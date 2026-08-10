@@ -774,8 +774,8 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     // the recognizer naturally terminates in the continuous tap session, STOP
     // cleanly (status → stopped, isRecording → false) and DO NOT re-arm. The
     // panel then shows 「停止聆听」 + the tap-reset hint; the user taps 重置 to
-    // record again (resetPttSessionAndRestart). pauseFor:3s already tolerates
-    // in-sentence pauses, so a single listen spans a normal utterance.
+    // record again (resetPttSessionAndRestart). The tuned pause window still
+    // tolerates a short in-sentence pause, so one listen spans a normal utterance.
     if (_continuousActive && terminal && _isRecording) {
       unawaited(
         _completePttSessionFromCurrentDraft(

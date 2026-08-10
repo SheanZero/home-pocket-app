@@ -161,21 +161,19 @@ void main() {
     });
   });
 
-  group('ShoppingItemTile — SHOP-03: ledger accent via badge (v15 port)', () {
-    // The old 4px left accent bar was replaced by the ledger badge
-    // (dailyLight/joyLight fill) + the ledger-coloured check circle.
-    bool hasBadgeFill(WidgetTester tester, Color fill) {
-      final containers = tester.widgetList<Container>(find.byType(Container));
-      return containers.any((c) {
-        final deco = c.decoration;
-        return deco is BoxDecoration && deco.color == fill;
-      });
+  group('ShoppingItemTile — SHOP-03: ledger accent via completion ring', () {
+    Color completionBorderColor(WidgetTester tester, String itemId) {
+      final checkbox = tester.widget<AnimatedContainer>(
+        find.byKey(ValueKey('shopping-check-$itemId')),
+      );
+      final decoration = checkbox.decoration! as BoxDecoration;
+      return (decoration.border! as Border).top.color;
     }
 
-    testWidgets('daily ledger: badge fill = palette.dailyLight', (
+    testWidgets('daily ledger uses the daily ring without a text badge', (
       tester,
     ) async {
-      final item = _makeItem(ledgerType: LedgerType.daily);
+      final item = _makeItem(id: 'daily-accent', ledgerType: LedgerType.daily);
       await _pumpTile(
         tester,
         item: item,
@@ -184,15 +182,20 @@ void main() {
       );
 
       expect(
-        hasBadgeFill(tester, AppPalette.light.dailyLight),
-        isTrue,
-        reason: 'daily tile must render a dailyLight ledger badge',
+        completionBorderColor(tester, item.id),
+        AppPalette.light.daily,
       );
-      expect(find.text('Daily'), findsOneWidget);
+      expect(find.text('Daily'), findsNothing);
+      expect(
+        find.byKey(ValueKey('shopping-ledger-badge-${item.id}')),
+        findsNothing,
+      );
     });
 
-    testWidgets('null ledger: no ledger badge rendered', (tester) async {
-      final item = _makeItem(ledgerType: null);
+    testWidgets('null ledger falls back to the daily ring without a badge', (
+      tester,
+    ) async {
+      final item = _makeItem(id: 'null-accent', ledgerType: null);
       await _pumpTile(
         tester,
         item: item,
@@ -200,12 +203,18 @@ void main() {
         toggle: mockToggle,
       );
 
+      expect(
+        completionBorderColor(tester, item.id),
+        AppPalette.light.daily,
+      );
       expect(find.text('Daily'), findsNothing);
       expect(find.text('Joy'), findsNothing);
     });
 
-    testWidgets('joy ledger: badge fill = palette.joyLight', (tester) async {
-      final item = _makeItem(ledgerType: LedgerType.joy);
+    testWidgets('joy ledger uses the joy ring without a text badge', (
+      tester,
+    ) async {
+      final item = _makeItem(id: 'joy-accent', ledgerType: LedgerType.joy);
       await _pumpTile(
         tester,
         item: item,
@@ -214,15 +223,40 @@ void main() {
       );
 
       expect(
-        hasBadgeFill(tester, AppPalette.light.joyLight),
-        isTrue,
-        reason: 'joy tile must render a joyLight ledger badge',
+        completionBorderColor(tester, item.id),
+        AppPalette.light.joy,
       );
-      expect(find.text('Joy'), findsOneWidget);
+      expect(find.text('Joy'), findsNothing);
+      expect(
+        find.byKey(ValueKey('shopping-ledger-badge-${item.id}')),
+        findsNothing,
+      );
     });
   });
 
   group('ShoppingItemTile — DONE-01: leading circle toggles completion (EC2)', () {
+    testWidgets('completion control owns an independent 44px tap target', (
+      tester,
+    ) async {
+      final item = _makeItem(id: 'item-tap-target');
+      await _pumpTile(
+        tester,
+        item: item,
+        delete: mockDelete,
+        toggle: mockToggle,
+      );
+
+      final toggle = find.byKey(const ValueKey('toggle-item-tap-target'));
+      expect(tester.getSize(toggle), const Size.square(44));
+
+      final rect = tester.getRect(toggle);
+      await tester.tapAt(Offset(rect.right - 2, rect.center.dy));
+      await tester.pump();
+
+      verify(() => mockToggle.execute('item-tap-target')).called(1);
+      expect(find.byType(ShoppingItemFormScreen), findsNothing);
+    });
+
     testWidgets('tap leading circle calls toggle.execute(item.id)', (
       tester,
     ) async {
@@ -341,10 +375,8 @@ void main() {
     });
   });
 
-  group('ShoppingItemTile — v15 ledger badge replaces 私有 marker', () {
-    // Default test locale resolves to 'en' (first supported locale). The v15
-    // port removes the 私有 lock marker in favour of the ledger badge.
-    testWidgets('private item shows the ledger badge, NOT a 私有 lock marker', (
+  group('ShoppingItemTile — no redundant ledger or 私有 marker', () {
+    testWidgets('private item shows neither ledger badge nor 私有 marker', (
       tester,
     ) async {
       final item = _makeItem(listType: 'private', ledgerType: LedgerType.daily);
@@ -357,7 +389,7 @@ void main() {
 
       expect(find.byIcon(Icons.lock_outline), findsNothing);
       expect(find.text('Private'), findsNothing);
-      expect(find.text('Daily'), findsOneWidget);
+      expect(find.text('Daily'), findsNothing);
     });
 
     testWidgets('public item shows NO 私有 marker', (tester) async {
@@ -373,7 +405,7 @@ void main() {
       expect(find.text('Private'), findsNothing);
     });
 
-    testWidgets('ledger badge IS present — Daily/Joy badge text (v15)', (
+    testWidgets('Daily/Joy badge text is absent for both ledger types', (
       tester,
     ) async {
       final dailyItem = _makeItem(ledgerType: LedgerType.daily);
@@ -383,7 +415,7 @@ void main() {
         delete: mockDelete,
         toggle: mockToggle,
       );
-      expect(find.text('Daily'), findsOneWidget);
+      expect(find.text('Daily'), findsNothing);
 
       final joyItem = _makeItem(ledgerType: LedgerType.joy);
       await _pumpTile(
@@ -392,7 +424,7 @@ void main() {
         delete: mockDelete,
         toggle: mockToggle,
       );
-      expect(find.text('Joy'), findsOneWidget);
+      expect(find.text('Joy'), findsNothing);
     });
   });
 
@@ -802,7 +834,7 @@ void main() {
     });
 
     testWidgets(
-      'completed tile leaves copy, badge, and glyph at full opacity',
+      'completed tile leaves copy and glyph at full opacity',
       (tester) async {
         final item = _makeItem(id: 'done-style', isCompleted: true);
         await _pumpTile(
@@ -815,7 +847,6 @@ void main() {
 
         for (final key in [
           const ValueKey('shopping-copy-done-style'),
-          const ValueKey('shopping-ledger-badge-done-style'),
           const ValueKey('shopping-drag-glyph-done-style'),
         ]) {
           final region = find.byKey(key);
@@ -831,24 +862,6 @@ void main() {
             reason: 'The completed card owns the single 0.58 opacity layer',
           );
         }
-
-        final badge = tester.widget<Container>(
-          find
-              .descendant(
-                of: find.byKey(
-                  const ValueKey('shopping-ledger-badge-done-style'),
-                ),
-                matching: find.byType(Container),
-              )
-              .first,
-        );
-        expect(
-          (badge.decoration! as BoxDecoration).color,
-          AppPalette.light.backgroundMuted,
-        );
-
-        final badgeText = tester.widget<Text>(find.text('Daily'));
-        expect(badgeText.style?.color, AppPalette.light.textSecondary);
 
         final dragIcon = tester.widget<Icon>(find.byIcon(Icons.drag_indicator));
         expect(dragIcon.color, AppPalette.light.textPrimary);

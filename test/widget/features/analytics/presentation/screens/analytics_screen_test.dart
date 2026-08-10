@@ -195,6 +195,7 @@ void main() {
       final title = find.byKey(const Key('analytics-main-title'));
       final calendar = find.byKey(const Key('analytics-month-picker-button'));
       final settings = find.byKey(const Key('analytics-settings-button'));
+      final badge = find.byKey(const Key('analytics-mode-badge'));
       final tabs = find.byKey(const Key('analytics-primary-tabs'));
 
       expect(find.byType(AppBar), findsNothing);
@@ -211,6 +212,16 @@ void main() {
       );
       expect(tester.getSize(calendar), const Size(40, 40));
       expect(tester.getSize(settings), const Size(40, 40));
+      expect(badge, findsOneWidget);
+      expect(find.text('Personal'), findsOneWidget);
+      expect(
+        tester
+            .widget<InkWell>(
+              find.descendant(of: badge, matching: find.byType(InkWell)),
+            )
+            .onTap,
+        isNotNull,
+      );
       expect(tester.getCenter(settings).dx - tester.getCenter(calendar).dx, 40);
       expect(tester.getTopLeft(tabs).dy - tester.getBottomLeft(header).dy, 13);
     });

@@ -249,7 +249,7 @@ final _testProfile = UserProfile(
   updatedAt: DateTime(2026, 1, 1),
 );
 
-Future<void> _pumpApp(
+Future<ProviderContainer> _pumpApp(
   WidgetTester tester, {
   required List<Override> overrides,
   PushNotificationService? pushService,
@@ -266,6 +266,7 @@ Future<void> _pumpApp(
   // gate's `ref.read(settingsRepositoryProvider)` observes it mid-flight.
   bool realSettingsChain = false,
   Duration prefsDelay = Duration.zero,
+  AppSettings Function()? liveAppSettings,
 }) async {
   // _initialize() now pre-warms sharedPreferences.future before the gate read,
   // so even fake-settings tests must stub the prefs plugin (the settingsRepository
@@ -283,7 +284,16 @@ Future<void> _pumpApp(
   final baseOverrides = [
     appDatabaseProvider.overrideWithValue(db),
     if (!realSettingsChain) ...[
-      appSettingsProvider.overrideWith((ref) => Future.value(appSettings)),
+      appSettingsProvider.overrideWith(
+        (ref) => Future.value(
+          liveAppSettings?.call() ??
+              appSettings.copyWith(
+                appLockEnabled: appLockEnabled,
+                biometricUnlockEnabled: biometricUnlockEnabled,
+                onboardingComplete: onboardingComplete,
+              ),
+        ),
+      ),
       // The gate reads settingsRepositoryProvider.getSettings() directly (not
       // appSettingsProvider) after init settle — drive it explicitly.
       settingsRepositoryProvider.overrideWith(
@@ -346,6 +356,7 @@ Future<void> _pumpApp(
       ),
     ),
   );
+  return container;
 }
 
 /// Pumps a bounded number of frames to let async app initialization resolve
@@ -735,6 +746,188 @@ void main() {
     );
 
     testWidgets(
+      'LOCK-03 relock covers a pushed route and blocks its input and semantics',
+      (tester) async {
+        await _pumpApp(
+          tester,
+          overrides: buildSuccessOverrides(profile: _testProfile),
+          appLockEnabled: true,
+          pinHash: 'argon2-phc',
+          biometricUnlockEnabled: true,
+          biometric: _OnceSuccessBiometricService(),
+        );
+        await _pumpInitNoSettle(tester);
+        expect(find.byType(MainShellScreen), findsOneWidget);
+
+        // Reproduce the real failure: add-entry/settings/shopping forms are
+        // pushed above the app gate's home route. Relocking only that home route
+        // leaves the pushed surface visible and interactive.
+        final appNavigator = Navigator.of(
+          tester.element(find.byKey(const ValueKey('main-shell-body-stack'))),
+        );
+        appNavigator.push<void>(
+          MaterialPageRoute<void>(
+            builder: (_) => Scaffold(
+              body: Center(
+                child: Semantics(
+                  label: 'sensitive-pushed-route',
+                  child: ElevatedButton(
+                    key: const ValueKey('sensitive-pushed-route-action'),
+                    onPressed: () {},
+                    child: const Text('Sensitive action'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 350));
+        expect(appNavigator.canPop(), isTrue);
+        expect(
+          find.byKey(const ValueKey('sensitive-pushed-route-action')),
+          findsOneWidget,
+        );
+
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.inactive,
+        );
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.resumed,
+        );
+        await _pumpInitNoSettle(tester);
+
+        expect(find.byType(AppLockScreen), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('sensitive-pushed-route-action')),
+          findsNothing,
+          reason:
+              'locked content must not paint, hit-test, or expose semantics',
+        );
+        expect(
+          find.byKey(
+            const ValueKey('sensitive-pushed-route-action'),
+            skipOffstage: false,
+          ),
+          findsOneWidget,
+          reason: 'the pushed route stays mounted so drafts survive unlocking',
+        );
+
+        await tester.binding.handlePopRoute();
+        await tester.pump();
+        expect(
+          appNavigator.canPop(),
+          isTrue,
+          reason: 'system back must not mutate routes behind the lock barrier',
+        );
+      },
+    );
+
+    testWidgets(
+      'enabling app lock at runtime arms the next background relock immediately',
+      (tester) async {
+        var liveSettings = const AppSettings(onboardingComplete: true);
+        final container = await _pumpApp(
+          tester,
+          overrides: buildSuccessOverrides(profile: _testProfile),
+          pinHash: 'argon2-phc',
+          liveAppSettings: () => liveSettings,
+        );
+        await _pumpInitNoSettle(tester);
+        expect(find.byType(MainShellScreen), findsOneWidget);
+
+        // Mirrors the Settings flow after setPin succeeds: persist the master
+        // toggle and invalidate appSettingsProvider in the same running app.
+        liveSettings = liveSettings.copyWith(appLockEnabled: true);
+        container.invalidate(appSettingsProvider);
+        await _pumpInitNoSettle(tester);
+
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.inactive,
+        );
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.resumed,
+        );
+        await _pumpInitNoSettle(tester);
+
+        expect(find.byType(AppLockScreen), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'disabling app lock at runtime prevents stale-cache relocking',
+      (tester) async {
+        var liveSettings = const AppSettings(
+          onboardingComplete: true,
+          appLockEnabled: true,
+          biometricUnlockEnabled: true,
+        );
+        final container = await _pumpApp(
+          tester,
+          overrides: buildSuccessOverrides(profile: _testProfile),
+          appLockEnabled: true,
+          biometricUnlockEnabled: true,
+          pinHash: 'argon2-phc',
+          biometric: _OnceSuccessBiometricService(),
+          liveAppSettings: () => liveSettings,
+        );
+        await _pumpInitNoSettle(tester);
+        expect(find.byType(MainShellScreen), findsOneWidget);
+
+        liveSettings = liveSettings.copyWith(
+          appLockEnabled: false,
+          biometricUnlockEnabled: false,
+        );
+        container.invalidate(appSettingsProvider);
+        await _pumpInitNoSettle(tester);
+
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.inactive,
+        );
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.resumed,
+        );
+        await _pumpInitNoSettle(tester);
+
+        expect(find.byType(AppLockScreen), findsNothing);
+        expect(find.byType(MainShellScreen), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'runtime half-config without a PIN is disarmed instead of stranding user',
+      (tester) async {
+        var liveSettings = const AppSettings(onboardingComplete: true);
+        final container = await _pumpApp(
+          tester,
+          overrides: buildSuccessOverrides(profile: _testProfile),
+          liveAppSettings: () => liveSettings,
+          // No pinHash: simulates corrupted/imported toggle-only state.
+        );
+        await _pumpInitNoSettle(tester);
+
+        liveSettings = liveSettings.copyWith(appLockEnabled: true);
+        container.invalidate(appSettingsProvider);
+        await _pumpInitNoSettle(tester);
+
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.inactive,
+        );
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.resumed,
+        );
+        await _pumpInitNoSettle(tester);
+
+        expect(find.byType(AppLockScreen), findsNothing);
+        expect(find.byType(MainShellScreen), findsOneWidget);
+      },
+    );
+
+    testWidgets(
       'G4 biometric OFF: lock screen starts on PIN, never auto-prompts Face ID',
       (tester) async {
         final spy = _SpyBiometricService();
@@ -757,6 +950,15 @@ void main() {
         );
         // The critical invariant: no auto Face ID prompt when biometric is off.
         expect(spy.authenticateCalls, 0);
+
+        // The top-level barrier owns a private Navigator so lock-only dialogs
+        // remain available without exposing or mutating the app Navigator.
+        await tester.tap(find.byKey(const ValueKey('app-lock-forgot-pin')));
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const ValueKey('app-lock-forgot-explanation')),
+          findsOneWidget,
+        );
       },
     );
 

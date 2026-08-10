@@ -383,6 +383,35 @@ void main() {
       });
     });
 
+    test('5420 + 亿日元 across finals prioritizes terminal spoken 一', () {
+      fakeAsync((async) {
+        final commits = <int>[];
+        final mockSpeech = _MockSpeechRecognitionService();
+        when(() => mockSpeech.restartListen()).thenAnswer((_) async => true);
+        final textParser = VoiceTextParser();
+
+        final merger = _buildMerger(
+          parser: const ChineseNumeralStateMachine(),
+          onAmountResolved: commits.add,
+          async: async,
+          speechService: mockSpeech,
+          amountExtractor: (text) =>
+              textParser.extractAmount(text, localeId: 'zh-CN'),
+        );
+
+        merger.feedChunk('5420', isFinal: true);
+        async.flushMicrotasks();
+        async.elapse(const Duration(milliseconds: 900));
+        merger.feedChunk('亿日元', isFinal: true);
+        async.flushMicrotasks();
+        async.elapse(const Duration(milliseconds: 2500));
+        async.flushMicrotasks();
+
+        expect(commits, equals([5421]));
+        merger.dispose();
+      });
+    });
+
     test('split finals through the extractor also read 2546', () {
       fakeAsync((async) {
         final commits = <int>[];

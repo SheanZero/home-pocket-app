@@ -74,7 +74,7 @@ mixin VoiceRecognitionEventHandlerMixin<W extends StatefulWidget>
   /// Speech-recognizer status callback — preserves Phase 22 G-01 verbatim.
   ///
   /// When the platform recognizer self-terminates (status 'done' or
-  /// 'notListening' — triggered by 30s listenFor expiry, 3s pauseFor
+  /// 'notListening' — triggered by 30s listenFor expiry, 1.2s pauseFor
   /// mid-press, or platform mic interruption) while the user is still
   /// holding the mic ([pressStart] != null), drives the SAME commit path
   /// as _onLongPressEnd. Without this branch, _onLongPressEnd on the

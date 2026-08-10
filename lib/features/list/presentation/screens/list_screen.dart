@@ -10,6 +10,8 @@ import '../../../../generated/app_localizations.dart';
 import '../../../../features/accounting/presentation/screens/transaction_edit_screen.dart';
 import '../../../../features/accounting/presentation/utils/category_display_utils.dart';
 import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
+import '../../../../features/family_sync/presentation/navigation/family_flow_launcher.dart';
+import '../../../../features/family_sync/presentation/widgets/family_mode_badge.dart';
 import '../../../../features/home/presentation/widgets/month_picker_dialog.dart';
 import '../../../../features/home/presentation/providers/state_shadow_books.dart';
 import '../../../../features/profile/domain/models/user_profile.dart';
@@ -87,9 +89,11 @@ class ListScreen extends ConsumerWidget {
                 titleColor: context.palette.info,
                 onTitleTap: openMonthPicker,
                 titleTooltip: l10n.listMonthPickerLabel,
-                trailing: isGroupMode
-                    ? _ListFamilyModeBadge(label: l10n.homeFamilyMode)
-                    : null,
+                trailing: FamilyModeBadge(
+                  key: const Key('list-mode-badge'),
+                  isGroupMode: isGroupMode,
+                  onTap: () => openAuthoritativeFamilyFlow(context, ref),
+                ),
                 actions: [
                   MainSurfaceHeaderAction(
                     key: const Key('list-month-picker-button'),
@@ -496,40 +500,6 @@ class ListScreen extends ConsumerWidget {
       tone: FamilyPayerTone.shared,
       avatarEmoji: fallback?.emoji ?? '',
       avatarImagePath: null,
-    );
-  }
-}
-
-class _ListFamilyModeBadge extends StatelessWidget {
-  const _ListFamilyModeBadge({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    return Container(
-      key: const Key('list-family-mode-badge'),
-      height: 32,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: palette.accentPrimaryLight,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.group_outlined, size: 16, color: palette.accentPrimary),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: AppTextStyles.label.copyWith(
-              color: palette.accentPrimary,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

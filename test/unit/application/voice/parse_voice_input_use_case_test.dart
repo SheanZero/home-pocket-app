@@ -118,6 +118,17 @@ void main() {
       expect(result.data!.rawText, equals('昼ごはんに680円'));
     });
 
+    test('zh terminal 亿 near-miss fills 5421 instead of 5420', () async {
+      final result = await useCase.execute(
+        '今天吃饭用了五千四百二十亿日元',
+        localeId: 'zh-CN',
+      );
+
+      expect(result.isSuccess, isTrue, reason: result.error);
+      expect(result.data!.amount, 5421);
+      expect(result.data!.rawText, '今天吃饭用了五千四百二十亿日元');
+    });
+
     test(
       'returns success with nulls when no engine produces a match',
       () async {

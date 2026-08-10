@@ -98,6 +98,19 @@ void main() {
         expect(project, contains('path = PrivacyInfo.xcprivacy;'));
       },
     );
+
+    test('exports the HPB document type for the iOS file picker', () {
+      final infoPlist = File('ios/Runner/Info.plist').readAsStringSync();
+
+      expect(infoPlist, contains('<key>UTExportedTypeDeclarations</key>'));
+      expect(
+        infoPlist,
+        contains('<string>com.sheanzero.happypocket.backup</string>'),
+      );
+      expect(infoPlist, contains('<key>public.filename-extension</key>'));
+      expect(infoPlist, contains('<string>hpb</string>'));
+      expect(infoPlist, contains('<string>public.data</string>'));
+    });
   });
 }
 

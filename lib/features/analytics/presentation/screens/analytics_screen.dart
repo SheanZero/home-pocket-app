@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/misc.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../features/home/presentation/providers/state_shadow_books.dart';
 import '../../../../features/home/presentation/widgets/month_picker_dialog.dart';
+import '../../../../features/family_sync/presentation/navigation/family_flow_launcher.dart';
+import '../../../../features/family_sync/presentation/widgets/family_mode_badge.dart';
 import '../../../../features/settings/presentation/screens/settings_screen.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/i18n/formatters/date_formatter.dart';
@@ -140,6 +142,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 titleColor: context.palette.joyText,
                 onTitleTap: openMonthPicker,
                 titleTooltip: l10n.listMonthPickerLabel,
+                trailing: FamilyModeBadge(
+                  key: const Key('analytics-mode-badge'),
+                  isGroupMode: ctx.isGroupMode,
+                  onTap: () => openAuthoritativeFamilyFlow(context, ref),
+                ),
                 actions: [
                   MainSurfaceHeaderAction(
                     key: const Key('analytics-month-picker-button'),

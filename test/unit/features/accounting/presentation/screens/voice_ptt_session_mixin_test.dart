@@ -142,8 +142,8 @@ class CapturingSpeechService implements StartSpeechRecognitionUseCase {
     SpeechRecognitionResult([SpeechRecognitionWords(words, null, 0.5)], false),
   );
 
-  /// Simulate the platform recognizer self-terminating (30s/3s timeout) so the
-  /// continuous tap-session must re-arm to keep listening.
+  /// Simulate the platform recognizer self-terminating (30s/1.2s timeout) so the
+  /// one-shot tap session can stop cleanly.
   void emitTerminalStatus() => onStatus!('done');
 
   void emitStatus(String status) => onStatus!(status);
@@ -1092,7 +1092,7 @@ void main() {
       await tester.pump();
 
       // A PARTIAL result (not final) must drive a live fill after the 300ms
-      // debounce — the user does NOT wait for the 3s pauseFor final. Advance the
+      // debounce — the user does NOT wait for the pauseFor final. Advance the
       // fake clock past the debounce so the Timer fires, then settle the parse.
       speech.emitPartial('1千8百4十元 星巴克');
       await tester.pump(const Duration(milliseconds: 350));

@@ -150,9 +150,51 @@ void main() {
 
       await _pumpScreen(tester, mockUseCase, mockRepo, isGroupMode: true);
 
-      expect(find.byKey(const Key('list-family-mode-badge')), findsOneWidget);
+      final badge = find.byKey(const Key('list-mode-badge'));
+      expect(badge, findsOneWidget);
       expect(find.text('家族'), findsOneWidget);
-      expect(find.byIcon(Icons.group_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.people), findsOneWidget);
+      expect(
+        tester
+            .widget<InkWell>(
+              find.descendant(of: badge, matching: find.byType(InkWell)),
+            )
+            .onTap,
+        isNotNull,
+      );
+    });
+
+    testWidgets('personal mode shows a tappable personal badge', (
+      tester,
+    ) async {
+      final mockUseCase = _MockGetListTransactionsUseCase();
+      final mockRepo = _MockAnalyticsRepository();
+
+      when(
+        () => mockUseCase.execute(any()),
+      ).thenAnswer((_) async => Result.success(<Transaction>[]));
+      when(
+        () => mockRepo.getDailyTotals(
+          bookId: any(named: 'bookId'),
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      ).thenAnswer((_) async => []);
+
+      await _pumpScreen(tester, mockUseCase, mockRepo);
+
+      final badge = find.byKey(const Key('list-mode-badge'));
+      expect(badge, findsOneWidget);
+      expect(find.text('個人'), findsOneWidget);
+      expect(find.byIcon(Icons.person), findsOneWidget);
+      expect(
+        tester
+            .widget<InkWell>(
+              find.descendant(of: badge, matching: find.byType(InkWell)),
+            )
+            .onTap,
+        isNotNull,
+      );
     });
 
     testWidgets(

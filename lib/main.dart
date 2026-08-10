@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -136,7 +138,8 @@ class HomePocketApp extends ConsumerStatefulWidget {
   ConsumerState<HomePocketApp> createState() => _HomePocketAppState();
 }
 
-class _HomePocketAppState extends ConsumerState<HomePocketApp> {
+class _HomePocketAppState extends ConsumerState<HomePocketApp>
+    with WidgetsBindingObserver {
   /// Root navigator key — lets the gate push the post-onboarding security
   /// deep-link (D-13) on top of the live shell without the onboarding flow
   /// having to grab a `rootNavigator` itself (HI-01).
@@ -172,17 +175,34 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
   /// Registered in [_initialize], torn down in [dispose].
   AppLockLifecycleObserver? _lockObserver;
 
+  /// Rejects stale async PIN-presence checks when the user toggles app lock
+  /// again before secure storage responds.
+  int _liveLockSettingsRevision = 0;
+
   @override
   void initState() {
     super.initState();
+    // Register before the descendant MaterialApp/Navigator so a system-back
+    // event can be consumed before it mutates routes hidden behind the lock.
+    WidgetsBinding.instance.addObserver(this);
     _initialize();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _lockObserver?.dispose();
     _maskVisible.dispose();
     super.dispose();
+  }
+
+  @override
+  Future<bool> didPopRoute() async {
+    // Android back (and equivalent platform pop requests) is dispatched to the
+    // root Navigator even while our security Navigator is painted above it.
+    // Consume it while locked/masked so add-entry drafts and other underlying
+    // routes cannot be popped invisibly behind the unlock screen.
+    return _isLocked || (_lockConfigured && _maskVisible.value);
   }
 
   /// Shared seed + ensure-default-book step. Returns the active book id on
@@ -244,7 +264,11 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
         _lockObserver ??= AppLockLifecycleObserver(
           isLockEffective: () => _lockConfigured,
           onRelock: () {
-            if (mounted) setState(() => _isLocked = true);
+            if (!mounted) return;
+            // A focused notes/merchant field can otherwise leave the platform
+            // keyboard floating above the unlock surface after resume.
+            FocusManager.instance.primaryFocus?.unfocus();
+            setState(() => _isLocked = true);
           },
           onMask: () => _maskVisible.value = true,
           onUnmask: () => _maskVisible.value = false,
@@ -370,6 +394,16 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
       _reinitializeAfterDataReset();
     });
 
+    // Keep the lifecycle observer's synchronous lock cache aligned when the
+    // user enables/disables app lock without restarting the app. The cold-start
+    // path cannot cover this: Settings persists the change later in the same
+    // process. Enabling is applied synchronously (the Settings flow writes the
+    // PIN before the toggle), then defensively verified against secure storage;
+    // disabling clears both the cache and any active barrier immediately.
+    ref.listen(appSettingsProvider, (previous, next) {
+      next.whenData(_applyLiveSecuritySettings);
+    });
+
     final settingsAsync = ref.watch(appSettingsProvider);
     final themeMode =
         settingsAsync.whenOrNull(
@@ -394,14 +428,49 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
       // Cap iOS/Android Dynamic Type so large accessibility font sizes don't
-      // overflow fixed horizontal Rows (quick 260604-fyd — ceiling 1.2), then
-      // host the opaque privacy mask ABOVE everything (LOCK-04). The mask is
-      // driven by the synchronous [_maskVisible] notifier so it paints before
-      // the OS app-switcher snapshot (RESEARCH §5 / T-55-28).
+      // overflow fixed horizontal Rows (quick 260604-fyd — ceiling 1.2).
+      //
+      // The unlock surface lives HERE, above the root Navigator, rather than in
+      // its home route. Entry forms, settings, dialogs, and bottom sheets are
+      // all routes/overlays above `home`; putting the lock in `_buildHome`
+      // allowed those surfaces to remain visible until they were popped. The
+      // top-level security barrier preserves the live navigation stack behind
+      // it while blocking pointer and accessibility access to every route.
+      // The privacy mask remains last so it covers both app and unlock UI before
+      // the OS app-switcher snapshot (LOCK-04 / T-55-28).
       builder: (context, child) {
+        final showLockBarrier =
+            _initialized && _error == null && !_needsOnboarding && _isLocked;
         return Stack(
+          fit: StackFit.expand,
           children: [
-            clampTextScaling(context, child),
+            Offstage(
+              offstage: showLockBarrier,
+              child: TickerMode(
+                enabled: !showLockBarrier,
+                child: clampTextScaling(context, child),
+              ),
+            ),
+            if (showLockBarrier)
+              HeroControllerScope.none(
+                child: Navigator(
+                  key: const ValueKey('app-lock-barrier-navigator'),
+                  onGenerateRoute: (_) => MaterialPageRoute<void>(
+                    builder: (_) => PopScope(
+                      canPop: false,
+                      child: AppLockScreen(
+                        key: const ValueKey('app-gate-locked'),
+                        onUnlocked: _completeUnlock,
+                        onBeginAuth: _lockObserver?.beginAuth,
+                        onEndAuth: _lockObserver?.endAuth,
+                        // Skip the Face ID auto-prompt when biometric unlock is
+                        // disabled; open directly on the PIN keypad (LOCK-07).
+                        startOnPinPage: !_biometricUnlockEnabled,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             Positioned.fill(
               child: ValueListenableBuilder<bool>(
                 valueListenable: _maskVisible,
@@ -414,6 +483,60 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
       },
       home: Builder(builder: (context) => _buildHome(context)),
     );
+  }
+
+  void _applyLiveSecuritySettings(AppSettings settings) {
+    if (!_initialized || !mounted) return;
+
+    if (!settings.appLockEnabled) {
+      // Invalidate any in-flight PIN check from an earlier enable.
+      _liveLockSettingsRevision++;
+      if (_lockConfigured ||
+          _isLocked ||
+          _biometricUnlockEnabled != settings.biometricUnlockEnabled) {
+        setState(() {
+          _lockConfigured = false;
+          _isLocked = false;
+          _biometricUnlockEnabled = settings.biometricUnlockEnabled;
+        });
+      }
+      return;
+    }
+
+    final newlyEnabled = !_lockConfigured;
+    final revision = newlyEnabled ? ++_liveLockSettingsRevision : null;
+    if (newlyEnabled ||
+        _biometricUnlockEnabled != settings.biometricUnlockEnabled) {
+      setState(() {
+        // Safe to arm immediately: every in-app enable path persists a PIN
+        // before appLockEnabled=true. The async check below protects against a
+        // corrupted/imported half-configured state without leaving a privacy
+        // window after the user turns the feature on.
+        _lockConfigured = true;
+        _biometricUnlockEnabled = settings.biometricUnlockEnabled;
+      });
+    }
+    if (newlyEnabled) {
+      unawaited(_verifyLiveLockHasPin(revision!));
+    }
+  }
+
+  Future<void> _verifyLiveLockHasPin(int revision) async {
+    String? pinHash;
+    try {
+      pinHash = await ref.read(secureStorageServiceProvider).getPinHash();
+    } catch (_) {
+      // Fail closed: the setting was enabled only after PIN persistence. A
+      // transient keychain read failure must not open a privacy window.
+      return;
+    }
+    if (!mounted || revision != _liveLockSettingsRevision || pinHash != null) {
+      return;
+    }
+    setState(() {
+      _lockConfigured = false;
+      _isLocked = false;
+    });
   }
 
   ThemeMode _toFlutterThemeMode(AppThemeMode mode) {
@@ -445,22 +568,6 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp> {
         key: const ValueKey('app-gate-onboarding'),
         bookId: _bookId!,
         onCompleted: _completeOnboarding,
-      );
-    } else if (_isLocked) {
-      // App-lock gate (LOCK-02): sits AFTER onboarding and BEFORE the shell so a
-      // locked cold start (or a lifecycle relock) hard-stops entry to the ledger.
-      // Unlock reports back via [_completeUnlock] (a setState flag flip, never
-      // pushReplacement) so the live '/' Builder keeps rendering this gate and
-      // the _reinitializeAfterDataReset refresh path stays attached
-      // ([[boot-gate-completion-must-flip-flag-not-pushreplacement]]).
-      gateChild = AppLockScreen(
-        key: const ValueKey('app-gate-locked'),
-        onUnlocked: _completeUnlock,
-        onBeginAuth: _lockObserver?.beginAuth,
-        onEndAuth: _lockObserver?.endAuth,
-        // Skip the Face ID auto-prompt when biometric unlock is disabled — open
-        // straight on the PIN keypad instead of surfacing the OS sheet (LOCK-07).
-        startOnPinPage: !_biometricUnlockEnabled,
       );
     } else {
       gateChild = MainShellScreen(

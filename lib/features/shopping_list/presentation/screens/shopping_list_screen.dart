@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../features/family_sync/presentation/navigation/family_flow_launcher.dart';
+import '../../../../features/family_sync/presentation/providers/state_active_group.dart';
+import '../../../../features/family_sync/presentation/widgets/family_mode_badge.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/main_surface_header.dart';
@@ -37,6 +40,7 @@ class ShoppingListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final palette = context.palette;
     final listType = ref.watch(listTypeProvider);
+    final isGroupMode = ref.watch(isGroupModeProvider);
 
     return Scaffold(
       backgroundColor: palette.background,
@@ -50,6 +54,11 @@ class ShoppingListScreen extends ConsumerWidget {
                 key: const Key('shopping-main-header'),
                 title: S.of(context).shoppingListScreenTitle,
                 titleKey: const Key('shopping-main-title'),
+                trailing: FamilyModeBadge(
+                  key: const Key('shopping-mode-badge'),
+                  isGroupMode: isGroupMode,
+                  onTap: () => openAuthoritativeFamilyFlow(context, ref),
+                ),
                 actions: [
                   MainSurfaceHeaderAction(
                     key: const Key('shopping-settings-button'),

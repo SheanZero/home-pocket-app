@@ -4,8 +4,8 @@ library;
 // Golden tests for ShoppingItemTile — 3 variants × 3 locales × 2 modes = 18 PNGs.
 //
 // Variants:
-//   active:       daily-ledger item, not completed (daily green left border)
-//   completed:    joy-ledger item, completed (soft Joy check + neutral badge + strikethrough)
+//   active:       daily-ledger item, not completed (daily green check ring)
+//   completed:    joy-ledger item, completed (Joy check + strikethrough)
 //   attribution:  daily-ledger item, public list, with family attribution chip
 //
 // Baselines: test/golden/goldens/shopping_item_tile_{variant}[_dark]_{locale}.png

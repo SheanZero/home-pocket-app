@@ -1310,7 +1310,7 @@ class _ShoppingQuantitySection extends StatelessWidget {
                             contentPadding: EdgeInsets.zero,
                             isDense: true,
                           ),
-                          style: AppTextStyles.amountLarge.copyWith(
+                          style: AppTextStyles.amountMedium.copyWith(
                             color: palette.textPrimary,
                           ),
                         ),
@@ -1549,7 +1549,7 @@ class _ShoppingSecondaryCard extends ConsumerWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.end,
-                        style: AppTextStyles.label.copyWith(
+                        style: AppTextStyles.itemTitle.copyWith(
                           color: categoryDisplay != null
                               ? palette.textPrimary
                               : palette.textSecondary,
@@ -1641,10 +1641,13 @@ class _ShoppingSecondaryCard extends ConsumerWidget {
                     controller: noteController,
                     minLines: 3,
                     maxLines: 5,
+                    style: AppTextStyles.itemTitle.copyWith(
+                      color: palette.textPrimary,
+                    ),
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: l.shoppingFormNotePlaceholder,
-                      hintStyle: AppTextStyles.label.copyWith(
+                      hintStyle: AppTextStyles.itemTitle.copyWith(
                         color: palette.textTertiary,
                       ),
                       filled: true,

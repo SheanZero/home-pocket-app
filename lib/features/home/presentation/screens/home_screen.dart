@@ -83,6 +83,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 isGroupMode: isGroupMode,
                 onSettingsTap: widget.onSettingsTap ?? () {},
                 onMonthTap: () => _pickMonth(selectedMonth),
+                onModeTap: () => openAuthoritativeFamilyFlow(context, ref),
               ),
               const SizedBox(height: MainSurfaceHeader.contentSpacing),
               _HomeHeroSection(

@@ -382,7 +382,7 @@ void main() {
       expect(find.text('Name is required'), findsOneWidget);
       await tester.tap(find.byKey(ShoppingVoiceDraftPanel.manualStateKey));
       await tester.pumpAndSettle();
-      expect(speech.pauseFor, const Duration(seconds: 3));
+      expect(speech.pauseFor, const Duration(milliseconds: 1200));
       expect(
         find.byKey(ShoppingVoiceDraftPanel.listeningStateKey),
         findsOneWidget,

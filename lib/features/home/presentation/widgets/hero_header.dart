@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../features/family_sync/presentation/widgets/family_mode_badge.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/widgets/main_surface_header.dart';
 
@@ -18,12 +19,14 @@ class HeroHeader extends StatelessWidget {
     required this.isGroupMode,
     required this.onSettingsTap,
     required this.onMonthTap,
+    required this.onModeTap,
   });
 
   final int year;
   final int month;
   final bool isGroupMode;
   final VoidCallback onSettingsTap;
+  final VoidCallback onModeTap;
 
   /// Tapping the month label opens the month picker dialog.
   final VoidCallback onMonthTap;
@@ -39,7 +42,11 @@ class HeroHeader extends StatelessWidget {
       titleStyle: AppTextStyles.numerals(AppTextStyles.pageTitle),
       onTitleTap: onMonthTap,
       titleTooltip: l10n.listMonthPickerLabel,
-      trailing: _ModeBadge(isGroupMode: isGroupMode, l10n: l10n),
+      trailing: FamilyModeBadge(
+        key: const Key('home-mode-badge'),
+        isGroupMode: isGroupMode,
+        onTap: onModeTap,
+      ),
       actions: [
         MainSurfaceHeaderAction(
           key: const Key('home-calendar-hit-area'),
@@ -54,49 +61,6 @@ class HeroHeader extends StatelessWidget {
           onPressed: onSettingsTap,
         ),
       ],
-    );
-  }
-}
-
-/// Badge showing either family mode (coral) or personal mode (blue).
-class _ModeBadge extends StatelessWidget {
-  const _ModeBadge({required this.isGroupMode, required this.l10n});
-
-  final bool isGroupMode;
-  final S l10n;
-
-  @override
-  Widget build(BuildContext context) {
-    final backgroundColor = isGroupMode
-        ? context.palette.familyBadgeBg
-        : context.palette.dailyLight;
-    final foregroundColor = isGroupMode
-        ? context.palette.accentPrimary
-        : context.palette.daily;
-    final label = isGroupMode ? l10n.homeFamilyMode : l10n.homePersonalMode;
-    final icon = isGroupMode ? Icons.people : Icons.person;
-
-    return Container(
-      constraints: const BoxConstraints(minHeight: 27),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 15, color: foregroundColor),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: AppTextStyles.compact.copyWith(
-              fontWeight: FontWeight.w700,
-              color: foregroundColor,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

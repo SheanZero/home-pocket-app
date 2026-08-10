@@ -11,6 +11,7 @@ void main() {
     required int month,
     required VoidCallback onSettingsTap,
     VoidCallback? onMonthTap,
+    VoidCallback? onModeTap,
     bool isGroupMode = false,
   }) {
     return testLocalizedApp(
@@ -23,6 +24,7 @@ void main() {
             isGroupMode: isGroupMode,
             onSettingsTap: onSettingsTap,
             onMonthTap: onMonthTap ?? () {},
+            onModeTap: onModeTap ?? () {},
           ),
         ),
       ),
@@ -128,6 +130,33 @@ void main() {
         ),
         const Size(40, 40),
       );
+    });
+
+    testWidgets('personal and family badges are tappable', (tester) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        buildTestWidget(
+          year: 2026,
+          month: 2,
+          onSettingsTap: () {},
+          onModeTap: () => taps++,
+        ),
+      );
+
+      await tester.tap(find.byKey(const Key('home-mode-badge')));
+      expect(taps, 1);
+
+      await tester.pumpWidget(
+        buildTestWidget(
+          year: 2026,
+          month: 2,
+          isGroupMode: true,
+          onSettingsTap: () {},
+          onModeTap: () => taps++,
+        ),
+      );
+      await tester.tap(find.byKey(const Key('home-mode-badge')));
+      expect(taps, 2);
     });
   });
 }

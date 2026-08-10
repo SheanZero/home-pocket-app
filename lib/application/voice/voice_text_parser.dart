@@ -74,6 +74,90 @@ class VoiceTextParser {
   /// ambiguous 550-vs-5.50 case, so the X.50 idiom must never fire bare.
   static final _enMoneyContextPattern = RegExp(r'\$|\bdollars?\b');
 
+  static const _zhNumericMagnitudeCharacters =
+      '0123456789０１２３４５６７８９'
+      '零〇一壱壹二两兩弐贰貳三参叁四五伍六七八九'
+      '十百千仟万萬几幾';
+
+  /// Chinese STT occasionally emits terminal `亿`/`億` for spoken `一`.
+  ///
+  /// In a personal-accounting amount, a number ending in `十亿日元` or an
+  /// ITN run ending in `0亿日元` is overwhelmingly more likely to be a
+  /// ones-place `一` than a hundred-million magnitude. Only the terminal money
+  /// shape is repaired. An explicit magnitude with a lower-order residue, such
+  /// as `三亿五千万日元`, keeps `亿` and is rejected below instead of
+  /// being silently downcast to a plausible but wrong household amount.
+  static String _preferTerminalChineseOne(String text) {
+    var normalized = text;
+    for (var index = normalized.length - 1; index >= 0; index--) {
+      final character = normalized[index];
+      if (character != '亿' && character != '億') continue;
+
+      var previous = index - 1;
+      while (previous >= 0 && _isWhitespace(normalized[previous])) {
+        previous--;
+      }
+      if (previous < 0) continue;
+      final previousCharacter = normalized[previous];
+      final looksLikeMissingOnesPlace =
+          previousCharacter == '十' ||
+          previousCharacter == '0' ||
+          previousCharacter == '０';
+      if (!looksLikeMissingOnesPlace) continue;
+      if (!_isTerminalMoneyTail(normalized.substring(index + 1))) continue;
+
+      normalized = normalized.replaceRange(index, index + 1, '一');
+    }
+    return normalized;
+  }
+
+  static bool _containsExplicitChineseHundredMillionAmount(String text) {
+    for (var index = 0; index < text.length; index++) {
+      final character = text[index];
+      if (character != '亿' && character != '億') continue;
+
+      var before = index - 1;
+      while (before >= 0 && _isWhitespace(text[before])) {
+        before--;
+      }
+      if (before < 0 || !_isZhMagnitudeCharacter(text[before])) continue;
+
+      var after = index + 1;
+      while (after < text.length) {
+        final next = text[after];
+        if (_isWhitespace(next) || _isZhMagnitudeCharacter(next)) {
+          after++;
+          continue;
+        }
+        break;
+      }
+      if (_isTerminalMoneyTail(text.substring(after))) return true;
+    }
+    return false;
+  }
+
+  static bool _isZhMagnitudeCharacter(String character) =>
+      _zhNumericMagnitudeCharacters.contains(character);
+
+  static bool _isWhitespace(String character) =>
+      character == ' ' ||
+      character == '　' ||
+      character == '\n' ||
+      character == '\t';
+
+  static bool _isTerminalMoneyTail(String tail) {
+    var remaining = tail.trimLeft();
+    remaining = remaining
+        .replaceFirst(RegExp(r'^[,，。.!！?？:：;；]+'), '')
+        .trimLeft();
+    if (remaining.isEmpty) return true;
+
+    final lower = remaining.toLowerCase();
+    return VoiceCurrencySuffixes.all.any(
+      (token) => lower.startsWith(token.toLowerCase()),
+    );
+  }
+
   bool _hasEnMoneyContext(String text) {
     if (_enMoneyContextPattern.hasMatch(text.toLowerCase())) return true;
     final lower = text.toLowerCase();
@@ -98,16 +182,27 @@ class VoiceTextParser {
       return null;
     }
 
+    final locale = (localeId ?? '').toLowerCase();
+    final shouldApplyChinesePriority =
+        localeId == null || locale.startsWith('zh');
+    final amountText = shouldApplyChinesePriority
+        ? _preferTerminalChineseOne(text)
+        : text;
+    if (shouldApplyChinesePriority &&
+        _containsExplicitChineseHundredMillionAmount(amountText)) {
+      return null;
+    }
+
     // 260622-nhs R6 (BUG 2): a comma-grouped Arabic amount is unambiguous and
     // the scanner cannot read it (it drops the comma and keeps only the last
     // group). Prefer the Arabic regex when one is present, even if a stray kanji
     // numeral (e.g. 一 in 一共) would otherwise trip the state-machine hint.
-    if (_commaGroupedPattern.hasMatch(text)) {
-      final fromArabic = _extractArabicAmount(text);
+    if (_commaGroupedPattern.hasMatch(amountText)) {
+      final fromArabic = _extractArabicAmount(amountText);
       if (fromArabic != null) return fromArabic;
     }
 
-    final hasNumeralHint = _numeralHintPattern.hasMatch(text);
+    final hasNumeralHint = _numeralHintPattern.hasMatch(amountText);
 
     // Mixed kanji+arabic strings (e.g. 「2千304元」) must NOT fall through to
     // the arabic regex — it would partial-match the trailing 「304元」 and
@@ -124,11 +219,11 @@ class VoiceTextParser {
     // reassembles it correctly. Comma-grouped inputs never reach here (the
     // comma-authoritative gate above already returned), and en locales are
     // fully isolated in the branch at the top.
-    if (hasNumeralHint || _spacedRoundGroupPattern.hasMatch(text)) {
-      final fromMachine = _runStateMachine(text, localeId);
+    if (hasNumeralHint || _spacedRoundGroupPattern.hasMatch(amountText)) {
+      final fromMachine = _runStateMachine(amountText, localeId);
       if (fromMachine != null) return fromMachine;
     }
-    return _extractArabicAmount(text);
+    return _extractArabicAmount(amountText);
   }
 
   /// 260703 BUG-1: detects the UNSPACED ITN concatenation signature in a pure

@@ -3,9 +3,9 @@
 /// Quick task 260706-saz: these values were previously scattered as magic
 /// literals across the infrastructure / application / presentation layers
 /// (S5). Each constant below documents its origin site and semantics; the
-/// values are byte-identical to the pre-consolidation literals and are
-/// locked by `test/unit/application/voice/voice_tuning_consistency_test.dart`
-/// against silent drift.
+/// values are locked by
+/// `test/unit/application/voice/voice_tuning_consistency_test.dart` against
+/// silent drift.
 ///
 /// NOT in here (deliberately):
 ///   - `kMerchantAutoFillFloor` (0.85) — owned by
@@ -23,14 +23,14 @@ class VoiceTuning {
   static const Duration listenFor = Duration(seconds: 30);
 
   /// End-of-utterance silence window (speech_to_text `pauseFor`) — the
-  /// recognizer finalizes after this much silence. Same origin sites as
-  /// [listenFor]. Tolerates in-sentence pauses in the one-shot listen model.
-  static const Duration pauseFor = Duration(seconds: 3);
+  /// recognizer finalizes after this much silence. The 1.2s window keeps short
+  /// natural pauses usable while making the one-shot flow feel responsive.
+  static const Duration pauseFor = Duration(milliseconds: 1200);
 
-  /// App-owned grace after a non-empty final result. The recognizer may split a
-  /// spoken amount across multiple final chunks, so completion waits slightly
-  /// beyond the normal pause window; another result resets this deadline.
-  static const Duration finalCompletionGrace = Duration(milliseconds: 3500);
+  /// App-owned grace after a non-empty final result. A platform-final transcript
+  /// is already stable, so only a short window is retained for a closely
+  /// following split chunk; another result resets this deadline.
+  static const Duration finalCompletionGrace = Duration(milliseconds: 650);
 
   /// Debounce for parsing PARTIAL recognition results (`_onResult` Timer in
   /// `voice_ptt_session_mixin.dart`). NOT the same semantic as

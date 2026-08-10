@@ -222,6 +222,7 @@ Widget _v16PhonePreview({bool dark = false}) {
                     isGroupMode: false,
                     onSettingsTap: () {},
                     onMonthTap: () {},
+                    onModeTap: () {},
                   ),
                   const SizedBox(height: MainSurfaceHeader.contentSpacing),
                   HomeHeroCard(

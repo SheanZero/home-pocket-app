@@ -146,9 +146,28 @@ class VoiceChunkMerger {
   bool _shouldMerge(String buffer, String chunk, DateTime now) {
     if (_lastFinalAt == null) return false;
     if (now.difference(_lastFinalAt!) > _windowDuration) return false;
+    // zh STT can split a spoken terminal 「一」 into a second final transcribed
+    // as 「亿」/「億」 (for example 5420 + 亿日元). Treat that narrow
+    // continuation as numeric so the full-parser extractor can apply its
+    // household-amount 一-over-亿 priority. Without this gate the merger commits
+    // 5420 immediately and drops the final syllable before parsing sees it.
+    if (_looksLikeTerminalChineseOneContinuation(buffer, chunk)) return true;
     if (!_bufferLooksOpen(buffer)) return false;
     if (!_chunkStartsNumeric(chunk)) return false;
     return true;
+  }
+
+  bool _looksLikeTerminalChineseOneContinuation(String buffer, String chunk) {
+    final trimmedBuffer = buffer.trimRight();
+    final trimmedChunk = chunk.trimLeft();
+    if (trimmedBuffer.isEmpty || trimmedChunk.isEmpty) return false;
+
+    final bufferTail = trimmedBuffer[trimmedBuffer.length - 1];
+    final canAcceptOnesPlace =
+        bufferTail == '\u5341' || bufferTail == '0' || bufferTail == '０';
+    final chunkHead = trimmedChunk[0];
+    return canAcceptOnesPlace &&
+        (chunkHead == '\u4EBF' || chunkHead == '\u5104');
   }
 
   /// Lexical gate — buffer side.

@@ -84,6 +84,7 @@ Widget _preview({required bool family}) {
                           isGroupMode: family,
                           onSettingsTap: () {},
                           onMonthTap: () {},
+                          onModeTap: () {},
                         ),
                         const SizedBox(
                           height: MainSurfaceHeader.contentSpacing,

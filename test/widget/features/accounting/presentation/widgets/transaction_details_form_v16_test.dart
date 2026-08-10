@@ -121,6 +121,24 @@ void main() {
     expect(find.byKey(const ValueKey('date-chip')), findsOneWidget);
     expect(find.byKey(const ValueKey('merchant-textfield')), findsOneWidget);
     expect(purpose, findsOneWidget);
+    final purposeIcon = find.byKey(const ValueKey('v16-purpose-icon'));
+    final categoryIcon = find.descendant(
+      of: find.byKey(const ValueKey('category-chip')),
+      matching: find.byIcon(Icons.shopping_bag_outlined),
+    );
+    expect(purposeIcon, findsOneWidget);
+    expect(
+      tester.widget<Icon>(purposeIcon).icon,
+      Icons.account_balance_wallet_outlined,
+    );
+    expect(
+      tester.getTopLeft(purposeIcon).dx,
+      tester.getTopLeft(categoryIcon).dx,
+    );
+    expect(
+      tester.getTopLeft(find.text('Purpose')).dx,
+      tester.getTopLeft(find.text('Category')).dx,
+    );
     expect(note, findsOneWidget);
     expect(tester.getSize(note).height, 52);
     expect(

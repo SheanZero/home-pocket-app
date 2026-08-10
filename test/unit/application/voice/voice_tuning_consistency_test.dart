@@ -2,8 +2,8 @@
 //
 // Two guarantees:
 //   1. The three preserved public aliases resolve to their VoiceTuning value.
-//   2. Every VoiceTuning value equals the pre-consolidation literal — any
-//      silent drift of a tuning constant turns this file red.
+//   2. Every VoiceTuning value equals the reviewed product tuning — any silent
+//      drift of a tuning constant turns this file red.
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/voice/recognition/category_recognizer.dart';
@@ -32,10 +32,20 @@ void main() {
     });
   });
 
-  group('VoiceTuning values are locked to pre-consolidation behavior', () {
+  group('VoiceTuning values are locked to reviewed product tuning', () {
     test('recognizer listen configuration', () {
       expect(VoiceTuning.listenFor, const Duration(seconds: 30));
-      expect(VoiceTuning.pauseFor, const Duration(seconds: 3));
+      expect(VoiceTuning.pauseFor, const Duration(milliseconds: 1200));
+      expect(
+        VoiceTuning.finalCompletionGrace,
+        const Duration(milliseconds: 650),
+      );
+      expect(
+        VoiceTuning.finalCompletionGrace,
+        lessThan(VoiceTuning.pauseFor),
+        reason:
+            'a platform-final transcript should confirm faster than silence',
+      );
     });
 
     test('the two distinct 300ms constants stay separately declared', () {

@@ -95,6 +95,28 @@ void main() {
     });
   });
 
+  group('zh terminal 一/亿 recognition priority', () {
+    test('五千四百二十亿日元 treats terminal 亿 as spoken 一', () {
+      expect(parser.extractAmount('五千四百二十亿日元', localeId: 'zh-CN'), 5421);
+    });
+
+    test('Arabic ITN 5420亿日元 repairs the final digit to 5421', () {
+      expect(parser.extractAmount('5420亿日元', localeId: 'zh-CN'), 5421);
+    });
+
+    test('the correctly recognized 五千四百二十一日元 stays 5421', () {
+      expect(parser.extractAmount('五千四百二十一日元', localeId: 'zh-CN'), 5421);
+    });
+
+    test('explicit 三亿五千万 keeps magnitude semantics and is not downcast', () {
+      expect(parser.extractAmount('三亿五千万日元', localeId: 'zh-CN'), isNull);
+    });
+
+    test('a direct 三亿 amount is not rewritten as 31', () {
+      expect(parser.extractAmount('三亿日元', localeId: 'zh-CN'), isNull);
+    });
+  });
+
   // ── 260622-nhs R6 BUG 2: multi-digit Arabic amount must NOT collapse to the
   //    last digit when a stray kanji-numeral (e.g. 一 in 一共) trips the hint. ──
   group('260622-nhs R6 BUG 2: multi-digit Arabic amount', () {

@@ -141,6 +141,7 @@ void main() {
       final header = find.byKey(const Key('shopping-main-header'));
       final title = find.byKey(const Key('shopping-main-title'));
       final settings = find.byKey(const Key('shopping-settings-button'));
+      final badge = find.byKey(const Key('shopping-mode-badge'));
       final filter = find.byKey(const Key('shopping_filter_surface'));
 
       expect(find.byType(AppBar), findsNothing);
@@ -156,6 +157,16 @@ void main() {
         AppTypography.pageTitleLineHeight / AppTypography.pageTitle,
       );
       expect(tester.getSize(settings), const Size(40, 40));
+      expect(badge, findsOneWidget);
+      expect(find.text('Personal'), findsOneWidget);
+      expect(
+        tester
+            .widget<InkWell>(
+              find.descendant(of: badge, matching: find.byType(InkWell)),
+            )
+            .onTap,
+        isNotNull,
+      );
       expect(
         tester.getSize(find.byIcon(Icons.settings_outlined)),
         const Size(24, 24),
@@ -338,7 +349,6 @@ void main() {
       expect(find.text('Active 1'), findsOneWidget);
       expect(find.text('Active 2'), findsOneWidget);
     });
-
   });
 
   group('ShoppingListScreen — reorderable list (D38-02)', () {

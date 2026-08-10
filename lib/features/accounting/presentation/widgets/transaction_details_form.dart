@@ -1495,11 +1495,26 @@ class TransactionDetailsFormState
         children: [
           Row(
             children: [
-              Text(
-                l10n.expenseClassification,
-                style: AppTextStyles.label.copyWith(
-                  color: palette.textPrimary,
-                  fontWeight: FontWeight.w700,
+              SizedBox(
+                width: 20,
+                child: Icon(
+                  Icons.account_balance_wallet_outlined,
+                  key: const ValueKey('v16-purpose-icon'),
+                  size: 20,
+                  color: palette.textSecondary,
+                ),
+              ),
+              const SizedBox(width: 9),
+              SizedBox(
+                width: 48,
+                child: Text(
+                  l10n.expenseClassification,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.label.copyWith(
+                    color: palette.textPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),

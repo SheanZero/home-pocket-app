@@ -18,10 +18,10 @@ import '../../../home/presentation/providers/state_shadow_books.dart';
 /// Shopping list item tile — v15 warm-Japanese port (D-02, ADR-019).
 ///
 /// Faithful to the mockup `shopItem()`: a check circle (ledger-coloured hollow
-/// ring → filled + white tick when done), the item name + meta copy, a ledger
-/// badge (日常/ときめき), and a drag affordance. The dual-ledger accent is now
-/// carried by the check circle and the badge — the old 4px left accent bar and
-/// the 私有 lock marker were removed to match the mockup.
+/// ring → filled + white tick when done), the item name + meta copy, and a drag
+/// affordance. The dual-ledger accent is carried solely by the check circle;
+/// redundant ledger badges, the old 4px left accent bar, and the 私有 lock
+/// marker are intentionally omitted.
 ///
 /// Interaction model:
 /// - DONE-01: tapping the leading circle calls [ToggleItemCompletedUseCase].
@@ -173,9 +173,18 @@ class ShoppingItemTile extends ConsumerWidget {
       color: Colors.transparent,
       constraints: const BoxConstraints(minHeight: 68),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        // The completion control owns a full 44px touch target. The 4px left
+        // inset plus the control's centred 28px ring preserves the previous
+        // 12px visual inset, while keeping the target independent from the
+        // body gesture that opens the edit form.
+        padding: const EdgeInsets.fromLTRB(4, 10, 12, 10),
         child: Row(
           children: [
+            // Leading circular completion toggle (DONE-01). Keep it outside
+            // the body detector so the two actions never compete in Flutter's
+            // gesture arena on a physical device.
+            _buildCompletionToggle(context, ref, palette),
+            const SizedBox(width: 2),
             Expanded(
               child: GestureDetector(
                 key: ValueKey('shopping-item-body-${item.id}'),
@@ -184,9 +193,6 @@ class ShoppingItemTile extends ConsumerWidget {
                 behavior: HitTestBehavior.opaque,
                 child: Row(
                   children: [
-                    // Leading circular completion toggle (DONE-01).
-                    _buildCompletionToggle(context, ref, palette),
-                    const SizedBox(width: 10),
                     // The completed card owns the single .58 opacity layer so
                     // every visual element fades by the same amount.
                     Expanded(
@@ -229,7 +235,6 @@ class ShoppingItemTile extends ConsumerWidget {
                     // Attribution chip — public-list tiles only (SYNC-04).
                     if (item.listType == 'public' && item.addedByBookId != null)
                       _buildAttributionChip(context, ref, palette),
-                    _buildLedgerBadge(context, palette),
                   ],
                 ),
               ),
@@ -276,46 +281,6 @@ class ShoppingItemTile extends ConsumerWidget {
         ),
         const SizedBox(width: 8),
       ],
-    );
-  }
-
-  /// Ledger badge (日常 / ときめき) — mockup `.badge.shopping-ledger-badge`.
-  ///
-  /// daily → `dailyLight` fill + `dailyText`; joy → `joyLight` + `joyText`
-  /// (never raw `joy`/`daily` on text — WCAG AA). Completed-state fading is
-  /// applied once by the surrounding card. Null ledger renders nothing.
-  Widget _buildLedgerBadge(BuildContext context, AppPalette palette) {
-    final l10n = S.of(context);
-    final (Color bg, Color fg, String label) = switch (item.ledgerType) {
-      LedgerType.daily => (
-        palette.dailyLight,
-        palette.dailyText,
-        l10n.listLedgerDaily,
-      ),
-      LedgerType.joy => (palette.joyLight, palette.joyText, l10n.listLedgerJoy),
-      null => (palette.backgroundMuted, palette.textSecondary, ''),
-    };
-    if (label.isEmpty) return const SizedBox.shrink();
-    final badgeBackground = item.isCompleted ? palette.backgroundMuted : bg;
-    final badgeForeground = item.isCompleted ? palette.textSecondary : fg;
-
-    return KeyedSubtree(
-      key: ValueKey('shopping-ledger-badge-${item.id}'),
-      child: Container(
-        margin: const EdgeInsets.only(right: 2),
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-        decoration: BoxDecoration(
-          color: badgeBackground,
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Text(
-          label,
-          style: AppTextStyles.compact.copyWith(
-            color: badgeForeground,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
     );
   }
 
@@ -369,9 +334,7 @@ class ShoppingItemTile extends ConsumerWidget {
         onTap: () =>
             ref.read(toggleItemCompletedUseCaseProvider).execute(item.id),
         behavior: HitTestBehavior.opaque,
-        // Keep the 44px vertical tap lane without reserving 44px horizontally;
-        // V15 places copy 10px after the 23px circle.
-        child: SizedBox(width: 28, height: 44, child: Center(child: circle)),
+        child: SizedBox.square(dimension: 44, child: Center(child: circle)),
       ),
     );
   }

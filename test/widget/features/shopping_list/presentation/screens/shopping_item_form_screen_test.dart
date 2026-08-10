@@ -281,6 +281,26 @@ void main() {
       expect(find.byKey(const Key('shopping_form_tags_field')), findsNothing);
     });
 
+    testWidgets('category and note content use the unified item font size', (
+      tester,
+    ) async {
+      await _pumpForm(
+        tester,
+        createUseCase: mockCreate,
+        updateUseCase: mockUpdate,
+        deviceIdentityRepo: mockDeviceIdentityRepo,
+      );
+
+      final categoryValue = tester.widget<Text>(find.text('No category'));
+      expect(categoryValue.style?.fontSize, 15);
+
+      final noteField = tester.widget<TextField>(
+        find.byKey(const Key('shopping_form_note_field')),
+      );
+      expect(noteField.style?.fontSize, 15);
+      expect(noteField.decoration?.hintStyle?.fontSize, 15);
+    });
+
     testWidgets('category row (InkWell with label) is present', (tester) async {
       await _pumpForm(
         tester,
@@ -762,7 +782,7 @@ void main() {
 
       expect(quantityField.textAlign, TextAlign.center);
       expect(quantityField.textAlignVertical, TextAlignVertical.center);
-      expect(quantityField.style?.fontSize, 24);
+      expect(quantityField.style?.fontSize, 18);
 
       final quantityBox = find.byKey(
         const Key('shopping_form_quantity_input_box'),
