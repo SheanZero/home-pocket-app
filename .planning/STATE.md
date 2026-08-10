@@ -5,15 +5,15 @@ milestone_name: 依赖与原生工具链现代化
 current_phase: 62
 current_phase_name: automated-release-gate-lock
 status: executing
-stopped_at: Completed 62-11-PLAN.md
-last_updated: "2026-08-10T11:38:39.421Z"
+stopped_at: Completed 62-12-PLAN.md
+last_updated: "2026-08-10T11:50:15.503Z"
 last_activity: 2026-08-10
 last_activity_desc: Phase 62 execution started
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 49
-  completed_plans: 47
+  completed_plans: 48
   percent: 71
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-08-10 after Phase 61 completion)
 ## Current Position
 
 Phase: 62 (automated-release-gate-lock) — EXECUTING
-Plan: 3 of 13
+Plan: 4 of 13
 Status: Ready to execute
 Last activity: 2026-08-10 — Phase 62 execution started
 
-Progress: [██████████] 96%
+Progress: [██████████] 98%
 
 ### Decisions
 
@@ -152,6 +152,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: Treat iOS/Android validator success and shared inventory equality as mandatory aggregate-stage requirements.
 - [Phase ?]: 62-11: exit timeout races independently-started stream drains, then uses bounded TERM/KILL recovery before diagnostics are returned.
 - [Phase ?]: 62-11: serialHostSuite is valid evidence; only actual serial or UDID assignments are sensitive.
+- [Phase ?]: Direct Android package paths resolve PHASE61_JAVA_HOME before JAVA_HOME, require exact JDK 17, and export the verified home without consulting PHASE61_SIGNING_EVIDENCE.
 
 ### Quick Tasks Completed
 
@@ -341,8 +342,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-08-10T11:38:39.405Z
-Stopped at: Completed 62-11-PLAN.md
+Last session: 2026-08-10T11:50:15.488Z
+Stopped at: Completed 62-12-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -473,6 +474,7 @@ Resume file: None
 | Phase 62 P08 | 9min | 2 tasks | 8 files |
 | Phase 62 P10 | 4m 20s | 2 tasks | 4 files |
 | Phase 62-automated-release-gate-lock P11 | 4min | 2 tasks | 4 files |
+| Phase 62 P12 | 5min | 1 tasks | 2 files |
 
 ## Decisions
 
