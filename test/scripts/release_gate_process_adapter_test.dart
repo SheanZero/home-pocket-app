@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +8,35 @@ import '../../scripts/release_gate/process_adapter.dart';
 
 void main() {
   group('SystemProcessAdapter', () {
+    test(
+      'scrubs secret assignment variants without breaking JSON diagnostics',
+      () {
+        const rawAssignments = <String>[
+          'token: colon-secret',
+          'credential = spaced-secret',
+          'PASSWORD=compact-secret',
+          'api-key = api-secret',
+        ];
+
+        for (final raw in rawAssignments) {
+          final scrubbed = scrubDiagnostic(raw);
+          expect(
+            scrubbed,
+            isNot(contains(raw.split(RegExp(r'[:=]')).last.trim())),
+          );
+        }
+
+        const rawJson =
+            '{"secret":"json-secret","message":"benign diagnostic"}';
+        final scrubbedJson = scrubDiagnostic(rawJson, preserveJson: true);
+
+        expect(jsonDecode(scrubbedJson), <String, Object?>{
+          'secret': '<redacted>',
+          'message': 'benign diagnostic',
+        });
+      },
+    );
+
     test('timeout remains armed while child output pipes stay open', () async {
       final marker = File(
         '${Directory.systemTemp.path}/release-gate-child-${DateTime.now().microsecondsSinceEpoch}.pid',
