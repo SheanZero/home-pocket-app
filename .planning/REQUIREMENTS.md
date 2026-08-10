@@ -46,10 +46,10 @@
 
 ### Automated Quality & Release Gates（自动化质量与发布门禁）
 
-- [ ] **QA-01**: 最终组合通过 `flutter analyze`、custom lint/import guard、架构/隐私/依赖合同和 `git diff --check`，结果为 0 issue 且无新增无依据的 ignore
-- [ ] **QA-02**: 目标测试、完整 `flutter test`、覆盖率门禁及必要的单并发复跑全部通过；任何因升级修改的行为先有回归测试再修复
-- [ ] **QA-03**: release preflight 从干净状态重新生成 native registrants，证明生产 Runner 不包含 `integration_test` 等开发插件；CI 固定同一 Flutter stable、lockfile 与生成步骤
-- [ ] **QA-04**: iPhone Simulator 与 Android Emulator 作为真机前置门禁通过，最终兼容性报告记录命令、环境、commit、版本差异、intentional holds、失败/修复与残余债务
+- [x] **QA-01**: 最终组合通过 `flutter analyze`、custom lint/import guard、架构/隐私/依赖合同和 `git diff --check`，结果为 0 issue 且无新增无依据的 ignore
+- [x] **QA-02**: 目标测试、完整 `flutter test`、覆盖率门禁及必要的单并发复跑全部通过；任何因升级修改的行为先有回归测试再修复
+- [x] **QA-03**: release preflight 从干净状态重新生成 native registrants，证明生产 Runner 不包含 `integration_test` 等开发插件；CI 固定同一 Flutter stable、lockfile 与生成步骤
+- [x] **QA-04**: iPhone Simulator 与 Android Emulator 作为真机前置门禁通过，最终兼容性报告记录命令、环境、commit、版本差异、intentional holds、失败/修复与残余债务
 
 ### Wired iPhone Acceptance（有线 iPhone 真机验收）
 
@@ -110,10 +110,10 @@ Every current requirement maps to exactly one v2.1 roadmap phase.
 | AND-02 | Phase 61 | Complete |
 | AND-03 | Phase 61 | Complete |
 | AND-04 | Phase 61 | Complete |
-| QA-01 | Phase 62 | Pending |
-| QA-02 | Phase 62 | Pending |
-| QA-03 | Phase 62 | Pending |
-| QA-04 | Phase 62 | Pending |
+| QA-01 | Phase 62 | Complete |
+| QA-02 | Phase 62 | Complete |
+| QA-03 | Phase 62 | Complete |
+| QA-04 | Phase 62 | Complete |
 | DEVICE-01 | Phase 63 | Pending |
 | DEVICE-02 | Phase 63 | Pending |
 | DEVICE-03 | Phase 63 | Pending |
