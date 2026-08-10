@@ -187,6 +187,7 @@ void main() {
 
   test('Phase 62 report lifecycle follows the selected exact-path decision', () {
     final source = File('scripts/release_gate.dart');
+    final report = File(_reportPath);
     final reportDecision = _decisionCode('RPT');
     final contents = source.existsSync() ? source.readAsStringSync() : '';
 
@@ -216,6 +217,43 @@ void main() {
       contents,
       isNot(contains('allowAnyDirtyPath')),
       reason: 'a broad candidate-drift exclusion is forbidden',
+    );
+    expect(
+      contents,
+      contains('resolveAttestedCandidateCommit'),
+      reason: 'RPT-A must resolve the tested parent from an exact report successor',
+    );
+    expect(
+      contents,
+      contains('publishCompatibilityReport'),
+      reason: 'RPT-A requires an explicit publication operation',
+    );
+    expect(
+      contents,
+      contains("argument == '--publish-report'"),
+      reason: 'report publication must be opt-in and never run implicitly',
+    );
+    for (final path in const [
+      'lib/',
+      'test/',
+      'integration_test/',
+      'scripts/',
+      'android/',
+      'ios/',
+      '.github/',
+      'docs/testing/STABLE_BASELINE.json',
+    ]) {
+      expect(
+        contents,
+        contains("'$path'"),
+        reason: 'candidate scope must positively include $path',
+      );
+    }
+    expect(report.existsSync(), isTrue);
+    expect(
+      report.readAsStringSync(),
+      contains('No validated candidate attestation has been published.'),
+      reason: 'the checked-in surface must not fabricate unexecuted runner proof',
     );
   });
 }
