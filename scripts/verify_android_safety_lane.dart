@@ -411,7 +411,7 @@ Future<Phase62AndroidEvidence> runPhase62AndroidEvidence(
       failure: 'candidate fingerprint mismatch before primary execution',
     );
   }
-  final primaryResult = await primary();
+  final primaryResult = _normalizePhase62PrimaryResult(await primary());
   if (!primaryResult.passed) {
     return persist(
       'BLOCKED',
@@ -453,6 +453,34 @@ Future<Phase62AndroidEvidence> runPhase62AndroidEvidence(
     primaryResult: primaryResult,
     releaseResult: releaseResult,
   );
+}
+
+/// Phase 62's Android adapter reports paths relative to `integration_test/`.
+/// Normalize at this adapter boundary so the shared release inventory contract
+/// stays strict without changing the Phase 61 matrix's historical path model.
+AndroidPhase62PrimaryResult _normalizePhase62PrimaryResult(
+  AndroidPhase62PrimaryResult result,
+) => AndroidPhase62PrimaryResult(
+  result: result.result,
+  discoveredFiles: result.discoveredFiles
+      .map(_normalizePhase62IntegrationPath)
+      .toList(growable: false),
+  executedFiles: result.executedFiles
+      .map(_normalizePhase62IntegrationPath)
+      .toList(growable: false),
+  message: result.message,
+);
+
+String _normalizePhase62IntegrationPath(String path) {
+  final normalized = path.replaceAll('\\', '/');
+  if (normalized.startsWith('integration_test/') ||
+      normalized.isEmpty ||
+      normalized.startsWith('/') ||
+      normalized.startsWith('../') ||
+      normalized.contains('/../')) {
+    return normalized;
+  }
+  return 'integration_test/$normalized';
 }
 
 bool _sameBytes(List<int> left, List<int> right) =>

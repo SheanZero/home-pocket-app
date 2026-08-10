@@ -628,11 +628,44 @@ _SimulatorSelection? _selectIphoneSimulator(String rawInventory) {
         }
       }
     }
-    if (candidates.length != 1) return null;
-    return candidates.single;
+    if (candidates.isEmpty) return null;
+    candidates.sort(_compareSimulatorSelection);
+    return candidates.first;
   } on FormatException {
     return null;
   }
+}
+
+/// Selects a reproducible iPhone destination from real `simctl` inventories:
+/// newest iOS runtime first, then model and identifier in stable ascending order.
+int _compareSimulatorSelection(
+  _SimulatorSelection left,
+  _SimulatorSelection right,
+) {
+  final runtime = _compareRuntimeDescending(left.runtime, right.runtime);
+  if (runtime != 0) return runtime;
+  final model = left.model.compareTo(right.model);
+  if (model != 0) return model;
+  return left.identifier.compareTo(right.identifier);
+}
+
+int _compareRuntimeDescending(String left, String right) {
+  List<int> parts(String runtime) => RegExp(r'\d+')
+      .allMatches(runtime)
+      .map((match) => int.parse(match.group(0)!))
+      .toList(growable: false);
+  final leftParts = parts(left);
+  final rightParts = parts(right);
+  final length = leftParts.length > rightParts.length
+      ? leftParts.length
+      : rightParts.length;
+  for (var index = 0; index < length; index++) {
+    final leftPart = index < leftParts.length ? leftParts[index] : 0;
+    final rightPart = index < rightParts.length ? rightParts[index] : 0;
+    final comparison = rightPart.compareTo(leftPart);
+    if (comparison != 0) return comparison;
+  }
+  return left.compareTo(right);
 }
 
 String _redactedToken(String identifier) =>
