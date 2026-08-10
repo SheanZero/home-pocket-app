@@ -215,7 +215,7 @@ Plans:
 
 ### Phase 61: Android Toolchain & Emulator Lane
 
-**Goal**: The supported Android build is either fully migrated as one production-stable AGP lane or safely held at the last green AGP 8 lane, with no partial toolchain state.
+**Goal**: The supported Android build is either fully migrated as one production-stable AGP lane or safely held at the last green AGP 8 lane, with no partial toolchain state; the local Apple Silicon API 36 `google_apis` `arm64-v8a` Emulator is the primary runtime acceptance while the API 36 `x86_64` GitHub/Intel lane remains independently testable supplemental evidence.
 **Depends on**: Phase 58
 **Requirements**: AND-01, AND-02, AND-03, AND-04
 **Success Criteria** (what must be TRUE):
@@ -223,7 +223,7 @@ Plans:
   1. The execution-date AGP 9.3.1 / Gradle 9.5.0 / JDK 17 / API 36 candidate (rechecked from the dated 9.0.1/9.1 snapshot) is evaluated as a single lane while preserving minSdk 24.
   2. If AGP 9 is compatible, built-in Kotlin/new DSL adoption, legacy KGP removal, and temporary Flutter opt-out cleanup are complete across the app and plugin graph; if it is not, the entire lane is held at the last green AGP 8 combination with its blocker recorded.
   3. The final Android combination produces a non-debug-signed release AAB/APK that the signing contract accepts and that contains no test-only registrar or plugin.
-  4. Key integration journeys pass on a supported Android Emulator, and the final evidence explicitly says Android physical-device acceptance was not performed or claimed.
+  4. Key integration journeys pass on a clean API 36 `google_apis` `arm64-v8a` Emulator on the Apple Silicon host, with cold boot, wipe/no-snapshot, deterministic readiness, runner ownership, redacted serial, complete discovery/execution, and post-test AAB/APK hygiene. The API 36 `x86_64` GitHub/Intel lane is preserved as independently testable supplemental evidence; its absence/failure is a documented limitation, not a pass or primary blocker. Final evidence explicitly says Android physical-device acceptance was not performed or claimed.
 
 **Plans**: 4/6 plans executed
 **Wave 1**
@@ -236,7 +236,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [x] 61-03-PLAN.md — Lock the terminal Android graph and declare the API 36 x86_64 full-suite device lane.
+- [x] 61-03-PLAN.md — Lock the terminal Android graph and declare the API 36 x86_64 GitHub/Intel supplemental full-suite device lane.
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -244,7 +244,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 61-05-PLAN.md — Execute the complete integration suite on a clean API 36 x86_64 Emulator and rescan release artifacts.
+- [ ] 61-05-PLAN.md — Execute the complete integration suite on the clean local API 36 google_apis arm64-v8a primary Emulator, retain the API 36 x86_64 GitHub/Intel supplemental lane, and rescan release artifacts.
 
 **Wave 6** *(blocked on Wave 5 completion)*
 

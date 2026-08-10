@@ -4,11 +4,11 @@ milestone: v2.1
 milestone_name: 依赖与原生工具链现代化
 current_phase: 61
 current_phase_name: Android Toolchain & Emulator Lane
-status: blocked
-stopped_at: Blocked during 61-05-PLAN.md Task 1 — API 36 x86_64 Emulator cannot boot on Apple-silicon host
-last_updated: "2026-08-10T00:20:01Z"
+status: in_progress
+stopped_at: Resumed 61-05-PLAN.md Task 1 under owner-approved API 36 arm64-v8a primary acceptance
+last_updated: "2026-08-10T00:26:24Z"
 last_activity: 2026-08-10
-last_activity_desc: Phase 61 Plan 05 reattempted — native QEMU rejects x86_64 on aarch64; prior Rosetta diagnostics retained
+last_activity_desc: Owner superseded the local x86_64 blocker: API 36 google_apis arm64-v8a is primary; x86_64 GitHub/Intel is supplemental
 progress:
   total_phases: 7
   completed_phases: 4
@@ -30,8 +30,8 @@ See: .planning/PROJECT.md (updated 2026-08-09 after Phase 59 completion)
 
 Phase: 61 — Android Toolchain & Emulator Lane
 Plan: 5 of 6
-Status: Blocked
-Last activity: 2026-08-10 — Phase 61 Plan 05 reattempted at the exact API 36 x86_64 host-compatibility gate
+Status: In progress
+Last activity: 2026-08-10 — owner-approved API 36 google_apis arm64-v8a primary gate is being executed; x86_64 GitHub/Intel remains supplemental
 
 Progress: [█████████░] 94%
 
@@ -41,6 +41,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 
 - [v2.1 roadmap, 2026-08-05]: Use seven atomic compatibility lanes: baseline/contract → Flutter/analyzer/codegen → controlled plugins → SQLCipher/iOS → Android → automated release gates → isolated wired-iPhone UAT. A documented safe hold is successful; partial upgrades and security fallbacks are not.
 - [v2.1 roadmap, 2026-08-05]: Android physical-device testing is unavailable and out of scope. The only device acceptance is the current wired `“Xin Zhang”的 iPhone`, under an additive test-only app identity that cannot touch production financial data, containers, Keychain, backups, or credentials.
+- [Phase 61 owner decision, 2026-08-10]: Supersede the local API 36 x86_64 Emulator blocker. The Apple Silicon API 36 `google_apis` `arm64-v8a` Emulator is the blocking primary runtime acceptance; preserve the API 36 `x86_64` GitHub/Intel lane as independently testable supplemental evidence. Absence/failure of the supplemental lane is an explicit limitation, never a pass or Phase 61 blocker. Do not claim Android physical-device validation.
 - [Phase 58 execution, 2026-08-08]: The generic post-wave Xcode gate exposed `FlutterGeneratedPluginSwiftPackage` at iOS 13 while Firebase Swift packages require iOS 15. The working tree was clean and the user chose to continue Phase 58; defer this pre-existing native-platform mismatch to Phase 60 per D-10 rather than changing native tooling in the analyzer/codegen lane.
 - [Phase 58 close, 2026-08-08]: The owner narrowed GEN-02 to current production entrypoints and project-supported syntax. The repository-owned token scanner remains defense-in-depth rather than a complete Dart parser; nested unbraced-control-flow alias handling and locally shadowed `runApp` handling are accepted technical debt with no current production exposure found and do not block release.
 
@@ -209,9 +210,9 @@ v1.9 (Phases 49-52) shipped & archived 2026-06-25 — see `.planning/milestones/
 
 ### Blockers / Concerns
 
-Active execution blocker:
+Historical superseded execution record:
 
-- **Phase 61 AND-04 / Plan 61-05:** The installed arm64 Android Emulator 36.3.10 rejects the required API 36 `google_apis/x86_64` AVD because QEMU2 requires the system-image architecture to match the aarch64 host. Two official macOS x86_64 host binaries were also tried under Rosetta: stable 37.1.11 build 15917651 (Google-published SHA-1 verified) and matching 36.3.10 build 14472402 (downloaded from Google, SHA-256 recorded); both QEMU children failed to return even from `-version` and were terminated by exact PID. No AVD, device, diagnostic process, archive, or extracted runtime remains; the API 36 x86_64 system image remains installed outside the repository. **Exit condition:** execute the checked-in x86_64 GitHub device lane (or an equivalent Intel/x86_64 host) against this exact source graph, import redacted per-file runtime evidence, and rerun signed post-test AAB/APK hygiene. Arm64 substitution and an unexecuted workflow declaration remain prohibited.
+- **Phase 61 AND-04 / Plan 61-05 (superseded 2026-08-10):** The installed arm64 Android Emulator 36.3.10 rejected API 36 `google_apis/x86_64` because QEMU2 requires the system-image architecture to match the aarch64 host. Official macOS x86_64 host binaries were also bounded under Rosetta without a usable QEMU child. This exact x86_64 outcome remains retained as supplemental-lane history; it is no longer the primary Phase 61 blocker. The current primary gate is the local API 36 `google_apis/arm64-v8a` Emulator. Android physical-device validation remains unavailable and unclaimed.
 
 v2.1 planning constraints that must remain explicit:
 

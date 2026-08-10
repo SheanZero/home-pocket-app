@@ -16,7 +16,7 @@ The safe implementation path is therefore:
 1. Re-query and record AGP `9.3.1` / Gradle `9.5.0` / JDK `17` / API `36` as the execution-date candidate.
 2. Run a disposable candidate probe that removes app KGP and both temporary opt-out flags only inside the disposable copy, then capture the first attributable Flutter/plugin incompatibility without editing Pub-cache or generated sources.
 3. Verify the main worktree remains or is restored exactly to AGP `8.11.1` / Gradle `8.14` / Kotlin `2.2.20` / JDK `17`, with both legacy flags present and minSdk `24`.
-4. Prove that exact hold graph with a non-debug ephemeral evidence key, both release AAB and APK, signature and packaged-content inspection, and the full integration suite on a clean API 36 x86_64 Emulator.
+4. Prove that exact hold graph with a non-debug ephemeral evidence key, both release AAB and APK, signature and packaged-content inspection, and the full integration suite on the owner-approved local API 36 `google_apis` `arm64-v8a` primary Emulator. The checked-in API 36 `x86_64` GitHub/Intel lane remains supplemental.
 
 A documented hold is the intended safe success state, not a degraded result. No mixed AGP 9/KGP/new-DSL state may enter the main tree.
 
@@ -214,5 +214,9 @@ Use six sequential plans because the same Android/build/evidence surfaces are sh
 6. Converge the evidence ledger and focused Phase 61 verification.
 
 Plans 1–2 are the end-to-end tracer: by the end of plan 2 the lane has a real official candidate, a bounded attempted build, an attributable decision, and a machine-checked clean terminal graph. Plans 3–6 deepen and prove that decision without reopening it.
+
+## 2026-08-10 Owner Supersession
+
+The original research recorded API 36 `x86_64` Emulator execution as the local acceptance surface. The owner superseded that contract after the Apple Silicon QEMU compatibility result: the local API 36 `google_apis` `arm64-v8a` lane is primary runtime acceptance; API 36 `x86_64` GitHub/Intel remains a checked-in, independently testable supplemental lane. Evidence must never merge ABI claims, and neither emulator lane permits an Android physical-device claim.
 
 ## RESEARCH COMPLETE
