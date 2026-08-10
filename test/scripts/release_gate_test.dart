@@ -657,6 +657,83 @@ void main() {
       },
     );
   });
+
+  group('Phase 62 aggregate discovery and report contracts', () {
+    const discovered = <String>[
+      'integration_test/device_critical_journey_test.dart',
+      'integration_test/nested/child_test.dart',
+    ];
+
+    test(
+      'requires each platform to account for the same recursive inventory',
+      () {
+        final manifest = ReleaseSkipManifest.empty();
+
+        expect(
+          validatePlatformInventory(
+            discovered: discovered,
+            executed: discovered,
+            skips: manifest,
+          ),
+          isEmpty,
+        );
+        expect(
+          validatePlatformInventory(
+            discovered: discovered,
+            executed: const <String>[
+              'integration_test/device_critical_journey_test.dart',
+            ],
+            skips: manifest,
+          ),
+          isNotEmpty,
+        );
+      },
+    );
+
+    test(
+      'rejects missing, duplicate, stale, and incomplete expected skips',
+      () {
+        expect(
+          ReleaseSkipManifest.parse(<String, Object?>{
+            'schema_version': 1,
+            'skips': <Object>[
+              <String, Object?>{
+                'path': 'integration_test/nested/child_test.dart',
+                'reason': 'blocked by a tracked simulator defect',
+                'owner_phase': '63',
+                'exit_condition': 'remove after the simulator defect is fixed',
+              },
+            ],
+          }, discovered: discovered).entries,
+          hasLength(1),
+        );
+        for (final malformed in <Map<String, Object?>>[
+          <String, Object?>{
+            'schema_version': 1,
+            'skips': <Object>[
+              <String, Object?>{'path': 'outside_test.dart'},
+            ],
+          },
+          <String, Object?>{
+            'schema_version': 1,
+            'skips': <Object>[
+              <String, Object?>{
+                'path': 'integration_test/missing_test.dart',
+                'reason': 'stale',
+                'owner_phase': '63',
+                'exit_condition': 'remove',
+              },
+            ],
+          },
+        ]) {
+          expect(
+            () => ReleaseSkipManifest.parse(malformed, discovered: discovered),
+            throwsFormatException,
+          );
+        }
+      },
+    );
+  });
 }
 
 class _RecordingProcessAdapter implements ProcessAdapter {
