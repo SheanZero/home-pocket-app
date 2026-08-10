@@ -193,11 +193,14 @@ void main() {
           'phase62-boundary-',
         );
         addTearDown(() => fixture.delete(recursive: true));
+        final ledger = File('${fixture.path}/61-ANDROID-SAFETY-EVIDENCE.md')
+          ..writeAsStringSync('historical ledger');
         var captures = 0;
         final evidence = await lane.runPhase62AndroidEvidence(
           fixture,
           candidate: candidate,
           resultPath: 'build/release_gate/android.json',
+          ledgerPath: ledger.path,
           captureCurrentCandidate: () async =>
               ++captures ==
                   switch (boundary) {
@@ -214,6 +217,7 @@ void main() {
         );
         expect(evidence.result, 'BLOCKED', reason: boundary);
         expect(evidence.failure, contains('candidate fingerprint mismatch'));
+        expect(ledger.readAsStringSync(), 'historical ledger');
       }
     },
   );
