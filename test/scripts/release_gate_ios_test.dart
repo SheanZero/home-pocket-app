@@ -97,6 +97,29 @@ void main() {
       },
     );
 
+    test('tolerates an already-shutdown iPhone Simulator', () async {
+      final process = _RecordingProcessAdapter(<ProcessOutcome>[
+        ProcessOutcome(exitCode: 0, diagnostic: jsonEncode(_iphoneInventory)),
+        const ProcessOutcome(exitCode: 148, diagnostic: 'already shutdown'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'erased'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'booted'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'ready'),
+        const ProcessOutcome(exitCode: 148, diagnostic: 'already shutdown'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'erased'),
+      ]);
+      final adapter = SimctlIosSimulatorAdapter(
+        processAdapter: process,
+        candidateProvider: () => candidate,
+      );
+
+      final evidence = await adapter.prepare(
+        IosSimulatorOptions(candidate: candidate),
+      );
+
+      expect(evidence.isReady, isTrue);
+      expect(evidence.failure, isNull);
+    });
+
     test(
       'rejects a physical or ambiguous destination before destructive work',
       () async {
