@@ -120,6 +120,34 @@ void main() {
       expect(evidence.failure, isNull);
     });
 
+    test('tolerates Xcode current-state shutdown responses', () async {
+      final process = _RecordingProcessAdapter(<ProcessOutcome>[
+        ProcessOutcome(exitCode: 0, diagnostic: jsonEncode(_iphoneInventory)),
+        const ProcessOutcome(
+          exitCode: 149,
+          diagnostic: 'Unable to shutdown device in current state: Shutdown',
+        ),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'erased'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'booted'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'ready'),
+        const ProcessOutcome(
+          exitCode: 149,
+          diagnostic: 'Unable to shutdown device in current state: Shutdown',
+        ),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'erased'),
+      ]);
+      final adapter = SimctlIosSimulatorAdapter(
+        processAdapter: process,
+        candidateProvider: () => candidate,
+      );
+
+      final evidence = await adapter.prepare(
+        IosSimulatorOptions(candidate: candidate),
+      );
+
+      expect(evidence.failure, isNull);
+    });
+
     test(
       'rejects a physical or ambiguous destination before destructive work',
       () async {
