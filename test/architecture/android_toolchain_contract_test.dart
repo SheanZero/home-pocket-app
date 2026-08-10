@@ -103,10 +103,12 @@ void main() {
     final current = inputs();
     final candidateObserved = current['evidence']!
         .replaceFirst(
-          '"completed_stage": "compile"',
+          '"completed_stage": "emulator"',
           '"completed_stage": "candidate"',
         )
-        .replaceFirst('"compile": "PASS"', '"compile": "NOT_RUN"');
+        .replaceFirst('"compile": "PASS"', '"compile": "NOT_RUN"')
+        .replaceFirst('"package": "PASS"', '"package": "NOT_RUN"')
+        .replaceFirst('"emulator": "PASS"', '"emulator": "NOT_RUN"');
     expect(
       validate({...current, 'evidence': candidateObserved}, allowNotRun: false),
       isEmpty,
@@ -148,5 +150,54 @@ void main() {
         'Flutter configuration restored the legacy built-in-Kotlin/new-DSL opt-outs.',
       ),
     );
+  });
+
+  test('final provenance rejects cross-plan, incomplete, and mixed evidence', () {
+    final current = inputs();
+    final cases = <String, String>{
+      'source commit mismatch': current['evidence']!.replaceFirst(
+        '"package_source_commit": "e6b5cbf672e885dcbb4446621cc20e7ca05aa058"',
+        '"package_source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"',
+      ),
+      'missing timestamp': current['evidence']!.replaceFirst(
+        '"package_completed_utc": "2026-08-10T00:43:09.500889Z",',
+        '',
+      ),
+      'missing command exit': current['evidence']!.replaceFirst(
+        '"exit_code": 0,',
+        '',
+      ),
+      'missing artifact hash': current['evidence']!.replaceFirst(
+        '"sha256": "2c8cebace1d09a69d60f334aacc158ed83ea676a7bc89299cc78a5049d97905e",',
+        '"sha256": "",',
+      ),
+      'incomplete matrix': current['evidence']!.replaceFirst(
+        '"file": "device_critical_journey_test.dart",',
+        '"file": "missing_test.dart",',
+      ),
+    };
+
+    for (final entry in cases.entries) {
+      expect(
+        validate({...current, 'evidence': entry.value}),
+        isNotEmpty,
+        reason: entry.key,
+      );
+    }
+  });
+
+  test('active Android documents keep arm64 primary and x86 supplemental', () {
+    final validation = File(
+      '.planning/phases/61-android-toolchain-emulator-lane/61-VALIDATION.md',
+    ).readAsStringSync();
+    final compatibility = File(
+      'docs/testing/DEPENDENCY_COMPATIBILITY.md',
+    ).readAsStringSync();
+
+    for (final document in [validation, compatibility]) {
+      expect(document, contains('arm64-v8a'));
+      expect(document, contains('supplemental'));
+      expect(document, isNot(contains('AND-04 remains blocked')));
+    }
   });
 }

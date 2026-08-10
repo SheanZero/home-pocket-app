@@ -27,6 +27,9 @@ void main() {
     expect(issues, isNotEmpty);
 
     final current = File(lane.evidencePath).readAsStringSync();
+    final baseline = File(
+      'docs/testing/STABLE_BASELINE.json',
+    ).readAsStringSync();
     final contaminated = current.replaceFirst(
       RegExp(r'"source_commit": "[^"]+"'),
       '"source_commit": "/Users/alice/private"',
@@ -49,6 +52,39 @@ void main() {
       findings.any((finding) => finding.contains('prohibited sensitive value')),
       isTrue,
     );
+
+    for (final mutation in <String>[
+      '"password": "not-safe"',
+      '"keystore": "not-safe"',
+      '"api_token": "not-safe"',
+      '"amount": 12345',
+      '"local_path": "/home/alice/private"',
+    ]) {
+      final unsafe = current.replaceFirst(
+        '"source_commit": "e6b5cbf672e885dcbb4446621cc20e7ca05aa058"',
+        '"source_commit": "e6b5cbf672e885dcbb4446621cc20e7ca05aa058",\n'
+        '  $mutation',
+      );
+      final unsafeFindings = lane.validateAndroidSafetyLane(
+        baselineJson: baseline,
+        settingsGradle: File('android/settings.gradle.kts').readAsStringSync(),
+        gradleProperties: File('android/gradle.properties').readAsStringSync(),
+        gradleWrapper: File(
+          'android/gradle/wrapper/gradle-wrapper.properties',
+        ).readAsStringSync(),
+        appBuildGradle: File('android/app/build.gradle.kts').readAsStringSync(),
+        evidenceMarkdown: unsafe,
+        legacyKgpPlugins: const ['speech_to_text'],
+        allowNotRun: true,
+      );
+      expect(
+        unsafeFindings.any(
+          (finding) => finding.contains('prohibited sensitive value'),
+        ),
+        isTrue,
+        reason: mutation,
+      );
+    }
   });
 
   test('strict evidence cannot pass while native results are NOT_RUN', () {
