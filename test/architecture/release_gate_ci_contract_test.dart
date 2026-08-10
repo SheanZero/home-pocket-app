@@ -8,6 +8,8 @@ const _deviceWorkflowPath = '.github/workflows/device-e2e.yml';
 const _decisionLedgerPath =
     '.planning/phases/62-automated-release-gate-lock/62-02-SUMMARY.md';
 const _reportPath = 'docs/testing/RELEASE_COMPATIBILITY.md';
+const _ciATopology = 'CI-A';
+const _ciALabels = '[self-hosted, macOS, ARM64, happy-pocket-release]';
 
 List<String> _executableLines(String source) => source
     .split('\n')
@@ -72,6 +74,17 @@ void main() {
       reason:
           'every main merge must call the sole authority once with --scope=full',
     );
+    expect(
+      auditLines.where((line) => line == 'push:'),
+      isEmpty,
+      reason: 'the fast host authority is a PR gate, not a second main verdict',
+    );
+    expect(
+      RegExp(r'push:\n\s+branches: \[main\]\n\s+paths:', multiLine: true)
+          .hasMatch(device),
+      isFalse,
+      reason: 'every main merge must reach the full authority without path filters',
+    );
   });
 
   test(
@@ -105,6 +118,19 @@ void main() {
         reason:
             'main workflow must declare the owner-selected $topology topology',
       );
+      expect(topology, _ciATopology);
+      expect(
+        device,
+        contains('runs-on: $_ciALabels'),
+        reason: 'CI-A must use only the release-owner-authorized labels',
+      );
+      expect(
+        RegExp(
+          r'release-gate-full:[\s\S]*?continue-on-error:\s*true',
+        ).hasMatch(device),
+        isFalse,
+        reason: 'the mandatory Apple-Silicon result must fail closed',
+      );
     },
   );
 
@@ -129,8 +155,37 @@ void main() {
         isNot(contains('PHASE62_X86_CLASSIFICATION: mandatory')),
         reason: 'x86_64 cannot become a passing mandatory result',
       );
+      expect(
+        RegExp(
+          r'android-device-e2e:[\s\S]*?needs:\s*release-gate-full',
+        ).hasMatch(workflow),
+        isFalse,
+        reason: 'supplemental x86 must neither gate nor substitute for CI-A',
+      );
+      expect(workflow, contains('api-level: 36'));
+      expect(workflow, contains('arch: x86_64'));
+      expect(workflow, contains('java-version: "17"'));
+      expect(workflow, contains('bash scripts/release_preflight.sh --platform android'));
     },
   );
+
+  test('Phase 62 keeps lower-level verdict commands inside release_gate.dart', () {
+    final audit = File(_auditWorkflowPath).readAsStringSync();
+    final device = File(_deviceWorkflowPath).readAsStringSync();
+
+    for (final duplicate in const [
+      'bash scripts/verify_codegen_reproducibility.sh',
+      'flutter test --coverage',
+      'dart run scripts/coverage_gate.dart',
+      'bash scripts/release_preflight.sh --platform ios',
+    ]) {
+      expect(
+        '$audit\n$device',
+        isNot(contains(duplicate)),
+        reason: '$duplicate would create a competing Phase 62 verdict graph',
+      );
+    }
+  });
 
   test('Phase 62 report lifecycle follows the selected exact-path decision', () {
     final source = File('scripts/release_gate.dart');
