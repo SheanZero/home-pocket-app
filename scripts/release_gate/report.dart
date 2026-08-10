@@ -185,3 +185,53 @@ Future<void> recordFailureFix({
   await file.parent.create(recursive: true);
   await file.writeAsString(const JsonEncoder.withIndent('  ').convert(payload));
 }
+
+/// Loads the current candidate's sanitized fix history before later stages
+/// (notably `flutter clean`) can remove ignored build artifacts.
+List<FailureFixRecord> loadFailureFixes({
+  required Directory root,
+  required String resultPath,
+  required CandidateFingerprint candidate,
+}) {
+  final file = File(
+    '${root.path}/${resultPath.replaceFirst(RegExp(r'\.json$'), '.fixes.json')}',
+  );
+  if (!file.existsSync()) return const <FailureFixRecord>[];
+  final decoded = jsonDecode(file.readAsStringSync());
+  if (decoded is! Map ||
+      decoded['schema_version'] != 1 ||
+      decoded['records'] is! List) {
+    throw const FormatException('existing failure-fix ledger is invalid');
+  }
+  final records = <FailureFixRecord>[];
+  for (final raw in decoded['records'] as List) {
+    if (raw is! Map || raw['candidate'] is! Map) {
+      throw const FormatException('existing failure-fix ledger is invalid');
+    }
+    final candidateJson = raw['candidate'] as Map;
+    if (candidateJson['commit'] != candidate.commit ||
+        candidateJson['input_digests'] is! Map) {
+      continue;
+    }
+    final digests = (candidateJson['input_digests'] as Map)
+        .cast<String, String>();
+    if (!candidate.matches(
+      CandidateFingerprint(commit: candidate.commit, inputDigests: digests),
+    )) {
+      continue;
+    }
+    final record = FailureFixRecord(
+      stage: raw['stage'] as String? ?? '',
+      failureSummary: raw['failure_summary'] as String? ?? '',
+      finalFix: raw['final_fix'] as String? ?? '',
+      candidateChanged: raw['candidate_changed'] as bool? ?? false,
+      completeRerunOutcome: raw['complete_rerun_outcome'] as String? ?? '',
+    );
+    if (!record.isComplete ||
+        validateEvidencePrivacy(record.toJson()).isNotEmpty) {
+      throw const FormatException('existing failure-fix ledger is invalid');
+    }
+    records.add(record);
+  }
+  return List<FailureFixRecord>.unmodifiable(records);
+}

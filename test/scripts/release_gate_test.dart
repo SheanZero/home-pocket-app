@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -108,6 +109,43 @@ void main() {
         ),
         <String>['docs/testing/RELEASE_COMPATIBILITY.md'],
       );
+    });
+
+    test('loads current-candidate fix history before build cleanup', () async {
+      final root = await Directory.systemTemp.createTemp('release-fixes-');
+      addTearDown(() => root.delete(recursive: true));
+      final candidate = CandidateFingerprint(
+        commit: 'a' * 40,
+        inputDigests: const <String, String>{'pubspec.lock': 'digest'},
+      );
+      final ledger = File('${root.path}/build/release_gate/final.fixes.json');
+      await ledger.create(recursive: true);
+      await ledger.writeAsString(
+        jsonEncode(<String, Object>{
+          'schema_version': 1,
+          'records': <Object>[
+            <String, Object>{
+              'candidate': candidate.toJson(),
+              'stage': 'ios',
+              'failure_summary': 'simulator cleanup blocked',
+              'final_fix': 'made cleanup idempotent',
+              'candidate_changed': true,
+              'complete_rerun_outcome': 'PASS',
+            },
+          ],
+        }),
+      );
+
+      final records = loadFailureFixes(
+        root: root,
+        resultPath: 'build/release_gate/final.json',
+        candidate: candidate,
+      );
+      await ledger.delete();
+
+      expect(records, hasLength(1));
+      expect(records.single.stage, 'ios');
+      expect(records.single.completeRerunOutcome, 'PASS');
     });
   });
 

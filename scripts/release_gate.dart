@@ -303,6 +303,7 @@ Future<GateResult> runReleaseGate({
   final root = workingDirectory ?? Directory.current;
   final stages = <StageResult>[];
   CandidateFingerprint? candidate;
+  var failureFixes = const <FailureFixRecord>[];
   try {
     if (scope != 'tracer' && scope != 'host' && scope != 'full') {
       throw const _CandidateFailure('release gate scope is not configured');
@@ -316,6 +317,11 @@ Future<GateResult> runReleaseGate({
       trackedInputPaths: trackedInputPaths,
     );
     candidate = captured.fingerprint;
+    failureFixes = loadFailureFixes(
+      root: root,
+      resultPath: resultPath,
+      candidate: candidate,
+    );
     stages.add(
       _stage(
         stage: GateStage.candidate,
@@ -352,6 +358,7 @@ Future<GateResult> runReleaseGate({
           candidate: candidate,
           verdict: ReleaseVerdict.blocked,
           stages: stages,
+          failureFixes: failureFixes,
         ),
       );
     }
@@ -468,6 +475,7 @@ Future<GateResult> runReleaseGate({
           candidate: candidate,
           verdict: ReleaseVerdict.blocked,
           stages: stages,
+          failureFixes: failureFixes,
         ),
       );
     }
@@ -487,6 +495,7 @@ Future<GateResult> runReleaseGate({
         candidate: candidate,
         verdict: ReleaseVerdict.pass,
         stages: stages,
+        failureFixes: failureFixes,
       ),
     );
   } on _CandidateFailure catch (error) {
@@ -517,6 +526,7 @@ Future<GateResult> runReleaseGate({
       candidate: candidate,
       verdict: ReleaseVerdict.blocked,
       stages: stages,
+      failureFixes: failureFixes,
     ),
   );
 }
