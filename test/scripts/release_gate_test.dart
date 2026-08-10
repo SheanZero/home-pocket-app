@@ -329,6 +329,30 @@ void main() {
     );
 
     test(
+      'an unexpected child-process error persists blocked evidence',
+      () async {
+        final result = await runReleaseGate(
+          workingDirectory: fixture.root,
+          processAdapter: const _ThrowingProcessAdapter(),
+          trackedInputPaths: const <String>[
+            'pubspec.lock',
+            'config/release_gate_input.txt',
+          ],
+          resultPath: 'build/release_gate/exception.json',
+        );
+
+        expect(result.verdict, ReleaseVerdict.blocked);
+        expect(result.stages.last.stage, GateStage.privacy);
+        expect(
+          File(
+            '${fixture.root.path}/build/release_gate/exception.json',
+          ).existsSync(),
+          isTrue,
+        );
+      },
+    );
+
+    test(
       'a prerequisite mutation fails the final candidate drift proof',
       () async {
         final adapter = _MutatingProcessAdapter(
@@ -993,6 +1017,18 @@ class _MutatingProcessAdapter implements ProcessAdapter {
       diagnostic: 'child process passed',
     );
   }
+}
+
+class _ThrowingProcessAdapter implements ProcessAdapter {
+  const _ThrowingProcessAdapter();
+
+  @override
+  Future<ProcessOutcome> run(
+    String executable,
+    List<String> arguments, {
+    required Duration timeout,
+    required String workingDirectory,
+  }) => throw StateError('simulated adapter exception');
 }
 
 void _runFixtureGit(Directory root, List<String> arguments) {

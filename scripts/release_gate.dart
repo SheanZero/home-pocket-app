@@ -510,10 +510,14 @@ Future<GateResult> runReleaseGate({
       ),
     );
   }
-  return GateResult(
-    candidate: candidate,
-    verdict: ReleaseVerdict.blocked,
-    stages: stages,
+  return _persist(
+    root,
+    resultPath,
+    GateResult(
+      candidate: candidate,
+      verdict: ReleaseVerdict.blocked,
+      stages: stages,
+    ),
   );
 }
 
