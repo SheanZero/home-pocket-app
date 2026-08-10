@@ -527,9 +527,11 @@ class SimctlIosSimulatorAdapter implements IosSimulatorAdapter {
 bool _shutdownSucceeded(ProcessOutcome outcome) {
   if (outcome.exitCode == 0) return true;
   final diagnostic = outcome.diagnostic.toLowerCase();
-  return outcome.exitCode == 148 &&
-      (diagnostic.contains('already shutdown') ||
-          diagnostic.contains('current state: shutdown'));
+  final reportsShutdownState =
+      diagnostic.contains('already shutdown') ||
+      diagnostic.contains('current state: shutdown');
+  return (outcome.exitCode == 148 || outcome.exitCode == 149) &&
+      reportsShutdownState;
 }
 
 Future<IosSimulatorEvidence> runIosSimulatorStage({
