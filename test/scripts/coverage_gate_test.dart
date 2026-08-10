@@ -413,8 +413,15 @@ void main() {
         final auditWorkflow = File(
           '$root/.github/workflows/audit.yml',
         ).readAsStringSync();
+        final releaseGate = File(
+          '$root/scripts/release_gate.dart',
+        ).readAsStringSync();
         expect(
           auditWorkflow,
+          contains('dart run scripts/release_gate.dart --scope=host'),
+        );
+        expect(
+          releaseGate,
           contains('.planning/audit/coverage-gate-required-files.txt'),
         );
         expect(

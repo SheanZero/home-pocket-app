@@ -101,6 +101,43 @@ void main() {
     );
 
     test(
+      'selects one available iPhone deterministically from multiple devices',
+      () async {
+        final process = _RecordingProcessAdapter(<ProcessOutcome>[
+          ProcessOutcome(
+            exitCode: 0,
+            diagnostic: jsonEncode(_multipleIphoneInventory),
+          ),
+          const ProcessOutcome(exitCode: 0, diagnostic: 'shutdown'),
+          const ProcessOutcome(exitCode: 0, diagnostic: 'erased'),
+          const ProcessOutcome(exitCode: 0, diagnostic: 'booted'),
+          const ProcessOutcome(exitCode: 0, diagnostic: 'ready'),
+          const ProcessOutcome(exitCode: 0, diagnostic: 'shutdown'),
+          const ProcessOutcome(exitCode: 0, diagnostic: 'erased'),
+        ]);
+        final adapter = SimctlIosSimulatorAdapter(
+          processAdapter: process,
+          candidateProvider: () => candidate,
+        );
+
+        final evidence = await adapter.prepare(
+          IosSimulatorOptions(candidate: candidate),
+        );
+
+        expect(evidence.isReady, isTrue);
+        expect(
+          evidence.profile.runtime,
+          'com.apple.CoreSimulator.SimRuntime.iOS-18-2',
+        );
+        expect(evidence.profile.model, 'iPhone 16');
+        expect(
+          process.invocations[1],
+          const <String>['xcrun', 'simctl', 'shutdown', 'IPHONE-16-A'],
+        );
+      },
+    );
+
+    test(
       'candidate mismatch before boot blocks without destructive commands',
       () async {
         final process = _RecordingProcessAdapter(const <ProcessOutcome>[]);
@@ -303,6 +340,35 @@ const _physicalInventory = <String, Object>{
       <String, Object>{
         'name': 'iPad Pro',
         'udid': 'NOT-AN-IPHONE',
+        'isAvailable': true,
+      },
+    ],
+  },
+};
+
+const _multipleIphoneInventory = <String, Object>{
+  'devices': <String, Object>{
+    'com.apple.CoreSimulator.SimRuntime.iOS-18-1': <Object>[
+      <String, Object>{
+        'name': 'iPhone 17 Pro',
+        'udid': 'OLDER-RUNTIME',
+        'isAvailable': true,
+      },
+    ],
+    'com.apple.CoreSimulator.SimRuntime.iOS-18-2': <Object>[
+      <String, Object>{
+        'name': 'iPhone 16 Pro',
+        'udid': 'IPHONE-16-PRO',
+        'isAvailable': true,
+      },
+      <String, Object>{
+        'name': 'iPhone 16',
+        'udid': 'IPHONE-16-B',
+        'isAvailable': true,
+      },
+      <String, Object>{
+        'name': 'iPhone 16',
+        'udid': 'IPHONE-16-A',
         'isAvailable': true,
       },
     ],

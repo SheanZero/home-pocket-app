@@ -164,6 +164,14 @@ void main() {
       );
 
       expect(evidence.result, 'PASS');
+      expect(
+        evidence.primary.discoveredFiles,
+        const ['integration_test/critical_test.dart'],
+      );
+      expect(
+        evidence.primary.executedFiles,
+        const ['integration_test/critical_test.dart'],
+      );
       expect(ledger.readAsStringSync(), 'historical ledger');
       expect(
         File('${fixture.path}/build/release_gate/android.json').existsSync(),
