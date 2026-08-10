@@ -9,11 +9,56 @@ String _projectRoot() => Directory.current.path;
 Future<ProcessResult> _runScript(
   List<String> arguments, {
   String? workingDirectory,
+  Map<String, String>? environment,
 }) {
-  return Process.run('bash', [
-    _scriptPath,
-    ...arguments,
-  ], workingDirectory: workingDirectory ?? _projectRoot());
+  return Process.run(
+    'bash',
+    [_scriptPath, ...arguments],
+    workingDirectory: workingDirectory ?? _projectRoot(),
+    environment: environment,
+  );
+}
+
+Future<Directory> _createFakeJdk({
+  required String versionOutput,
+  int exitCode = 0,
+  bool createJava = true,
+}) async {
+  final home = await Directory.systemTemp.createTemp('release-preflight-jdk-');
+  if (!createJava) return home;
+
+  final java = File('${home.path}/bin/java');
+  await java.create(recursive: true);
+  await java.writeAsString('''#!/usr/bin/env bash
+printf '%s\\n' '${versionOutput.replaceAll("'", "'\\\"'\\\"'")}' >&2
+exit $exitCode
+''');
+  await Process.run('chmod', ['+x', java.path]);
+  return home;
+}
+
+String? _androidPackageJdkGateContractFailure(String source) {
+  const gateCall = '    verify_android_package_jdk17';
+  const packageCall = '    package_signed_release';
+  final gate = source.lastIndexOf(gateCall);
+  final package = source.lastIndexOf(packageCall);
+
+  if (gate < 0) return 'missing Android package JDK gate invocation';
+  if (package < 0) return 'missing signed package invocation';
+  if (gate > package) return 'Android package JDK gate runs after packaging';
+  if (!source.contains(r'[[ "$java_major" == "17" ]]')) {
+    return 'JDK gate does not require exact major 17';
+  }
+  if (!source.contains(r'"$java_binary" -version 2>&1')) {
+    return 'JDK gate does not execute the configured java binary';
+  }
+  if (!source.contains(r'export JAVA_HOME="$jdk_home"')) {
+    return 'JDK gate does not export the verified home';
+  }
+  if (!source.contains(r'export PATH="$JAVA_HOME/bin:$PATH"')) {
+    return 'JDK gate does not prioritize the verified Java binary';
+  }
+  return null;
 }
 
 Future<ProcessResult> _scanFixture(
@@ -211,6 +256,80 @@ dev_dependencies:
         expect(output, isNot(contains('keyPassword')));
       },
     );
+
+    test('Android package requires independent JDK 17 proof', () async {
+      final jdk17 = await _createFakeJdk(
+        versionOutput: 'openjdk version "17.0.15" 2025-04-15',
+      );
+      final jdk21 = await _createFakeJdk(
+        versionOutput: 'openjdk version "21.0.7" 2025-04-15',
+      );
+      final invalidJdk = await _createFakeJdk(
+        versionOutput: 'not a Java version',
+        exitCode: 1,
+      );
+      final missingJava = await _createFakeJdk(
+        versionOutput: '',
+        createJava: false,
+      );
+      addTearDown(() async {
+        await jdk17.delete(recursive: true);
+        await jdk21.delete(recursive: true);
+        await invalidJdk.delete(recursive: true);
+        await missingJava.delete(recursive: true);
+      });
+
+      Future<ProcessResult> packageWith(String jdkHome) => _runScript(
+        ['--platform', 'android', '--package', '--dry-run'],
+        environment: {
+          ...Platform.environment,
+          'PHASE61_JAVA_HOME': jdkHome,
+          'JAVA_HOME': '/ignored-java-home',
+          'PHASE61_SIGNING_EVIDENCE': 'true',
+        },
+      );
+
+      final accepted = await packageWith(jdk17.path);
+      expect(accepted.exitCode, equals(0), reason: accepted.stderr.toString());
+      expect(
+        accepted.stdout,
+        contains('Android package JDK verified: ${jdk17.path}'),
+      );
+      expect(accepted.stdout, contains('bundleRelease'));
+      expect(accepted.stdout, contains('assembleRelease'));
+
+      for (final rejected in [jdk21, invalidJdk, missingJava]) {
+        final result = await packageWith(rejected.path);
+        expect(result.exitCode, isNonZero);
+        expect(result.stdout, isNot(contains('bundleRelease')));
+        expect(result.stdout, isNot(contains('assembleRelease')));
+        expect(
+          result.stdout,
+          isNot(contains('flutter build appbundle --release')),
+        );
+      }
+
+      final source = File(_scriptPath).readAsStringSync();
+      expect(_androidPackageJdkGateContractFailure(source), isNull);
+
+      final removed = source.replaceFirst(
+        '    verify_android_package_jdk17\\n',
+        '',
+      );
+      expect(_androidPackageJdkGateContractFailure(removed), isNotNull);
+
+      final late = source.replaceFirst(
+        '    verify_android_package_jdk17\\n    package_signed_release',
+        '    package_signed_release\\n    verify_android_package_jdk17',
+      );
+      expect(_androidPackageJdkGateContractFailure(late), isNotNull);
+
+      final weakened = source.replaceFirst(
+        r'[[ "$java_major" == "17" ]]',
+        r'[[ "$java_major" == "17" || "$java_major" == "21" ]]',
+      );
+      expect(_androidPackageJdkGateContractFailure(weakened), isNotNull);
+    });
 
     test(
       'the iOS release gate always routes integration cleanup to preflight',
