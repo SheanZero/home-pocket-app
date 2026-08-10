@@ -7,6 +7,7 @@ import '../../scripts/release_gate/execution.dart';
 import '../../scripts/release_gate/ios_simulator_stage.dart';
 import '../../scripts/release_gate/models.dart';
 import '../../scripts/release_gate/process_adapter.dart';
+import '../../scripts/release_gate/report.dart';
 import '../../scripts/verify_android_safety_lane.dart' as android_lane;
 import '../helpers/release_gate_test_support.dart';
 
@@ -832,6 +833,116 @@ void main() {
       },
     );
   });
+
+  group('Phase 62 authoritative verdict and report', () {
+    final candidate = CandidateFingerprint(
+      commit: 'a' * 40,
+      inputDigests: const <String, String>{'pubspec.lock': 'b'},
+    );
+
+    GateResult result({
+      bool mandatoryFailure = false,
+      bool manualOverride = false,
+      List<ReleaseLimitation> limitations = const <ReleaseLimitation>[],
+      String diagnostic = 'clean diagnostic',
+    }) => GateResult(
+      candidate: candidate,
+      verdict: ReleaseVerdict.pass,
+      stages: <StageResult>[
+        _stageForReport(GateStage.candidate, diagnostic: diagnostic),
+        _stageForReport(
+          GateStage.prerequisite,
+          pass: !mandatoryFailure,
+        ),
+        _stageForReport(GateStage.finalDrift),
+      ],
+      manualOverride: manualOverride,
+      limitations: limitations,
+      failureFixes: const <FailureFixRecord>[
+        FailureFixRecord(
+          stage: 'hostSuite',
+          failureSummary: 'bounded failure',
+          finalFix: 'reran from the same candidate',
+          candidateChanged: false,
+          completeRerunOutcome: 'PASS',
+        ),
+      ],
+    );
+
+    test('only preclassified limitations can follow a green mandatory graph', () {
+      expect(computeVerdict(result()), ReleaseVerdict.pass);
+      expect(
+        computeVerdict(
+          result(
+            limitations: const <ReleaseLimitation>[
+              ReleaseLimitation.supplementalX86,
+            ],
+          ),
+        ),
+        ReleaseVerdict.passWithLimitations,
+      );
+      expect(
+        computeVerdict(result(mandatoryFailure: true)),
+        ReleaseVerdict.blocked,
+      );
+      expect(
+        computeVerdict(result(manualOverride: true)),
+        ReleaseVerdict.blocked,
+      );
+      expect(
+        computeVerdict(
+          result(
+            limitations: const <ReleaseLimitation>[
+              ReleaseLimitation.unclassified,
+            ],
+          ),
+        ),
+        ReleaseVerdict.blocked,
+      );
+    });
+
+    test('privacy and schema failures reject JSON before rendering', () {
+      final privateResult = result(diagnostic: 'token=not-safe');
+
+      expect(validateGateResult(privateResult), isNotEmpty);
+      expect(validateEvidencePrivacy(privateResult.toJson()), isNotEmpty);
+      expect(() => renderCompatibilityReport(privateResult), throwsStateError);
+    });
+
+    test('preview is deterministic and never contains raw attempt history', () {
+      final safe = result(
+        limitations: const <ReleaseLimitation>[
+          ReleaseLimitation.acceptedHistoricalDebt,
+        ],
+      );
+      final first = renderCompatibilityReport(safe);
+      final second = renderCompatibilityReport(safe);
+
+      expect(first, second);
+      expect(first, contains('PASS_WITH_LIMITATIONS'));
+      expect(first, contains('Android physical-device validation: not performed or claimed.'));
+      expect(first, isNot(contains('attempts')));
+    });
+  });
+}
+
+StageResult _stageForReport(
+  GateStage stage, {
+  bool pass = true,
+  String diagnostic = 'passed',
+}) {
+  final now = DateTime.utc(2026, 8, 10);
+  return StageResult(
+    stage: stage,
+    command: const <String>['release-gate'],
+    startedAtUtc: now,
+    finishedAtUtc: now,
+    exitCode: pass ? 0 : 1,
+    classification: pass
+        ? StageClassification.succeeded
+        : StageClassification.commandFailed,
+    diagnostic: diagnostic,
+  );
 }
 
 class _RecordingProcessAdapter implements ProcessAdapter {
