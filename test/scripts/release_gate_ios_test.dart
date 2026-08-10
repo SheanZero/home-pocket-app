@@ -8,6 +8,27 @@ import '../../scripts/release_gate/models.dart';
 import '../../scripts/release_gate/process_adapter.dart';
 
 void main() {
+  test('preserves a redacted complete simulator inventory for parsing', () {
+    final inventory = jsonEncode(<String, Object>{
+      'devices': <String, Object>{
+        'com.apple.CoreSimulator.SimRuntime.iOS-26-2': List<Object>.generate(
+          10,
+          (index) => <String, Object>{
+            'name': 'iPhone diagnostic ${'x' * 80} $index',
+            'udid': 'SIMULATOR-UDID-$index',
+            'isAvailable': true,
+          },
+        ),
+      },
+    });
+
+    final preserved = scrubDiagnostic(inventory, preserveJson: true);
+
+    expect(jsonDecode(preserved), isA<Map<Object?, Object?>>());
+    expect(preserved, contains('iPhone diagnostic ${'x' * 80} 9'));
+    expect(preserved, isNot(contains('SIMULATOR-UDID')));
+  });
+
   group('Phase 62 iOS Simulator stage', () {
     final candidate = CandidateFingerprint(
       commit: 'a' * 40,
