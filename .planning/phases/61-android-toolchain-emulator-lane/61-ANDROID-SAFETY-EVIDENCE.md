@@ -185,11 +185,11 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
     "repository_secret_or_artifact": "ABSENT"
   },
   "emulator_preparation": {
-    "result": "UNAVAILABLE",
+    "result": "PASS",
     "lane": "primary_local_arm64",
-    "source_commit": "f569e8a6",
-    "started_utc": "2026-08-10T00:26:24Z",
-    "completed_utc": "2026-08-10T00:26:24Z",
+    "source_commit": "8f8d6306f5c30e348c195598124b615a51321438",
+    "started_utc": "2026-08-10T00:35:10.996487Z",
+    "completed_utc": "2026-08-10T00:35:38.871813Z",
     "api": 36,
     "abi": "arm64-v8a",
     "profile": "pixel_6",
@@ -201,11 +201,13 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
     "emulator_host_binary": {
       "architecture": "arm64"
     },
-    "serial_redacted": "NOT_RUN",
-    "boot_started_utc": "NOT_RUN",
-    "boot_ready_utc": "NOT_RUN",
-    "failure": "Primary arm64-v8a preparation has not yet been executed under the 2026-08-10 owner-approved contract.",
-    "exit_condition": "Run the local API 36 google_apis arm64-v8a primary gate; retain the separate x86_64 GitHub/Intel lane as a supplemental limitation until it is independently observed."
+    "serial_redacted": "<emulator-redacted>",
+    "boot_started_utc": "2026-08-10T00:35:11.588423Z",
+    "boot_ready_utc": "2026-08-10T00:35:36.319653Z",
+    "cleanup": {
+      "runner_owned_avd": "DELETED",
+      "unrelated_devices": "ABSENT_BEFORE_BOOT"
+    }
   }
 }
 ```

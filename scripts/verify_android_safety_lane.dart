@@ -933,6 +933,12 @@ List<String> validateEmulatorPreparationRecord(
       preparation['host_architecture'] == 'arm64',
       'primary preparation must run on an Apple Silicon arm64 host',
     );
+    final cleanup = _object(preparation['cleanup']);
+    require(
+      cleanup['runner_owned_avd'] == 'DELETED' &&
+          cleanup['unrelated_devices'] == 'ABSENT_BEFORE_BOOT',
+      'successful primary preparation must prove runner-owned cleanup',
+    );
   } else if (result == 'UNAVAILABLE') {
     require(
       '${preparation['failure'] ?? ''}'.trim().isNotEmpty,
@@ -1079,6 +1085,11 @@ void _recordEmulatorPreparation({
     'serial_redacted': prepared == null ? 'NOT_RUN' : '<emulator-redacted>',
     'boot_started_utc': prepared?.started.toIso8601String() ?? 'NOT_RUN',
     'boot_ready_utc': prepared?.ready.toIso8601String() ?? 'NOT_RUN',
+    if (prepared != null && failure == null)
+      'cleanup': {
+        'runner_owned_avd': 'DELETED',
+        'unrelated_devices': 'ABSENT_BEFORE_BOOT',
+      },
     if (failure != null) 'failure': _diagnosticLine(failure),
   };
   evidence['emulator_preparation'] = mergeEmulatorPreparationRecord(
@@ -1349,7 +1360,7 @@ Future<void> _withPreparedEmulator(
       }
       await Future.wait(drains);
     }
-    await runBoundedCommand(
+    final delete = await runBoundedCommand(
       avdManager,
       ['delete', 'avd', '--name', avdName],
       workingDirectory: root,
@@ -1357,6 +1368,9 @@ Future<void> _withPreparedEmulator(
       timeout: const Duration(minutes: 1),
       durableCommand: 'avdmanager delete avd --name <runner-owned>',
     );
+    if (delete.exitCode != 0) {
+      throw StateError('runner-owned AVD cleanup failed');
+    }
   }
 }
 
