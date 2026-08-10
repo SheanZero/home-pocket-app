@@ -6,12 +6,12 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
 ```json
 {
   "schema_version": 1,
-  "completed_stage": "package",
-  "source_commit": "b953bcc368a1783823963d4c1b4a0792fb17693e",
+  "completed_stage": "emulator",
+  "source_commit": "e6b5cbf672e885dcbb4446621cc20e7ca05aa058",
   "candidate_source_commit": "ab6c25a4f6a1820250656258eee775ed0e94f205",
   "compile_source_commit": "5870a04ec041c0c8dba5d6b23cffead5a30b5385",
   "started_utc": "2026-08-09T15:02:37.932294Z",
-  "completed_utc": "2026-08-09T15:51:04.020537Z",
+  "completed_utc": "2026-08-10T00:43:09.500889Z",
   "compile_started_utc": "2026-08-09T15:14:55Z",
   "compile_completed_utc": "2026-08-09T15:15:59Z",
   "host_os": "macOS 26.5.1 arm64",
@@ -36,7 +36,7 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
     "candidate": "INCOMPATIBLE",
     "compile": "PASS",
     "package": "PASS",
-    "emulator": "NOT_RUN",
+    "emulator": "PASS",
     "physical_device": "NOT_PERFORMED_NOT_CLAIMED"
   },
   "commands": [
@@ -99,27 +99,62 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
       "command": "aapt dump badging app-release.apk",
       "exit_code": 0,
       "timed_out": false
+    },
+    {
+      "command": "./gradlew <verified-jdk17> -Pphase61SigningEvidence=true :app:verifyReleaseSigning (credentials absent)",
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "command": "./gradlew <verified-jdk17> -Pphase61SigningEvidence=true :app:verifyReleaseSigning (Android Debug certificate)",
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "command": "bash scripts/release_preflight.sh --platform android --package (ephemeral non-debug evidence certificate)",
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "command": "apksigner verify --verbose --print-certs app-release.apk",
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "command": "jarsigner -verify app-release.aab",
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "command": "keytool -printcert -jarfile app-release.aab",
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "command": "aapt dump badging app-release.apk",
+      "exit_code": 0,
+      "timed_out": false
     }
   ],
   "artifacts": [
     {
       "kind": "release_aab",
-      "sha256": "ec9fd01d96fc8cf60488628ba435755a82716e63fa47da714ef279f69db44c61",
-      "size_bytes": 83911159,
+      "sha256": "2c8cebace1d09a69d60f334aacc158ed83ea676a7bc89299cc78a5049d97905e",
+      "size_bytes": 83911152,
       "certificate_class": "NON_DEBUG_EPHEMERAL_EVIDENCE",
       "certificate_subject": "CN=Happy Pocket Phase 61 Evidence",
-      "certificate_sha256": "250315b3a00f8d4e6946365a44e2b875304585bb17c37bd83aea64351e0c53a7",
+      "certificate_sha256": "c929afb8b0287d2d13d4c7ac89b63ed5b19a90e067e00e55aeff9a628f16ae38",
       "signature_tool": "jarsigner + keytool",
       "archive_and_content_hygiene": "PASS",
       "durable_artifact_retained": false
     },
     {
       "kind": "release_apk",
-      "sha256": "a351fc44d27f7e5abcc2f1cfc08eeb6651c1a50281b255f911886405da688597",
+      "sha256": "be48e7ee43f5ed4cdace8e9b33faba63d40abc4e123445e4628063adc948aefc",
       "size_bytes": 89743247,
       "certificate_class": "NON_DEBUG_EPHEMERAL_EVIDENCE",
       "certificate_subject": "CN=Happy Pocket Phase 61 Evidence",
-      "certificate_sha256": "250315b3a00f8d4e6946365a44e2b875304585bb17c37bd83aea64351e0c53a7",
+      "certificate_sha256": "c929afb8b0287d2d13d4c7ac89b63ed5b19a90e067e00e55aeff9a628f16ae38",
       "signature_tool": "apksigner",
       "archive_and_content_hygiene": "PASS",
       "durable_artifact_retained": false
@@ -129,8 +164,8 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
     "lane": "primary_local_arm64",
     "api": 36,
     "abi": "arm64-v8a",
-    "profile": "NOT_RUN",
-    "serial_redacted": "NOT_RUN"
+    "profile": "pixel_6",
+    "serial_redacted": "<emulator-redacted>"
   },
   "x86_64_supplemental": {
     "result": "UNAVAILABLE_LIMITATION",
@@ -158,9 +193,9 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
     "result": "BUILD SUCCESSFUL",
     "hosted_api36_x86_64_workflow": "NOT_RUN"
   },
-  "package_source_commit": "b953bcc368a1783823963d4c1b4a0792fb17693e",
-  "package_started_utc": "2026-08-09T15:48:58.779404Z",
-  "package_completed_utc": "2026-08-09T15:51:04.020537Z",
+  "package_source_commit": "e6b5cbf672e885dcbb4446621cc20e7ca05aa058",
+  "package_started_utc": "2026-08-10T00:40:50.988047Z",
+  "package_completed_utc": "2026-08-10T00:43:09.500889Z",
   "release_signing_negatives": {
     "missing_credentials": {
       "result": "REJECTED_AS_REQUIRED",
@@ -187,9 +222,9 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
   "emulator_preparation": {
     "result": "PASS",
     "lane": "primary_local_arm64",
-    "source_commit": "8f8d6306f5c30e348c195598124b615a51321438",
-    "started_utc": "2026-08-10T00:35:10.996487Z",
-    "completed_utc": "2026-08-10T00:35:38.871813Z",
+    "source_commit": "e6b5cbf672e885dcbb4446621cc20e7ca05aa058",
+    "started_utc": "2026-08-10T00:38:02.465875Z",
+    "completed_utc": "2026-08-10T00:43:09.529135Z",
     "api": 36,
     "abi": "arm64-v8a",
     "profile": "pixel_6",
@@ -202,13 +237,51 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
       "architecture": "arm64"
     },
     "serial_redacted": "<emulator-redacted>",
-    "boot_started_utc": "2026-08-10T00:35:11.588423Z",
-    "boot_ready_utc": "2026-08-10T00:35:36.319653Z",
+    "boot_started_utc": "2026-08-10T00:38:03.065910Z",
+    "boot_ready_utc": "2026-08-10T00:38:24.611832Z",
     "cleanup": {
       "runner_owned_avd": "DELETED",
       "unrelated_devices": "ABSENT_BEFORE_BOOT"
     }
-  }
+  },
+  "integration_matrix": [
+    {
+      "file": "device_critical_journey_test.dart",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 55232
+    },
+    {
+      "file": "device_sync_delivery_test.dart",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 17546
+    },
+    {
+      "file": "merchant_migration_ladder_test.dart",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 15938
+    },
+    {
+      "file": "performance/performance_baseline_test.dart",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 16778
+    },
+    {
+      "file": "sqlcipher_backup_recovery_test.dart",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 23293
+    },
+    {
+      "file": "sqlcipher_native_assets_lifecycle_test.dart",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 14849
+    }
+  ]
 }
 ```
 <!-- phase61-evidence-json:end -->
