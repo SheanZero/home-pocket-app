@@ -384,6 +384,18 @@ void main() {
     expect(output, contains('<local-path>'));
   });
 
+  test('primary integration failures retain bounded redacted Flutter output', () {
+    final diagnostic = lane.formatPrimaryIntegrationFailure('''
+Exception: encrypted database did not open
+/Users/alice/project/android: test runner context
+Command: adb -s emulator-5582 uninstall com.sheanzero.happypocket.app
+''');
+
+    expect(diagnostic, contains('Exception: encrypted database did not open'));
+    expect(diagnostic, contains('Command: adb -s <emulator-redacted> uninstall'));
+    expect(diagnostic, isNot(contains('/Users/alice')));
+  });
+
   test(
     'bounded command output preserves completion text from the tail',
     () async {
