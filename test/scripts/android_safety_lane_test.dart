@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../scripts/release_gate/models.dart';
 import '../../scripts/verify_android_safety_lane.dart' as lane;
 
 void main() {
@@ -117,6 +118,89 @@ void main() {
     expect(lane.sha256Text('phase61'), hasLength(64));
     expect(lane.sha256Text('phase61'), lane.sha256Text('phase61'));
   });
+
+  test(
+    'Phase 62 evidence validates the exact candidate and keeps the ledger immutable',
+    () async {
+      final fixture = await Directory.systemTemp.createTemp('phase62-android-');
+      addTearDown(() => fixture.delete(recursive: true));
+      final ledger = File('${fixture.path}/61-ANDROID-SAFETY-EVIDENCE.md')
+        ..writeAsStringSync('historical ledger');
+      final input = File('${fixture.path}/pubspec.lock')
+        ..writeAsStringSync('locked');
+      final candidate = CandidateFingerprint(
+        commit: 'a' * 40,
+        inputDigests: {
+          'pubspec.lock': lane.sha256Text(input.readAsStringSync()),
+        },
+      );
+
+      final evidence = await lane.runPhase62AndroidEvidence(
+        fixture,
+        candidate: candidate,
+        resultPath: 'build/release_gate/android.json',
+        ledgerPath: ledger.path,
+        captureCurrentCandidate: () async => candidate,
+        inspectPrerequisites: () async =>
+            lane.AndroidPrerequisiteRecord.ready(),
+        runPrimary: () async => const lane.AndroidPhase62PrimaryResult.pass(),
+        runRelease: () async => const lane.AndroidPhase62ReleaseResult.pass(),
+      );
+
+      expect(evidence.result, 'PASS');
+      expect(ledger.readAsStringSync(), 'historical ledger');
+      expect(
+        File('${fixture.path}/build/release_gate/android.json').existsSync(),
+        isTrue,
+      );
+      expect(evidence.physicalDevice, 'NOT_PERFORMED_NOT_CLAIMED');
+    },
+  );
+
+  test(
+    'Phase 62 evidence blocks mismatch at every irreversible boundary',
+    () async {
+      final candidate = CandidateFingerprint(
+        commit: 'a' * 40,
+        inputDigests: const {'pubspec.lock': 'b'},
+      );
+      final mismatch = CandidateFingerprint(
+        commit: 'c' * 40,
+        inputDigests: const {'pubspec.lock': 'b'},
+      );
+      for (final boundary in [
+        'before_preparation',
+        'before_packaging',
+        'on_exit',
+      ]) {
+        final fixture = await Directory.systemTemp.createTemp(
+          'phase62-boundary-',
+        );
+        addTearDown(() => fixture.delete(recursive: true));
+        var captures = 0;
+        final evidence = await lane.runPhase62AndroidEvidence(
+          fixture,
+          candidate: candidate,
+          resultPath: 'build/release_gate/android.json',
+          captureCurrentCandidate: () async =>
+              ++captures ==
+                  switch (boundary) {
+                    'before_preparation' => 1,
+                    'before_packaging' => 2,
+                    _ => 3,
+                  }
+              ? mismatch
+              : candidate,
+          inspectPrerequisites: () async =>
+              lane.AndroidPrerequisiteRecord.ready(),
+          runPrimary: () async => const lane.AndroidPhase62PrimaryResult.pass(),
+          runRelease: () async => const lane.AndroidPhase62ReleaseResult.pass(),
+        );
+        expect(evidence.result, 'BLOCKED', reason: boundary);
+        expect(evidence.failure, contains('candidate fingerprint mismatch'));
+      }
+    },
+  );
 
   test('candidate transaction migrates every coupled Android input', () {
     final migrated = lane.migrateCandidateInputs(

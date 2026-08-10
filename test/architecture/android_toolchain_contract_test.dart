@@ -207,4 +207,19 @@ void main() {
       expect(document, isNot(contains('AND-04 remains blocked')));
     }
   });
+
+  test('Phase 62 adapter uses independent JDK and signing controls', () {
+    final runner = File(
+      'scripts/verify_android_safety_lane.dart',
+    ).readAsStringSync();
+    final preflight = File('scripts/release_preflight.sh').readAsStringSync();
+
+    expect(runner, contains('runPhase62AndroidEvidence'));
+    expect(runner, contains('validatePhase62AndroidEvidence'));
+    expect(runner, contains('candidate fingerprint mismatch'));
+    expect(runner, contains('PHASE61_SIGNING_EVIDENCE'));
+    expect(runner, isNot(contains("'PHASE61_GRADLE_JAVA_HOME': jdkHome")));
+    expect(preflight, contains('PHASE61_SIGNING_EVIDENCE'));
+    expect(preflight, isNot(contains('PHASE61_GRADLE_JAVA_HOME')));
+  });
 }
