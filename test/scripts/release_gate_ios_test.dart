@@ -122,6 +122,44 @@ void main() {
       },
     );
 
+    test('candidate mismatch after cleanup is terminal', () async {
+      var candidateChecks = 0;
+      final process = _RecordingProcessAdapter(<ProcessOutcome>[
+        ProcessOutcome(exitCode: 0, diagnostic: jsonEncode(_iphoneInventory)),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'shutdown'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'erased'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'booted'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'ready'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'shutdown'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'erased'),
+      ]);
+      final adapter = SimctlIosSimulatorAdapter(
+        processAdapter: process,
+        candidateProvider: () {
+          candidateChecks++;
+          return candidateChecks < 3
+              ? candidate
+              : CandidateFingerprint(
+                  commit: 'b' * 40,
+                  inputDigests: const <String, String>{'pubspec.lock': 'lock'},
+                );
+        },
+      );
+
+      final evidence = await adapter.prepare(
+        IosSimulatorOptions(candidate: candidate),
+      );
+
+      expect(evidence.failure, IosSimulatorFailure.candidateDrift);
+      expect(evidence.retryEligible, isFalse);
+      expect(process.invocations.last, <String>[
+        'xcrun',
+        'simctl',
+        'erase',
+        'SIMULATOR-UDID-123',
+      ]);
+    });
+
     test('readiness failures are retry eligible but drift is not', () async {
       final readinessProcess = _RecordingProcessAdapter(<ProcessOutcome>[
         ProcessOutcome(exitCode: 0, diagnostic: jsonEncode(_iphoneInventory)),
