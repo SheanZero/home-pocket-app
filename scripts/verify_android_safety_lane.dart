@@ -8,6 +8,8 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 
+import 'release_gate/models.dart';
+
 enum AndroidSafetyMode { verify, candidateProbe, release, emulator }
 
 enum AndroidCertificateClass { debug, nonDebug }
@@ -61,6 +63,386 @@ class AndroidSafetyOptions {
   final bool allowNotRun;
   final bool prepareOnly;
 }
+
+/// A normalized, non-authoritative Android stage result for the Phase 62 gate.
+/// The aggregate release authority owns the final verdict; this adapter only
+/// reports its candidate-bound mandatory evidence.
+class Phase62AndroidEvidence {
+  const Phase62AndroidEvidence({
+    required this.result,
+    required this.candidate,
+    required this.prerequisites,
+    required this.primary,
+    required this.release,
+    required this.supplemental,
+    required this.physicalDevice,
+    this.failure,
+  });
+
+  final String result;
+  final CandidateFingerprint candidate;
+  final AndroidPrerequisiteRecord prerequisites;
+  final AndroidPhase62PrimaryResult primary;
+  final AndroidPhase62ReleaseResult release;
+  final Phase62SupplementalResult supplemental;
+  final String physicalDevice;
+  final String? failure;
+
+  Map<String, Object?> toJson() => {
+    'schema_version': 1,
+    'stage': 'android',
+    'result': result,
+    'candidate': candidate.toJson(),
+    'prerequisites': prerequisites.toJson(),
+    'primary_arm64': primary.toJson(),
+    'supplemental_x86_64': supplemental.toJson(),
+    'physical_device': physicalDevice,
+    'release_hygiene': release.toJson(),
+    if (failure != null) 'failure': failure,
+  };
+}
+
+class AndroidPrerequisiteRecord {
+  const AndroidPrerequisiteRecord({required this.result, required this.issues});
+
+  const AndroidPrerequisiteRecord.ready() : result = 'PASS', issues = const [];
+
+  final String result;
+  final List<String> issues;
+
+  bool get passed => result == 'PASS';
+
+  Map<String, Object> toJson() => {'result': result, 'issues': issues};
+}
+
+class AndroidPhase62PrimaryResult {
+  const AndroidPhase62PrimaryResult({
+    required this.result,
+    required this.discoveredFiles,
+    required this.executedFiles,
+    this.message,
+  });
+
+  const AndroidPhase62PrimaryResult.pass()
+    : result = 'PASS',
+      discoveredFiles = const [],
+      executedFiles = const [],
+      message = null;
+
+  final String result;
+  final List<String> discoveredFiles;
+  final List<String> executedFiles;
+  final String? message;
+
+  bool get passed => result == 'PASS';
+
+  Map<String, Object?> toJson() => {
+    'result': result,
+    'lane': 'primary_local_arm64',
+    'api': requiredAndroidApi,
+    'abi': primaryAndroidAbi,
+    'system_image': primaryAndroidSystemImage,
+    'discovered_files': discoveredFiles,
+    'executed_files': executedFiles,
+    if (message != null) 'message': message,
+  };
+}
+
+class AndroidPhase62ReleaseResult {
+  const AndroidPhase62ReleaseResult({required this.result, this.message});
+
+  const AndroidPhase62ReleaseResult.pass() : result = 'PASS', message = null;
+
+  final String result;
+  final String? message;
+
+  bool get passed => result == 'PASS';
+
+  Map<String, Object?> toJson() => {
+    'result': result,
+    if (message != null) 'message': message,
+  };
+}
+
+class Phase62SupplementalResult {
+  const Phase62SupplementalResult({required this.result, required this.detail});
+
+  final String result;
+  final String detail;
+
+  bool get affectsPrimary => false;
+
+  Map<String, String> toJson() => {
+    'result': result,
+    'lane': 'supplemental_github_intel_x86_64',
+    'detail': detail,
+  };
+}
+
+Phase62SupplementalResult classifyPhase62Supplemental(
+  String result,
+) => switch (result) {
+  'PASS' => const Phase62SupplementalResult(
+    result: 'PASS',
+    detail: 'Supplemental only; cannot satisfy the mandatory local arm64 lane.',
+  ),
+  _ => const Phase62SupplementalResult(
+    result: 'LIMITATION',
+    detail:
+        'Supplemental x86_64 evidence is unavailable or failed; it is non-blocking and cannot claim Android physical-device coverage.',
+  ),
+};
+
+AndroidPrerequisiteRecord validateAndroidPhase62Prerequisites({
+  required int? javaMajor,
+  required bool hasSdkManager,
+  required bool hasAvdManager,
+  required bool hasEmulator,
+  required bool hasAdb,
+  required bool hasPrimaryImage,
+}) {
+  final issues = <String>[];
+  if (javaMajor != 17) issues.add('JDK 17 is required');
+  if (!hasSdkManager) issues.add('sdkmanager is unavailable');
+  if (!hasAvdManager) issues.add('avdmanager is unavailable');
+  if (!hasEmulator) issues.add('Android emulator is unavailable');
+  if (!hasAdb) issues.add('adb is unavailable');
+  if (!hasPrimaryImage) {
+    issues.add('API 36 google_apis arm64-v8a system image is unavailable');
+  }
+  return AndroidPrerequisiteRecord(
+    result: issues.isEmpty ? 'PASS' : 'BLOCKED',
+    issues: List.unmodifiable(issues),
+  );
+}
+
+Future<AndroidPrerequisiteRecord> inspectAndroidPhase62Prerequisites(
+  Directory root,
+) async {
+  final jdkHome = _resolveJdk17Home();
+  int? javaMajor;
+  if (jdkHome != null) {
+    final java = await runBoundedCommand(
+      '$jdkHome/bin/java',
+      const ['-version'],
+      workingDirectory: root,
+      durableCommand: 'java -version',
+    );
+    if (java.exitCode == 0) javaMajor = parseJavaMajor(java.output);
+  }
+  final sdk = _androidSdkRoot();
+  bool exists(String path) => sdk != null && File('$sdk/$path').existsSync();
+  return validateAndroidPhase62Prerequisites(
+    javaMajor: javaMajor,
+    hasSdkManager: exists('cmdline-tools/latest/bin/sdkmanager'),
+    hasAvdManager: exists('cmdline-tools/latest/bin/avdmanager'),
+    hasEmulator: exists('emulator/emulator'),
+    hasAdb: exists('platform-tools/adb'),
+    hasPrimaryImage: exists(
+      'system-images/android-$requiredAndroidApi/google_apis/$primaryAndroidAbi/package.xml',
+    ),
+  );
+}
+
+Future<CandidateFingerprint> capturePhase62AndroidCandidate(
+  Directory root,
+) async {
+  final commit = _gitOutput(root, ['rev-parse', 'HEAD']);
+  final inputs = trackedAndroidInputDigests(root);
+  return CandidateFingerprint(commit: commit, inputDigests: inputs);
+}
+
+bool _validPhase62ResultPath(String path) =>
+    path.startsWith('build/release_gate/') &&
+    path.endsWith('.json') &&
+    !path.contains('..') &&
+    !path.startsWith('/');
+
+List<String> validatePhase62AndroidEvidence(Phase62AndroidEvidence evidence) {
+  final issues = <String>[];
+  if (evidence.candidate.commit.length != 40 ||
+      evidence.candidate.inputDigests.isEmpty) {
+    issues.add('Phase 62 Android evidence must bind a complete candidate');
+  }
+  if (evidence.physicalDevice != 'NOT_PERFORMED_NOT_CLAIMED') {
+    issues.add('Android physical-device evidence must remain not performed');
+  }
+  if (evidence.supplemental.affectsPrimary) {
+    issues.add('supplemental x86_64 result must not affect primary arm64');
+  }
+  if (evidence.result == 'PASS' &&
+      (!evidence.prerequisites.passed ||
+          !evidence.primary.passed ||
+          !evidence.release.passed)) {
+    issues.add(
+      'PASS requires prerequisite, primary, and release hygiene success',
+    );
+  }
+  if (evidence.result != 'PASS' && evidence.result != 'BLOCKED') {
+    issues.add('Phase 62 Android result must be PASS or BLOCKED');
+  }
+  final rendered = jsonEncode(evidence.toJson());
+  if (RegExp(
+    r'(?:password|keystore|token|serial|/users/|/home/)',
+    caseSensitive: false,
+  ).hasMatch(rendered)) {
+    issues.add('Phase 62 Android evidence contains prohibited sensitive value');
+  }
+  return issues;
+}
+
+Future<Phase62AndroidEvidence> runPhase62AndroidEvidence(
+  Directory root, {
+  required CandidateFingerprint candidate,
+  required String resultPath,
+  String? ledgerPath,
+  Future<CandidateFingerprint> Function()? captureCurrentCandidate,
+  Future<AndroidPrerequisiteRecord> Function()? inspectPrerequisites,
+  Future<AndroidPhase62PrimaryResult> Function()? runPrimary,
+  Future<AndroidPhase62ReleaseResult> Function()? runRelease,
+  String supplementalResult = 'UNAVAILABLE',
+}) async {
+  if (!_validPhase62ResultPath(resultPath)) {
+    throw ArgumentError(
+      'Phase 62 result path must be under build/release_gate',
+    );
+  }
+  final capture =
+      captureCurrentCandidate ?? () => capturePhase62AndroidCandidate(root);
+  final prerequisites =
+      inspectPrerequisites ?? () => inspectAndroidPhase62Prerequisites(root);
+  final primary = runPrimary ?? () => _runPhase62Primary(root);
+  final release = runRelease ?? () => _runPhase62Release(root);
+  final supplemental = classifyPhase62Supplemental(supplementalResult);
+  final originalLedger = ledgerPath == null
+      ? null
+      : File(ledgerPath).existsSync()
+      ? File(ledgerPath).readAsBytesSync()
+      : null;
+
+  Future<Phase62AndroidEvidence> persist(
+    String result, {
+    AndroidPrerequisiteRecord prerequisite = const AndroidPrerequisiteRecord(
+      result: 'BLOCKED',
+      issues: ['not reached'],
+    ),
+    AndroidPhase62PrimaryResult primaryResult =
+        const AndroidPhase62PrimaryResult(
+          result: 'BLOCKED',
+          discoveredFiles: [],
+          executedFiles: [],
+        ),
+    AndroidPhase62ReleaseResult releaseResult =
+        const AndroidPhase62ReleaseResult(result: 'BLOCKED'),
+    String? failure,
+  }) async {
+    final evidence = Phase62AndroidEvidence(
+      result: result,
+      candidate: candidate,
+      prerequisites: prerequisite,
+      primary: primaryResult,
+      release: releaseResult,
+      supplemental: supplemental,
+      physicalDevice: 'NOT_PERFORMED_NOT_CLAIMED',
+      failure: failure,
+    );
+    final issues = validatePhase62AndroidEvidence(evidence);
+    if (issues.isNotEmpty) {
+      throw StateError(issues.join('; '));
+    }
+    if (ledgerPath != null &&
+        originalLedger != null &&
+        !_sameBytes(originalLedger, File(ledgerPath).readAsBytesSync())) {
+      throw StateError(
+        'Phase 62 mode must not mutate Phase 61 evidence ledger',
+      );
+    }
+    final file = File('${root.path}/$resultPath');
+    file.parent.createSync(recursive: true);
+    file.writeAsStringSync(
+      const JsonEncoder.withIndent('  ').convert(evidence.toJson()),
+    );
+    return evidence;
+  }
+
+  Future<bool> matchesAt(String boundary) async {
+    final current = await capture();
+    if (candidate.matches(current)) return true;
+    await persist(
+      'BLOCKED',
+      failure: 'candidate fingerprint mismatch $boundary',
+    );
+    return false;
+  }
+
+  if (!await matchesAt('before preparation')) {
+    return persist(
+      'BLOCKED',
+      failure: 'candidate fingerprint mismatch before preparation',
+    );
+  }
+  final prerequisite = await prerequisites();
+  if (!prerequisite.passed) {
+    return persist(
+      'BLOCKED',
+      prerequisite: prerequisite,
+      failure: 'Android readiness prerequisite blocked',
+    );
+  }
+  if (!await matchesAt('before primary execution')) {
+    return persist(
+      'BLOCKED',
+      prerequisite: prerequisite,
+      failure: 'candidate fingerprint mismatch before primary execution',
+    );
+  }
+  final primaryResult = await primary();
+  if (!primaryResult.passed) {
+    return persist(
+      'BLOCKED',
+      prerequisite: prerequisite,
+      primaryResult: primaryResult,
+      failure: primaryResult.message ?? 'primary arm64 execution blocked',
+    );
+  }
+  if (!await matchesAt('before packaging')) {
+    return persist(
+      'BLOCKED',
+      prerequisite: prerequisite,
+      primaryResult: primaryResult,
+      failure: 'candidate fingerprint mismatch before packaging',
+    );
+  }
+  final releaseResult = await release();
+  if (!releaseResult.passed) {
+    return persist(
+      'BLOCKED',
+      prerequisite: prerequisite,
+      primaryResult: primaryResult,
+      releaseResult: releaseResult,
+      failure: releaseResult.message ?? 'release hygiene blocked',
+    );
+  }
+  if (!await matchesAt('on exit')) {
+    return persist(
+      'BLOCKED',
+      prerequisite: prerequisite,
+      primaryResult: primaryResult,
+      releaseResult: releaseResult,
+      failure: 'candidate fingerprint mismatch on exit',
+    );
+  }
+  return persist(
+    'PASS',
+    prerequisite: prerequisite,
+    primaryResult: primaryResult,
+    releaseResult: releaseResult,
+  );
+}
+
+bool _sameBytes(List<int> left, List<int> right) =>
+    left.length == right.length &&
+    left.asMap().entries.every((entry) => entry.value == right[entry.key]);
 
 AndroidSafetyOptions parseAndroidSafetyOptions(List<String> arguments) {
   AndroidSafetyMode? mode;
@@ -1198,6 +1580,8 @@ String redactEmulatorSerial(String value) =>
 Future<EmulatorEvidenceResult> runEmulatorEvidence(
   Directory root, {
   required bool prepareOnly,
+  bool recordEvidence = true,
+  bool runReleaseEvidenceAfterMatrix = true,
 }) async {
   final started = DateTime.now().toUtc();
   _PreparedEmulator? prepared;
@@ -1210,21 +1594,28 @@ Future<EmulatorEvidenceResult> runEmulatorEvidence(
         integrationMatrix = await _runPrimaryIntegrationMatrix(root, session);
       }
     });
-    if (!prepareOnly && integrationMatrix != null) {
-      final release = await runReleaseEvidence(root);
+    if (!prepareOnly &&
+        integrationMatrix != null &&
+        runReleaseEvidenceAfterMatrix) {
+      final release = await runReleaseEvidence(
+        root,
+        recordEvidence: recordEvidence,
+      );
       if (!release.completed) throw StateError(release.message);
     }
   } on Object catch (error) {
     failure = scrubCandidateOutput('$error');
   }
 
-  _recordEmulatorPreparation(
-    root: root,
-    started: started,
-    prepared: prepared,
-    failure: failure,
-    integrationMatrix: integrationMatrix,
-  );
+  if (recordEvidence) {
+    _recordEmulatorPreparation(
+      root: root,
+      started: started,
+      prepared: prepared,
+      failure: failure,
+      integrationMatrix: integrationMatrix,
+    );
+  }
   if (failure != null || prepared == null) {
     return EmulatorEvidenceResult(
       completed: false,
@@ -1237,6 +1628,32 @@ Future<EmulatorEvidenceResult> runEmulatorEvidence(
     completed: true,
     message:
         'PASS: disposable API 36 arm64-v8a primary Emulator cold-booted and was cleaned up',
+  );
+}
+
+Future<AndroidPhase62PrimaryResult> _runPhase62Primary(Directory root) async {
+  final discovered = discoverIntegrationTestFiles(
+    Directory('${root.path}/integration_test'),
+  );
+  final result = await runEmulatorEvidence(
+    root,
+    prepareOnly: false,
+    recordEvidence: false,
+    runReleaseEvidenceAfterMatrix: false,
+  );
+  return AndroidPhase62PrimaryResult(
+    result: result.completed ? 'PASS' : 'BLOCKED',
+    discoveredFiles: discovered,
+    executedFiles: result.completed ? discovered : const [],
+    message: result.completed ? null : result.message,
+  );
+}
+
+Future<AndroidPhase62ReleaseResult> _runPhase62Release(Directory root) async {
+  final result = await runReleaseEvidence(root, recordEvidence: false);
+  return AndroidPhase62ReleaseResult(
+    result: result.completed ? 'PASS' : 'BLOCKED',
+    message: result.completed ? null : result.message,
   );
 }
 
@@ -1767,7 +2184,10 @@ class _ReleaseArtifactResult {
   final String hygiene;
 }
 
-Future<ReleaseEvidenceResult> runReleaseEvidence(Directory root) async {
+Future<ReleaseEvidenceResult> runReleaseEvidence(
+  Directory root, {
+  bool recordEvidence = true,
+}) async {
   final jdkHome = _resolveJdk17Home();
   final flutterRoot = _flutterRoot();
   final androidSdk = _androidSdkRoot();
@@ -1894,7 +2314,7 @@ Future<ReleaseEvidenceResult> runReleaseEvidence(Directory root) async {
             password: evidencePassword,
             alias: 'phase61evidence',
           ),
-          'PHASE61_GRADLE_JAVA_HOME': jdkHome,
+          'PHASE61_SIGNING_EVIDENCE': 'true',
           'ANDROID_HOME': androidSdk,
           'ANDROID_SDK_ROOT': androidSdk,
           'PATH': '$flutterRoot/bin:${Platform.environment['PATH'] ?? ''}',
@@ -2090,21 +2510,23 @@ Future<ReleaseEvidenceResult> runReleaseEvidence(Directory root) async {
     );
   }
 
-  _recordReleaseEvidence(
-    root: root,
-    sourceCommit: sourceCommit,
-    started: started,
-    completed: DateTime.now().toUtc(),
-    missingNegative: missingNegative!,
-    debugNegative: debugNegative!,
-    packaging: packaging!,
-    apkSignature: apkSignature!,
-    aabSignature: aabSignature!,
-    aabCertificate: aabCertificate!,
-    apkMetadata: apkMetadata!,
-    artifacts: artifacts!,
-    metadata: metadata!,
-  );
+  if (recordEvidence) {
+    _recordReleaseEvidence(
+      root: root,
+      sourceCommit: sourceCommit,
+      started: started,
+      completed: DateTime.now().toUtc(),
+      missingNegative: missingNegative!,
+      debugNegative: debugNegative!,
+      packaging: packaging!,
+      apkSignature: apkSignature!,
+      aabSignature: aabSignature!,
+      aabCertificate: aabCertificate!,
+      apkMetadata: apkMetadata!,
+      artifacts: artifacts!,
+      metadata: metadata!,
+    );
+  }
   return const ReleaseEvidenceResult(
     completed: true,
     message:

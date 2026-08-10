@@ -15,7 +15,7 @@ RELEASE_PREFLIGHT_PLATFORM="all"
 DRY_RUN=false
 REGENERATE=false
 PACKAGE_RELEASE=false
-PHASE61_GRADLE_JAVA_HOME="${PHASE61_GRADLE_JAVA_HOME:-}"
+PHASE61_SIGNING_EVIDENCE="${PHASE61_SIGNING_EVIDENCE:-}"
 RELEASE_DEPENDENCY_SCOPE_ACTIVE=false
 RELEASE_DEPENDENCY_SCOPE_DIR=''
 RELEASE_PUBSPEC_BACKUP=''
@@ -270,14 +270,12 @@ package_signed_release() {
   case "$RELEASE_PREFLIGHT_PLATFORM" in
     android)
       # This invokes verifyReleaseSigning; no debug-key fallback is permitted.
-      if [[ -n "$PHASE61_GRADLE_JAVA_HOME" ]]; then
-        run env JAVA_HOME="$PHASE61_GRADLE_JAVA_HOME" \
-          "$PROJECT_ROOT/android/gradlew" -p "$PROJECT_ROOT/android" \
-          --no-daemon "-Dorg.gradle.java.home=$PHASE61_GRADLE_JAVA_HOME" \
+      if [[ "$PHASE61_SIGNING_EVIDENCE" == "true" ]]; then
+        run "$PROJECT_ROOT/android/gradlew" -p "$PROJECT_ROOT/android" \
+          --no-daemon \
           -Pphase61SigningEvidence=true bundleRelease
-        run env JAVA_HOME="$PHASE61_GRADLE_JAVA_HOME" \
-          "$PROJECT_ROOT/android/gradlew" -p "$PROJECT_ROOT/android" \
-          --no-daemon "-Dorg.gradle.java.home=$PHASE61_GRADLE_JAVA_HOME" \
+        run "$PROJECT_ROOT/android/gradlew" -p "$PROJECT_ROOT/android" \
+          --no-daemon \
           -Pphase61SigningEvidence=true assembleRelease
       else
         run_flutter build appbundle --release
