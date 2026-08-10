@@ -16,7 +16,8 @@ void main() {
       expect(source, contains('bootstatus'));
       expect(source, contains('discoverIosIntegrationTests'));
       expect(source, contains('release_preflight.sh'));
-      expect(source, contains("'--platform', 'ios'"));
+      expect(source, contains("'--platform'"));
+      expect(source, contains("'ios'"));
       expect(phase60.readAsStringSync(), contains('_allowedRuntimeTests'));
     },
   );

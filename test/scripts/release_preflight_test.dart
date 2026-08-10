@@ -212,14 +212,18 @@ dev_dependencies:
       },
     );
 
-    test('the iOS release gate always routes integration cleanup to preflight', () {
-      final stage = File('scripts/release_gate/ios_simulator_stage.dart')
-          .readAsStringSync();
-      final preflight = stage.indexOf('scripts/release_preflight.sh');
-      final cleanup = stage.lastIndexOf("'erase'");
+    test(
+      'the iOS release gate always routes integration cleanup to preflight',
+      () {
+        final stage = File(
+          'scripts/release_gate/ios_simulator_stage.dart',
+        ).readAsStringSync();
+        final preflight = stage.indexOf('scripts/release_preflight.sh');
+        final cleanup = stage.lastIndexOf("'erase'");
 
-      expect(preflight, greaterThanOrEqualTo(0));
-      expect(cleanup, greaterThan(preflight));
-    });
+        expect(preflight, greaterThanOrEqualTo(0));
+        expect(cleanup, greaterThan(preflight));
+      },
+    );
   });
 }
