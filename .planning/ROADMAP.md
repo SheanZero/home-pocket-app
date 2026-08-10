@@ -262,7 +262,7 @@ Plans:
   3. A clean release preflight regenerates native registrants and proves the production Runner excludes development-only plugins while CI pins the same Flutter stable, lockfile, and generation steps.
   4. iPhone Simulator and Android Emulator prerequisites pass, and a compatibility report records exact commands, environment, commit, version deltas, intentional holds, fixes, residual debt, and the absence of Android physical-device validation.
 
-**Plans**: 10/13 plans executed
+**Plans**: 11/13 plans executed
 
 Plans:
 **Wave 1**
@@ -298,7 +298,7 @@ Plans:
 **Wave 8** *(gap closure; blocked on Wave 7 completion)*
 
 - [x] 62-10-PLAN.md — Repair merge-candidate attribution and require complete iOS/Android evidence validation.
-- [ ] 62-11-PLAN.md — Make process timeouts reachable and close evidence redaction/serial-recovery defects.
+- [x] 62-11-PLAN.md — Make process timeouts reachable and close evidence redaction/serial-recovery defects.
 
 **Wave 9** *(blocked on Wave 8 completion)*
 
@@ -334,5 +334,5 @@ Plans:
 | 59. Controlled Platform Plugin Cohorts | 7/7 | Complete    | 2026-08-09 |
 | 60. SQLCipher & iOS Native Safety Lane | 10/10 | Complete    | 2026-08-09 |
 | 61. Android Toolchain & Emulator Lane | 6/6 | Complete    | 2026-08-10 |
-| 62. Automated Release-Gate Lock | 10/13 | In Progress|  |
+| 62. Automated Release-Gate Lock | 11/13 | In Progress|  |
 | 63. Isolated Wired-iPhone Acceptance | 0/TBD | Not started | - |

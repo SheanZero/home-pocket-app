@@ -5,15 +5,15 @@ milestone_name: 依赖与原生工具链现代化
 current_phase: 62
 current_phase_name: automated-release-gate-lock
 status: executing
-stopped_at: Completed 62-10-PLAN.md
-last_updated: "2026-08-10T11:30:43.583Z"
+stopped_at: Completed 62-11-PLAN.md
+last_updated: "2026-08-10T11:38:39.421Z"
 last_activity: 2026-08-10
 last_activity_desc: Phase 62 execution started
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 49
-  completed_plans: 46
+  completed_plans: 47
   percent: 71
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-08-10 after Phase 61 completion)
 ## Current Position
 
 Phase: 62 (automated-release-gate-lock) — EXECUTING
-Plan: 2 of 13
+Plan: 3 of 13
 Status: Ready to execute
 Last activity: 2026-08-10 — Phase 62 execution started
 
-Progress: [█████████░] 94%
+Progress: [██████████] 96%
 
 ### Decisions
 
@@ -150,6 +150,8 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: RPT-A publishes only a validated green JSON rendering bound to the immutable candidate and permits only the compatibility report as metadata successor.
 - [Phase ?]: Resolve candidate-scoped merges against their first parent so the attested SHA and hashed tree are the same candidate.
 - [Phase ?]: Treat iOS/Android validator success and shared inventory equality as mandatory aggregate-stage requirements.
+- [Phase ?]: 62-11: exit timeout races independently-started stream drains, then uses bounded TERM/KILL recovery before diagnostics are returned.
+- [Phase ?]: 62-11: serialHostSuite is valid evidence; only actual serial or UDID assignments are sensitive.
 
 ### Quick Tasks Completed
 
@@ -339,8 +341,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-08-10T11:30:43.567Z
-Stopped at: Completed 62-10-PLAN.md
+Last session: 2026-08-10T11:38:39.405Z
+Stopped at: Completed 62-11-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -470,6 +472,7 @@ Resume file: None
 | Phase 62 P07 | 7min | 2 tasks | 5 files |
 | Phase 62 P08 | 9min | 2 tasks | 8 files |
 | Phase 62 P10 | 4m 20s | 2 tasks | 4 files |
+| Phase 62-automated-release-gate-lock P11 | 4min | 2 tasks | 4 files |
 
 ## Decisions
 
