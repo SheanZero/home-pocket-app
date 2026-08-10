@@ -5,15 +5,15 @@ milestone_name: 依赖与原生工具链现代化
 current_phase: 62
 current_phase_name: automated-release-gate-lock
 status: executing
-stopped_at: Completed 62-03-PLAN.md
-last_updated: "2026-08-10T04:19:05.182Z"
+stopped_at: Completed 62-04-PLAN.md
+last_updated: "2026-08-10T04:32:23.746Z"
 last_activity: 2026-08-10
 last_activity_desc: Phase 62 execution started
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 45
-  completed_plans: 39
+  completed_plans: 40
   percent: 71
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-08-10 after Phase 61 completion)
 ## Current Position
 
 Phase: 62 (automated-release-gate-lock) — EXECUTING
-Plan: 4 of 9
+Plan: 5 of 9
 Status: Ready to execute
 Last activity: 2026-08-10 — Phase 62 execution started
 
-Progress: [█████████░] 87%
+Progress: [█████████░] 89%
 
 ### Decisions
 
@@ -138,6 +138,8 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: 62-02 SIGN-A: Phase 62/release owner repair JDK 17 selection versus signing-evidence switching; only an exercised current-candidate release path may be claimed.
 - [Phase ?]: RPT-A has only one metadata exception (docs/testing/RELEASE_COMPATIBILITY.md); raw evidence remains ignored under build/release_gate/.
 - [Phase ?]: The release-gate tracer snapshots manifest and gate/workflow inputs before and after its fixed prerequisite, blocking any drift.
+- [Phase ?]: Only closed infrastructure classes retry once; unknown, product, privacy, coverage, drift, and schema failures are terminal.
+- [Phase ?]: A recognized host-test timeout must diagnose explicit files and pass a complete serial coverage suite before the coverage gate.
 
 ### Quick Tasks Completed
 
@@ -327,8 +329,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-08-10T04:19:05.167Z
-Stopped at: Completed 62-03-PLAN.md
+Last session: 2026-08-10T04:32:23.730Z
+Stopped at: Completed 62-04-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -452,6 +454,7 @@ Resume file: None
 | Phase 62 P01 | 3min | 2 tasks | 3 files |
 | Phase 62 P02 | 3min | 3 tasks | 1 files |
 | Phase 62 P03 | 13min | 2 tasks | 4 files |
+| Phase 62 P04 | 12min | 2 tasks | 4 files |
 
 ## Decisions
 
