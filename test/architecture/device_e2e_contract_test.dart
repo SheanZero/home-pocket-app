@@ -129,7 +129,7 @@ void main() {
         '61-ANDROID-SAFETY-EVIDENCE.md',
       ).readAsStringSync();
 
-      expect(evidence, contains('"emulator": "NOT_RUN"'));
+      expect(evidence, contains('"emulator": "PASS"'));
       expect(evidence, contains('"lane": "primary_local_arm64"'));
       expect(evidence, contains('"x86_64_supplemental"'));
       expect(
