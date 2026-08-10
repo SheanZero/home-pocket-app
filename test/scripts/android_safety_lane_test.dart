@@ -164,14 +164,12 @@ void main() {
       );
 
       expect(evidence.result, 'PASS');
-      expect(
-        evidence.primary.discoveredFiles,
-        const ['integration_test/critical_test.dart'],
-      );
-      expect(
-        evidence.primary.executedFiles,
-        const ['integration_test/critical_test.dart'],
-      );
+      expect(evidence.primary.discoveredFiles, const [
+        'integration_test/critical_test.dart',
+      ]);
+      expect(evidence.primary.executedFiles, const [
+        'integration_test/critical_test.dart',
+      ]);
       expect(ledger.readAsStringSync(), 'historical ledger');
       expect(
         File('${fixture.path}/build/release_gate/android.json').existsSync(),
@@ -384,17 +382,28 @@ void main() {
     expect(output, contains('<local-path>'));
   });
 
-  test('primary integration failures retain bounded redacted Flutter output', () {
-    final diagnostic = lane.formatPrimaryIntegrationFailure('''
+  test(
+    'primary integration failures retain bounded redacted Flutter output',
+    () {
+      final diagnostic = lane.formatPrimaryIntegrationFailure('''
 Exception: encrypted database did not open
 /Users/alice/project/android: test runner context
+password=device-e2e-password
 Command: adb -s emulator-5582 uninstall com.sheanzero.happypocket.app
 ''');
 
-    expect(diagnostic, contains('Exception: encrypted database did not open'));
-    expect(diagnostic, contains('Command: adb -s <emulator-redacted> uninstall'));
-    expect(diagnostic, isNot(contains('/Users/alice')));
-  });
+      expect(
+        diagnostic,
+        contains('Exception: encrypted database did not open'),
+      );
+      expect(
+        diagnostic,
+        contains('Command: adb -s <emulator-redacted> uninstall'),
+      );
+      expect(diagnostic, isNot(contains('/Users/alice')));
+      expect(diagnostic, isNot(contains('device-e2e-password')));
+    },
+  );
 
   test(
     'bounded command output preserves completion text from the tail',
