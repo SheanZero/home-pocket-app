@@ -100,6 +100,15 @@ void main() {
         expect(second.candidate.matches(candidate), isTrue);
       },
     );
+
+    test('preserves the first porcelain status column while parsing paths', () {
+      expect(
+        parseWorkingTreeStatusPaths(
+          ' M docs/testing/RELEASE_COMPATIBILITY.md\n',
+        ),
+        <String>['docs/testing/RELEASE_COMPATIBILITY.md'],
+      );
+    });
   });
 
   group('Phase 62 release-gate authority tracer', () {
