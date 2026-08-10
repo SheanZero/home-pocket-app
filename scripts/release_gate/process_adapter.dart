@@ -62,13 +62,9 @@ class SystemProcessAdapter implements ProcessAdapter {
 
 /// Scrubs diagnostics before a normalized evidence object receives them.
 String scrubDiagnostic(String value, {bool preserveJson = false}) {
-  final scrubbed = value
+  var scrubbed = value
       .replaceAll(RegExp(r'/Users/[^\s]+'), '<redacted-path>')
       .replaceAll(RegExp(r'/home/[^\s]+'), '<redacted-path>')
-      .replaceAll(
-        RegExp(r'"udid"\s*:\s*"[^"]+"', caseSensitive: false),
-        '"udid":"<redacted>"',
-      )
       .replaceAll(
         RegExp(
           r'(?:token|credential|secret|password|api[_-]?key)=[^\s]+',
@@ -77,6 +73,12 @@ String scrubDiagnostic(String value, {bool preserveJson = false}) {
         '<redacted>',
       )
       .replaceAll(RegExp(r'udid=[^\s]+', caseSensitive: false), '<redacted>');
+  if (!preserveJson) {
+    scrubbed = scrubbed.replaceAll(
+      RegExp(r'"udid"\s*:\s*"[^"]+"', caseSensitive: false),
+      '"udid":"<redacted>"',
+    );
+  }
   final limit = preserveJson ? 32768 : _maxDiagnosticCharacters;
   return scrubbed.length <= limit
       ? scrubbed
