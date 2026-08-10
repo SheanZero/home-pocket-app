@@ -11,6 +11,7 @@ import 'release_gate/process_adapter.dart';
 import 'release_gate/execution.dart';
 import 'release_gate/ios_simulator_stage.dart';
 import 'verify_android_safety_lane.dart' as android_lane;
+import 'release_gate/report.dart';
 
 export 'release_gate/models.dart'
     show ReleaseGateRetry, ReleaseVerdict, validateResume;
@@ -53,11 +54,13 @@ class ReleaseGateOptions {
     required this.scope,
     required this.resultPath,
     required this.resume,
+    this.failureFix,
   });
 
   final String scope;
   final String resultPath;
   final bool resume;
+  final FailureFixRecord? failureFix;
 }
 
 /// The two device adapters are injected only for deterministic tests. The
@@ -83,6 +86,12 @@ ReleaseGateOptions parseReleaseGateOptions(List<String> arguments) {
   String? scope;
   String? resultPath;
   var resume = false;
+  var recordFix = false;
+  String? fixStage;
+  String? failureSummary;
+  String? finalFix;
+  bool? candidateChanged;
+  String? rerunOutcome;
   for (final argument in arguments) {
     if (argument.startsWith('--scope=')) {
       if (scope != null) throw ArgumentError('scope supplied more than once');
@@ -95,9 +104,66 @@ ReleaseGateOptions parseReleaseGateOptions(List<String> arguments) {
     } else if (argument == '--resume') {
       if (resume) throw ArgumentError('resume supplied more than once');
       resume = true;
+    } else if (argument == '--record-fix') {
+      if (recordFix) throw ArgumentError('record-fix supplied more than once');
+      recordFix = true;
+    } else if (argument.startsWith('--fix-stage=')) {
+      if (fixStage != null)
+        throw ArgumentError('fix-stage supplied more than once');
+      fixStage = argument.substring('--fix-stage='.length);
+    } else if (argument.startsWith('--failure-summary=')) {
+      if (failureSummary != null) {
+        throw ArgumentError('failure-summary supplied more than once');
+      }
+      failureSummary = argument.substring('--failure-summary='.length);
+    } else if (argument.startsWith('--final-fix=')) {
+      if (finalFix != null)
+        throw ArgumentError('final-fix supplied more than once');
+      finalFix = argument.substring('--final-fix='.length);
+    } else if (argument.startsWith('--candidate-changed=')) {
+      if (candidateChanged != null) {
+        throw ArgumentError('candidate-changed supplied more than once');
+      }
+      candidateChanged = switch (argument.substring(
+        '--candidate-changed='.length,
+      )) {
+        'true' => true,
+        'false' => false,
+        _ => throw ArgumentError('candidate-changed must be true or false'),
+      };
+    } else if (argument.startsWith('--complete-rerun=')) {
+      if (rerunOutcome != null) {
+        throw ArgumentError('complete-rerun supplied more than once');
+      }
+      rerunOutcome = argument.substring('--complete-rerun='.length);
     } else {
       throw ArgumentError('unknown argument: $argument');
     }
+  }
+  if (recordFix) {
+    final record = FailureFixRecord(
+      stage: fixStage ?? '',
+      failureSummary: failureSummary ?? '',
+      finalFix: finalFix ?? '',
+      candidateChanged: candidateChanged ?? false,
+      completeRerunOutcome: rerunOutcome ?? '',
+    );
+    if (scope != null ||
+        resume ||
+        resultPath == null ||
+        !_isRawArtifactPath(resultPath) ||
+        !record.isComplete ||
+        validateEvidencePrivacy(record.toJson()).isNotEmpty) {
+      throw ArgumentError(
+        'record-fix requires --result plus fix-stage, failure-summary, final-fix, candidate-changed, and complete-rerun facts',
+      );
+    }
+    return ReleaseGateOptions(
+      scope: 'record-fix',
+      resultPath: resultPath,
+      resume: false,
+      failureFix: record,
+    );
   }
   if ((scope != 'tracer' && scope != 'host' && scope != 'full') ||
       resultPath == null ||
@@ -117,6 +183,16 @@ ReleaseGateOptions parseReleaseGateOptions(List<String> arguments) {
 Future<void> main(List<String> arguments) async {
   try {
     final options = parseReleaseGateOptions(arguments);
+    if (options.failureFix case final record?) {
+      await recordFailureFix(
+        root: Directory.current,
+        resultPath: options.resultPath,
+        candidate: validateCandidate(Directory.current),
+        record: record,
+      );
+      stdout.writeln('RECORDED');
+      return;
+    }
     if (options.resume && options.scope == 'tracer') {
       throw ArgumentError('resume requires the host or full execution graph');
     }
@@ -438,7 +514,8 @@ Future<GateResult> _persist(
   String resultPath,
   GateResult result,
 ) async {
-  if (!result.isSchemaValid || !_isPrivacySafe(jsonEncode(result.toJson()))) {
+  final validationIssues = validateGateResult(result);
+  if (!result.isSchemaValid || validationIssues.isNotEmpty) {
     return GateResult(
       candidate: result.candidate,
       verdict: ReleaseVerdict.blocked,
@@ -452,17 +529,29 @@ Future<GateResult> _persist(
           diagnostic: 'evidence schema or privacy validation failed',
         ),
       ],
+      manualOverride: result.manualOverride,
+      limitations: result.limitations,
+      failureFixes: result.failureFixes,
     );
   }
+  final authoritative = GateResult(
+    candidate: result.candidate,
+    verdict: computeVerdict(result),
+    stages: result.stages,
+    manualOverride: result.manualOverride,
+    limitations: result.limitations,
+    failureFixes: result.failureFixes,
+  );
   final jsonFile = File('${root.path}/$resultPath');
   final previewFile = File(
     '${jsonFile.parent.path}/${jsonFile.uri.pathSegments.last.replaceFirst(RegExp(r'\.json$'), '')}.preview.md',
   );
   final jsonEvidence = const JsonEncoder.withIndent(
     '  ',
-  ).convert(result.toJson());
-  final preview = _renderPreview(result);
-  if (!_isPrivacySafe(jsonEvidence) || !_isPrivacySafe(preview)) {
+  ).convert(authoritative.toJson());
+  final preview = renderCompatibilityReport(authoritative);
+  if (validateEvidencePrivacy(jsonEvidence).isNotEmpty ||
+      validateEvidencePrivacy(preview).isNotEmpty) {
     return GateResult(
       candidate: result.candidate,
       verdict: ReleaseVerdict.blocked,
@@ -481,24 +570,7 @@ Future<GateResult> _persist(
   await jsonFile.parent.create(recursive: true);
   await jsonFile.writeAsString(jsonEvidence);
   await previewFile.writeAsString(preview);
-  return result;
-}
-
-String _renderPreview(GateResult result) {
-  final candidate = result.candidate;
-  return <String>[
-    '# Release Gate Preview',
-    '',
-    'Verdict: `${result.verdict.wireValue}`',
-    'Candidate: `${candidate?.commit ?? 'unavailable'}`',
-    'Inputs: `${candidate?.inputDigests.length ?? 0}` digests',
-    '',
-    '## Stages',
-    ...result.stages.map(
-      (stage) => '- `${stage.stage.name}`: `${stage.classification.name}`',
-    ),
-    '',
-  ].join('\n');
+  return authoritative;
 }
 
 ({CandidateFingerprint fingerprint, Map<String, String> expectedDigests})
@@ -604,11 +676,6 @@ bool _isRawArtifactPath(String path) =>
     path.startsWith(_rawArtifactRoot) &&
     path.endsWith('.json') &&
     !path.contains('..');
-
-bool _isPrivacySafe(String value) => !RegExp(
-  r'(/users/|/home/|udid|serial|token=|credential=|secret=|password=|api[_-]?key=|sync[_ -]?payload|backup content|financial field|note=|amount=)',
-  caseSensitive: false,
-).hasMatch(value);
 
 StageResult _stage({
   required GateStage stage,

@@ -13,6 +13,11 @@ enum ReleaseVerdict {
   };
 }
 
+/// Limitations may describe only evidence outside the mandatory local release
+/// graph. `unclassified` exists so that a newly observed limitation fails
+/// closed instead of inheriting a passing result.
+enum ReleaseLimitation { supplementalX86, acceptedHistoricalDebt, unclassified }
+
 /// The configured release-lock order. Do not sort stage results by timestamps:
 /// equal timestamps must retain this deterministic graph order.
 enum GateStage {
@@ -126,16 +131,56 @@ class StageAttemptRecord {
   };
 }
 
+/// Concise, privacy-safe history of a real Phase 62 failure. Raw command
+/// transcripts stay in ignored CI artifacts and are intentionally absent.
+class FailureFixRecord {
+  const FailureFixRecord({
+    required this.stage,
+    required this.failureSummary,
+    required this.finalFix,
+    required this.candidateChanged,
+    required this.completeRerunOutcome,
+  });
+
+  final String stage;
+  final String failureSummary;
+  final String finalFix;
+  final bool candidateChanged;
+  final String completeRerunOutcome;
+
+  bool get isComplete =>
+      stage.isNotEmpty &&
+      failureSummary.isNotEmpty &&
+      finalFix.isNotEmpty &&
+      (completeRerunOutcome == 'PASS' || completeRerunOutcome == 'BLOCKED');
+
+  Map<String, Object> toJson() => <String, Object>{
+    'stage': stage,
+    'failure_summary': failureSummary,
+    'final_fix': finalFix,
+    'candidate_changed': candidateChanged,
+    'complete_rerun_outcome': completeRerunOutcome,
+  };
+}
+
 class GateResult {
   GateResult({
     required this.candidate,
     required this.verdict,
     required Iterable<StageResult> stages,
-  }) : stages = List<StageResult>.unmodifiable(stages);
+    this.manualOverride = false,
+    Iterable<ReleaseLimitation> limitations = const <ReleaseLimitation>[],
+    Iterable<FailureFixRecord> failureFixes = const <FailureFixRecord>[],
+  }) : stages = List<StageResult>.unmodifiable(stages),
+       limitations = List<ReleaseLimitation>.unmodifiable(limitations),
+       failureFixes = List<FailureFixRecord>.unmodifiable(failureFixes);
 
   final CandidateFingerprint? candidate;
   final ReleaseVerdict verdict;
   final List<StageResult> stages;
+  final bool manualOverride;
+  final List<ReleaseLimitation> limitations;
+  final List<FailureFixRecord> failureFixes;
 
   bool get isSchemaValid {
     if (stages.isEmpty ||
@@ -154,6 +199,9 @@ class GateResult {
     'verdict': verdict.wireValue,
     'candidate': candidate?.toJson(),
     'stages': stages.map((stage) => stage.toJson()).toList(),
+    'manual_override': manualOverride,
+    'limitations': limitations.map((limitation) => limitation.name).toList(),
+    'failure_fixes': failureFixes.map((record) => record.toJson()).toList(),
   };
 }
 
