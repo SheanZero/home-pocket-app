@@ -4,17 +4,17 @@ milestone: v2.1
 milestone_name: 依赖与原生工具链现代化
 current_phase: 62
 current_phase_name: automated-release-gate-lock
-status: planned
-stopped_at: Gap-closure plans 62-10 through 62-13 created and verified
-last_updated: "2026-08-10T20:18:41+09:00"
+status: executing
+stopped_at: Completed 62-10-PLAN.md
+last_updated: "2026-08-10T11:30:43.583Z"
 last_activity: 2026-08-10
-last_activity_desc: Phase 62 gap-closure planning completed
+last_activity_desc: Phase 62 execution started
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 49
-  completed_plans: 45
-  percent: 92
+  completed_plans: 46
+  percent: 71
 ---
 
 # Project State
@@ -28,12 +28,12 @@ See: .planning/PROJECT.md (updated 2026-08-10 after Phase 61 completion)
 
 ## Current Position
 
-Phase: 62 (automated-release-gate-lock) — PLANNED
-Plan: 9 of 13
-Status: Ready to execute gap-closure plans 62-10 through 62-13
-Last activity: 2026-08-10 — Phase 62 gap-closure planning completed
+Phase: 62 (automated-release-gate-lock) — EXECUTING
+Plan: 2 of 13
+Status: Ready to execute
+Last activity: 2026-08-10 — Phase 62 execution started
 
-Progress: [█████████░] 92%
+Progress: [█████████░] 94%
 
 ### Decisions
 
@@ -148,6 +148,8 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: 62-07: computeVerdict is the sole authority; manual overrides, mandatory failures, schema/privacy faults, and unclassified limitations are BLOCKED.
 - [Phase ?]: CI-A uses exact self-hosted, macOS, ARM64, happy-pocket-release labels; unavailable Apple-Silicon capacity remains a mandatory failure or pending result.
 - [Phase ?]: RPT-A publishes only a validated green JSON rendering bound to the immutable candidate and permits only the compatibility report as metadata successor.
+- [Phase ?]: Resolve candidate-scoped merges against their first parent so the attested SHA and hashed tree are the same candidate.
+- [Phase ?]: Treat iOS/Android validator success and shared inventory equality as mandatory aggregate-stage requirements.
 
 ### Quick Tasks Completed
 
@@ -337,8 +339,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-08-10T05:29:32.419Z
-Stopped at: Completed 62-08-PLAN.md
+Last session: 2026-08-10T11:30:43.567Z
+Stopped at: Completed 62-10-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -467,6 +469,7 @@ Resume file: None
 | Phase 62 P06 | 13min | 2 tasks | 4 files |
 | Phase 62 P07 | 7min | 2 tasks | 5 files |
 | Phase 62 P08 | 9min | 2 tasks | 8 files |
+| Phase 62 P10 | 4m 20s | 2 tasks | 4 files |
 
 ## Decisions
 
