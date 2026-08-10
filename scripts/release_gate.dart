@@ -80,12 +80,19 @@ String resolveAttestedCandidateCommit(Directory root) {
     'rev-list',
     'HEAD',
   ]).split('\n')) {
+    final parents = _git(root, <String>[
+      'rev-list',
+      '--parents',
+      '-n',
+      '1',
+      commit,
+    ]).split(RegExp(r'\s+'));
     final changed = _git(root, <String>[
       'diff-tree',
       '--no-commit-id',
       '--name-only',
       '-r',
-      '--root',
+      if (parents.length == 1) '--root' else '${commit}^1',
       commit,
     ]).split('\n').where((path) => path.isNotEmpty);
     if (changed.any(isCandidateScopedPath)) return commit;
