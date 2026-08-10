@@ -853,8 +853,16 @@ bool _workingTreeIsClean(Directory root) => _git(root, const <String>[
   '--untracked-files=all',
 ]).isEmpty;
 
-List<String> _workingTreePaths(Directory root) =>
-    _git(root, const <String>['status', '--porcelain', '--untracked-files=all'])
+List<String> _workingTreePaths(Directory root) => parseWorkingTreeStatusPaths(
+  _gitRaw(root, const <String>[
+    'status',
+    '--porcelain',
+    '--untracked-files=all',
+  ]),
+);
+
+List<String> parseWorkingTreeStatusPaths(String porcelainStatus) =>
+    porcelainStatus
         .split('\n')
         .where((line) => line.isNotEmpty)
         .map((line) => line.substring(3))
@@ -883,7 +891,10 @@ Map<String, String> _baselineTrackedInputDigests(Directory root) {
   return digests;
 }
 
-String _git(Directory root, List<String> arguments) {
+String _git(Directory root, List<String> arguments) =>
+    _gitRaw(root, arguments).trim();
+
+String _gitRaw(Directory root, List<String> arguments) {
   final result = Process.runSync(
     'git',
     arguments,
