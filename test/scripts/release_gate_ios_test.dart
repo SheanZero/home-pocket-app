@@ -13,88 +13,113 @@ void main() {
       inputDigests: <String, String>{'pubspec.lock': 'lock'},
     );
 
-    test('prepares only an available iPhone Simulator with redacted evidence',
-        () async {
-      final process = _RecordingProcessAdapter(<ProcessOutcome>[
-        ProcessOutcome(exitCode: 0, diagnostic: jsonEncode(_iphoneInventory)),
-        const ProcessOutcome(exitCode: 0, diagnostic: 'shutdown'),
-        const ProcessOutcome(exitCode: 0, diagnostic: 'erased'),
-        const ProcessOutcome(exitCode: 0, diagnostic: 'booted'),
-        const ProcessOutcome(exitCode: 0, diagnostic: 'ready'),
-        const ProcessOutcome(exitCode: 0, diagnostic: 'shutdown'),
-        const ProcessOutcome(exitCode: 0, diagnostic: 'erased'),
-      ]);
-      final adapter = SimctlIosSimulatorAdapter(
-        processAdapter: process,
-        candidateProvider: () => candidate,
-      );
+    test(
+      'prepares only an available iPhone Simulator with redacted evidence',
+      () async {
+        final process = _RecordingProcessAdapter(<ProcessOutcome>[
+          ProcessOutcome(exitCode: 0, diagnostic: jsonEncode(_iphoneInventory)),
+          const ProcessOutcome(exitCode: 0, diagnostic: 'shutdown'),
+          const ProcessOutcome(exitCode: 0, diagnostic: 'erased'),
+          const ProcessOutcome(exitCode: 0, diagnostic: 'booted'),
+          const ProcessOutcome(exitCode: 0, diagnostic: 'ready'),
+          const ProcessOutcome(exitCode: 0, diagnostic: 'shutdown'),
+          const ProcessOutcome(exitCode: 0, diagnostic: 'erased'),
+        ]);
+        final adapter = SimctlIosSimulatorAdapter(
+          processAdapter: process,
+          candidateProvider: () => candidate,
+        );
 
-      final evidence = await adapter.prepare(
-        IosSimulatorOptions(candidate: candidate),
-      );
+        final evidence = await adapter.prepare(
+          IosSimulatorOptions(candidate: candidate),
+        );
 
-      expect(evidence.isReady, isTrue);
-      expect(evidence.profile.deviceKind, 'simulator');
-      expect(evidence.profile.model, 'iPhone 16');
-      expect(evidence.profile.runtime, 'com.apple.CoreSimulator.SimRuntime.iOS-18-2');
-      expect(evidence.profile.redactedToken, isNot(contains('SIMULATOR-UDID')));
-      expect(evidence.profile.redactedToken, startsWith('simulator-'));
-      expect(jsonEncode(evidence.toJson()), isNot(contains('SIMULATOR-UDID')));
-      expect(process.invocations, <List<String>>[
-        const <String>['xcrun', 'simctl', 'list', 'devices', 'available', '-j'],
-        const <String>['xcrun', 'simctl', 'shutdown', 'SIMULATOR-UDID-123'],
-        const <String>['xcrun', 'simctl', 'erase', 'SIMULATOR-UDID-123'],
-        const <String>['xcrun', 'simctl', 'boot', 'SIMULATOR-UDID-123'],
-        const <String>[
-          'xcrun',
-          'simctl',
-          'bootstatus',
-          'SIMULATOR-UDID-123',
-          '-b',
-        ],
-        const <String>['xcrun', 'simctl', 'shutdown', 'SIMULATOR-UDID-123'],
-        const <String>['xcrun', 'simctl', 'erase', 'SIMULATOR-UDID-123'],
-      ]);
-    });
+        expect(evidence.isReady, isTrue);
+        expect(evidence.profile.deviceKind, 'simulator');
+        expect(evidence.profile.model, 'iPhone 16');
+        expect(
+          evidence.profile.runtime,
+          'com.apple.CoreSimulator.SimRuntime.iOS-18-2',
+        );
+        expect(
+          evidence.profile.redactedToken,
+          isNot(contains('SIMULATOR-UDID')),
+        );
+        expect(evidence.profile.redactedToken, startsWith('simulator-'));
+        expect(
+          jsonEncode(evidence.toJson()),
+          isNot(contains('SIMULATOR-UDID')),
+        );
+        expect(process.invocations, <List<String>>[
+          const <String>[
+            'xcrun',
+            'simctl',
+            'list',
+            'devices',
+            'available',
+            '-j',
+          ],
+          const <String>['xcrun', 'simctl', 'shutdown', 'SIMULATOR-UDID-123'],
+          const <String>['xcrun', 'simctl', 'erase', 'SIMULATOR-UDID-123'],
+          const <String>['xcrun', 'simctl', 'boot', 'SIMULATOR-UDID-123'],
+          const <String>[
+            'xcrun',
+            'simctl',
+            'bootstatus',
+            'SIMULATOR-UDID-123',
+            '-b',
+          ],
+          const <String>['xcrun', 'simctl', 'shutdown', 'SIMULATOR-UDID-123'],
+          const <String>['xcrun', 'simctl', 'erase', 'SIMULATOR-UDID-123'],
+        ]);
+      },
+    );
 
-    test('rejects a physical or ambiguous destination before destructive work',
-        () async {
-      final process = _RecordingProcessAdapter(<ProcessOutcome>[
-        ProcessOutcome(exitCode: 0, diagnostic: jsonEncode(_physicalInventory)),
-      ]);
-      final adapter = SimctlIosSimulatorAdapter(
-        processAdapter: process,
-        candidateProvider: () => candidate,
-      );
+    test(
+      'rejects a physical or ambiguous destination before destructive work',
+      () async {
+        final process = _RecordingProcessAdapter(<ProcessOutcome>[
+          ProcessOutcome(
+            exitCode: 0,
+            diagnostic: jsonEncode(_physicalInventory),
+          ),
+        ]);
+        final adapter = SimctlIosSimulatorAdapter(
+          processAdapter: process,
+          candidateProvider: () => candidate,
+        );
 
-      final evidence = await adapter.prepare(
-        IosSimulatorOptions(candidate: candidate),
-      );
+        final evidence = await adapter.prepare(
+          IosSimulatorOptions(candidate: candidate),
+        );
 
-      expect(evidence.isReady, isFalse);
-      expect(evidence.failure, IosSimulatorFailure.invalidDestination);
-      expect(process.invocations, hasLength(1));
-    });
+        expect(evidence.isReady, isFalse);
+        expect(evidence.failure, IosSimulatorFailure.invalidDestination);
+        expect(process.invocations, hasLength(1));
+      },
+    );
 
-    test('candidate mismatch before boot blocks without destructive commands',
-        () async {
-      final process = _RecordingProcessAdapter(const <ProcessOutcome>[]);
-      final adapter = SimctlIosSimulatorAdapter(
-        processAdapter: process,
-        candidateProvider: () => CandidateFingerprint(
-          commit: 'b' * 40,
-          inputDigests: <String, String>{'pubspec.lock': 'lock'},
-        ),
-      );
+    test(
+      'candidate mismatch before boot blocks without destructive commands',
+      () async {
+        final process = _RecordingProcessAdapter(const <ProcessOutcome>[]);
+        final adapter = SimctlIosSimulatorAdapter(
+          processAdapter: process,
+          candidateProvider: () => CandidateFingerprint(
+            commit: 'b' * 40,
+            inputDigests: <String, String>{'pubspec.lock': 'lock'},
+          ),
+        );
 
-      final evidence = await adapter.prepare(
-        IosSimulatorOptions(candidate: candidate),
-      );
+        final evidence = await adapter.prepare(
+          IosSimulatorOptions(candidate: candidate),
+        );
 
-      expect(evidence.failure, IosSimulatorFailure.candidateDrift);
-      expect(evidence.retryEligible, isFalse);
-      expect(process.invocations, isEmpty);
-    });
+        expect(evidence.failure, IosSimulatorFailure.candidateDrift);
+        expect(evidence.retryEligible, isFalse);
+        expect(process.invocations, isEmpty);
+      },
+    );
 
     test('readiness failures are retry eligible but drift is not', () async {
       final readinessProcess = _RecordingProcessAdapter(<ProcessOutcome>[
@@ -160,7 +185,9 @@ class _RecordingProcessAdapter implements ProcessAdapter {
   }) async {
     invocations.add(<String>[executable, ...arguments]);
     if (_outcomes.isEmpty) {
-      throw StateError('unexpected invocation: $executable ${arguments.join(' ')}');
+      throw StateError(
+        'unexpected invocation: $executable ${arguments.join(' ')}',
+      );
     }
     return _outcomes.removeAt(0);
   }
