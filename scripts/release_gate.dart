@@ -17,7 +17,23 @@ const _prerequisiteCommand = <String>[
   'scripts/verify_codegen_reproducibility.sh',
 ];
 const _rawArtifactRoot = 'build/release_gate/';
+const _attestationMetadataPath = 'docs/testing/RELEASE_COMPATIBILITY.md';
 const _gateTimeout = Duration(minutes: 20);
+const _additionalCandidateInputs = <String>{
+  'docs/testing/STABLE_BASELINE.json',
+  'scripts/verify_codegen_reproducibility.sh',
+  'scripts/release_gate.dart',
+  'scripts/release_gate/models.dart',
+  'scripts/release_gate/process_adapter.dart',
+  '.github/workflows/audit.yml',
+  '.github/workflows/device-e2e.yml',
+};
+
+/// RPT-A grants metadata treatment to one report path only. The raw evidence
+/// root is ignored and never becomes a candidate input; every other path is in
+/// candidate scope.
+bool isCandidateScopedPath(String path) =>
+    path != _attestationMetadataPath && !path.startsWith(_rawArtifactRoot);
 
 class ReleaseGateOptions {
   const ReleaseGateOptions({required this.scope, required this.resultPath});
@@ -122,6 +138,47 @@ Future<GateResult> runReleaseGate({
       );
     }
 
+    CandidateFingerprint? after;
+    try {
+      after = _captureCandidate(
+        root,
+        trackedInputPaths: trackedInputPaths,
+        requireClean: false,
+      ).fingerprint;
+    } on _CandidateFailure {
+      // A deleted critical input is final drift, not a new eligible candidate.
+    }
+    if (after == null ||
+        !_workingTreeIsClean(root) ||
+        !candidate.matches(after)) {
+      stages.add(
+        _stage(
+          stage: GateStage.finalDrift,
+          command: const <String>['git', 'candidate-snapshot'],
+          exitCode: 1,
+          classification: StageClassification.driftDetected,
+          diagnostic: 'candidate identity changed during release gate',
+        ),
+      );
+      return await _persist(
+        root,
+        resultPath,
+        GateResult(
+          candidate: candidate,
+          verdict: ReleaseVerdict.blocked,
+          stages: stages,
+        ),
+      );
+    }
+    stages.add(
+      _stage(
+        stage: GateStage.finalDrift,
+        command: const <String>['git', 'candidate-snapshot'],
+        exitCode: 0,
+        classification: StageClassification.succeeded,
+        diagnostic: 'candidate identity remains unchanged',
+      ),
+    );
     return await _persist(
       root,
       resultPath,
@@ -228,18 +285,20 @@ String _renderPreview(GateResult result) {
 }
 
 ({CandidateFingerprint fingerprint, Map<String, String> expectedDigests})
-_captureCandidate(Directory root, {List<String>? trackedInputPaths}) {
+_captureCandidate(
+  Directory root, {
+  List<String>? trackedInputPaths,
+  bool requireClean = true,
+}) {
   final commit = _git(root, const <String>['rev-parse', '--verify', 'HEAD']);
-  final status = _git(root, const <String>[
-    'status',
-    '--porcelain',
-    '--untracked-files=all',
-  ]);
-  if (status.isNotEmpty) {
+  if (requireClean && !_workingTreeIsClean(root)) {
     throw const _CandidateFailure('candidate checkout is not clean');
   }
   final expected = trackedInputPaths == null
-      ? _baselineTrackedInputDigests(root)
+      ? <String, String>{
+          ..._baselineTrackedInputDigests(root),
+          for (final path in _additionalCandidateInputs) path: '',
+        }
       : <String, String>{for (final path in trackedInputPaths) path: ''};
   final digests = <String, String>{};
   for (final entry in expected.entries) {
@@ -264,6 +323,12 @@ CandidateFingerprint validateCandidate(
   Directory root, {
   List<String>? trackedInputPaths,
 }) => _captureCandidate(root, trackedInputPaths: trackedInputPaths).fingerprint;
+
+bool _workingTreeIsClean(Directory root) => _git(root, const <String>[
+  'status',
+  '--porcelain',
+  '--untracked-files=all',
+]).isEmpty;
 
 Map<String, String> _baselineTrackedInputDigests(Directory root) {
   final manifest = File('${root.path}/docs/testing/STABLE_BASELINE.json');

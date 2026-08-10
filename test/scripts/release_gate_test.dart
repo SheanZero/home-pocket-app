@@ -140,7 +140,7 @@ void main() {
 
         expect(result.verdict, ReleaseVerdict.pass);
         expect(result.candidate!.commit, expected.commit);
-        expect(result.stages, hasLength(2));
+        expect(result.stages, hasLength(3));
         expect(adapter.invocations, <List<String>>[
           const <String>['bash', 'scripts/verify_codegen_reproducibility.sh'],
         ]);
@@ -228,6 +228,92 @@ void main() {
       },
     );
 
+    test(
+      'a prerequisite mutation fails the final candidate drift proof',
+      () async {
+        final adapter = _MutatingProcessAdapter(
+          fixture.root,
+          'config/release_gate_input.txt',
+          'mutated by child process\n',
+        );
+
+        final result = await runReleaseGate(
+          workingDirectory: fixture.root,
+          processAdapter: adapter,
+          trackedInputPaths: const <String>[
+            'pubspec.lock',
+            'config/release_gate_input.txt',
+          ],
+          resultPath: 'build/release_gate/mutated.json',
+        );
+
+        expect(result.verdict, ReleaseVerdict.blocked);
+        expect(result.stages.last.stage, GateStage.finalDrift);
+        expect(
+          result.stages.last.classification,
+          StageClassification.driftDetected,
+        );
+      },
+    );
+
+    test(
+      'ignored raw artifacts do not alter the candidate fingerprint',
+      () async {
+        final result = await runReleaseGate(
+          workingDirectory: fixture.root,
+          processAdapter: _MutatingProcessAdapter(
+            fixture.root,
+            'build/release_gate/child.raw.log',
+            'ignored child artifact\n',
+          ),
+          trackedInputPaths: const <String>[
+            'pubspec.lock',
+            'config/release_gate_input.txt',
+          ],
+          resultPath: 'build/release_gate/ignored.json',
+        );
+
+        expect(result.verdict, ReleaseVerdict.pass);
+        expect(
+          result.stages.last.classification,
+          StageClassification.succeeded,
+        );
+      },
+    );
+
+    test(
+      'untracked generated output blocks before the prerequisite launches',
+      () async {
+        File('${fixture.root.path}/lib/generated/rogue.g.dart')
+          ..parent.createSync(recursive: true)
+          ..writeAsStringSync('generated residue\n');
+        final adapter = _RecordingProcessAdapter(const <ProcessOutcome>[]);
+
+        final result = await runReleaseGate(
+          workingDirectory: fixture.root,
+          processAdapter: adapter,
+          trackedInputPaths: const <String>[
+            'pubspec.lock',
+            'config/release_gate_input.txt',
+          ],
+          resultPath: 'build/release_gate/generated-residue.json',
+        );
+
+        expect(result.verdict, ReleaseVerdict.blocked);
+        expect(adapter.invocations, isEmpty);
+      },
+    );
+
+    test('only RPT-A metadata and ignored raw artifacts are outside scope', () {
+      expect(
+        isCandidateScopedPath('docs/testing/RELEASE_COMPATIBILITY.md'),
+        isFalse,
+      );
+      expect(isCandidateScopedPath('build/release_gate/raw.log'), isFalse);
+      expect(isCandidateScopedPath('docs/testing/other_report.md'), isTrue);
+      expect(isCandidateScopedPath('lib/main.dart'), isTrue);
+    });
+
     test('requires the repository-owned sole authority', () {
       expect(source.existsSync(), isTrue);
     });
@@ -298,6 +384,30 @@ class _RecordingProcessAdapter implements ProcessAdapter {
       throw StateError('no process outcome configured');
     }
     return _outcomes.removeAt(0);
+  }
+}
+
+class _MutatingProcessAdapter implements ProcessAdapter {
+  _MutatingProcessAdapter(this.root, this.relativePath, this.contents);
+
+  final Directory root;
+  final String relativePath;
+  final String contents;
+
+  @override
+  Future<ProcessOutcome> run(
+    String executable,
+    List<String> arguments, {
+    required Duration timeout,
+    required String workingDirectory,
+  }) async {
+    final file = File('${root.path}/$relativePath');
+    file.parent.createSync(recursive: true);
+    file.writeAsStringSync(contents);
+    return const ProcessOutcome(
+      exitCode: 0,
+      diagnostic: 'child process passed',
+    );
   }
 }
 
