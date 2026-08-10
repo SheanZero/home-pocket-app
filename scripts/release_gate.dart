@@ -395,6 +395,7 @@ Future<GateResult> runReleaseGate({
         _platformStage(
           GateStage.ios,
           ios.isReady &&
+              validateIosSimulatorEvidence(ios) &&
               validatePlatformInventory(
                 discovered: inventory,
                 executed: ios.executedTests,
@@ -423,6 +424,7 @@ Future<GateResult> runReleaseGate({
           GateStage.android,
           android != null &&
               android.result == 'PASS' &&
+              android_lane.validatePhase62AndroidEvidence(android).isEmpty &&
               androidInventoryIssues.isEmpty,
           android?.failure ?? androidInventoryIssues.join('; '),
         ),

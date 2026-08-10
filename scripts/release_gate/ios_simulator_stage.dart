@@ -542,7 +542,14 @@ Future<IosSimulatorEvidence> runIosSimulatorStage({
 bool validateIosSimulatorEvidence(IosSimulatorEvidence evidence) {
   final profile = evidence.profile;
   final recordedPaths = evidence.testRecords.map((record) => record.testPath);
-  return profile.deviceKind == 'simulator' &&
+  return evidence.failure == null &&
+      evidence.preflightRan &&
+      validateIosIntegrationMatrix(
+        discovered: evidence.discoveredTests,
+        executed: evidence.executedTests,
+        allowedSkips: evidence.allowedSkips,
+      ) &&
+      profile.deviceKind == 'simulator' &&
       profile.model.startsWith('iPhone') &&
       profile.runtime.startsWith('com.apple.CoreSimulator.SimRuntime.iOS-') &&
       RegExp(r'^simulator-[a-f0-9]{16}$').hasMatch(profile.redactedToken) &&
@@ -552,7 +559,8 @@ bool validateIosSimulatorEvidence(IosSimulatorEvidence evidence) {
       evidence.testRecords.every(
         (record) =>
             record.candidateCommit == evidence.candidate.commit &&
-            evidence.executedTests.contains(record.testPath),
+            evidence.executedTests.contains(record.testPath) &&
+            record.exitCode == 0,
       ) &&
       evidence.commands.every(
         (command) => command.every((value) => !value.contains('UDID')),
