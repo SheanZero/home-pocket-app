@@ -137,6 +137,59 @@ class ResumeCheckpoint {
     );
   }
 
+  factory ResumeCheckpoint.fromJson(Map<String, Object?> value) {
+    Map<String, String> strings(Object? source, String field) {
+      if (source is! Map) throw FormatException('checkpoint $field is invalid');
+      final result = <String, String>{};
+      for (final entry in source.entries) {
+        if (entry.key is! String || entry.value is! String) {
+          throw FormatException('checkpoint $field is invalid');
+        }
+        result[entry.key as String] = entry.value as String;
+      }
+      return result;
+    }
+
+    final candidateValue = value['candidate'];
+    if (candidateValue is! Map || candidateValue['commit'] is! String) {
+      throw const FormatException('checkpoint candidate is invalid');
+    }
+    final stageValues = strings(
+      value['completed_stage_digests'],
+      'completed_stage_digests',
+    );
+    final stages = <GateStage, String>{};
+    for (final entry in stageValues.entries) {
+      final matches = GateStage.values.where(
+        (stage) => stage.name == entry.key,
+      );
+      if (matches.length != 1) {
+        throw const FormatException('checkpoint stage is invalid');
+      }
+      stages[matches.single] = entry.value;
+    }
+    if (value['stage_graph_version'] is! int || value['integrity'] is! String) {
+      throw const FormatException('checkpoint integrity is invalid');
+    }
+    return ResumeCheckpoint._(
+      candidate: CandidateFingerprint(
+        commit: candidateValue['commit'] as String,
+        inputDigests: strings(candidateValue['input_digests'], 'input_digests'),
+      ),
+      configurationDigests: strings(
+        value['configuration_digests'],
+        'configuration_digests',
+      ),
+      environmentFingerprint: strings(
+        value['environment_fingerprint'],
+        'environment_fingerprint',
+      ),
+      stageGraphVersion: value['stage_graph_version'] as int,
+      completedStageDigests: stages,
+      integrity: value['integrity'] as String,
+    );
+  }
+
   final CandidateFingerprint candidate;
   final Map<String, String> configurationDigests;
   final Map<String, String> environmentFingerprint;
@@ -219,6 +272,19 @@ GateStage? earliestInvalidatedStage(
 ) {
   for (final stage in GateStage.values) {
     if (prior.containsKey(stage) && prior[stage] != current[stage]) {
+      return stage;
+    }
+  }
+  return null;
+}
+
+/// Treats absent records from an interrupted checkpoint as needing execution.
+GateStage? earliestPendingStage(
+  Map<GateStage, String> prior,
+  Map<GateStage, String> current,
+) {
+  for (final stage in GateStage.values) {
+    if (current.containsKey(stage) && prior[stage] != current[stage]) {
       return stage;
     }
   }
@@ -315,4 +381,219 @@ class ReleaseExecutionGraph {
     }
     return List<StageResult>.unmodifiable(results);
   }
+}
+
+const _targetedHostTests = <String>[
+  'flutter',
+  'test',
+  'test/scripts/release_gate_test.dart',
+  'test/scripts/coverage_gate_test.dart',
+  '-r',
+  'expanded',
+];
+const _fullCoverageSuite = <String>['flutter', 'test', '--coverage'];
+const _serialCoverageSuite = <String>[
+  'flutter',
+  'test',
+  '--coverage',
+  '--concurrency=1',
+];
+const _coverageFilter = <String>[
+  'coverde',
+  'filter',
+  '--input',
+  'coverage/lcov.info',
+  '--output',
+  'coverage/lcov_clean.info',
+  '--mode',
+  'w',
+  '--filters',
+  r'\.g\.dart$,\.freezed\.dart$,\.mocks\.dart$,^lib/generated/',
+];
+const _coverageGate = <String>[
+  'dart',
+  'run',
+  'scripts/coverage_gate.dart',
+  '--list',
+  '.planning/audit/coverage-gate-required-files.txt',
+  '--deferred',
+  '.planning/audit/coverage-gate-deferred.txt',
+  '--threshold',
+  '70',
+  '--lcov',
+  'coverage/lcov_clean.info',
+];
+
+/// The host-only tail of the release graph. It composes existing lower-level
+/// commands without parsing LCOV or duplicating their policy.
+class HostExecutionGraph {
+  Future<List<StageResult>> run({
+    required ProcessAdapter processAdapter,
+    required String workingDirectory,
+    Duration timeout = const Duration(minutes: 20),
+  }) async {
+    final stages = <StageResult>[];
+    stages.add(
+      await _runHostNode(
+        stage: GateStage.targetRegressions,
+        command: _targetedHostTests,
+        processAdapter: processAdapter,
+        workingDirectory: workingDirectory,
+        timeout: timeout,
+      ),
+    );
+    final fullSuite = await _runHostNode(
+      stage: GateStage.hostSuite,
+      command: _fullCoverageSuite,
+      processAdapter: processAdapter,
+      workingDirectory: workingDirectory,
+      timeout: timeout,
+      deferRunnerTimeout: true,
+    );
+    stages.add(fullSuite);
+
+    if (fullSuite.attempts.last.failureClass ==
+        FailureClass.runnerTimeout.name) {
+      final affectedFiles = extractTimedOutTestFiles(fullSuite.diagnostic);
+      if (affectedFiles.isEmpty) {
+        stages.add(
+          _blockedStage(
+            stage: GateStage.timeoutDiagnosis,
+            command: const <String>['flutter', 'test'],
+            diagnostic: 'recognized timeout did not identify test files',
+          ),
+        );
+        return List<StageResult>.unmodifiable(stages);
+      }
+      stages.add(
+        await _runHostNode(
+          stage: GateStage.timeoutDiagnosis,
+          command: <String>[
+            'flutter',
+            'test',
+            ...affectedFiles,
+            '-r',
+            'expanded',
+          ],
+          processAdapter: processAdapter,
+          workingDirectory: workingDirectory,
+          timeout: timeout,
+        ),
+      );
+      stages.add(
+        await _runHostNode(
+          stage: GateStage.serialHostSuite,
+          command: _serialCoverageSuite,
+          processAdapter: processAdapter,
+          workingDirectory: workingDirectory,
+          timeout: timeout,
+          deferRunnerTimeout: true,
+        ),
+      );
+    }
+
+    stages.add(
+      await _runHostNode(
+        stage: GateStage.coverageFilter,
+        command: _coverageFilter,
+        processAdapter: processAdapter,
+        workingDirectory: workingDirectory,
+        timeout: timeout,
+      ),
+    );
+    stages.add(
+      await _runHostNode(
+        stage: GateStage.coverageGate,
+        command: _coverageGate,
+        processAdapter: processAdapter,
+        workingDirectory: workingDirectory,
+        timeout: timeout,
+      ),
+    );
+    return List<StageResult>.unmodifiable(stages);
+  }
+}
+
+Future<StageResult> _runHostNode({
+  required GateStage stage,
+  required List<String> command,
+  required ProcessAdapter processAdapter,
+  required String workingDirectory,
+  required Duration timeout,
+  bool deferRunnerTimeout = false,
+}) async {
+  final started = DateTime.now().toUtc();
+  final attempts = <StageAttemptRecord>[];
+  late ProcessOutcome outcome;
+  late FailureClass failure;
+  for (var attempt = 0; attempt < 2; attempt++) {
+    outcome = await processAdapter.run(
+      command.first,
+      command.sublist(1),
+      timeout: timeout,
+      workingDirectory: workingDirectory,
+    );
+    failure = classifyFailure(outcome);
+    attempts.add(
+      StageAttemptRecord(
+        ordinal: attempt + 1,
+        exitCode: outcome.exitCode,
+        failureClass: failure.name,
+        diagnostic: scrubDiagnostic(outcome.diagnostic),
+      ),
+    );
+    if (failure == FailureClass.succeeded ||
+        (deferRunnerTimeout && failure == FailureClass.runnerTimeout) ||
+        retryDecisionFor(failure, priorAttempts: attempt) ==
+            RetryDecision.stop) {
+      break;
+    }
+  }
+  return StageResult(
+    stage: stage,
+    command: List<String>.unmodifiable(command),
+    startedAtUtc: started,
+    finishedAtUtc: DateTime.now().toUtc(),
+    exitCode: outcome.exitCode,
+    classification: failure == FailureClass.succeeded
+        ? StageClassification.succeeded
+        : StageClassification.commandFailed,
+    diagnostic: scrubDiagnostic(outcome.diagnostic),
+    attempts: List<StageAttemptRecord>.unmodifiable(attempts),
+  );
+}
+
+StageResult _blockedStage({
+  required GateStage stage,
+  required List<String> command,
+  required String diagnostic,
+}) {
+  final now = DateTime.now().toUtc();
+  return StageResult(
+    stage: stage,
+    command: command,
+    startedAtUtc: now,
+    finishedAtUtc: now,
+    exitCode: 1,
+    classification: StageClassification.unknown,
+    diagnostic: diagnostic,
+    attempts: const <StageAttemptRecord>[
+      StageAttemptRecord(
+        ordinal: 1,
+        exitCode: 1,
+        failureClass: 'unknown',
+        diagnostic: 'recognized timeout did not identify test files',
+      ),
+    ],
+  );
+}
+
+/// Extracts only repository-relative test files. Missing or ambiguous output
+/// yields an empty set, which the caller treats as a blocking timeout result.
+List<String> extractTimedOutTestFiles(String diagnostic) {
+  final matches = RegExp(
+    r'(?<![A-Za-z0-9_])(test/[A-Za-z0-9_./-]+\.dart)',
+  ).allMatches(diagnostic).map((match) => match.group(1)!).toSet().toList();
+  matches.sort();
+  return List<String>.unmodifiable(matches);
 }

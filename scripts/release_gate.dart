@@ -8,12 +8,14 @@ import 'package:crypto/crypto.dart';
 
 import 'release_gate/models.dart';
 import 'release_gate/process_adapter.dart';
+import 'release_gate/execution.dart';
 
 export 'release_gate/models.dart'
     show ReleaseGateRetry, ReleaseVerdict, validateResume;
 export 'release_gate/execution.dart'
     show
         FailureClass,
+        HostExecutionGraph,
         ReleaseExecutionGraph,
         ResumeCheckpoint,
         RetryDecision,
@@ -32,6 +34,7 @@ const _additionalCandidateInputs = <String>{
   'scripts/verify_codegen_reproducibility.sh',
   'scripts/release_gate.dart',
   'scripts/release_gate/models.dart',
+  'scripts/release_gate/execution.dart',
   'scripts/release_gate/process_adapter.dart',
   '.github/workflows/audit.yml',
   '.github/workflows/device-e2e.yml',
@@ -123,14 +126,12 @@ Future<GateResult> runReleaseGate({
   final stages = <StageResult>[];
   CandidateFingerprint? candidate;
   try {
-    if (scope != 'tracer') {
-      // Host composition lands in Task 2. Never accept a host resume as a
-      // tracer run, because that could silently skip mandatory stages.
-      throw const _CandidateFailure('host execution graph is not configured');
+    if (scope != 'tracer' && scope != 'host') {
+      throw const _CandidateFailure('full execution graph is not configured');
     }
-    if (resume) {
-      throw const _CandidateFailure('resume checkpoint is not configured');
-    }
+    // A missing or untrusted checkpoint is deliberately equivalent to a full
+    // run. Candidate capture below happens before every child process, so
+    // `--resume` can never weaken the clean-state eligibility contract.
     _assertIgnoredArtifactPath(root, resultPath);
     final captured = _captureCandidate(
       root,
@@ -175,6 +176,26 @@ Future<GateResult> runReleaseGate({
           stages: stages,
         ),
       );
+    }
+
+    if (scope == 'host') {
+      final hostStages = await HostExecutionGraph().run(
+        processAdapter: processAdapter ?? const SystemProcessAdapter(),
+        workingDirectory: root.path,
+        timeout: _gateTimeout,
+      );
+      stages.addAll(hostStages);
+      if (hostStages.any((stage) => !stage.succeeded)) {
+        return await _persist(
+          root,
+          resultPath,
+          GateResult(
+            candidate: candidate,
+            verdict: ReleaseVerdict.blocked,
+            stages: stages,
+          ),
+        );
+      }
     }
 
     CandidateFingerprint? after;
