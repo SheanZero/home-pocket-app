@@ -1,19 +1,10 @@
-# Permanent gate — do not weaken without ADR amendment.
-# See docs/arch/03-adr/ADR-011_Codebase_Cleanup_Initiative_Outcome.md.
-# Phase 8 D-05: the four guardrails below (import_lint / analyzer plugins /
-# coverde per-file >=70% / sqlite3_flutter_libs reject) are blocking on
-# every PR + push to main. The coverage job intentionally has no PR-only
-# guard, and every guardrail step is hard-failing by design.
-# Threshold history: 80% (Phase 2 BASE-06) → 70% (Phase 8 amendment 2026-04-28,
-# user directive: post-cleanup coverage 74.6% short of 80%; raise revisited after
-# v1 feature work completes — see backlog ID coverage-baseline-review).
-
+# Phase 62 makes release_gate.dart the only pass/fail authority for PRs.
+# Secondary audit scanners remain artifact producers; their outcomes never define
+# the candidate verdict.
 name: audit
 
 on:
   pull_request:
-    branches: [main]
-  push:
     branches: [main]
 
 concurrency:
@@ -21,7 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  static-analysis:
+  release-gate-host:
+    name: Release gate host scope
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,18 +21,22 @@ jobs:
         with:
           channel: stable
           flutter-version: 3.44.8
-      - uses: actions/cache@v4
+      - name: Run the repository-owned PR authority
+        run: dart run scripts/release_gate.dart --scope=host
+
+  audit-scanners:
+    name: Supplemental audit artifacts
+    needs: release-gate-host
+    if: ${{ always() }}
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
         with:
-          path: |
-            ~/.pub-cache
-            .dart_tool/
-          key: pub-${{ hashFiles('pubspec.lock') }}
-      # Phase 58 D-08/D-09 — the sole Stable owner of locked retrieval,
-      # exact-baseline verification, two clean generation passes, analysis,
-      # architecture enforcement, and reversible negative tooling proof.
-      - name: Reproducible generation and architecture contract
-        run: bash scripts/verify_codegen_reproducibility.sh
-      - run: dart pub global activate coverde 0.3.0+1
+          channel: stable
+          flutter-version: 3.44.8
+      - run: flutter pub get --enforce-lockfile
       - name: Audit scanners
         run: |
           bash scripts/audit_layer.sh
@@ -50,6 +46,7 @@ jobs:
       - name: Merge findings
         run: dart run scripts/merge_findings.dart
       - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
         with:
           name: audit-issues
           path: |
@@ -57,78 +54,3 @@ jobs:
             .planning/audit/ISSUES.md
             .planning/audit/shards/*.json
             .planning/audit/agent-shards/*.json
-
-  guardrails:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: 3.44.8
-      - run: flutter pub get --enforce-lockfile
-
-      - name: Android release signing contract
-        run: flutter test test/architecture/android_release_signing_contract_test.dart
-
-      - name: Release preflight contract
-        run: flutter test test/scripts/release_preflight_test.dart
-
-      # AUDIT-09 — obsolete/plaintext native SQLite packages are forbidden.
-      - name: Reject legacy SQLite Flutter libraries
-        run: |
-          if grep -Eq 'sqlite3_flutter_libs|sqlcipher_flutter_libs' pubspec.lock; then
-            echo "::error::legacy SQLite Flutter library detected — sqlite3 Native Assets must provide SQLCipher"
-            exit 1
-          fi
-
-  coverage:
-    runs-on: ubuntu-latest
-    needs: static-analysis
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: 3.44.8
-      - run: flutter pub get --enforce-lockfile
-      - run: dart pub global activate coverde 0.3.0+1
-      - run: flutter test --coverage
-      - name: Strip generated files from lcov
-        # WR-08 (defense-in-depth): strict-mode + remove any stale
-        # lcov_clean.info before invoking coverde filter so a partial write
-        # from a prior step cannot poison the downstream coverage gate.
-        run: |
-          set -euo pipefail
-          rm -f coverage/lcov_clean.info
-          coverde filter \
-            --input coverage/lcov.info \
-            --output coverage/lcov_clean.info \
-            --mode w \
-            --filters '\.g\.dart$,\.freezed\.dart$,\.mocks\.dart$,^lib/generated/'
-      - name: Per-file coverage gate
-        # A compact risk manifest contains only hand-written executable
-        # trust-boundary code. Missing LCOV records are failures; generated
-        # and non-executable inputs are documented outside this list.
-        # --deferred remains file-scoped and rationale-required.
-        run: dart run scripts/coverage_gate.dart --list .planning/audit/coverage-gate-required-files.txt --deferred .planning/audit/coverage-gate-deferred.txt --threshold 70 --lcov coverage/lcov_clean.info
-      - uses: VeryGoodOpenSource/very_good_coverage@v2
-        # Phase 2 close (BASE-06 / D-05): blocking. Threshold 80 → 70 (Phase 8 amendment 2026-04-28).
-        with:
-          path: coverage/lcov_clean.info   # Phase 2 BASE-02: cleaned by coverde filter upstream
-          min_coverage: 70
-          exclude: |
-            **/*.g.dart
-            **/*.freezed.dart
-            **/*.mocks.dart
-            lib/generated/**
-      - name: Generate coverage baseline artifacts
-        run: dart run scripts/coverage_baseline.dart
-      - uses: actions/upload-artifact@v4
-        with:
-          name: coverage-baseline
-          path: |
-            .planning/audit/coverage-baseline.txt
-            .planning/audit/coverage-baseline.json
-            .planning/audit/files-needing-tests.txt
-            .planning/audit/files-needing-tests.json

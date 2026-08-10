@@ -1,30 +1,11 @@
-# Device-level release gate. Host `flutter test` and workflow declaration are
-# not runtime substitutes: these jobs boot Android/iOS and exercise the full
-# integration_test directory against the native SQLCipher library.
+# Phase 62 main-merge release gate. The Apple-Silicon job below is the sole
+# mandatory platform verdict; GitHub/Intel x86 evidence remains supplemental.
 name: device-e2e
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [main]
-    paths:
-      - "lib/**"
-      - "integration_test/**"
-      - "android/**"
-      - "ios/**"
-      - "pubspec.yaml"
-      - "pubspec.lock"
-      - ".github/workflows/device-e2e.yml"
   push:
     branches: [main]
-    paths:
-      - "lib/**"
-      - "integration_test/**"
-      - "android/**"
-      - "ios/**"
-      - "pubspec.yaml"
-      - "pubspec.lock"
-      - ".github/workflows/device-e2e.yml"
 
 concurrency:
   group: device-e2e-${{ github.ref }}
@@ -34,12 +15,39 @@ permissions:
   contents: read
 
 jobs:
+  release-gate-full:
+    name: Apple-Silicon full release gate
+    # CI-A: owner-operated runner authorization. A missing/offline runner stays
+    # queued or fails; it is never replaced by GitHub-hosted x86 evidence.
+    runs-on: [self-hosted, macOS, ARM64, happy-pocket-release]
+    timeout-minutes: 120
+    env:
+      PHASE62_CI_TOPOLOGY: CI-A
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.8
+          cache: true
+      - name: Run the repository-owned main authority
+        run: dart run scripts/release_gate.dart --scope=full
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: release-gate-full-evidence
+          path: build/release_gate/
+          if-no-files-found: warn
+
   android-device-e2e:
-    # Supplemental x86_64 runtime lane for GitHub/Intel hosts. The local Apple
-    # Silicon arm64-v8a primary lane is executed by the checked-in verifier.
+    # Supplemental x86_64 runtime lane for GitHub/Intel hosts. Its outcome is
+    # a named limitation and cannot block or satisfy the CI-A aggregate verdict.
     name: Android Emulator supplemental suite (API 36 x86_64 GitHub/Intel)
+    continue-on-error: true
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      PHASE62_X86_CLASSIFICATION: supplemental
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -58,7 +66,9 @@ jobs:
             | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - name: Run device integration suite
+      - id: integration
+        name: Run device integration suite
+        continue-on-error: true
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 36
@@ -68,41 +78,24 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 900
           script: flutter test integration_test/ -d emulator-5554 -r expanded
-      - name: Regenerate clean Android release metadata after integration tests
-        # This proves an integration-test registrant cannot contaminate the
-        # next release candidate. It only generates Android release metadata,
-        # so it does not consume production signing credentials.
+      - id: preflight
+        name: Regenerate clean Android release metadata after integration tests
+        if: ${{ always() }}
+        continue-on-error: true
         run: bash scripts/release_preflight.sh --platform android
-
-  ios-device-e2e:
-    name: iOS device smoke (simulator)
-    runs-on: macos-15
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: 3.44.8
-          cache: true
-      - run: flutter pub get --enforce-lockfile
-      - name: Boot an available iPhone simulator
-        shell: bash
+      - name: Record supplemental x86 outcome
+        if: ${{ always() }}
         run: |
-          set -euo pipefail
-          device_id="$(xcrun simctl list devices available \
-            | awk -F '[()]' '/iPhone/ && /(Shutdown|Booted)/ {print $2; exit}')"
-          if [[ -z "$device_id" ]]; then
-            echo "::error::No available iPhone simulator runtime"
-            exit 1
-          fi
-          xcrun simctl boot "$device_id" 2>/dev/null || true
-          xcrun simctl bootstatus "$device_id" -b
-          echo "IOS_DEVICE_ID=$device_id" >> "$GITHUB_ENV"
-      - name: Run device integration suite
-        run: flutter test integration_test/ -d "$IOS_DEVICE_ID" -r expanded
-      - name: Rebuild a clean unsigned iOS release candidate after integration tests
-        # The script builds an unsigned iOS release artifact, then scans its
-        # binary after excluding the dev-only integration_test dependency.
-        # Signed IPA creation remains a separately credentialed release action.
-        run: bash scripts/release_preflight.sh --platform ios
+          mkdir -p build/release_gate
+          printf '{"classification":"supplemental","integration":"%s","preflight":"%s"}\n' \
+            "${{ steps.integration.outcome }}" "${{ steps.preflight.outcome }}" \
+            > build/release_gate/supplemental-x86.json
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: release-gate-supplemental-x86
+          path: build/release_gate/supplemental-x86.json
+          if-no-files-found: error
+      - name: Surface supplemental limitation
+        if: ${{ steps.integration.outcome == 'failure' || steps.preflight.outcome == 'failure' }}
+        run: exit 1

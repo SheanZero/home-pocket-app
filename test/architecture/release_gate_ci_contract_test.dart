@@ -125,10 +125,8 @@ void main() {
         reason: 'CI-A must use only the release-owner-authorized labels',
       );
       expect(
-        RegExp(
-          r'release-gate-full:[\s\S]*?continue-on-error:\s*true',
-        ).hasMatch(device),
-        isFalse,
+        device.split('  android-device-e2e:').first,
+        isNot(contains('continue-on-error: true')),
         reason: 'the mandatory Apple-Silicon result must fail closed',
       );
     },

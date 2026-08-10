@@ -27,11 +27,18 @@ void main() {
       );
       expect(workflow, contains('java-version: "17"'));
       expect(workflow, contains('flutter pub get --enforce-lockfile'));
-      expect(workflow, contains('ios-device-e2e:'));
-      expect(workflow, contains('xcrun simctl bootstatus'));
+      expect(workflow, contains('release-gate-full:'));
+      expect(
+        workflow,
+        contains('runs-on: [self-hosted, macOS, ARM64, happy-pocket-release]'),
+      );
+      expect(
+        workflow,
+        contains('dart run scripts/release_gate.dart --scope=full'),
+      );
       expect(
         RegExp(r'flutter test integration_test/').allMatches(workflow),
-        hasLength(2),
+        hasLength(1),
       );
       expect(
         workflow,
