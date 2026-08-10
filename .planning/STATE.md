@@ -5,8 +5,8 @@ milestone_name: 依赖与原生工具链现代化
 current_phase: 62
 current_phase_name: automated-release-gate-lock
 status: executing
-stopped_at: Completed 62-12-PLAN.md
-last_updated: "2026-08-10T11:50:15.503Z"
+stopped_at: "Blocked 62-13-PLAN.md: release environment explicitly deferred"
+last_updated: "2026-08-10T12:04:45.717Z"
 last_activity: 2026-08-10
 last_activity_desc: Phase 62 execution started
 progress:
@@ -153,6 +153,7 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: 62-11: exit timeout races independently-started stream drains, then uses bounded TERM/KILL recovery before diagnostics are returned.
 - [Phase ?]: 62-11: serialHostSuite is valid evidence; only actual serial or UDID assignments are sensitive.
 - [Phase ?]: Direct Android package paths resolve PHASE61_JAVA_HOME before JAVA_HOME, require exact JDK 17, and export the verified home without consulting PHASE61_SIGNING_EVIDENCE.
+- [Phase ?]: 62-13 owner decision: defer unavailable local JDK 17, Android API 36 arm64 Emulator, and CoreSimulator setup; do not run the targeted union or the exactly-once full gate. Retain the prior BLOCKED evidence only; CI-A is human_needed/UNVERIFIED and Android physical-device validation is NOT_PERFORMED_NOT_CLAIMED.
 
 ### Quick Tasks Completed
 
@@ -342,9 +343,9 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-08-10T11:50:15.488Z
-Stopped at: Completed 62-12-PLAN.md
-Resume file: None
+Last session: 2026-08-10T12:04:45.701Z
+Stopped at: Blocked 62-13-PLAN.md: release environment explicitly deferred
+Resume file: .planning/phases/62-automated-release-gate-lock/62-13-PLAN.md
 
 ## Performance Metrics
 
@@ -567,3 +568,4 @@ Resume file: None
 - **49-06 Task 3 (blocking human-verify):** run `flutter test integration_test/merchant_migration_ladder_test.dart` on a booted simulator/device; confirm `PRAGMA cipher_version` non-empty + fresh-v22/v21→v22 index+seed+categoryId∈L2 assertions + D-08 ~10-row merchant spot-check. Cannot run in headless orchestrator (no simulator).
 - ~~Phase 60 Plan 02 compile convergence was incomplete.~~ **RESOLVED (60-08 + 60-09):** clean linkage passes, retained/from-zero graphs and iOS 15 floors match, and all six unsigned compile-only matrix rows pass.
 - ~~Phase 60 current-schema Simulator lifecycle was pending plan 60-10.~~ **RESOLVED:** the allowlisted production `AppDatabase` lifecycle emitted `RUNTIME_PASS` on a booted iPhone 17 Pro / iOS 26.2 Simulator; compile evidence remains separately attributable.
+- Plan 62-13 is blocked: the owner deferred the unavailable local JDK 17, Android API 36 google_apis arm64-v8a Emulator, and CoreSimulator prerequisites. No targeted union or current-candidate full gate has run; retain prior BLOCKED evidence, leave CI-A human_needed/UNVERIFIED, and require later Android physical-device validation.

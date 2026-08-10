@@ -57,8 +57,9 @@ created: 2026-08-10
 | 62-08-02 | 08 | 6 | QA-03, QA-04 | T-62-34..36 | Selected RPT lifecycle preserves tested candidate/report binding | architecture + unit | `flutter test test/architecture/release_gate_ci_contract_test.dart test/scripts/release_gate_test.dart -r expanded` | W0 dependency | ✅ green |
 | 62-09-01 | 09 | 7 | QA-01..QA-04 | T-62-37..42 | Exact clean candidate completes every mandatory automated gate | end-to-end | `dart run scripts/release_gate.dart --scope=full --result=build/release_gate/final.json` | implemented by 62-03..08 | ❌ red — candidate `a79f41cf` blocked only at `hostSuite`; later test-only fix was not followed by a complete rerun |
 | 62-09-02 | 09 | 7 | QA-01..QA-04 | T-62-39..41 | Selected publication plus validation remain candidate-bound/privacy-safe | end-to-end + architecture | selected publish command, targeted tests, `flutter analyze`, API precheck, `git diff --check` | implemented by 62-08 | ⚠️ partial — report remains unpublished; GitHub verification is owner-manual |
+| 62-13-01 | 13 | 10 | QA-01..QA-04 | T-62-13-01..04 | One current-candidate targeted union and full authority may run only after the required local toolchain and platform prerequisites are available | tracer / end-to-end | not run — user explicitly skipped unavailable local JDK 17, Android API 36 `google_apis` arm64-v8a Emulator, and CoreSimulator setup | existing `final.json` is stale `BLOCKED` evidence for `a79f41cf`, not a current result | ⛔ BLOCKED / NOT_PERFORMED_NOT_CLAIMED — targeted union 0, full-gate invocations 0, CI-A `human_needed` / `UNVERIFIED`, Android physical-device validation `NOT_PERFORMED_NOT_CLAIMED` |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky · ⛔ blocked/not performed*
 
 ---
 
@@ -69,6 +70,20 @@ created: 2026-08-10
 - [x] `test/helpers/release_gate_test_support.dart` — created by Plan 62-01 Task 1 with temporary-Git and synthetic normalized-command-result fixtures; no unit test boots emulators
 
 Plan 62-01 is the only Wave 0 writer. Plans 62-03 and 62-08 explicitly depend on it (directly or through the decision gate) and extend these seams rather than creating them. The Wave 0 production-facing assertions intentionally start RED; Plan 62-03 must turn the behavior seam green, and Plan 62-08 must turn the CI contract green.
+
+---
+
+## Current Execution Hold
+
+On 2026-08-10, the owner explicitly chose to skip configuring the unavailable local JDK 17, Android SDK/API 36 `google_apis` arm64-v8a Emulator, and CoreSimulator prerequisites. This is a decision to defer the environment, not PASS evidence.
+
+- The Task 1 targeted union was not run (count: 0).
+- The Task 1 full release-gate command was not run (count: 0); its exactly-once allowance remains unused.
+- `build/release_gate/final.json` and `final.preview.md` remain the prior ignored `BLOCKED` result for candidate `a79f41cf`; they do not attest the current checkout and must not be published.
+- RPT-A publication was not run. GitHub CI-A remains `human_needed` / `UNVERIFIED`; no executor GitHub action or claim occurred.
+- Android physical-device validation remains `NOT_PERFORMED_NOT_CLAIMED` and requires later human-owned physical-device validation.
+
+Phase 62 remains incomplete and blocked until a prepared environment can execute one current-candidate authority and the owner supplies CI-A attribution for that same candidate.
 
 ---
 
@@ -91,4 +106,4 @@ Plan 62-01 is the only Wave 0 writer. Plans 62-03 and 62-08 explicitly depend on
 - [x] `nyquist_compliant: true` set because the plan provides continuous automated sampling and explicit Wave 0 dependencies
 - [x] `wave_0_complete: true` is set because Plan 62-01 executed and all three Wave 0 files exist
 
-**Approval:** partial — the latest candidate still lacks a complete green rerun and RPT-A publication; GitHub verification is explicitly owner-manual.
+**Approval:** blocked — the environment was explicitly deferred before any Plan 62-13 targeted or full authority invocation. The prior `BLOCKED` evidence remains retained only; RPT-A is unpublished, CI-A is `human_needed` / `UNVERIFIED`, and Android physical-device validation remains `NOT_PERFORMED_NOT_CLAIMED`.
