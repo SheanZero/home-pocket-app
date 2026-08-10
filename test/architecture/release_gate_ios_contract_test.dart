@@ -14,6 +14,9 @@ void main() {
       expect(source, contains("'xcrun'"));
       expect(source, contains("'simctl'"));
       expect(source, contains('bootstatus'));
+      expect(source, contains('discoverIosIntegrationTests'));
+      expect(source, contains('release_preflight.sh'));
+      expect(source, contains("'--platform', 'ios'"));
       expect(phase60.readAsStringSync(), contains('_allowedRuntimeTests'));
     },
   );

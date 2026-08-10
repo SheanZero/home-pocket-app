@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -142,6 +143,94 @@ void main() {
 
       expect(readinessEvidence.failure, IosSimulatorFailure.startupReadiness);
       expect(readinessEvidence.retryEligible, isTrue);
+    });
+
+    test('recursively executes every discovered test then runs iOS preflight',
+        () async {
+      final root = await Directory.systemTemp.createTemp('ios-stage-inventory-');
+      addTearDown(() => root.delete(recursive: true));
+      await File('${root.path}/integration_test/root_test.dart')
+          .create(recursive: true);
+      await File('${root.path}/integration_test/nested/child_test.dart')
+          .create(recursive: true);
+      final process = _RecordingProcessAdapter(<ProcessOutcome>[
+        ProcessOutcome(exitCode: 0, diagnostic: jsonEncode(_iphoneInventory)),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'shutdown'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'erased'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'booted'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'ready'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'child passed'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'root passed'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'preflight passed'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'shutdown'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'erased'),
+      ]);
+      final adapter = SimctlIosSimulatorAdapter(
+        processAdapter: process,
+        candidateProvider: () => candidate,
+      );
+
+      final evidence = await adapter.runFullSuite(
+        IosSimulatorOptions(candidate: candidate, workingDirectory: root.path),
+      );
+
+      expect(evidence.isReady, isTrue);
+      expect(evidence.discoveredTests, <String>[
+        'integration_test/nested/child_test.dart',
+        'integration_test/root_test.dart',
+      ]);
+      expect(evidence.executedTests, evidence.discoveredTests);
+      expect(evidence.allowedSkips, isEmpty);
+      expect(evidence.preflightRan, isTrue);
+      expect(
+        evidence.commands,
+        contains(<String>[
+          'bash',
+          'scripts/release_preflight.sh',
+          '--platform',
+          'ios',
+        ]),
+      );
+      expect(
+        evidence.commands.expand((command) => command),
+        isNot(contains('SIMULATOR-UDID-123')),
+      );
+    });
+
+    test('empty, omitted, duplicate, and unexpected-skip matrices block', () {
+      expect(
+        validateIosIntegrationMatrix(
+          discovered: const <String>['integration_test/only_test.dart'],
+          executed: const <String>[],
+          allowedSkips: const <String, IosAllowedSkip>{},
+        ),
+        isFalse,
+      );
+      expect(
+        validateIosIntegrationMatrix(
+          discovered: const <String>['integration_test/only_test.dart'],
+          executed: const <String>[
+            'integration_test/only_test.dart',
+            'integration_test/only_test.dart',
+          ],
+          allowedSkips: const <String, IosAllowedSkip>{},
+        ),
+        isFalse,
+      );
+      expect(
+        validateIosIntegrationMatrix(
+          discovered: const <String>['integration_test/only_test.dart'],
+          executed: const <String>[],
+          allowedSkips: <String, IosAllowedSkip>{
+            'integration_test/unknown_test.dart': const IosAllowedSkip(
+              reason: 'not in inventory',
+              ownerPhase: '62',
+              exitCondition: 'remove the skip',
+            ),
+          },
+        ),
+        isFalse,
+      );
     });
   });
 }
