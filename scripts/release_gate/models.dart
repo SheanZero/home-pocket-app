@@ -36,8 +36,8 @@ enum StageClassification {
   unknown,
 }
 
-/// Conservative placeholder for the closed retry policy added by Plan 62-04.
-/// Until that policy exists, no failed stage is retryable.
+/// Legacy compatibility enum retained for the tracer's public export.
+/// Plan 62-04's executable retry policy lives in execution.dart.
 enum ReleaseGateRetry { notEligible }
 
 /// Resume is deliberately unavailable until Plan 62-04 supplies its complete
