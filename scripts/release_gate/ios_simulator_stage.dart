@@ -510,6 +510,12 @@ class SimctlIosSimulatorAdapter implements IosSimulatorAdapter {
       command.skip(1).toList(growable: false),
       timeout: _simulatorTimeout,
       workingDirectory: options.workingDirectory,
+      preserveJson:
+          command.length >= 5 &&
+          command[0] == 'xcrun' &&
+          command[1] == 'simctl' &&
+          command[2] == 'list' &&
+          command[3] == 'devices',
     );
   }
 }

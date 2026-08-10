@@ -986,6 +986,7 @@ class _RecordingProcessAdapter implements ProcessAdapter {
     List<String> arguments, {
     required Duration timeout,
     required String workingDirectory,
+    bool preserveJson = false,
   }) async {
     invocations.add(<String>[executable, ...arguments]);
     if (_outcomes.isEmpty) {
@@ -1008,6 +1009,7 @@ class _MutatingProcessAdapter implements ProcessAdapter {
     List<String> arguments, {
     required Duration timeout,
     required String workingDirectory,
+    bool preserveJson = false,
   }) async {
     final file = File('${root.path}/$relativePath');
     file.parent.createSync(recursive: true);
@@ -1028,6 +1030,7 @@ class _ThrowingProcessAdapter implements ProcessAdapter {
     List<String> arguments, {
     required Duration timeout,
     required String workingDirectory,
+    bool preserveJson = false,
   }) => throw StateError('simulated adapter exception');
 }
 

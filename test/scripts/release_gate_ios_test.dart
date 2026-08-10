@@ -151,10 +151,12 @@ void main() {
           'com.apple.CoreSimulator.SimRuntime.iOS-18-2',
         );
         expect(evidence.profile.model, 'iPhone 16');
-        expect(
-          process.invocations[1],
-          const <String>['xcrun', 'simctl', 'shutdown', 'IPHONE-16-A'],
-        );
+        expect(process.invocations[1], const <String>[
+          'xcrun',
+          'simctl',
+          'shutdown',
+          'IPHONE-16-A',
+        ]);
       },
     );
 
@@ -408,6 +410,7 @@ class _RecordingProcessAdapter implements ProcessAdapter {
     List<String> arguments, {
     required Duration timeout,
     required String workingDirectory,
+    bool preserveJson = false,
   }) async {
     invocations.add(<String>[executable, ...arguments]);
     if (_outcomes.isEmpty) {
