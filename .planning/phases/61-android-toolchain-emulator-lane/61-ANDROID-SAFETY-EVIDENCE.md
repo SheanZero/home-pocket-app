@@ -19,6 +19,7 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
     "decision": "hold",
     "candidate_agp": "9.3.1",
     "candidate_gradle": "9.5.0",
+    "candidate_queried_on": "2026-08-09",
     "selected_agp": "8.11.1",
     "selected_gradle": "8.14",
     "selected_kotlin": "2.2.20",

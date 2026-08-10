@@ -30,6 +30,9 @@ void main() {
     evidenceMarkdown: input['evidence']!,
     legacyKgpPlugins:
         legacyPlugins ?? lane.inventoryLegacyKgpPlugins(Directory.current),
+    expectedIntegrationFiles: lane.discoverIntegrationTestFiles(
+      Directory('integration_test'),
+    ),
     allowNotRun: allowNotRun,
   );
 

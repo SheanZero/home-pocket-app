@@ -63,7 +63,7 @@ void main() {
       final unsafe = current.replaceFirst(
         '"source_commit": "e6b5cbf672e885dcbb4446621cc20e7ca05aa058"',
         '"source_commit": "e6b5cbf672e885dcbb4446621cc20e7ca05aa058",\n'
-        '  $mutation',
+            '  $mutation',
       );
       final unsafeFindings = lane.validateAndroidSafetyLane(
         baselineJson: baseline,

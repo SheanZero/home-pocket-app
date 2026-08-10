@@ -164,6 +164,9 @@ List<String> validateCurrentAndroidSafetyLane({required bool allowNotRun}) {
     appBuildGradle: File('android/app/build.gradle.kts').readAsStringSync(),
     evidenceMarkdown: File(evidencePath).readAsStringSync(),
     legacyKgpPlugins: inventoryLegacyKgpPlugins(Directory.current),
+    expectedIntegrationFiles: discoverIntegrationTestFiles(
+      Directory('integration_test'),
+    ),
     allowNotRun: allowNotRun,
   );
 }
@@ -176,6 +179,7 @@ List<String> validateAndroidSafetyLane({
   required String appBuildGradle,
   required String evidenceMarkdown,
   required List<String> legacyKgpPlugins,
+  List<String>? expectedIntegrationFiles,
   required bool allowNotRun,
 }) {
   final issues = <String>[];
@@ -339,6 +343,8 @@ List<String> validateAndroidSafetyLane({
     issues,
     allowNotRun: allowNotRun,
     legacyKgpPlugins: legacyKgpPlugins,
+    baselineLane: lane,
+    expectedIntegrationFiles: expectedIntegrationFiles,
   );
   return issues;
 }
@@ -366,6 +372,8 @@ void _validateEvidence(
   List<String> issues, {
   required bool allowNotRun,
   required List<String> legacyKgpPlugins,
+  required Map<String, Object?> baselineLane,
+  required List<String>? expectedIntegrationFiles,
 }) {
   _expect(
     evidence['schema_version'] == 1,
@@ -395,15 +403,30 @@ void _validateEvidence(
     'evidence Android API must be 36',
   );
   _expect(graph['min_sdk'] == 24, issues, 'evidence minSdk must be 24');
+  _expect(
+    graph['candidate_queried_on'] == candidateQueriedOn,
+    issues,
+    'evidence candidate query date is stale',
+  );
+  _expect(
+    graph['decision'] == baselineLane['decision'],
+    issues,
+    'evidence graph decision must match the baseline lane',
+  );
 
   final encoded = jsonEncode(evidence);
   for (final pattern in <RegExp>[
     RegExp(r'/Users/[^/\s"]+'),
+    RegExp(r'/home/[^/\s"]+'),
     RegExp(
       r'(storePassword|keyPassword|keystore_password|secret)\s*[:=]',
       caseSensitive: false,
     ),
     RegExp(r'emulator-\d{4}'),
+    RegExp(
+      r'"(?:storePassword|keyPassword|keystore(?:_password)?|password|api[_-]?key|api[_-]?token|token|credential|secret|amount|merchant(?:_name)?|note(?:s)?|financial[^"]*)"\s*:\s*(?:"(?!ABSENT|DELETED_AFTER_EVIDENCE|NOT_RUN|<[^>]+>)[^"]+"|\d+)',
+      caseSensitive: false,
+    ),
   ]) {
     if (pattern.hasMatch(encoded)) {
       issues.add(
@@ -413,6 +436,48 @@ void _validateEvidence(
   }
 
   final results = _object(evidence['results']);
+  for (final field in [
+    'source_commit',
+    'candidate_source_commit',
+    'compile_source_commit',
+    'package_source_commit',
+  ]) {
+    _expect(
+      _isCommitHash(evidence[field]),
+      issues,
+      'evidence $field must be a full commit hash',
+    );
+  }
+  _expect(
+    evidence['source_commit'] == evidence['package_source_commit'],
+    issues,
+    'package source commit must match final evidence source commit',
+  );
+  for (final field in [
+    'started_utc',
+    'completed_utc',
+    'compile_started_utc',
+    'compile_completed_utc',
+    'package_started_utc',
+    'package_completed_utc',
+  ]) {
+    _expect(
+      _isUtcTimestamp(evidence[field]),
+      issues,
+      'evidence $field must be an ISO-8601 UTC timestamp',
+    );
+  }
+  final commands = _objectList(evidence['commands']);
+  _expect(commands.isNotEmpty, issues, 'evidence commands are missing');
+  for (final command in commands) {
+    _expect(
+      '${command['command'] ?? ''}'.trim().isNotEmpty &&
+          command['exit_code'] is int &&
+          command['timed_out'] is bool,
+      issues,
+      'evidence command must include command, integer exit_code, and timed_out',
+    );
+  }
   for (final field in [
     'candidate',
     'compile',
@@ -490,11 +555,83 @@ void _validateEvidence(
       validateEmulatorPreparationRecord(preparation.cast<String, Object?>()),
     );
   }
+  if (preparation is Map) {
+    final record = preparation.cast<String, Object?>();
+    _expect(
+      record['source_commit'] == evidence['source_commit'],
+      issues,
+      'emulator source commit must match final evidence source commit',
+    );
+    for (final field in [
+      'started_utc',
+      'completed_utc',
+      'boot_started_utc',
+      'boot_ready_utc',
+    ]) {
+      _expect(
+        _isUtcTimestamp(record[field]),
+        issues,
+        'emulator preparation $field must be an ISO-8601 UTC timestamp',
+      );
+    }
+  }
+  if (stageIndex >= 3) {
+    final artifacts = _objectList(evidence['artifacts']);
+    _expect(
+      artifacts.length == 2,
+      issues,
+      'package evidence must contain both artifacts',
+    );
+    for (final kind in ['release_aab', 'release_apk']) {
+      final artifact = artifacts.where((item) => item['kind'] == kind).toList();
+      _expect(
+        artifact.length == 1,
+        issues,
+        'package evidence is missing $kind',
+      );
+      if (artifact.length == 1) {
+        _expect(
+          _isSha256(artifact.single['sha256']) &&
+              artifact.single['archive_and_content_hygiene'] == 'PASS',
+          issues,
+          '$kind must have a SHA-256 and passing hygiene',
+        );
+      }
+    }
+  }
+  if (stageIndex >= 4 && expectedIntegrationFiles != null) {
+    issues.addAll(
+      validatePrimaryIntegrationMatrix(
+        expectedIntegrationFiles,
+        _objectList(evidence['integration_matrix']),
+      ),
+    );
+  }
+  final supplemental = _object(evidence['x86_64_supplemental']);
+  _expect(
+    supplemental['result'] == 'UNAVAILABLE_LIMITATION' &&
+        supplemental['api'] == requiredAndroidApi &&
+        supplemental['abi'] == supplementalX86AndroidAbi &&
+        '${supplemental['claim'] ?? ''}'.contains('Supplemental only'),
+    issues,
+    'x86_64 evidence must remain an explicit supplemental limitation',
+  );
   _expect(
     results['physical_device'] == 'NOT_PERFORMED_NOT_CLAIMED',
     issues,
     'physical-device result must remain explicitly absent',
   );
+}
+
+bool _isCommitHash(Object? value) =>
+    value is String && RegExp(r'^[0-9a-f]{40}$').hasMatch(value);
+
+bool _isSha256(Object? value) =>
+    value is String && RegExp(r'^[0-9a-f]{64}$').hasMatch(value);
+
+bool _isUtcTimestamp(Object? value) {
+  if (value is! String || !value.endsWith('Z')) return false;
+  return DateTime.tryParse(value) != null;
 }
 
 List<String> inventoryLegacyKgpPlugins(Directory root) {
