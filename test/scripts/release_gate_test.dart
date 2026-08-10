@@ -850,10 +850,7 @@ void main() {
       verdict: ReleaseVerdict.pass,
       stages: <StageResult>[
         _stageForReport(GateStage.candidate, diagnostic: diagnostic),
-        _stageForReport(
-          GateStage.prerequisite,
-          pass: !mandatoryFailure,
-        ),
+        _stageForReport(GateStage.prerequisite, pass: !mandatoryFailure),
         _stageForReport(GateStage.finalDrift),
       ],
       manualOverride: manualOverride,
@@ -869,37 +866,40 @@ void main() {
       ],
     );
 
-    test('only preclassified limitations can follow a green mandatory graph', () {
-      expect(computeVerdict(result()), ReleaseVerdict.pass);
-      expect(
-        computeVerdict(
-          result(
-            limitations: const <ReleaseLimitation>[
-              ReleaseLimitation.supplementalX86,
-            ],
+    test(
+      'only preclassified limitations can follow a green mandatory graph',
+      () {
+        expect(computeVerdict(result()), ReleaseVerdict.pass);
+        expect(
+          computeVerdict(
+            result(
+              limitations: const <ReleaseLimitation>[
+                ReleaseLimitation.supplementalX86,
+              ],
+            ),
           ),
-        ),
-        ReleaseVerdict.passWithLimitations,
-      );
-      expect(
-        computeVerdict(result(mandatoryFailure: true)),
-        ReleaseVerdict.blocked,
-      );
-      expect(
-        computeVerdict(result(manualOverride: true)),
-        ReleaseVerdict.blocked,
-      );
-      expect(
-        computeVerdict(
-          result(
-            limitations: const <ReleaseLimitation>[
-              ReleaseLimitation.unclassified,
-            ],
+          ReleaseVerdict.passWithLimitations,
+        );
+        expect(
+          computeVerdict(result(mandatoryFailure: true)),
+          ReleaseVerdict.blocked,
+        );
+        expect(
+          computeVerdict(result(manualOverride: true)),
+          ReleaseVerdict.blocked,
+        );
+        expect(
+          computeVerdict(
+            result(
+              limitations: const <ReleaseLimitation>[
+                ReleaseLimitation.unclassified,
+              ],
+            ),
           ),
-        ),
-        ReleaseVerdict.blocked,
-      );
-    });
+          ReleaseVerdict.blocked,
+        );
+      },
+    );
 
     test('privacy and schema failures reject JSON before rendering', () {
       final privateResult = result(diagnostic: 'token=not-safe');
@@ -920,7 +920,12 @@ void main() {
 
       expect(first, second);
       expect(first, contains('PASS_WITH_LIMITATIONS'));
-      expect(first, contains('Android physical-device validation: not performed or claimed.'));
+      expect(
+        first,
+        contains(
+          'Android physical-device validation: not performed or claimed.',
+        ),
+      );
       expect(first, isNot(contains('attempts')));
     });
   });

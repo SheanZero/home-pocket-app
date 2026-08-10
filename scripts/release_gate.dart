@@ -105,11 +105,14 @@ ReleaseGateOptions parseReleaseGateOptions(List<String> arguments) {
       if (resume) throw ArgumentError('resume supplied more than once');
       resume = true;
     } else if (argument == '--record-fix') {
-      if (recordFix) throw ArgumentError('record-fix supplied more than once');
+      if (recordFix) {
+        throw ArgumentError('record-fix supplied more than once');
+      }
       recordFix = true;
     } else if (argument.startsWith('--fix-stage=')) {
-      if (fixStage != null)
+      if (fixStage != null) {
         throw ArgumentError('fix-stage supplied more than once');
+      }
       fixStage = argument.substring('--fix-stage='.length);
     } else if (argument.startsWith('--failure-summary=')) {
       if (failureSummary != null) {
@@ -117,8 +120,9 @@ ReleaseGateOptions parseReleaseGateOptions(List<String> arguments) {
       }
       failureSummary = argument.substring('--failure-summary='.length);
     } else if (argument.startsWith('--final-fix=')) {
-      if (finalFix != null)
+      if (finalFix != null) {
         throw ArgumentError('final-fix supplied more than once');
+      }
       finalFix = argument.substring('--final-fix='.length);
     } else if (argument.startsWith('--candidate-changed=')) {
       if (candidateChanged != null) {
