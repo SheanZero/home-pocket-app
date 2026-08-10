@@ -518,6 +518,108 @@ void main() {
         isNull,
       );
     });
+
+    test('host graph runs targeted suite, full coverage, filter and gate once',
+        () async {
+      final adapter = _RecordingProcessAdapter(<ProcessOutcome>[
+        const ProcessOutcome(exitCode: 0, diagnostic: 'targets green'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'full suite green'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'filtered'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'coverage green'),
+      ]);
+
+      final result = await HostExecutionGraph().run(
+        processAdapter: adapter,
+        workingDirectory: '.',
+      );
+
+      expect(result.every((stage) => stage.succeeded), isTrue);
+      expect(result.map((stage) => stage.stage), <GateStage>[
+        GateStage.targetRegressions,
+        GateStage.hostSuite,
+        GateStage.coverageFilter,
+        GateStage.coverageGate,
+      ]);
+      expect(adapter.invocations[0], containsAll(<String>[
+        'flutter',
+        'test',
+        'test/scripts/release_gate_test.dart',
+      ]));
+      expect(adapter.invocations[1], <String>[
+        'flutter',
+        'test',
+        '--coverage',
+      ]);
+      expect(adapter.invocations[3], contains('scripts/coverage_gate.dart'));
+      expect(adapter.invocations[3], contains('--threshold'));
+      expect(adapter.invocations[3], contains('70'));
+    });
+
+    test('recognized full-suite timeout diagnoses then requires serial green',
+        () async {
+      final adapter = _RecordingProcessAdapter(<ProcessOutcome>[
+        const ProcessOutcome(exitCode: 0, diagnostic: 'targets green'),
+        const ProcessOutcome(
+          exitCode: 124,
+          diagnostic: 'test/scripts/a_test.dart process timed out',
+        ),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'isolated green'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'serial green'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'filtered'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'coverage green'),
+      ]);
+
+      final result = await HostExecutionGraph().run(
+        processAdapter: adapter,
+        workingDirectory: '.',
+      );
+
+      expect(result.map((stage) => stage.stage), <GateStage>[
+        GateStage.targetRegressions,
+        GateStage.hostSuite,
+        GateStage.timeoutDiagnosis,
+        GateStage.serialHostSuite,
+        GateStage.coverageFilter,
+        GateStage.coverageGate,
+      ]);
+      expect(result[1].succeeded, isFalse);
+      expect(result[3].succeeded, isTrue);
+      expect(adapter.invocations[2], <String>[
+        'flutter',
+        'test',
+        'test/scripts/a_test.dart',
+        '-r',
+        'expanded',
+      ]);
+      expect(adapter.invocations[3], <String>[
+        'flutter',
+        'test',
+        '--coverage',
+        '--concurrency=1',
+      ]);
+    });
+
+    test('coverage shortfall is terminal and receives no retry', () async {
+      final adapter = _RecordingProcessAdapter(<ProcessOutcome>[
+        const ProcessOutcome(exitCode: 0, diagnostic: 'targets green'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'full suite green'),
+        const ProcessOutcome(exitCode: 0, diagnostic: 'filtered'),
+        const ProcessOutcome(
+          exitCode: 1,
+          diagnostic: 'coverage below-threshold',
+        ),
+      ]);
+
+      final result = await HostExecutionGraph().run(
+        processAdapter: adapter,
+        workingDirectory: '.',
+      );
+
+      expect(result.last.stage, GateStage.coverageGate);
+      expect(result.last.attempts, hasLength(1));
+      expect(result.last.succeeded, isFalse);
+      expect(adapter.invocations, hasLength(4));
+    });
   });
 }
 
