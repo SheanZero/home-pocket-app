@@ -451,6 +451,33 @@ void main() {
         isFalse,
       );
       expect(
+        checkpoint.isValidFor(
+          candidate: candidate,
+          configurationDigests: const <String, String>{'workflow': 'changed'},
+          environmentFingerprint: const <String, String>{'os': 'macos'},
+          stageGraphVersion: releaseGraphVersion,
+        ),
+        isFalse,
+      );
+      expect(
+        checkpoint.isValidFor(
+          candidate: candidate,
+          configurationDigests: const <String, String>{'workflow': 'cfg'},
+          environmentFingerprint: const <String, String>{'os': 'changed'},
+          stageGraphVersion: releaseGraphVersion,
+        ),
+        isFalse,
+      );
+      expect(
+        checkpoint.isValidFor(
+          candidate: candidate,
+          configurationDigests: const <String, String>{'workflow': 'cfg'},
+          environmentFingerprint: const <String, String>{'os': 'macos'},
+          stageGraphVersion: releaseGraphVersion + 1,
+        ),
+        isFalse,
+      );
+      expect(
         checkpoint
             .copyWith(integrity: 'tampered')
             .isValidFor(

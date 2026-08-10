@@ -11,6 +11,14 @@ import 'release_gate/process_adapter.dart';
 
 export 'release_gate/models.dart'
     show ReleaseGateRetry, ReleaseVerdict, validateResume;
+export 'release_gate/execution.dart'
+    show
+        FailureClass,
+        ReleaseExecutionGraph,
+        ResumeCheckpoint,
+        RetryDecision,
+        classifyFailure,
+        earliestInvalidatedStage;
 
 const _prerequisiteCommand = <String>[
   'bash',
@@ -36,15 +44,21 @@ bool isCandidateScopedPath(String path) =>
     path != _attestationMetadataPath && !path.startsWith(_rawArtifactRoot);
 
 class ReleaseGateOptions {
-  const ReleaseGateOptions({required this.scope, required this.resultPath});
+  const ReleaseGateOptions({
+    required this.scope,
+    required this.resultPath,
+    required this.resume,
+  });
 
   final String scope;
   final String resultPath;
+  final bool resume;
 }
 
 ReleaseGateOptions parseReleaseGateOptions(List<String> arguments) {
   String? scope;
   String? resultPath;
+  var resume = false;
   for (final argument in arguments) {
     if (argument.startsWith('--scope=')) {
       if (scope != null) throw ArgumentError('scope supplied more than once');
@@ -54,24 +68,39 @@ ReleaseGateOptions parseReleaseGateOptions(List<String> arguments) {
         throw ArgumentError('result supplied more than once');
       }
       resultPath = argument.substring('--result='.length);
+    } else if (argument == '--resume') {
+      if (resume) throw ArgumentError('resume supplied more than once');
+      resume = true;
     } else {
       throw ArgumentError('unknown argument: $argument');
     }
   }
-  if ((scope != 'tracer' && scope != 'full') ||
+  if ((scope != 'tracer' && scope != 'host' && scope != 'full') ||
       resultPath == null ||
       !_isRawArtifactPath(resultPath)) {
     throw ArgumentError(
-      'usage: --scope=tracer|full --result=build/release_gate/<name>.json',
+      'usage: --scope=tracer|host|full [--resume] '
+      '--result=build/release_gate/<name>.json',
     );
   }
-  return ReleaseGateOptions(scope: scope!, resultPath: resultPath);
+  return ReleaseGateOptions(
+    scope: scope!,
+    resultPath: resultPath,
+    resume: resume,
+  );
 }
 
 Future<void> main(List<String> arguments) async {
   try {
     final options = parseReleaseGateOptions(arguments);
-    final result = await runReleaseGate(resultPath: options.resultPath);
+    if (options.resume && options.scope == 'tracer') {
+      throw ArgumentError('resume requires the host or full execution graph');
+    }
+    final result = await runReleaseGate(
+      resultPath: options.resultPath,
+      scope: options.scope,
+      resume: options.resume,
+    );
     stdout.writeln(result.verdict.wireValue);
     exitCode = result.verdict == ReleaseVerdict.blocked ? 1 : 0;
   } on ArgumentError catch (error) {
@@ -87,11 +116,21 @@ Future<GateResult> runReleaseGate({
   ProcessAdapter? processAdapter,
   List<String>? trackedInputPaths,
   String resultPath = 'build/release_gate/result.json',
+  String scope = 'tracer',
+  bool resume = false,
 }) async {
   final root = workingDirectory ?? Directory.current;
   final stages = <StageResult>[];
   CandidateFingerprint? candidate;
   try {
+    if (scope != 'tracer') {
+      // Host composition lands in Task 2. Never accept a host resume as a
+      // tracer run, because that could silently skip mandatory stages.
+      throw const _CandidateFailure('host execution graph is not configured');
+    }
+    if (resume) {
+      throw const _CandidateFailure('resume checkpoint is not configured');
+    }
     _assertIgnoredArtifactPath(root, resultPath);
     final captured = _captureCandidate(
       root,

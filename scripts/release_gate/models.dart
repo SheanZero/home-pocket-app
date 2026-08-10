@@ -12,7 +12,20 @@ enum ReleaseVerdict {
   };
 }
 
-enum GateStage { candidate, prerequisite, finalDrift, privacy }
+/// The configured release-lock order. Do not sort stage results by timestamps:
+/// equal timestamps must retain this deterministic graph order.
+enum GateStage {
+  candidate,
+  prerequisite,
+  targetRegressions,
+  hostSuite,
+  timeoutDiagnosis,
+  serialHostSuite,
+  coverageFilter,
+  coverageGate,
+  finalDrift,
+  privacy,
+}
 
 enum StageClassification {
   succeeded,
@@ -60,6 +73,7 @@ class StageResult {
     required this.exitCode,
     required this.classification,
     required this.diagnostic,
+    this.attempts = const <StageAttemptRecord>[],
   });
 
   final GateStage stage;
@@ -69,6 +83,7 @@ class StageResult {
   final int exitCode;
   final StageClassification classification;
   final String diagnostic;
+  final List<StageAttemptRecord> attempts;
 
   bool get succeeded => classification == StageClassification.succeeded;
 
@@ -79,6 +94,30 @@ class StageResult {
     'finished_at_utc': finishedAtUtc.toIso8601String(),
     'exit_code': exitCode,
     'classification': classification.name,
+    'diagnostic': diagnostic,
+    if (attempts.isNotEmpty)
+      'attempts': attempts.map((attempt) => attempt.toJson()).toList(),
+  };
+}
+
+/// Privacy-safe, normalized retry evidence retained only in ignored artifacts.
+class StageAttemptRecord {
+  const StageAttemptRecord({
+    required this.ordinal,
+    required this.exitCode,
+    required this.failureClass,
+    required this.diagnostic,
+  });
+
+  final int ordinal;
+  final int exitCode;
+  final String failureClass;
+  final String diagnostic;
+
+  Map<String, Object> toJson() => <String, Object>{
+    'ordinal': ordinal,
+    'exit_code': exitCode,
+    'failure_class': failureClass,
     'diagnostic': diagnostic,
   };
 }
