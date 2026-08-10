@@ -47,46 +47,55 @@ String _activeWorkflowSource(String source) => source
     .join('\n');
 
 String? _workflowJobSource(String workflow, String jobName) {
-  final match = RegExp(
-    '^  ${RegExp.escape(jobName)}:\\n([\\s\\S]*?)(?=^  [a-z][a-z0-9-]*:\\n|\\z)',
+  final source = _activeWorkflowSource(workflow);
+  final start = RegExp(
+    '^  ${RegExp.escape(jobName)}:\\n',
     multiLine: true,
-  ).firstMatch(_activeWorkflowSource(workflow));
-  return match?.group(1);
+  ).firstMatch(source);
+  if (start == null) return null;
+  Match? next;
+  for (final match in RegExp(
+    r'^  [a-z][a-z0-9-]*:\n',
+    multiLine: true,
+  ).allMatches(source)) {
+    if (match.start >= start.end) {
+      next = match;
+      break;
+    }
+  }
+  return source.substring(start.end, next?.start ?? source.length);
 }
 
-List<String> _stableStaticAnalysisWrapperViolations(String workflow) {
-  final staticAnalysis = _workflowJobSource(workflow, 'static-analysis');
-  if (staticAnalysis == null) {
-    return ['Stable static-analysis job is missing'];
+List<String> _stableReleaseAuthorityViolations(String workflow) {
+  final releaseGateHost = _workflowJobSource(workflow, 'release-gate-host');
+  if (releaseGateHost == null) {
+    return ['Stable release-gate host job is missing'];
   }
 
-  const wrapperCommand = 'bash scripts/verify_codegen_reproducibility.sh';
-  final wrapperMatches = RegExp(
-    '^\\s*-\\s*(?:name: [^\\n]+\\n\\s*)?run: ${RegExp.escape(wrapperCommand)}${r'\s*$'}',
+  const authorityCommand = 'dart run scripts/release_gate.dart --scope=host';
+  final authorityMatches = RegExp(
+    '^\\s*-\\s*(?:name: [^\\n]+\\n\\s*)?run: ${RegExp.escape(authorityCommand)}${r'\s*$'}',
     multiLine: true,
-  ).allMatches(staticAnalysis);
+  ).allMatches(releaseGateHost);
   final violations = <String>[];
-  if (wrapperMatches.length != 1) {
+  if (authorityMatches.length != 1) {
     violations.add(
-      'Stable static-analysis must invoke the wrapper exactly once',
+      'Stable CI must invoke the host release authority exactly once',
     );
   }
 
-  final checkout = staticAnalysis.indexOf('uses: actions/checkout@v4');
-  final flutterPin = staticAnalysis.indexOf('flutter-version: 3.44.8');
-  final wrapper = staticAnalysis.indexOf(wrapperCommand);
-  final auditScanners = staticAnalysis.indexOf('bash scripts/audit_layer.sh');
-  if (checkout < 0 || flutterPin < checkout || wrapper < flutterPin) {
+  final checkout = releaseGateHost.indexOf('uses: actions/checkout@v4');
+  final flutterPin = releaseGateHost.indexOf('flutter-version: 3.44.8');
+  final authority = releaseGateHost.indexOf(authorityCommand);
+  if (checkout < 0 || flutterPin < checkout || authority < flutterPin) {
     violations.add(
-      'wrapper must follow checkout and the exact Stable Flutter pin',
+      'release authority must follow checkout and the exact Stable Flutter pin',
     );
-  }
-  if (auditScanners < wrapper) {
-    violations.add('audit-only scanners must follow the wrapper');
   }
 
   const directCommands = [
     'flutter pub get',
+    'bash scripts/verify_codegen_reproducibility.sh',
     'dart run scripts/dependency_compatibility.dart',
     'flutter analyze',
     'dart run import_lint',
@@ -98,46 +107,46 @@ List<String> _stableStaticAnalysisWrapperViolations(String workflow) {
     'test/architecture/presentation_layer_rules_test.dart',
   ];
   for (final command in directCommands) {
-    if (staticAnalysis.contains(command)) {
-      violations.add('Stable static-analysis must not duplicate $command');
+    if (releaseGateHost.contains(command)) {
+      violations.add('Stable release-gate host must not duplicate $command');
     }
   }
-  if (staticAnalysis.contains('continue-on-error: true') ||
-      staticAnalysis.contains('|| true')) {
-    violations.add('Stable static-analysis must not soften wrapper failures');
+  if (releaseGateHost.contains('continue-on-error: true') ||
+      releaseGateHost.contains('|| true')) {
+    violations.add('Stable release authority must not soften failures');
   }
   return violations;
 }
 
-List<String> _stableWorkflowWrapperUniquenessViolations(String workflow) {
+List<String> _stableWorkflowAuthorityUniquenessViolations(String workflow) {
   final activeWorkflow = _activeWorkflowSource(workflow);
-  const wrapperCommand = 'bash scripts/verify_codegen_reproducibility.sh';
-  final staticAnalysis = _workflowJobSource(workflow, 'static-analysis');
-  final guardrails = _workflowJobSource(workflow, 'guardrails');
-  final coverage = _workflowJobSource(workflow, 'coverage');
+  const authorityCommand = 'dart run scripts/release_gate.dart --scope=host';
+  final releaseGateHost = _workflowJobSource(workflow, 'release-gate-host');
+  final auditScanners = _workflowJobSource(workflow, 'audit-scanners');
   final violations = <String>[];
 
   if (RegExp(
-        '^\\s*-\\s*(?:name: [^\\n]+\\n\\s*)?run: ${RegExp.escape(wrapperCommand)}${r'\s*$'}',
+        '^\\s*-\\s*(?:name: [^\\n]+\\n\\s*)?run: ${RegExp.escape(authorityCommand)}${r'\s*$'}',
         multiLine: true,
       ).allMatches(activeWorkflow).length !=
       1) {
-    violations.add('Stable workflow must invoke the wrapper exactly once');
+    violations.add(
+      'Stable workflow must invoke the release authority exactly once',
+    );
   }
-  if (staticAnalysis == null || !staticAnalysis.contains(wrapperCommand)) {
-    violations.add('the sole wrapper invocation must live in static-analysis');
+  if (releaseGateHost == null || !releaseGateHost.contains(authorityCommand)) {
+    violations.add(
+      'the sole authority invocation must live in release-gate-host',
+    );
   }
-  if (guardrails == null) {
-    violations.add('Stable guardrails job is missing');
+  if (auditScanners == null) {
+    violations.add('Supplemental audit-scanners job is missing');
     return violations;
   }
-  if (!guardrails.contains('flutter pub get --enforce-lockfile')) {
-    violations.add('guardrails must use enforced dependency retrieval');
-  }
-  if (coverage == null) {
-    violations.add('Stable coverage job is missing');
-  } else if (!coverage.contains('flutter pub get --enforce-lockfile')) {
-    violations.add('coverage must use enforced dependency retrieval');
+  if (!auditScanners.contains('flutter pub get --enforce-lockfile')) {
+    violations.add(
+      'supplemental scanners must use enforced dependency retrieval',
+    );
   }
 
   const duplicateCommands = [
@@ -155,9 +164,10 @@ List<String> _stableWorkflowWrapperUniquenessViolations(String workflow) {
       violations.add('Stable workflow must not duplicate $command');
     }
   }
-  if (activeWorkflow.contains('continue-on-error: true') ||
-      activeWorkflow.contains('|| true')) {
-    violations.add('Stable workflow must not soften wrapper failures');
+  final host = releaseGateHost;
+  if (host != null &&
+      (host.contains('continue-on-error: true') || host.contains('|| true'))) {
+    violations.add('Stable release authority must not soften failures');
   }
   return violations;
 }
@@ -829,16 +839,16 @@ end
       );
     });
 
-    test('rejects a comment-only Stable CI wrapper marker', () {
+    test('rejects a comment-only Stable CI release-authority marker', () {
       final input = currentInputs();
       input['audit'] = input['audit']!.replaceFirst(
-        '        run: bash scripts/verify_codegen_reproducibility.sh\n',
-        '        # run: bash scripts/verify_codegen_reproducibility.sh\n',
+        '        run: dart run scripts/release_gate.dart --scope=host\n',
+        '        # run: dart run scripts/release_gate.dart --scope=host\n',
       );
       expect(
         validate(input),
         contains(
-          'audit workflow must invoke SDK verification through the authoritative wrapper',
+          'audit workflow must invoke the repository-owned host release authority',
         ),
       );
     });
@@ -1140,113 +1150,114 @@ end
         '--mode=future-probe --verify-running-flutter-sdk';
 
     test(
-      'Stable analysis invokes the authoritative wrapper after the exact SDK pin',
+      'Stable CI invokes the host release authority after the exact SDK pin',
       () {
         final audit = currentInputs()['audit']!;
         expect(audit, contains('flutter-version: 3.44.8'));
         expect(
           audit.indexOf('flutter-version: 3.44.8'),
           lessThan(
-            audit.indexOf('bash scripts/verify_codegen_reproducibility.sh'),
+            audit.indexOf('dart run scripts/release_gate.dart --scope=host'),
           ),
         );
         expect(
-          audit.indexOf('bash scripts/verify_codegen_reproducibility.sh'),
+          audit.indexOf('dart run scripts/release_gate.dart --scope=host'),
           lessThan(audit.indexOf('bash scripts/audit_layer.sh')),
         );
       },
     );
 
     test(
-      'Stable CI routes post-generation lint and architecture gates through one wrapper',
+      'Stable CI routes post-generation lint and architecture gates through one authority',
       () {
         final audit = currentInputs()['audit']!;
-        expect(_stableStaticAnalysisWrapperViolations(audit), isEmpty);
+        expect(_stableReleaseAuthorityViolations(audit), isEmpty);
 
         expect(
-          _stableStaticAnalysisWrapperViolations(
+          _stableReleaseAuthorityViolations(
             audit.replaceFirst(
-              'bash scripts/verify_codegen_reproducibility.sh',
+              'dart run scripts/release_gate.dart --scope=host',
               'flutter analyze --no-fatal-infos',
             ),
           ),
           isNotEmpty,
-          reason: 'omitting the wrapper must fail',
+          reason: 'omitting the release authority must fail',
         );
         expect(
-          _stableStaticAnalysisWrapperViolations(
+          _stableReleaseAuthorityViolations(
             audit.replaceFirst(
-              'run: bash scripts/verify_codegen_reproducibility.sh',
-              '# run: bash scripts/verify_codegen_reproducibility.sh',
+              'run: dart run scripts/release_gate.dart --scope=host',
+              '# run: dart run scripts/release_gate.dart --scope=host',
             ),
           ),
           isNotEmpty,
-          reason: 'comment-only wrapper presence must fail',
+          reason: 'comment-only authority presence must fail',
         );
         expect(
-          _stableStaticAnalysisWrapperViolations(
+          _stableReleaseAuthorityViolations(
             audit.replaceFirst(
-              'run: bash scripts/verify_codegen_reproducibility.sh',
-              'run: bash scripts/verify_codegen_reproducibility.sh\n'
-                  '      - run: bash scripts/verify_codegen_reproducibility.sh',
+              'run: dart run scripts/release_gate.dart --scope=host',
+              'run: dart run scripts/release_gate.dart --scope=host\n'
+                  '      - run: dart run scripts/release_gate.dart --scope=host',
             ),
           ),
           isNotEmpty,
-          reason: 'duplicate wrapper calls must fail',
+          reason: 'duplicate authority calls must fail',
         );
         expect(
-          _stableStaticAnalysisWrapperViolations(
+          _stableReleaseAuthorityViolations(
             audit.replaceFirst(
-              'run: bash scripts/verify_codegen_reproducibility.sh',
+              'run: dart run scripts/release_gate.dart --scope=host',
               'continue-on-error: true\n'
-                  '        run: bash scripts/verify_codegen_reproducibility.sh || true',
+                  '        run: dart run scripts/release_gate.dart --scope=host || true',
             ),
           ),
           isNotEmpty,
-          reason: 'soft-failed wrapper calls must fail',
+          reason: 'soft-failed authority calls must fail',
         );
       },
     );
 
     test(
-      'Stable CI keeps one authoritative codegen wrapper without guardrails duplicates',
+      'Stable CI keeps one authoritative release gate without host duplicates',
       () {
         final audit = currentInputs()['audit']!;
-        expect(_stableWorkflowWrapperUniquenessViolations(audit), isEmpty);
+        expect(_stableWorkflowAuthorityUniquenessViolations(audit), isEmpty);
 
         expect(
-          _stableWorkflowWrapperUniquenessViolations(
+          _stableWorkflowAuthorityUniquenessViolations(
             audit.replaceFirst(
-              'run: bash scripts/verify_codegen_reproducibility.sh',
-              '# run: bash scripts/verify_codegen_reproducibility.sh',
+              'run: dart run scripts/release_gate.dart --scope=host',
+              '# run: dart run scripts/release_gate.dart --scope=host',
             ),
           ),
           isNotEmpty,
-          reason: 'comment-only wrapper presence must fail',
+          reason: 'comment-only authority presence must fail',
         );
         expect(
-          _stableWorkflowWrapperUniquenessViolations(
+          _stableWorkflowAuthorityUniquenessViolations(
             audit.replaceFirst(
-              'run: bash scripts/verify_codegen_reproducibility.sh',
-              'run: bash scripts/verify_codegen_reproducibility.sh\n'
-                  '      - run: bash scripts/verify_codegen_reproducibility.sh',
+              'run: dart run scripts/release_gate.dart --scope=host',
+              'run: dart run scripts/release_gate.dart --scope=host\n'
+                  '      - run: dart run scripts/release_gate.dart --scope=host',
             ),
           ),
           isNotEmpty,
-          reason: 'duplicate wrappers must fail',
+          reason: 'duplicate authorities must fail',
         );
         expect(
-          _stableWorkflowWrapperUniquenessViolations(
+          _stableWorkflowAuthorityUniquenessViolations(
             audit.replaceFirst(
               'flutter pub get --enforce-lockfile',
               'flutter pub get',
             ),
           ),
           isNotEmpty,
-          reason: 'guardrails cannot use an unlocked dependency retrieval',
+          reason:
+              'supplemental scanners cannot use unlocked dependency retrieval',
         );
         expect(
-          _stableWorkflowWrapperUniquenessViolations(
+          _stableWorkflowAuthorityUniquenessViolations(
             audit.replaceFirst(
               'flutter pub get --enforce-lockfile',
               'flutter pub get --enforce-lockfile\n'
@@ -1254,40 +1265,39 @@ end
             ),
           ),
           isNotEmpty,
-          reason: 'an inline guardrails generator must fail',
+          reason: 'a duplicated host generator must fail',
         );
         expect(
-          _stableWorkflowWrapperUniquenessViolations(
+          _stableWorkflowAuthorityUniquenessViolations(
             audit.replaceFirst(
-              'run: bash scripts/verify_codegen_reproducibility.sh',
+              'run: dart run scripts/release_gate.dart --scope=host',
               'continue-on-error: true\n'
-                  '        run: bash scripts/verify_codegen_reproducibility.sh || true',
+                  '        run: dart run scripts/release_gate.dart --scope=host || true',
             ),
           ),
           isNotEmpty,
-          reason: 'soft-failed wrapper calls must fail',
+          reason: 'soft-failed authority calls must fail',
         );
       },
     );
 
     test(
-      'coverage retrieves the exact reviewed graph and docs name the wrapper',
+      'supplemental scanners retrieve the reviewed graph and docs name the wrapper',
       () {
         final audit = currentInputs()['audit']!;
-        final coverage = _workflowJobSource(audit, 'coverage');
-        expect(coverage, isNotNull);
-        expect(coverage, contains('flutter pub get --enforce-lockfile'));
+        final scanners = _workflowJobSource(audit, 'audit-scanners');
+        expect(scanners, isNotNull);
+        expect(scanners, contains('flutter pub get --enforce-lockfile'));
         expect(
-          _stableWorkflowWrapperUniquenessViolations(
+          _stableWorkflowAuthorityUniquenessViolations(
             audit.replaceFirst(
-              '      - run: flutter pub get --enforce-lockfile\n'
-                  '      - run: dart pub global activate coverde 0.3.0+1',
-              '      - run: flutter pub get\n'
-                  '      - run: dart pub global activate coverde 0.3.0+1',
+              '      - run: flutter pub get --enforce-lockfile',
+              '      - run: flutter pub get',
             ),
           ),
           isNotEmpty,
-          reason: 'ordinary coverage retrieval must fail the Stable contract',
+          reason:
+              'ordinary supplemental retrieval must fail the Stable contract',
         );
 
         final guide = File(

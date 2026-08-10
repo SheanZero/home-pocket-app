@@ -521,13 +521,16 @@ CompatibilityReport validateDependencyCompatibility({
     mode: mode,
   );
 
-  final hasStableSdkVerificationCommand = RegExp(
-    r'^\s*run:\s+bash scripts/verify_codegen_reproducibility\.sh[ \t]*$',
+  // Phase 62 keeps the codegen wrapper as the prerequisite implementation,
+  // but routes CI through the repository-owned release authority so PR and
+  // main execution share one verdict boundary.
+  final hasStableReleaseAuthorityCommand = RegExp(
+    r'^\s*run:\s+dart run scripts/release_gate\.dart --scope=host[ \t]*$',
     multiLine: true,
   ).hasMatch(_withoutYamlComments(auditWorkflow));
-  if (!hasStableSdkVerificationCommand) {
+  if (!hasStableReleaseAuthorityCommand) {
     issues.add(
-      'audit workflow must invoke SDK verification through the authoritative wrapper',
+      'audit workflow must invoke the repository-owned host release authority',
     );
   }
   expectText('future workflow', futureWorkflow, 'channel: beta');
