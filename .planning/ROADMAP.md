@@ -225,7 +225,7 @@ Plans:
   3. The final Android combination produces a non-debug-signed release AAB/APK that the signing contract accepts and that contains no test-only registrar or plugin.
   4. Key integration journeys pass on a clean API 36 `google_apis` `arm64-v8a` Emulator on the Apple Silicon host, with cold boot, wipe/no-snapshot, deterministic readiness, runner ownership, redacted serial, complete discovery/execution, and post-test AAB/APK hygiene. The API 36 `x86_64` GitHub/Intel lane is preserved as independently testable supplemental evidence; its absence/failure is a documented limitation, not a pass or primary blocker. Final evidence explicitly says Android physical-device acceptance was not performed or claimed.
 
-**Plans**: 4/6 plans executed
+**Plans**: 5/6 plans executed
 **Wave 1**
 
 - [x] 61-01-PLAN.md — Establish the fail-closed candidate-or-hold tracer, official candidate metadata, and redacted evidence schema.
@@ -244,7 +244,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 61-05-PLAN.md — Execute the complete integration suite on the clean local API 36 google_apis arm64-v8a primary Emulator, retain the API 36 x86_64 GitHub/Intel supplemental lane, and rescan release artifacts.
+- [x] 61-05-PLAN.md — Execute the complete integration suite on the clean local API 36 google_apis arm64-v8a primary Emulator, retain the API 36 x86_64 GitHub/Intel supplemental lane, and rescan release artifacts.
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
@@ -289,6 +289,6 @@ Plans:
 | 58. Flutter, Analyzer & Code Generation Lane | 10/10 | Complete    | 2026-08-08 |
 | 59. Controlled Platform Plugin Cohorts | 7/7 | Complete    | 2026-08-09 |
 | 60. SQLCipher & iOS Native Safety Lane | 10/10 | Complete    | 2026-08-09 |
-| 61. Android Toolchain & Emulator Lane | 3/6 | In progress | 2026-08-09 |
+| 61. Android Toolchain & Emulator Lane | 5/6 | In Progress|  |
 | 62. Automated Release-Gate Lock | 0/TBD | Not started | - |
 | 63. Isolated Wired-iPhone Acceptance | 0/TBD | Not started | - |
