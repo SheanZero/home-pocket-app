@@ -393,6 +393,88 @@ void main() {
         isFalse,
       );
     });
+
+    test(
+      'iOS evidence validator requires successful records and preflight',
+      () {
+        const path = 'integration_test/critical_journey_test.dart';
+        IosSimulatorEvidence evidence({
+          IosSimulatorFailure? failure,
+          bool preflightRan = true,
+          List<String> executedTests = const <String>[path],
+          List<IosIntegrationRecord>? records,
+          IosSimulatorProfile profile = const IosSimulatorProfile(
+            deviceKind: 'simulator',
+            model: 'iPhone 16',
+            runtime: 'com.apple.CoreSimulator.SimRuntime.iOS-18-2',
+            redactedToken: 'simulator-aaaaaaaaaaaaaaaa',
+          ),
+        }) => IosSimulatorEvidence(
+          candidate: candidate,
+          profile: profile,
+          appDataIsolated: true,
+          failure: failure,
+          discoveredTests: const <String>[path],
+          executedTests: executedTests,
+          preflightRan: preflightRan,
+          testRecords:
+              records ??
+              <IosIntegrationRecord>[
+                IosIntegrationRecord(
+                  testPath: path,
+                  candidateCommit: candidate.commit,
+                  exitCode: 0,
+                ),
+              ],
+        );
+
+        expect(validateIosSimulatorEvidence(evidence()), isTrue);
+        expect(
+          validateIosSimulatorEvidence(
+            evidence(failure: IosSimulatorFailure.integrationFailure),
+          ),
+          isFalse,
+        );
+        expect(
+          validateIosSimulatorEvidence(evidence(preflightRan: false)),
+          isFalse,
+        );
+        expect(
+          validateIosSimulatorEvidence(
+            evidence(records: const <IosIntegrationRecord>[]),
+          ),
+          isFalse,
+        );
+        expect(
+          validateIosSimulatorEvidence(
+            evidence(
+              records: <IosIntegrationRecord>[
+                IosIntegrationRecord(
+                  testPath: path,
+                  candidateCommit: candidate.commit,
+                  exitCode: 1,
+                ),
+              ],
+            ),
+          ),
+          isFalse,
+        );
+        expect(
+          validateIosSimulatorEvidence(
+            evidence(
+              records: <IosIntegrationRecord>[
+                const IosIntegrationRecord(
+                  testPath: path,
+                  candidateCommit: 'b',
+                  exitCode: 0,
+                ),
+              ],
+            ),
+          ),
+          isFalse,
+        );
+      },
+    );
   });
 }
 

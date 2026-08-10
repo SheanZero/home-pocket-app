@@ -289,7 +289,12 @@ void main() {
           platformAdapters: ReleaseGatePlatformAdapters(
             runIos: (candidate, skips) async => IosSimulatorEvidence(
               candidate: candidate,
-              profile: const IosSimulatorProfile.unavailable(),
+              profile: const IosSimulatorProfile(
+                deviceKind: 'simulator',
+                model: 'iPhone 16',
+                runtime: 'com.apple.CoreSimulator.SimRuntime.iOS-18-2',
+                redactedToken: 'simulator-aaaaaaaaaaaaaaaa',
+              ),
               appDataIsolated: true,
               discoveredTests: const <String>[
                 'integration_test/device_critical_journey_test.dart',
@@ -300,31 +305,21 @@ void main() {
                 'integration_test/nested/child_test.dart',
               ],
               preflightRan: true,
-            ),
-            runAndroid: (candidate) async =>
-                android_lane.Phase62AndroidEvidence(
-                  result: 'PASS',
-                  candidate: candidate,
-                  prerequisites:
-                      const android_lane.AndroidPrerequisiteRecord.ready(),
-                  primary: const android_lane.AndroidPhase62PrimaryResult(
-                    result: 'PASS',
-                    discoveredFiles: <String>[
+              testRecords: <IosIntegrationRecord>[
+                IosIntegrationRecord(
+                  testPath:
                       'integration_test/device_critical_journey_test.dart',
-                      'integration_test/nested/child_test.dart',
-                    ],
-                    executedFiles: <String>[
-                      'integration_test/device_critical_journey_test.dart',
-                      'integration_test/nested/child_test.dart',
-                    ],
-                  ),
-                  release:
-                      const android_lane.AndroidPhase62ReleaseResult.pass(),
-                  supplemental: android_lane.classifyPhase62Supplemental(
-                    'UNAVAILABLE',
-                  ),
-                  physicalDevice: 'NOT_PERFORMED_NOT_CLAIMED',
+                  candidateCommit: candidate.commit,
+                  exitCode: 0,
                 ),
+                IosIntegrationRecord(
+                  testPath: 'integration_test/nested/child_test.dart',
+                  candidateCommit: candidate.commit,
+                  exitCode: 0,
+                ),
+              ],
+            ),
+            runAndroid: (candidate) async => _validAndroidEvidence(candidate),
           ),
         );
 
@@ -343,6 +338,107 @@ void main() {
             GateStage.postDevicePreflight,
             GateStage.finalDrift,
           ]),
+        );
+      },
+    );
+
+    test(
+      'full scope blocks malformed platform evidence at aggregate boundary',
+      () async {
+        File('${fixture.root.path}/scripts/release_gate/expected_skips.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"schema_version":1,"skips":[]}');
+        for (final path in const <String>[
+          'integration_test/device_critical_journey_test.dart',
+          'integration_test/nested/child_test.dart',
+        ]) {
+          File('${fixture.root.path}/$path').createSync(recursive: true);
+        }
+        _runFixtureGit(fixture.root, const <String>['add', '.']);
+        _runFixtureGit(fixture.root, const <String>[
+          'commit',
+          '-m',
+          'add malformed evidence inventory',
+        ]);
+
+        Future<GateResult> runWith(ReleaseGatePlatformAdapters adapters) =>
+            runReleaseGate(
+              workingDirectory: fixture.root,
+              processAdapter: _RecordingProcessAdapter(<ProcessOutcome>[
+                const ProcessOutcome(exitCode: 0, diagnostic: 'prerequisite'),
+                const ProcessOutcome(exitCode: 0, diagnostic: 'targeted'),
+                const ProcessOutcome(exitCode: 0, diagnostic: 'host'),
+                const ProcessOutcome(exitCode: 0, diagnostic: 'filter'),
+                const ProcessOutcome(exitCode: 0, diagnostic: 'coverage'),
+                const ProcessOutcome(exitCode: 0, diagnostic: 'post-device'),
+              ]),
+              trackedInputPaths: const <String>[
+                'pubspec.lock',
+                'config/release_gate_input.txt',
+              ],
+              resultPath: 'build/release_gate/malformed.json',
+              scope: 'full',
+              platformAdapters: adapters,
+            );
+
+        final malformedIos = await runWith(
+          ReleaseGatePlatformAdapters(
+            runIos: (candidate, skips) async => IosSimulatorEvidence(
+              candidate: candidate,
+              profile: const IosSimulatorProfile.unavailable(),
+              appDataIsolated: true,
+              discoveredTests: const <String>[
+                'integration_test/device_critical_journey_test.dart',
+                'integration_test/nested/child_test.dart',
+              ],
+              executedTests: const <String>[
+                'integration_test/device_critical_journey_test.dart',
+                'integration_test/nested/child_test.dart',
+              ],
+              preflightRan: true,
+              testRecords: <IosIntegrationRecord>[
+                IosIntegrationRecord(
+                  testPath:
+                      'integration_test/device_critical_journey_test.dart',
+                  candidateCommit: candidate.commit,
+                  exitCode: 0,
+                ),
+                IosIntegrationRecord(
+                  testPath: 'integration_test/nested/child_test.dart',
+                  candidateCommit: candidate.commit,
+                  exitCode: 0,
+                ),
+              ],
+            ),
+            runAndroid: (candidate) async => _validAndroidEvidence(candidate),
+          ),
+        );
+        expect(malformedIos.verdict, ReleaseVerdict.blocked);
+        expect(
+          malformedIos.stages
+              .singleWhere((stage) => stage.stage == GateStage.ios)
+              .succeeded,
+          isFalse,
+        );
+
+        final malformedAndroid = await runWith(
+          ReleaseGatePlatformAdapters(
+            runIos: (candidate, skips) async => _validIosEvidence(candidate),
+            runAndroid: (candidate) async => _validAndroidEvidence(
+              candidate,
+              prerequisites: const android_lane.AndroidPrerequisiteRecord(
+                result: 'BLOCKED',
+                issues: <String>['JDK 17 is unavailable'],
+              ),
+            ),
+          ),
+        );
+        expect(malformedAndroid.verdict, ReleaseVerdict.blocked);
+        expect(
+          malformedAndroid.stages
+              .singleWhere((stage) => stage.stage == GateStage.android)
+              .succeeded,
+          isFalse,
         );
       },
     );
@@ -1036,6 +1132,52 @@ void main() {
     });
   });
 }
+
+const _aggregateInventory = <String>[
+  'integration_test/device_critical_journey_test.dart',
+  'integration_test/nested/child_test.dart',
+];
+
+IosSimulatorEvidence _validIosEvidence(CandidateFingerprint candidate) =>
+    IosSimulatorEvidence(
+      candidate: candidate,
+      profile: const IosSimulatorProfile(
+        deviceKind: 'simulator',
+        model: 'iPhone 16',
+        runtime: 'com.apple.CoreSimulator.SimRuntime.iOS-18-2',
+        redactedToken: 'simulator-aaaaaaaaaaaaaaaa',
+      ),
+      appDataIsolated: true,
+      discoveredTests: _aggregateInventory,
+      executedTests: _aggregateInventory,
+      preflightRan: true,
+      testRecords: <IosIntegrationRecord>[
+        for (final path in _aggregateInventory)
+          IosIntegrationRecord(
+            testPath: path,
+            candidateCommit: candidate.commit,
+            exitCode: 0,
+          ),
+      ],
+    );
+
+android_lane.Phase62AndroidEvidence _validAndroidEvidence(
+  CandidateFingerprint candidate, {
+  android_lane.AndroidPrerequisiteRecord prerequisites =
+      const android_lane.AndroidPrerequisiteRecord.ready(),
+}) => android_lane.Phase62AndroidEvidence(
+  result: 'PASS',
+  candidate: candidate,
+  prerequisites: prerequisites,
+  primary: const android_lane.AndroidPhase62PrimaryResult(
+    result: 'PASS',
+    discoveredFiles: _aggregateInventory,
+    executedFiles: _aggregateInventory,
+  ),
+  release: const android_lane.AndroidPhase62ReleaseResult.pass(),
+  supplemental: android_lane.classifyPhase62Supplemental('UNAVAILABLE'),
+  physicalDevice: 'NOT_PERFORMED_NOT_CLAIMED',
+);
 
 StageResult _stageForReport(
   GateStage stage, {
