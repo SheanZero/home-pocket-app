@@ -354,6 +354,33 @@ target: google_apis
     },
   );
 
+  test(
+    'primary integration matrix rejects missing or failed discovered files',
+    () {
+      const files = [
+        'device_critical_journey_test.dart',
+        'performance/performance_baseline_test.dart',
+      ];
+      final valid = [
+        {'file': files[0], 'exit_code': 0, 'timed_out': false},
+        {'file': files[1], 'exit_code': 0, 'timed_out': false},
+      ];
+
+      expect(lane.validatePrimaryIntegrationMatrix(files, valid), isEmpty);
+      expect(
+        lane.validatePrimaryIntegrationMatrix(files, valid.take(1).toList()),
+        isNotEmpty,
+      );
+      expect(
+        lane.validatePrimaryIntegrationMatrix(files, [
+          ...valid.take(1),
+          {'file': files[1], 'exit_code': 1, 'timed_out': false},
+        ]),
+        isNotEmpty,
+      );
+    },
+  );
+
   test('unavailable emulator retries retain prior handoff evidence', () {
     final previous = <String, Object?>{
       'result': 'UNAVAILABLE',

@@ -1000,6 +1000,33 @@ List<String> discoverIntegrationTestFiles(Directory root) {
   return files;
 }
 
+List<String> validatePrimaryIntegrationMatrix(
+  List<String> discoveredFiles,
+  List<Map<String, Object?>> records,
+) {
+  final issues = <String>[];
+  final recorded = <String>{};
+  for (final record in records) {
+    final file = '${record['file'] ?? ''}';
+    if (file.isEmpty || !recorded.add(file)) {
+      issues.add('integration matrix has a missing or duplicate file record');
+      continue;
+    }
+    if (!discoveredFiles.contains(file)) {
+      issues.add('integration matrix recorded an undiscovered file: $file');
+    }
+    if (record['exit_code'] != 0 || record['timed_out'] != false) {
+      issues.add('integration matrix file did not pass: $file');
+    }
+  }
+  for (final file in discoveredFiles) {
+    if (!recorded.contains(file)) {
+      issues.add('integration matrix is missing discovered file: $file');
+    }
+  }
+  return issues;
+}
+
 String redactEmulatorSerial(String value) =>
     value.replaceAll(RegExp(r'emulator-\d{4}'), '<emulator-redacted>');
 
@@ -1009,16 +1036,19 @@ Future<EmulatorEvidenceResult> runEmulatorEvidence(
 }) async {
   final started = DateTime.now().toUtc();
   _PreparedEmulator? prepared;
+  List<Map<String, Object?>>? integrationMatrix;
   String? failure;
   try {
     await _withPreparedEmulator(root, (session) async {
       prepared = session;
       if (!prepareOnly) {
-        throw StateError(
-          'full emulator matrix is not implemented until task 61-05-02',
-        );
+        integrationMatrix = await _runPrimaryIntegrationMatrix(root, session);
       }
     });
+    if (!prepareOnly && integrationMatrix != null) {
+      final release = await runReleaseEvidence(root);
+      if (!release.completed) throw StateError(release.message);
+    }
   } on Object catch (error) {
     failure = scrubCandidateOutput('$error');
   }
@@ -1028,6 +1058,7 @@ Future<EmulatorEvidenceResult> runEmulatorEvidence(
     started: started,
     prepared: prepared,
     failure: failure,
+    integrationMatrix: integrationMatrix,
   );
   if (failure != null || prepared == null) {
     return EmulatorEvidenceResult(
@@ -1044,11 +1075,72 @@ Future<EmulatorEvidenceResult> runEmulatorEvidence(
   );
 }
 
+Future<List<Map<String, Object?>>> _runPrimaryIntegrationMatrix(
+  Directory root,
+  _PreparedEmulator session,
+) async {
+  final flutterRoot = _flutterRoot();
+  final jdkHome = _resolveJdk17Home();
+  final androidSdk = _androidSdkRoot();
+  if (flutterRoot == null || jdkHome == null || androidSdk == null) {
+    throw StateError('Flutter, verified JDK 17, or Android SDK is unavailable');
+  }
+  final files = discoverIntegrationTestFiles(
+    Directory('${root.path}/integration_test'),
+  );
+  if (files.isEmpty)
+    throw StateError('no integration_test files were discovered');
+  final environment = <String, String>{
+    'JAVA_HOME': jdkHome,
+    'ANDROID_HOME': androidSdk,
+    'ANDROID_SDK_ROOT': androidSdk,
+    'PATH': '$flutterRoot/bin:${Platform.environment['PATH'] ?? ''}',
+  };
+  final records = <Map<String, Object?>>[];
+  for (final file in files) {
+    final commandStarted = DateTime.now().toUtc();
+    final command = await runBoundedCommand(
+      '$flutterRoot/bin/flutter',
+      [
+        'test',
+        'integration_test/$file',
+        '-d',
+        session.serial,
+        '-r',
+        'expanded',
+      ],
+      workingDirectory: root,
+      environment: environment,
+      timeout: const Duration(minutes: 30),
+      durableCommand:
+          'flutter test integration_test/$file -d <emulator-redacted> -r expanded',
+    );
+    records.add({
+      'file': file,
+      'exit_code': command.exitCode,
+      'timed_out': command.timedOut,
+      'duration_ms': DateTime.now()
+          .toUtc()
+          .difference(commandStarted)
+          .inMilliseconds,
+    });
+    if (command.exitCode != 0 || command.timedOut) {
+      throw StateError(
+        'primary integration test failed: $file: ${_diagnosticLine(command.output)}',
+      );
+    }
+  }
+  final issues = validatePrimaryIntegrationMatrix(files, records);
+  if (issues.isNotEmpty) throw StateError(issues.join('; '));
+  return records;
+}
+
 void _recordEmulatorPreparation({
   required Directory root,
   required DateTime started,
   required _PreparedEmulator? prepared,
   required String? failure,
+  required List<Map<String, Object?>>? integrationMatrix,
 }) {
   final file = File('${root.path}/$evidencePath');
   final markdown = file.readAsStringSync();
@@ -1096,6 +1188,20 @@ void _recordEmulatorPreparation({
     priorPreparation,
     currentPreparation,
   );
+  if (integrationMatrix != null && failure == null) {
+    evidence['completed_stage'] = 'emulator';
+    final results = _object(evidence['results']);
+    results['emulator'] = 'PASS';
+    evidence['results'] = results;
+    evidence['emulator'] = {
+      'lane': 'primary_local_arm64',
+      'api': requiredAndroidApi,
+      'abi': primaryAndroidAbi,
+      'profile': 'pixel_6',
+      'serial_redacted': '<emulator-redacted>',
+    };
+    evidence['integration_matrix'] = integrationMatrix;
+  }
   final rendered = const JsonEncoder.withIndent('  ').convert(evidence);
   final start = markdown.indexOf(_evidenceStart) + _evidenceStart.length;
   final end = markdown.indexOf(_evidenceEnd);
