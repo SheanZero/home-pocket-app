@@ -64,6 +64,40 @@ run_flutter() {
   run flutter "$@"
 }
 
+verify_android_package_jdk17() {
+  local jdk_home=''
+  local candidate
+  local java_binary
+  local java_version
+  local java_major
+
+  for candidate in "${PHASE61_JAVA_HOME:-}" "${JAVA_HOME:-}"; do
+    if [[ -n "$candidate" && -x "$candidate/bin/java" ]]; then
+      jdk_home="$candidate"
+      break
+    fi
+  done
+
+  [[ -n "$jdk_home" ]] ||
+    fail 'Android package requires PHASE61_JAVA_HOME or JAVA_HOME with executable bin/java'
+
+  java_binary="$jdk_home/bin/java"
+  if ! java_version="$("$java_binary" -version 2>&1)"; then
+    fail 'Android package Java version check failed'
+  fi
+  if [[ "$java_version" =~ version[[:space:]]+\"([0-9]+) ]]; then
+    java_major="${BASH_REMATCH[1]}"
+  else
+    fail 'Android package Java version output is not parseable'
+  fi
+  [[ "$java_major" == "17" ]] ||
+    fail "Android package requires JDK 17; configured Java is major $java_major"
+
+  export JAVA_HOME="$jdk_home"
+  export PATH="$JAVA_HOME/bin:$PATH"
+  log "Android package JDK verified: $JAVA_HOME"
+}
+
 remove_generated_registrants() {
   local root="${1:-$PROJECT_ROOT}"
   # These are ignored Flutter-generated files, never hand-maintained source.
@@ -349,6 +383,9 @@ main() {
   fi
 
   if "$PACKAGE_RELEASE"; then
+    case "$RELEASE_PREFLIGHT_PLATFORM" in
+      android|all) verify_android_package_jdk17 ;;
+    esac
     log 'Preflight passed; starting signed production packaging.'
     package_signed_release
     if "$DRY_RUN"; then

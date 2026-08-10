@@ -38,8 +38,8 @@ exit $exitCode
 }
 
 String? _androidPackageJdkGateContractFailure(String source) {
-  const gateCall = '    verify_android_package_jdk17';
-  const packageCall = '    package_signed_release';
+  const gateCall = 'android|all) verify_android_package_jdk17 ;;';
+  const packageCall = 'package_signed_release';
   final gate = source.lastIndexOf(gateCall);
   final package = source.lastIndexOf(packageCall);
 
@@ -313,15 +313,23 @@ dev_dependencies:
       expect(_androidPackageJdkGateContractFailure(source), isNull);
 
       final removed = source.replaceFirst(
-        '    verify_android_package_jdk17\\n',
-        '',
+        'android|all) verify_android_package_jdk17 ;;',
+        'android|all) ;;',
       );
       expect(_androidPackageJdkGateContractFailure(removed), isNotNull);
 
-      final late = source.replaceFirst(
-        '    verify_android_package_jdk17\\n    package_signed_release',
-        '    package_signed_release\\n    verify_android_package_jdk17',
-      );
+      final late = source
+          .replaceFirst(
+            'android|all) verify_android_package_jdk17 ;;',
+            'android|all) ;;',
+          )
+          .replaceFirst(
+            '    package_signed_release',
+            '    package_signed_release\n'
+                '    case "\$RELEASE_PREFLIGHT_PLATFORM" in\n'
+                '      android|all) verify_android_package_jdk17 ;;\n'
+                '    esac',
+          );
       expect(_androidPackageJdkGateContractFailure(late), isNotNull);
 
       final weakened = source.replaceFirst(
