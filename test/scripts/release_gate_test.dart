@@ -348,6 +348,41 @@ void main() {
     );
 
     test(
+      'candidate-scoped merge is attributed to the merge commit',
+      () {
+        _runFixtureGit(fixture.root, const <String>[
+          'checkout',
+          '-b',
+          'candidate-side',
+        ]);
+        final scopedFile = File('${fixture.root.path}/scripts/candidate.dart');
+        scopedFile.parent.createSync(recursive: true);
+        scopedFile.writeAsStringSync('const mergedCandidate = 2;\n');
+        _runFixtureGit(fixture.root, const <String>['add', 'scripts/candidate.dart']);
+        _runFixtureGit(fixture.root, const <String>[
+          'commit',
+          '-m',
+          'candidate scoped side change',
+        ]);
+        _runFixtureGit(fixture.root, const <String>['checkout', '-']);
+        _runFixtureGit(fixture.root, const <String>[
+          'merge',
+          '--no-ff',
+          'candidate-side',
+          '-m',
+          'merge candidate-scoped change',
+        ]);
+
+        final mergeHead = _fixtureGitOutput(fixture.root, const <String>[
+          'rev-parse',
+          'HEAD',
+        ]);
+
+        expect(resolveAttestedCandidateCommit(fixture.root), mergeHead);
+      },
+    );
+
+    test(
       'strict arguments and candidate state fail closed before process launch',
       () async {
         fixture.dirtySource();
@@ -1091,4 +1126,17 @@ void _runFixtureGit(Directory root, List<String> arguments) {
   if (result.exitCode != 0) {
     throw StateError('fixture git command failed: ${arguments.join(' ')}');
   }
+}
+
+String _fixtureGitOutput(Directory root, List<String> arguments) {
+  final result = Process.runSync(
+    'git',
+    arguments,
+    workingDirectory: root.path,
+    runInShell: false,
+  );
+  if (result.exitCode != 0) {
+    throw StateError('fixture git command failed: ${arguments.join(' ')}');
+  }
+  return result.stdout.toString().trim();
 }
