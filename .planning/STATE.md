@@ -5,15 +5,15 @@ milestone_name: 依赖与原生工具链现代化
 current_phase: 62
 current_phase_name: automated-release-gate-lock
 status: executing
-stopped_at: Completed 62-04-PLAN.md
-last_updated: "2026-08-10T04:32:23.746Z"
+stopped_at: Completed 62-05-PLAN.md
+last_updated: "2026-08-10T04:46:58.763Z"
 last_activity: 2026-08-10
 last_activity_desc: Phase 62 execution started
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 45
-  completed_plans: 40
+  completed_plans: 41
   percent: 71
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-08-10 after Phase 61 completion)
 ## Current Position
 
 Phase: 62 (automated-release-gate-lock) — EXECUTING
-Plan: 5 of 9
+Plan: 6 of 9
 Status: Ready to execute
 Last activity: 2026-08-10 — Phase 62 execution started
 
-Progress: [█████████░] 89%
+Progress: [█████████░] 91%
 
 ### Decisions
 
@@ -140,6 +140,8 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: The release-gate tracer snapshots manifest and gate/workflow inputs before and after its fixed prerequisite, blocking any drift.
 - [Phase ?]: Only closed infrastructure classes retry once; unknown, product, privacy, coverage, drift, and schema failures are terminal.
 - [Phase ?]: A recognized host-test timeout must diagnose explicit files and pass a complete serial coverage suite before the coverage gate.
+- [Phase ?]: SIGN-A separates explicit signing evidence from verified JDK 17 selection; Phase 62 Android evidence is candidate-bound and non-mutating.
+- [Phase ?]: Android API 36 arm64-v8a remains mandatory; x86_64 stays supplemental and Android physical-device validation is not claimed.
 
 ### Quick Tasks Completed
 
@@ -329,8 +331,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-08-10T04:32:23.730Z
-Stopped at: Completed 62-04-PLAN.md
+Last session: 2026-08-10T04:46:58.744Z
+Stopped at: Completed 62-05-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -455,6 +457,7 @@ Resume file: None
 | Phase 62 P02 | 3min | 3 tasks | 1 files |
 | Phase 62 P03 | 13min | 2 tasks | 4 files |
 | Phase 62 P04 | 12min | 2 tasks | 4 files |
+| Phase 62 P05 | 12 min | 2 tasks | 5 files |
 
 ## Decisions
 
