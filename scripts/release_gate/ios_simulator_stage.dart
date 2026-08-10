@@ -384,7 +384,9 @@ class SimctlIosSimulatorAdapter implements IosSimulatorAdapter {
       'shutdown',
       identifier,
     ], options);
-    if (shutdown.exitCode != 0) return IosSimulatorFailure.deviceTransport;
+    if (!_shutdownSucceeded(shutdown)) {
+      return IosSimulatorFailure.deviceTransport;
+    }
     final erase = await _run(<String>[
       'xcrun',
       'simctl',
@@ -425,7 +427,7 @@ class SimctlIosSimulatorAdapter implements IosSimulatorAdapter {
       'erase',
       identifier,
     ], options);
-    return shutdown.exitCode == 0 && erase.exitCode == 0
+    return _shutdownSucceeded(shutdown) && erase.exitCode == 0
         ? null
         : IosSimulatorFailure.cleanup;
   }
@@ -441,7 +443,9 @@ class SimctlIosSimulatorAdapter implements IosSimulatorAdapter {
       commands,
       identifier: identifier,
     );
-    if (shutdown.exitCode != 0) return IosSimulatorFailure.deviceTransport;
+    if (!_shutdownSucceeded(shutdown)) {
+      return IosSimulatorFailure.deviceTransport;
+    }
     final erase = await _runLogged(
       <String>['xcrun', 'simctl', 'erase', identifier],
       options,
@@ -482,7 +486,7 @@ class SimctlIosSimulatorAdapter implements IosSimulatorAdapter {
       commands,
       identifier: identifier,
     );
-    return shutdown.exitCode == 0 && erase.exitCode == 0
+    return _shutdownSucceeded(shutdown) && erase.exitCode == 0
         ? null
         : IosSimulatorFailure.cleanup;
   }
@@ -518,6 +522,14 @@ class SimctlIosSimulatorAdapter implements IosSimulatorAdapter {
           command[3] == 'devices',
     );
   }
+}
+
+bool _shutdownSucceeded(ProcessOutcome outcome) {
+  if (outcome.exitCode == 0) return true;
+  final diagnostic = outcome.diagnostic.toLowerCase();
+  return outcome.exitCode == 148 &&
+      (diagnostic.contains('already shutdown') ||
+          diagnostic.contains('current state: shutdown'));
 }
 
 Future<IosSimulatorEvidence> runIosSimulatorStage({
