@@ -9,7 +9,11 @@ import 'models.dart';
 
 const _maxReportTextChars = 320;
 final _prohibitedEvidence = RegExp(
-  r'(/users/|/home/|udid|serial|token=|credential=|secret=|password=|api[_-]?key=|sync[_ -]?payload|backup content|financial field|note=|amount=|keystore)',
+  r'(/users/|/home/|sync[_ -]?payload|backup content|financial field|note=|amount=|keystore)',
+  caseSensitive: false,
+);
+final _sensitiveEvidenceAssignment = RegExp(
+  r'(?:"?(?:token|credential|secret|password|api[_-]?key|udid|serial)"?)\s*[:=]\s*(?:"(?!<redacted>")[^"]*"|(?!<redacted>)[^\s,}\]]+)',
   caseSensitive: false,
 );
 
@@ -54,7 +58,9 @@ List<String> validateGateResult(GateResult result) {
 /// collected then redacted, so reports never become a source of raw evidence.
 List<String> validateEvidencePrivacy(Object? evidence) {
   final encoded = jsonEncode(evidence);
-  if (_prohibitedEvidence.hasMatch(encoded)) {
+  final normalized = encoded.replaceAll(r'\"', '"');
+  if (_prohibitedEvidence.hasMatch(encoded) ||
+      _sensitiveEvidenceAssignment.hasMatch(normalized)) {
     return const <String>['evidence contains a prohibited sensitive category'];
   }
   if (encoded.length > 128 * 1024) {

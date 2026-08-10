@@ -4,6 +4,14 @@ import 'dart:io';
 const _maxDiagnosticCharacters = 512;
 const _terminationGrace = Duration(seconds: 1);
 const _drainGrace = Duration(seconds: 1);
+final _quotedSensitiveDiagnosticAssignment = RegExp(
+  r'((?:"?(?:token|credential|secret|password|api[_-]?key|udid|serial)"?)\s*[:=]\s*)"[^"]*"',
+  caseSensitive: false,
+);
+final _unquotedSensitiveDiagnosticAssignment = RegExp(
+  r'((?:"?(?:token|credential|secret|password|api[_-]?key|udid|serial)"?)\s*[:=]\s*)(?!")\S+',
+  caseSensitive: false,
+);
 
 class ProcessOutcome {
   const ProcessOutcome({required this.exitCode, required this.diagnostic});
@@ -81,20 +89,14 @@ String scrubDiagnostic(String value, {bool preserveJson = false}) {
   var scrubbed = value
       .replaceAll(RegExp(r'/Users/[^\s]+'), '<redacted-path>')
       .replaceAll(RegExp(r'/home/[^\s]+'), '<redacted-path>')
-      .replaceAll(
-        RegExp(
-          r'(?:token|credential|secret|password|api[_-]?key)=[^\s]+',
-          caseSensitive: false,
-        ),
-        '<redacted>',
+      .replaceAllMapped(
+        _quotedSensitiveDiagnosticAssignment,
+        (match) => '${match.group(1)}"<redacted>"',
       )
-      .replaceAll(RegExp(r'udid=[^\s]+', caseSensitive: false), '<redacted>');
-  if (!preserveJson) {
-    scrubbed = scrubbed.replaceAll(
-      RegExp(r'"udid"\s*:\s*"[^"]+"', caseSensitive: false),
-      '"udid":"<redacted>"',
-    );
-  }
+      .replaceAllMapped(
+        _unquotedSensitiveDiagnosticAssignment,
+        (match) => '${match.group(1)}<redacted>',
+      );
   final limit = preserveJson ? 32768 : _maxDiagnosticCharacters;
   return scrubbed.length <= limit
       ? scrubbed
