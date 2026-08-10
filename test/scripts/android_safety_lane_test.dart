@@ -197,20 +197,26 @@ void main() {
     );
   });
 
-  test('primary Emulator launch is cold, snapshot-free, and architecture exact', () {
-    final arguments = lane.emulatorLaunchArguments(
-      avdName: 'phase61-owned',
-      port: 5580,
-      hostArchitecture: 'arm64',
-      emulatorAbi: lane.primaryAndroidAbi,
-    );
+  test(
+    'primary Emulator launch is cold, snapshot-free, and architecture exact',
+    () {
+      final arguments = lane.emulatorLaunchArguments(
+        avdName: 'phase61-owned',
+        port: 5580,
+        hostArchitecture: 'arm64',
+        emulatorAbi: lane.primaryAndroidAbi,
+      );
 
-    expect(arguments, containsAll(['-avd', 'phase61-owned', '-port', '5580']));
-    expect(arguments, containsAll(['-wipe-data', '-no-snapshot']));
-    expect(arguments, contains('-no-snapshot-save'));
-    expect(arguments, isNot(contains('-no-accel')));
-    expect(arguments, containsAll(['-no-window', '-no-audio']));
-  });
+      expect(
+        arguments,
+        containsAll(['-avd', 'phase61-owned', '-port', '5580']),
+      );
+      expect(arguments, containsAll(['-wipe-data', '-no-snapshot']));
+      expect(arguments, contains('-no-snapshot-save'));
+      expect(arguments, isNot(contains('-no-accel')));
+      expect(arguments, containsAll(['-no-window', '-no-audio']));
+    },
+  );
 
   test('Rosetta emulator override requires the official x86_64 archive', () {
     expect(
@@ -236,36 +242,39 @@ void main() {
     );
   });
 
-  test('primary Emulator identity rejects false boot, API, ABI, and ownership', () {
-    const expected = lane.EmulatorIdentityExpectation(
-      avdName: 'phase61-owned',
-      serial: 'emulator-5580',
-      abi: lane.primaryAndroidAbi,
-    );
-    const valid = <String, String>{
-      'serial': 'emulator-5580',
-      'bootCompleted': '1',
-      'api': '36',
-      'abi': lane.primaryAndroidAbi,
-      'avdName': 'phase61-owned',
-    };
-
-    expect(lane.validateEmulatorIdentity(valid, expected), isEmpty);
-    for (final mutation in <String, String>{
-      'serial': 'emulator-5582',
-      'bootCompleted': '0',
-      'api': '35',
-      'abi': lane.supplementalX86AndroidAbi,
-      'avdName': 'someone-elses-avd',
-    }.entries) {
-      final mutated = {...valid, mutation.key: mutation.value};
-      expect(
-        lane.validateEmulatorIdentity(mutated, expected),
-        isNotEmpty,
-        reason: '${mutation.key} must fail closed',
+  test(
+    'primary Emulator identity rejects false boot, API, ABI, and ownership',
+    () {
+      const expected = lane.EmulatorIdentityExpectation(
+        avdName: 'phase61-owned',
+        serial: 'emulator-5580',
+        abi: lane.primaryAndroidAbi,
       );
-    }
-  });
+      const valid = <String, String>{
+        'serial': 'emulator-5580',
+        'bootCompleted': '1',
+        'api': '36',
+        'abi': lane.primaryAndroidAbi,
+        'avdName': 'phase61-owned',
+      };
+
+      expect(lane.validateEmulatorIdentity(valid, expected), isEmpty);
+      for (final mutation in <String, String>{
+        'serial': 'emulator-5582',
+        'bootCompleted': '0',
+        'api': '35',
+        'abi': lane.supplementalX86AndroidAbi,
+        'avdName': 'someone-elses-avd',
+      }.entries) {
+        final mutated = {...valid, mutation.key: mutation.value};
+        expect(
+          lane.validateEmulatorIdentity(mutated, expected),
+          isNotEmpty,
+          reason: '${mutation.key} must fail closed',
+        );
+      }
+    },
+  );
 
   test('Emulator discovery is recursive and serials are redacted', () async {
     final fixture = await Directory.systemTemp.createTemp(
@@ -290,56 +299,60 @@ void main() {
     );
   });
 
-  test('primary Emulator preparation evidence is exact or honestly unavailable', () {
-    final valid = <String, Object?>{
-      'result': 'UNAVAILABLE',
-      'api': 36,
-      'lane': 'primary_local_arm64',
-      'abi': lane.primaryAndroidAbi,
-      'profile': 'pixel_6',
-      'system_image': lane.primaryAndroidSystemImage,
-      'cold_boot': 'wipe-data/no-snapshot',
-      'host_architecture': 'arm64',
-      'runtime': 'native Apple Silicon host execution',
-      'emulator_version': 'Android emulator version 36.3.10.0',
-      'serial_redacted': 'NOT_RUN',
-      'failure': 'x86_64 is unsupported on this aarch64 host',
-    };
+  test(
+    'primary Emulator preparation evidence is exact or honestly unavailable',
+    () {
+      final valid = <String, Object?>{
+        'result': 'UNAVAILABLE',
+        'api': 36,
+        'lane': 'primary_local_arm64',
+        'abi': lane.primaryAndroidAbi,
+        'profile': 'pixel_6',
+        'system_image': lane.primaryAndroidSystemImage,
+        'cold_boot': 'wipe-data/no-snapshot',
+        'host_architecture': 'arm64',
+        'runtime': 'native Apple Silicon host execution',
+        'emulator_version': 'Android emulator version 36.3.10.0',
+        'serial_redacted': 'NOT_RUN',
+        'failure': 'x86_64 is unsupported on this aarch64 host',
+      };
 
-    expect(lane.validateEmulatorPreparationRecord(valid), isEmpty);
-    for (final mutation in <String, Object?>{
-      'result': 'PASS',
-      'api': 35,
-      'abi': lane.supplementalX86AndroidAbi,
-      'system_image': lane.supplementalX86AndroidSystemImage,
-    }.entries) {
-      final mutated = {...valid, mutation.key: mutation.value};
-      expect(
-        lane.validateEmulatorPreparationRecord(mutated),
-        isNotEmpty,
-        reason: '${mutation.key} must fail closed',
-      );
-    }
-  });
+      expect(lane.validateEmulatorPreparationRecord(valid), isEmpty);
+      for (final mutation in <String, Object?>{
+        'result': 'PASS',
+        'api': 35,
+        'abi': lane.supplementalX86AndroidAbi,
+        'system_image': lane.supplementalX86AndroidSystemImage,
+      }.entries) {
+        final mutated = {...valid, mutation.key: mutation.value};
+        expect(
+          lane.validateEmulatorPreparationRecord(mutated),
+          isNotEmpty,
+          reason: '${mutation.key} must fail closed',
+        );
+      }
+    },
+  );
 
-  test('supplemental x86 lane remains explicit and separate from primary arm64', () {
-    const workflow = '''
+  test(
+    'supplemental x86 lane remains explicit and separate from primary arm64',
+    () {
+      const workflow = '''
 name: Android Emulator supplemental suite (API 36 x86_64 GitHub/Intel)
+api-level: 36
 arch: x86_64
 target: google_apis
 ''';
 
-    expect(
-      lane.validateSupplementalX86Lane(workflow),
-      isEmpty,
-    );
-    expect(
-      lane.validateSupplementalX86Lane(
-        workflow.replaceAll('arch: x86_64', 'arch: arm64-v8a'),
-      ),
-      isNotEmpty,
-    );
-  });
+      expect(lane.validateSupplementalX86Lane(workflow), isEmpty);
+      expect(
+        lane.validateSupplementalX86Lane(
+          workflow.replaceAll('arch: x86_64', 'arch: arm64-v8a'),
+        ),
+        isNotEmpty,
+      );
+    },
+  );
 
   test('unavailable emulator retries retain prior handoff evidence', () {
     final previous = <String, Object?>{

@@ -35,7 +35,9 @@ permissions:
 
 jobs:
   android-device-e2e:
-    name: Android Emulator full suite (API 36 x86_64)
+    # Supplemental x86_64 runtime lane for GitHub/Intel hosts. The local Apple
+    # Silicon arm64-v8a primary lane is executed by the checked-in verifier.
+    name: Android Emulator supplemental suite (API 36 x86_64 GitHub/Intel)
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:

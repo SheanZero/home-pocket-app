@@ -19,8 +19,11 @@ const selectedGradle = '8.14';
 const selectedKotlin = '2.2.20';
 const requiredJdk = '17';
 const requiredAndroidApi = 36;
-const requiredAndroidAbi = 'x86_64';
-const requiredAndroidSystemImage =
+const primaryAndroidAbi = 'arm64-v8a';
+const primaryAndroidSystemImage =
+    'system-images;android-36;google_apis;arm64-v8a';
+const supplementalX86AndroidAbi = 'x86_64';
+const supplementalX86AndroidSystemImage =
     'system-images;android-36;google_apis;x86_64';
 const officialX86EmulatorBuild = '15917651';
 const officialX86EmulatorArchiveSha1 =
@@ -830,16 +833,19 @@ class EmulatorIdentityExpectation {
   const EmulatorIdentityExpectation({
     required this.avdName,
     required this.serial,
+    required this.abi,
   });
 
   final String avdName;
   final String serial;
+  final String abi;
 }
 
 List<String> emulatorLaunchArguments({
   required String avdName,
   required int port,
   required String hostArchitecture,
+  required String emulatorAbi,
 }) => [
   '-avd',
   avdName,
@@ -853,7 +859,8 @@ List<String> emulatorLaunchArguments({
   '-no-boot-anim',
   '-gpu',
   'swiftshader_indirect',
-  if (hostArchitecture == 'arm64') '-no-accel',
+  if (hostArchitecture == 'arm64' && emulatorAbi == supplementalX86AndroidAbi)
+    '-no-accel',
 ];
 
 List<String> validateEmulatorIdentity(
@@ -870,7 +877,7 @@ List<String> validateEmulatorIdentity(
   require('serial', expected.serial);
   require('bootCompleted', '1');
   require('api', '$requiredAndroidApi');
-  require('abi', requiredAndroidAbi);
+  require('abi', expected.abi);
   require('avdName', expected.avdName);
   return issues;
 }
@@ -893,15 +900,19 @@ List<String> validateEmulatorPreparationRecord(
     'emulator preparation API must be 36',
   );
   require(
-    preparation['abi'] == requiredAndroidAbi,
-    'emulator preparation ABI must be x86_64',
+    preparation['lane'] == 'primary_local_arm64',
+    'emulator preparation lane must be primary_local_arm64',
+  );
+  require(
+    preparation['abi'] == primaryAndroidAbi,
+    'emulator preparation ABI must be arm64-v8a',
   );
   require(
     preparation['profile'] == 'pixel_6',
     'emulator preparation profile must be pixel_6',
   );
   require(
-    preparation['system_image'] == requiredAndroidSystemImage,
+    preparation['system_image'] == primaryAndroidSystemImage,
     'emulator preparation system image is not exact',
   );
   require(
@@ -918,18 +929,33 @@ List<String> validateEmulatorPreparationRecord(
       preparation['serial_redacted'] == '<emulator-redacted>',
       'successful emulator preparation must redact the serial',
     );
-    if (preparation['host_architecture'] == 'arm64') {
-      final hostBinary = _object(preparation['emulator_host_binary']);
-      require(
-        hostBinary['architecture'] == 'x86_64' &&
-            hostBinary['archive_sha1'] == officialX86EmulatorArchiveSha1,
-        'Apple-silicon x86_64 preparation must prove the official Rosetta host binary',
-      );
-    }
+    require(
+      preparation['host_architecture'] == 'arm64',
+      'primary preparation must run on an Apple Silicon arm64 host',
+    );
   } else if (result == 'UNAVAILABLE') {
     require(
       '${preparation['failure'] ?? ''}'.trim().isNotEmpty,
       'unavailable emulator preparation must record a failure',
+    );
+  }
+  return issues;
+}
+
+/// Keeps the GitHub/Intel x86_64 lane independently testable without allowing
+/// it to populate local arm64 runtime evidence.
+List<String> validateSupplementalX86Lane(String workflow) {
+  final issues = <String>[];
+  if (!workflow.contains(
+    'name: Android Emulator supplemental suite (API 36 x86_64 GitHub/Intel)',
+  )) {
+    issues.add('supplemental x86_64 workflow name is missing');
+  }
+  if (!workflow.contains('api-level: 36') ||
+      !workflow.contains('arch: $supplementalX86AndroidAbi') ||
+      !workflow.contains('target: google_apis')) {
+    issues.add(
+      'supplemental x86_64 workflow must keep its exact API/ABI/image',
     );
   }
   return issues;
@@ -1000,13 +1026,15 @@ Future<EmulatorEvidenceResult> runEmulatorEvidence(
   if (failure != null || prepared == null) {
     return EmulatorEvidenceResult(
       completed: false,
-      message: failure ?? 'API 36 x86_64 Emulator preparation unavailable',
+      message:
+          failure ??
+          'API 36 arm64-v8a primary Emulator preparation unavailable',
     );
   }
   return const EmulatorEvidenceResult(
     completed: true,
     message:
-        'PASS: disposable API 36 x86_64 Emulator cold-booted and was cleaned up',
+        'PASS: disposable API 36 arm64-v8a primary Emulator cold-booted and was cleaned up',
   );
 }
 
@@ -1025,18 +1053,19 @@ void _recordEmulatorPreparation({
   final priorPreparation = _object(evidence['emulator_preparation']);
   final currentPreparation = <String, Object?>{
     'result': prepared != null && failure == null ? 'PASS' : 'UNAVAILABLE',
+    'lane': 'primary_local_arm64',
     'source_commit': _gitOutput(root, ['rev-parse', 'HEAD']),
     'started_utc': started.toIso8601String(),
     'completed_utc': DateTime.now().toUtc().toIso8601String(),
     'api': requiredAndroidApi,
-    'abi': requiredAndroidAbi,
+    'abi': primaryAndroidAbi,
     'profile': 'pixel_6',
-    'system_image': requiredAndroidSystemImage,
+    'system_image': primaryAndroidSystemImage,
     'cold_boot': 'wipe-data/no-snapshot',
     'host_architecture': hostArchitecture,
     'runtime': hostArchitecture == 'arm64'
-        ? 'cross-architecture software translation requested (-no-accel)'
-        : 'native host execution',
+        ? 'native Apple Silicon host execution'
+        : 'unsupported primary host architecture',
     'emulator_version':
         prepared?.emulatorVersion ?? _installedEmulatorVersion(),
     'emulator_host_binary': prepared?.x86HostBinary == true
@@ -1101,14 +1130,16 @@ Future<void> _withPreparedEmulator(
     throw StateError('verified JDK 17 or Android SDK is unavailable');
   }
   final hostArchitecture = _hostArchitectureSync();
+  if (hostArchitecture != 'arm64') {
+    throw StateError(
+      'primary API 36 arm64-v8a Emulator acceptance requires an Apple Silicon arm64 host',
+    );
+  }
   final sdkManager = '$androidSdk/cmdline-tools/latest/bin/sdkmanager';
   final avdManager = '$androidSdk/cmdline-tools/latest/bin/avdmanager';
   final nativeEmulator = '$androidSdk/emulator/emulator';
-  final emulator = await _resolveEmulatorExecutable(
-    nativeEmulator: nativeEmulator,
-    hostArchitecture: hostArchitecture,
-  );
-  final x86HostBinary = emulator != nativeEmulator;
+  final emulator = nativeEmulator;
+  const x86HostBinary = false;
   final adb = '$androidSdk/platform-tools/adb';
   for (final executable in [sdkManager, avdManager, emulator, adb]) {
     if (!File(executable).existsSync()) {
@@ -1121,20 +1152,20 @@ Future<void> _withPreparedEmulator(
     'ANDROID_SDK_ROOT': androidSdk,
   };
   final image = File(
-    '$androidSdk/system-images/android-36/google_apis/x86_64/package.xml',
+    '$androidSdk/system-images/android-36/google_apis/arm64-v8a/package.xml',
   );
   if (!image.existsSync()) {
     final install = await runBoundedCommand(
       sdkManager,
-      const [requiredAndroidSystemImage],
+      const [primaryAndroidSystemImage],
       workingDirectory: root,
       environment: environment,
       timeout: const Duration(minutes: 30),
-      durableCommand: 'sdkmanager $requiredAndroidSystemImage',
+      durableCommand: 'sdkmanager $primaryAndroidSystemImage',
     );
     if (install.exitCode != 0 || !image.existsSync()) {
       throw StateError(
-        'exact API 36 x86_64 system image installation failed: '
+        'exact API 36 arm64-v8a system image installation failed: '
         '${_diagnosticLine(install.output)}',
       );
     }
@@ -1158,7 +1189,7 @@ Future<void> _withPreparedEmulator(
   }
 
   final avdName =
-      'phase61_api36_x86_${DateTime.now().toUtc().microsecondsSinceEpoch}';
+      'phase61_api36_arm64_${DateTime.now().toUtc().microsecondsSinceEpoch}';
   final port = await _availableEmulatorPort();
   final serial = 'emulator-$port';
   final create = await runBoundedCommand(
@@ -1170,7 +1201,7 @@ Future<void> _withPreparedEmulator(
       '--name',
       avdName,
       '--package',
-      requiredAndroidSystemImage,
+      primaryAndroidSystemImage,
       '--device',
       'pixel_6',
     ],
@@ -1179,7 +1210,7 @@ Future<void> _withPreparedEmulator(
     timeout: const Duration(minutes: 2),
     durableCommand:
         'avdmanager create avd --name <runner-owned> '
-        '--package $requiredAndroidSystemImage --device pixel_6',
+        '--package $primaryAndroidSystemImage --device pixel_6',
   );
   if (create.exitCode != 0) {
     throw StateError(
@@ -1211,6 +1242,7 @@ Future<void> _withPreparedEmulator(
         avdName: avdName,
         port: port,
         hostArchitecture: hostArchitecture,
+        emulatorAbi: primaryAndroidAbi,
       ),
       workingDirectory: root.path,
       environment: environment,
@@ -1263,7 +1295,11 @@ Future<void> _withPreparedEmulator(
     }
     final identityIssues = validateEmulatorIdentity(
       observation,
-      EmulatorIdentityExpectation(avdName: avdName, serial: serial),
+      EmulatorIdentityExpectation(
+        avdName: avdName,
+        serial: serial,
+        abi: primaryAndroidAbi,
+      ),
     );
     if (identityIssues.isNotEmpty) {
       throw StateError(

@@ -4,36 +4,41 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('AND-04 keeps supplemental x86_64 CI and local arm64 primary contracts executable', () {
-    final workflow = File(
-      '.github/workflows/device-e2e.yml',
-    ).readAsStringSync();
+  test(
+    'AND-04 keeps supplemental x86_64 CI and local arm64 primary contracts executable',
+    () {
+      final workflow = File(
+        '.github/workflows/device-e2e.yml',
+      ).readAsStringSync();
 
-    expect(workflow, contains('android-device-e2e:'));
-    expect(workflow, contains('reactivecircus/android-emulator-runner@v2'));
-    expect(
-      workflow,
-      contains('name: Android Emulator supplemental suite (API 36 x86_64 GitHub/Intel)'),
-    );
-    expect(workflow, contains('api-level: 36'));
-    expect(workflow, contains('arch: x86_64'));
-    expect(
-      File('scripts/verify_android_safety_lane.dart').readAsStringSync(),
-      contains("const primaryAndroidAbi = 'arm64-v8a';"),
-    );
-    expect(workflow, contains('java-version: "17"'));
-    expect(workflow, contains('flutter pub get --enforce-lockfile'));
-    expect(workflow, contains('ios-device-e2e:'));
-    expect(workflow, contains('xcrun simctl bootstatus'));
-    expect(
-      RegExp(r'flutter test integration_test/').allMatches(workflow),
-      hasLength(2),
-    );
-    expect(
-      workflow,
-      contains('bash scripts/release_preflight.sh --platform android'),
-    );
-  });
+      expect(workflow, contains('android-device-e2e:'));
+      expect(workflow, contains('reactivecircus/android-emulator-runner@v2'));
+      expect(
+        workflow,
+        contains(
+          'name: Android Emulator supplemental suite (API 36 x86_64 GitHub/Intel)',
+        ),
+      );
+      expect(workflow, contains('api-level: 36'));
+      expect(workflow, contains('arch: x86_64'));
+      expect(
+        File('scripts/verify_android_safety_lane.dart').readAsStringSync(),
+        contains("const primaryAndroidAbi = 'arm64-v8a';"),
+      );
+      expect(workflow, contains('java-version: "17"'));
+      expect(workflow, contains('flutter pub get --enforce-lockfile'));
+      expect(workflow, contains('ios-device-e2e:'));
+      expect(workflow, contains('xcrun simctl bootstatus'));
+      expect(
+        RegExp(r'flutter test integration_test/').allMatches(workflow),
+        hasLength(2),
+      );
+      expect(
+        workflow,
+        contains('bash scripts/release_preflight.sh --platform android'),
+      );
+    },
+  );
 
   test(
     'HP-05 keeps every device E2E Flutter pin aligned with the selected Stable baseline',
@@ -116,20 +121,23 @@ void main() {
     expect(actual, expected);
   });
 
-  test('AND-04 distinguishes primary arm64 evidence from supplemental x86 and physical-device absence', () {
-    final evidence = File(
-      '.planning/phases/61-android-toolchain-emulator-lane/'
-      '61-ANDROID-SAFETY-EVIDENCE.md',
-    ).readAsStringSync();
+  test(
+    'AND-04 distinguishes primary arm64 evidence from supplemental x86 and physical-device absence',
+    () {
+      final evidence = File(
+        '.planning/phases/61-android-toolchain-emulator-lane/'
+        '61-ANDROID-SAFETY-EVIDENCE.md',
+      ).readAsStringSync();
 
-    expect(evidence, contains('"emulator": "NOT_RUN"'));
-    expect(evidence, contains('"lane": "primary_local_arm64"'));
-    expect(evidence, contains('"x86_64_supplemental"'));
-    expect(
-      evidence,
-      contains(
-        'Android physical-device validation was not performed or claimed.',
-      ),
-    );
-  });
+      expect(evidence, contains('"emulator": "NOT_RUN"'));
+      expect(evidence, contains('"lane": "primary_local_arm64"'));
+      expect(evidence, contains('"x86_64_supplemental"'));
+      expect(
+        evidence,
+        contains(
+          'Android physical-device validation was not performed or claimed.',
+        ),
+      );
+    },
+  );
 }
