@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('AND-04 keeps Android API 36 x86_64 and iOS gates executable', () {
+  test('AND-04 keeps supplemental x86_64 CI and local arm64 primary contracts executable', () {
     final workflow = File(
       '.github/workflows/device-e2e.yml',
     ).readAsStringSync();
@@ -13,11 +13,14 @@ void main() {
     expect(workflow, contains('reactivecircus/android-emulator-runner@v2'));
     expect(
       workflow,
-      contains('name: Android Emulator full suite (API 36 x86_64)'),
+      contains('name: Android Emulator supplemental suite (API 36 x86_64 GitHub/Intel)'),
     );
     expect(workflow, contains('api-level: 36'));
     expect(workflow, contains('arch: x86_64'));
-    expect(workflow, isNot(contains('arch: arm64-v8a')));
+    expect(
+      File('scripts/verify_android_safety_lane.dart').readAsStringSync(),
+      contains("const primaryAndroidAbi = 'arm64-v8a';"),
+    );
     expect(workflow, contains('java-version: "17"'));
     expect(workflow, contains('flutter pub get --enforce-lockfile'));
     expect(workflow, contains('ios-device-e2e:'));
@@ -113,13 +116,15 @@ void main() {
     expect(actual, expected);
   });
 
-  test('AND-04 workflow declaration remains NOT_RUN runtime evidence', () {
+  test('AND-04 distinguishes primary arm64 evidence from supplemental x86 and physical-device absence', () {
     final evidence = File(
       '.planning/phases/61-android-toolchain-emulator-lane/'
       '61-ANDROID-SAFETY-EVIDENCE.md',
     ).readAsStringSync();
 
     expect(evidence, contains('"emulator": "NOT_RUN"'));
+    expect(evidence, contains('"lane": "primary_local_arm64"'));
+    expect(evidence, contains('"x86_64_supplemental"'));
     expect(
       evidence,
       contains(

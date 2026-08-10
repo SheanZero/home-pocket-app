@@ -197,16 +197,18 @@ void main() {
     );
   });
 
-  test('Emulator launch is cold, snapshot-free, and cross-arch explicit', () {
+  test('primary Emulator launch is cold, snapshot-free, and architecture exact', () {
     final arguments = lane.emulatorLaunchArguments(
       avdName: 'phase61-owned',
       port: 5580,
       hostArchitecture: 'arm64',
+      emulatorAbi: lane.primaryAndroidAbi,
     );
 
     expect(arguments, containsAll(['-avd', 'phase61-owned', '-port', '5580']));
     expect(arguments, containsAll(['-wipe-data', '-no-snapshot']));
-    expect(arguments, containsAll(['-no-snapshot-save', '-no-accel']));
+    expect(arguments, contains('-no-snapshot-save'));
+    expect(arguments, isNot(contains('-no-accel')));
     expect(arguments, containsAll(['-no-window', '-no-audio']));
   });
 
@@ -234,16 +236,17 @@ void main() {
     );
   });
 
-  test('Emulator identity rejects false boot, API, ABI, and ownership', () {
+  test('primary Emulator identity rejects false boot, API, ABI, and ownership', () {
     const expected = lane.EmulatorIdentityExpectation(
       avdName: 'phase61-owned',
       serial: 'emulator-5580',
+      abi: lane.primaryAndroidAbi,
     );
     const valid = <String, String>{
       'serial': 'emulator-5580',
       'bootCompleted': '1',
       'api': '36',
-      'abi': 'x86_64',
+      'abi': lane.primaryAndroidAbi,
       'avdName': 'phase61-owned',
     };
 
@@ -252,7 +255,7 @@ void main() {
       'serial': 'emulator-5582',
       'bootCompleted': '0',
       'api': '35',
-      'abi': 'arm64-v8a',
+      'abi': lane.supplementalX86AndroidAbi,
       'avdName': 'someone-elses-avd',
     }.entries) {
       final mutated = {...valid, mutation.key: mutation.value};
@@ -287,16 +290,17 @@ void main() {
     );
   });
 
-  test('Emulator preparation evidence is exact or honestly unavailable', () {
+  test('primary Emulator preparation evidence is exact or honestly unavailable', () {
     final valid = <String, Object?>{
       'result': 'UNAVAILABLE',
       'api': 36,
-      'abi': 'x86_64',
+      'lane': 'primary_local_arm64',
+      'abi': lane.primaryAndroidAbi,
       'profile': 'pixel_6',
-      'system_image': lane.requiredAndroidSystemImage,
+      'system_image': lane.primaryAndroidSystemImage,
       'cold_boot': 'wipe-data/no-snapshot',
       'host_architecture': 'arm64',
-      'runtime': 'cross-architecture software translation requested',
+      'runtime': 'native Apple Silicon host execution',
       'emulator_version': 'Android emulator version 36.3.10.0',
       'serial_redacted': 'NOT_RUN',
       'failure': 'x86_64 is unsupported on this aarch64 host',
@@ -306,8 +310,8 @@ void main() {
     for (final mutation in <String, Object?>{
       'result': 'PASS',
       'api': 35,
-      'abi': 'arm64-v8a',
-      'system_image': 'system-images;android-36;google_apis;arm64-v8a',
+      'abi': lane.supplementalX86AndroidAbi,
+      'system_image': lane.supplementalX86AndroidSystemImage,
     }.entries) {
       final mutated = {...valid, mutation.key: mutation.value};
       expect(
@@ -316,6 +320,25 @@ void main() {
         reason: '${mutation.key} must fail closed',
       );
     }
+  });
+
+  test('supplemental x86 lane remains explicit and separate from primary arm64', () {
+    const workflow = '''
+name: Android Emulator supplemental suite (API 36 x86_64 GitHub/Intel)
+arch: x86_64
+target: google_apis
+''';
+
+    expect(
+      lane.validateSupplementalX86Lane(workflow),
+      isEmpty,
+    );
+    expect(
+      lane.validateSupplementalX86Lane(
+        workflow.replaceAll('arch: x86_64', 'arch: arm64-v8a'),
+      ),
+      isNotEmpty,
+    );
   });
 
   test('unavailable emulator retries retain prior handoff evidence', () {
