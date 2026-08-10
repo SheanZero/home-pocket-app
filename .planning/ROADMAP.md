@@ -265,15 +265,34 @@ Plans:
 **Plans**: 9 plans
 
 Plans:
+**Wave 1**
 
 - [ ] 62-01-PLAN.md — Create the Wave 0 release-gate and CI-contract test seams before production implementation.
 - [ ] 62-02-PLAN.md — Obtain release-owner decisions for report lifecycle, Apple-Silicon CI topology, and Phase 61 signing-path ownership.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 62-03-PLAN.md — Prove the candidate-bound release-gate tracer and immutable fingerprint under the selected report lifecycle.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 62-04-PLAN.md — Lock host tests, coverage, retry, timeout recovery, and resume semantics.
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 62-05-PLAN.md — Emit current-candidate Android arm64 evidence under the selected Phase 61 signing-path decision.
 - [ ] 62-06-PLAN.md — Execute the complete isolated iOS Simulator stage and restore release hygiene.
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
 - [ ] 62-07-PLAN.md — Converge discovery, skips, verdicts, privacy, and deterministic evidence rendering.
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
 - [ ] 62-08-PLAN.md — Route PR/main CI through the owner-approved topology and implement the selected report lifecycle.
+
+**Wave 7** *(blocked on Wave 6 completion)*
+
 - [ ] 62-09-PLAN.md — Run the formal full candidate and publish the final compatibility attestation.
 
 ### Phase 63: Isolated Wired-iPhone Acceptance
