@@ -410,7 +410,7 @@ void main() {
         isFalse,
       );
       expect(isCandidateScopedPath('build/release_gate/raw.log'), isFalse);
-      expect(isCandidateScopedPath('docs/testing/other_report.md'), isTrue);
+      expect(isCandidateScopedPath('docs/testing/other_report.md'), isFalse);
       expect(isCandidateScopedPath('lib/main.dart'), isTrue);
     });
 

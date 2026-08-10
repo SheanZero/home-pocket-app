@@ -31,7 +31,33 @@ const _prerequisiteCommand = <String>[
 ];
 const _rawArtifactRoot = 'build/release_gate/';
 const _attestationMetadataPath = 'docs/testing/RELEASE_COMPATIBILITY.md';
+const selectedReportLifecycle = 'RPT-A';
 const _gateTimeout = Duration(minutes: 20);
+const _candidateScope = <String>{
+  'lib/',
+  'test/',
+  'integration_test/',
+  'scripts/',
+  'android/',
+  'ios/',
+  'macos/',
+  'windows/',
+  'linux/',
+  'web/',
+  '.github/',
+  '.metadata',
+  '.gitignore',
+  'pubspec.yaml',
+  'pubspec.lock',
+  'analysis_options.yaml',
+  'build.yaml',
+  'l10n.yaml',
+  'docs/testing/STABLE_BASELINE.json',
+  'docs/testing/DEVICE_E2E_MATRIX.md',
+  'docs/testing/DEPENDENCY_COMPATIBILITY.md',
+  '.planning/audit/coverage-gate-required-files.txt',
+  '.planning/audit/coverage-gate-deferred.txt',
+};
 const _additionalCandidateInputs = <String>{
   'docs/testing/STABLE_BASELINE.json',
   'scripts/verify_codegen_reproducibility.sh',
@@ -43,11 +69,29 @@ const _additionalCandidateInputs = <String>{
   '.github/workflows/device-e2e.yml',
 };
 
-/// RPT-A grants metadata treatment to one report path only. The raw evidence
-/// root is ignored and never becomes a candidate input; every other path is in
-/// candidate scope.
-bool isCandidateScopedPath(String path) =>
-    path != _attestationMetadataPath && !path.startsWith(_rawArtifactRoot);
+/// RPT-A allows a report-only successor but otherwise selects the latest commit
+/// touching a positive release-input inclusion set.
+bool isCandidateScopedPath(String path) => _candidateScope.any(
+  (entry) => entry.endsWith('/') ? path.startsWith(entry) : path == entry,
+);
+
+String resolveAttestedCandidateCommit(Directory root) {
+  for (final commit in _git(root, const <String>[
+    'rev-list',
+    'HEAD',
+  ]).split('\n')) {
+    final changed = _git(root, <String>[
+      'diff-tree',
+      '--no-commit-id',
+      '--name-only',
+      '-r',
+      '--root',
+      commit,
+    ]).split('\n').where((path) => path.isNotEmpty);
+    if (changed.any(isCandidateScopedPath)) return commit;
+  }
+  throw const _CandidateFailure('no candidate-scoped commit is available');
+}
 
 class ReleaseGateOptions {
   const ReleaseGateOptions({
@@ -55,12 +99,14 @@ class ReleaseGateOptions {
     required this.resultPath,
     required this.resume,
     this.failureFix,
+    this.publishReport = false,
   });
 
   final String scope;
   final String resultPath;
   final bool resume;
   final FailureFixRecord? failureFix;
+  final bool publishReport;
 }
 
 /// The two device adapters are injected only for deterministic tests. The
@@ -87,6 +133,7 @@ ReleaseGateOptions parseReleaseGateOptions(List<String> arguments) {
   String? resultPath;
   var resume = false;
   var recordFix = false;
+  var publishReport = false;
   String? fixStage;
   String? failureSummary;
   String? finalFix;
@@ -109,6 +156,11 @@ ReleaseGateOptions parseReleaseGateOptions(List<String> arguments) {
         throw ArgumentError('record-fix supplied more than once');
       }
       recordFix = true;
+    } else if (argument == '--publish-report') {
+      if (publishReport) {
+        throw ArgumentError('publish-report supplied more than once');
+      }
+      publishReport = true;
     } else if (argument.startsWith('--fix-stage=')) {
       if (fixStage != null) {
         throw ArgumentError('fix-stage supplied more than once');
@@ -169,17 +221,33 @@ ReleaseGateOptions parseReleaseGateOptions(List<String> arguments) {
       failureFix: record,
     );
   }
-  if ((scope != 'tracer' && scope != 'host' && scope != 'full') ||
-      resultPath == null ||
-      !_isRawArtifactPath(resultPath)) {
+  if (publishReport) {
+    if (scope != null ||
+        resume ||
+        resultPath == null ||
+        !_isRawArtifactPath(resultPath)) {
+      throw ArgumentError(
+        'publish-report requires only --result=build/release_gate/<name>.json',
+      );
+    }
+    return ReleaseGateOptions(
+      scope: 'publish-report',
+      resultPath: resultPath,
+      resume: false,
+      publishReport: true,
+    );
+  }
+  if (scope != 'tracer' && scope != 'host' && scope != 'full') {
     throw ArgumentError(
       'usage: --scope=tracer|host|full [--resume] '
-      '--result=build/release_gate/<name>.json',
+      '[--result=build/release_gate/<name>.json]',
     );
   }
   return ReleaseGateOptions(
     scope: scope!,
-    resultPath: resultPath,
+    resultPath:
+        resultPath ??
+        'build/release_gate/${scope == 'full' ? 'final' : scope}.json',
     resume: resume,
   );
 }
@@ -187,6 +255,14 @@ ReleaseGateOptions parseReleaseGateOptions(List<String> arguments) {
 Future<void> main(List<String> arguments) async {
   try {
     final options = parseReleaseGateOptions(arguments);
+    if (options.publishReport) {
+      await publishCompatibilityReport(
+        root: Directory.current,
+        resultPath: options.resultPath,
+      );
+      stdout.writeln('PUBLISHED');
+      return;
+    }
     if (options.failureFix case final record?) {
       await recordFailureFix(
         root: Directory.current,
@@ -577,13 +653,163 @@ Future<GateResult> _persist(
   return authoritative;
 }
 
+/// RPT-A publication is a deliberate post-gate operation. It accepts only the
+/// ignored JSON authority for the current immutable candidate and may change
+/// exactly the one tracked Markdown attestation path.
+Future<void> publishCompatibilityReport({
+  required Directory root,
+  required String resultPath,
+}) async {
+  _assertIgnoredArtifactPath(root, resultPath);
+  if (!_workingTreeIsClean(root)) {
+    throw const _CandidateFailure(
+      'report publication requires a clean checkout',
+    );
+  }
+  final jsonFile = File('${root.path}/$resultPath');
+  if (!jsonFile.existsSync()) {
+    throw const _CandidateFailure('validated release result is missing');
+  }
+  final result = _decodeAuthoritativeResult(jsonFile.readAsStringSync());
+  final candidate = validateCandidate(root);
+  if (result.candidate == null || !result.candidate!.matches(candidate)) {
+    throw const _CandidateFailure(
+      'release result does not bind to the candidate',
+    );
+  }
+  if (result.verdict == ReleaseVerdict.blocked ||
+      computeVerdict(result) != result.verdict ||
+      validateGateResult(result).isNotEmpty) {
+    throw const _CandidateFailure(
+      'release result is not a validated green authority',
+    );
+  }
+  final rendered = renderCompatibilityReport(result);
+  final reportFile = File('${root.path}/$_attestationMetadataPath');
+  if (reportFile.existsSync() && reportFile.readAsStringSync() == rendered) {
+    return;
+  }
+  await reportFile.writeAsString(rendered);
+  final changedPaths = _workingTreePaths(root);
+  if (changedPaths.length != 1 ||
+      changedPaths.single != _attestationMetadataPath) {
+    throw const _CandidateFailure(
+      'report publication may change only the compatibility attestation path',
+    );
+  }
+}
+
+GateResult _decodeAuthoritativeResult(String source) {
+  final decoded = jsonDecode(source);
+  if (decoded is! Map || decoded['schema_version'] != 1) {
+    throw const _CandidateFailure('release result schema is invalid');
+  }
+  try {
+    final candidateJson = decoded['candidate'];
+    if (candidateJson is! Map ||
+        candidateJson['commit'] is! String ||
+        candidateJson['input_digests'] is! Map) {
+      throw const FormatException();
+    }
+    final candidate = CandidateFingerprint(
+      commit: candidateJson['commit'] as String,
+      inputDigests: <String, String>{
+        for (final entry in (candidateJson['input_digests'] as Map).entries)
+          if (entry.key is String && entry.value is String)
+            entry.key as String: entry.value as String,
+      },
+    );
+    final rawStages = decoded['stages'];
+    if (rawStages is! List || rawStages.isEmpty) throw const FormatException();
+    final stages = rawStages
+        .map((raw) {
+          if (raw is! Map ||
+              raw['stage'] is! String ||
+              raw['command'] is! List ||
+              raw['started_at_utc'] is! String ||
+              raw['finished_at_utc'] is! String ||
+              raw['exit_code'] is! int ||
+              raw['classification'] is! String ||
+              raw['diagnostic'] is! String) {
+            throw const FormatException();
+          }
+          final command = raw['command'] as List;
+          if (command.any((part) => part is! String)) {
+            throw const FormatException();
+          }
+          return StageResult(
+            stage: GateStage.values.byName(raw['stage'] as String),
+            command: command.cast<String>(),
+            startedAtUtc: DateTime.parse(
+              raw['started_at_utc'] as String,
+            ).toUtc(),
+            finishedAtUtc: DateTime.parse(
+              raw['finished_at_utc'] as String,
+            ).toUtc(),
+            exitCode: raw['exit_code'] as int,
+            classification: StageClassification.values.byName(
+              raw['classification'] as String,
+            ),
+            diagnostic: raw['diagnostic'] as String,
+          );
+        })
+        .toList(growable: false);
+    final rawLimitations = decoded['limitations'];
+    final rawFixes = decoded['failure_fixes'];
+    if (rawLimitations is! List ||
+        rawFixes is! List ||
+        decoded['manual_override'] is! bool) {
+      throw const FormatException();
+    }
+    final limitations = rawLimitations.map((raw) {
+      if (raw is! String) throw const FormatException();
+      return ReleaseLimitation.values.byName(raw);
+    });
+    final fixes = rawFixes.map((raw) {
+      if (raw is! Map ||
+          raw['stage'] is! String ||
+          raw['failure_summary'] is! String ||
+          raw['final_fix'] is! String ||
+          raw['candidate_changed'] is! bool ||
+          raw['complete_rerun_outcome'] is! String) {
+        throw const FormatException();
+      }
+      return FailureFixRecord(
+        stage: raw['stage'] as String,
+        failureSummary: raw['failure_summary'] as String,
+        finalFix: raw['final_fix'] as String,
+        candidateChanged: raw['candidate_changed'] as bool,
+        completeRerunOutcome: raw['complete_rerun_outcome'] as String,
+      );
+    });
+    final verdict = switch (decoded['verdict']) {
+      'PASS' => ReleaseVerdict.pass,
+      'PASS_WITH_LIMITATIONS' => ReleaseVerdict.passWithLimitations,
+      'BLOCKED' => ReleaseVerdict.blocked,
+      _ => throw const FormatException(),
+    };
+    return GateResult(
+      candidate: candidate,
+      verdict: verdict,
+      stages: stages,
+      manualOverride: decoded['manual_override'] as bool,
+      limitations: limitations,
+      failureFixes: fixes,
+    );
+  } on FormatException {
+    throw const _CandidateFailure('release result schema is invalid');
+  } on ArgumentError {
+    throw const _CandidateFailure('release result schema is invalid');
+  }
+}
+
 ({CandidateFingerprint fingerprint, Map<String, String> expectedDigests})
 _captureCandidate(
   Directory root, {
   List<String>? trackedInputPaths,
   bool requireClean = true,
 }) {
-  final commit = _git(root, const <String>['rev-parse', '--verify', 'HEAD']);
+  final commit = resolveAttestedCandidateCommit(root);
   if (requireClean && !_workingTreeIsClean(root)) {
     throw const _CandidateFailure('candidate checkout is not clean');
   }
@@ -622,6 +848,13 @@ bool _workingTreeIsClean(Directory root) => _git(root, const <String>[
   '--porcelain',
   '--untracked-files=all',
 ]).isEmpty;
+
+List<String> _workingTreePaths(Directory root) =>
+    _git(root, const <String>['status', '--porcelain', '--untracked-files=all'])
+        .split('\n')
+        .where((line) => line.isNotEmpty)
+        .map((line) => line.substring(3))
+        .toList(growable: false);
 
 Map<String, String> _baselineTrackedInputDigests(Directory root) {
   final manifest = File('${root.path}/docs/testing/STABLE_BASELINE.json');

@@ -80,10 +80,13 @@ void main() {
       reason: 'the fast host authority is a PR gate, not a second main verdict',
     );
     expect(
-      RegExp(r'push:\n\s+branches: \[main\]\n\s+paths:', multiLine: true)
-          .hasMatch(device),
+      RegExp(
+        r'push:\n\s+branches: \[main\]\n\s+paths:',
+        multiLine: true,
+      ).hasMatch(device),
       isFalse,
-      reason: 'every main merge must reach the full authority without path filters',
+      reason:
+          'every main merge must reach the full authority without path filters',
     );
   });
 
@@ -163,27 +166,33 @@ void main() {
       expect(workflow, contains('api-level: 36'));
       expect(workflow, contains('arch: x86_64'));
       expect(workflow, contains('java-version: "17"'));
-      expect(workflow, contains('bash scripts/release_preflight.sh --platform android'));
+      expect(
+        workflow,
+        contains('bash scripts/release_preflight.sh --platform android'),
+      );
     },
   );
 
-  test('Phase 62 keeps lower-level verdict commands inside release_gate.dart', () {
-    final audit = File(_auditWorkflowPath).readAsStringSync();
-    final device = File(_deviceWorkflowPath).readAsStringSync();
+  test(
+    'Phase 62 keeps lower-level verdict commands inside release_gate.dart',
+    () {
+      final audit = File(_auditWorkflowPath).readAsStringSync();
+      final device = File(_deviceWorkflowPath).readAsStringSync();
 
-    for (final duplicate in const [
-      'bash scripts/verify_codegen_reproducibility.sh',
-      'flutter test --coverage',
-      'dart run scripts/coverage_gate.dart',
-      'bash scripts/release_preflight.sh --platform ios',
-    ]) {
-      expect(
-        '$audit\n$device',
-        isNot(contains(duplicate)),
-        reason: '$duplicate would create a competing Phase 62 verdict graph',
-      );
-    }
-  });
+      for (final duplicate in const [
+        'bash scripts/verify_codegen_reproducibility.sh',
+        'flutter test --coverage',
+        'dart run scripts/coverage_gate.dart',
+        'bash scripts/release_preflight.sh --platform ios',
+      ]) {
+        expect(
+          '$audit\n$device',
+          isNot(contains(duplicate)),
+          reason: '$duplicate would create a competing Phase 62 verdict graph',
+        );
+      }
+    },
+  );
 
   test('Phase 62 report lifecycle follows the selected exact-path decision', () {
     final source = File('scripts/release_gate.dart');
@@ -221,7 +230,8 @@ void main() {
     expect(
       contents,
       contains('resolveAttestedCandidateCommit'),
-      reason: 'RPT-A must resolve the tested parent from an exact report successor',
+      reason:
+          'RPT-A must resolve the tested parent from an exact report successor',
     );
     expect(
       contents,
@@ -253,7 +263,8 @@ void main() {
     expect(
       report.readAsStringSync(),
       contains('No validated candidate attestation has been published.'),
-      reason: 'the checked-in surface must not fabricate unexecuted runner proof',
+      reason:
+          'the checked-in surface must not fabricate unexecuted runner proof',
     );
   });
 }
