@@ -262,7 +262,7 @@ Plans:
   3. A clean release preflight regenerates native registrants and proves the production Runner excludes development-only plugins while CI pins the same Flutter stable, lockfile, and generation steps.
   4. iPhone Simulator and Android Emulator prerequisites pass, and a compatibility report records exact commands, environment, commit, version deltas, intentional holds, fixes, residual debt, and the absence of Android physical-device validation.
 
-**Plans**: 8/9 plans executed
+**Plans**: 9/13 plans executed
 
 Plans:
 **Wave 1**
@@ -293,7 +293,20 @@ Plans:
 
 **Wave 7** *(blocked on Wave 6 completion)*
 
-- [ ] 62-09-PLAN.md — Run the formal full candidate and publish the final compatibility attestation.
+- [x] 62-09-PLAN.md — Run the formal full candidate and record the retained partial/blocked evidence without claiming PASS.
+
+**Wave 8** *(gap closure; blocked on Wave 7 completion)*
+
+- [ ] 62-10-PLAN.md — Repair merge-candidate attribution and require complete iOS/Android evidence validation.
+- [ ] 62-11-PLAN.md — Make process timeouts reachable and close evidence redaction/serial-recovery defects.
+
+**Wave 9** *(blocked on Wave 8 completion)*
+
+- [ ] 62-12-PLAN.md — Enforce an independent JDK 17 prerequisite before direct Android release packaging.
+
+**Wave 10** *(blocked on Wave 9 completion)*
+
+- [ ] 62-13-PLAN.md — Run one final candidate-bound gate, publish only green evidence, and hand CI-A verification to the owner.
 
 ### Phase 63: Isolated Wired-iPhone Acceptance
 
