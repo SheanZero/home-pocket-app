@@ -318,6 +318,28 @@ void main() {
     }
   });
 
+  test('unavailable emulator retries retain prior handoff evidence', () {
+    final previous = <String, Object?>{
+      'result': 'UNAVAILABLE',
+      'cross_architecture_attempts': [
+        {'build': '15917651', 'result': 'UNAVAILABLE: bounded diagnostic'},
+      ],
+      'cleanup': {'runner_owned_avd': 'ABSENT'},
+      'exit_condition': 'Run on an x86_64 host.',
+    };
+    final current = <String, Object?>{
+      'result': 'UNAVAILABLE',
+      'failure': 'Native QEMU rejected x86_64 on arm64.',
+    };
+
+    final merged = lane.mergeEmulatorPreparationRecord(previous, current);
+
+    expect(merged['failure'], current['failure']);
+    expect(merged['cross_architecture_attempts'], previous['cross_architecture_attempts']);
+    expect(merged['cleanup'], previous['cleanup']);
+    expect(merged['exit_condition'], previous['exit_condition']);
+  });
+
   test(
     'release artifact scanner rejects missing and test-contaminated archives',
     () async {
