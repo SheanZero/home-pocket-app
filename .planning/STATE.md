@@ -5,15 +5,15 @@ milestone_name: 依赖与原生工具链现代化
 current_phase: 62
 current_phase_name: automated-release-gate-lock
 status: executing
-stopped_at: Completed 62-07-PLAN.md
-last_updated: "2026-08-10T05:15:10.308Z"
+stopped_at: Completed 62-08-PLAN.md
+last_updated: "2026-08-10T05:29:32.432Z"
 last_activity: 2026-08-10
 last_activity_desc: Phase 62 execution started
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 45
-  completed_plans: 43
+  completed_plans: 44
   percent: 71
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-08-10 after Phase 61 completion)
 ## Current Position
 
 Phase: 62 (automated-release-gate-lock) — EXECUTING
-Plan: 8 of 9
+Plan: 9 of 9
 Status: Ready to execute
 Last activity: 2026-08-10 — Phase 62 execution started
 
-Progress: [██████████] 96%
+Progress: [██████████] 98%
 
 ### Decisions
 
@@ -146,6 +146,8 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: Use recursive inventory equality (executed plus explicit, complete skip records) rather than Phase 60's two-test runtime allowlist.
 - [Phase ?]: 62-07: Expected skips are explicit versioned inventory exceptions; absent, stale, duplicate, or incomplete records block platform evidence.
 - [Phase ?]: 62-07: computeVerdict is the sole authority; manual overrides, mandatory failures, schema/privacy faults, and unclassified limitations are BLOCKED.
+- [Phase ?]: CI-A uses exact self-hosted, macOS, ARM64, happy-pocket-release labels; unavailable Apple-Silicon capacity remains a mandatory failure or pending result.
+- [Phase ?]: RPT-A publishes only a validated green JSON rendering bound to the immutable candidate and permits only the compatibility report as metadata successor.
 
 ### Quick Tasks Completed
 
@@ -335,8 +337,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-08-10T05:15:10.293Z
-Stopped at: Completed 62-07-PLAN.md
+Last session: 2026-08-10T05:29:32.419Z
+Stopped at: Completed 62-08-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -464,6 +466,7 @@ Resume file: None
 | Phase 62 P05 | 12 min | 2 tasks | 5 files |
 | Phase 62 P06 | 13min | 2 tasks | 4 files |
 | Phase 62 P07 | 7min | 2 tasks | 5 files |
+| Phase 62 P08 | 9min | 2 tasks | 8 files |
 
 ## Decisions
 
