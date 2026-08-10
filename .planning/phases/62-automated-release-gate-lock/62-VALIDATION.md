@@ -1,7 +1,7 @@
 ---
 phase: 62
 slug: automated-release-gate-lock
-status: partial
+status: complete_with_accepted_release_gates
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-08-10
@@ -83,7 +83,7 @@ On 2026-08-10, the owner explicitly chose to skip configuring the unavailable lo
 - RPT-A publication was not run. GitHub CI-A remains `human_needed` / `UNVERIFIED`; no executor GitHub action or claim occurred.
 - Android physical-device validation remains `NOT_PERFORMED_NOT_CLAIMED` and requires later human-owned physical-device validation.
 
-Phase 62 remains incomplete and blocked until a prepared environment can execute one current-candidate authority and the owner supplies CI-A attribution for that same candidate.
+The owner closed Phase 62 by explicit workflow override on 2026-08-10. Release readiness remains blocked until a prepared environment can execute one current-candidate authority and the owner supplies CI-A attribution for that same candidate. Phase completion must not be interpreted as release-gate PASS evidence.
 
 ---
 
@@ -106,4 +106,4 @@ Phase 62 remains incomplete and blocked until a prepared environment can execute
 - [x] `nyquist_compliant: true` set because the plan provides continuous automated sampling and explicit Wave 0 dependencies
 - [x] `wave_0_complete: true` is set because Plan 62-01 executed and all three Wave 0 files exist
 
-**Approval:** blocked — the environment was explicitly deferred before any Plan 62-13 targeted or full authority invocation. The prior `BLOCKED` evidence remains retained only; RPT-A is unpublished, CI-A is `human_needed` / `UNVERIFIED`, and Android physical-device validation remains `NOT_PERFORMED_NOT_CLAIMED`.
+**Approval:** phase closed by owner override with accepted release gates — the environment was explicitly deferred before any Plan 62-13 targeted or full authority invocation. Release approval remains blocked: the prior `BLOCKED` evidence is retained only, RPT-A is unpublished, CI-A is `human_needed` / `UNVERIFIED`, and Android physical-device validation remains `NOT_PERFORMED_NOT_CLAIMED`.
