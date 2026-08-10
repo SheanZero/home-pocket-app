@@ -140,4 +140,17 @@ void main() {
       );
     },
   );
+
+  test('Phase 62 makes local arm64 mandatory and keeps x86 non-blocking', () {
+    final runner = File(
+      'scripts/verify_android_safety_lane.dart',
+    ).readAsStringSync();
+
+    expect(runner, contains('API 36 google_apis arm64-v8a system image'));
+    expect(runner, contains("'NOT_PERFORMED_NOT_CLAIMED'"));
+    expect(runner, contains('discoverIntegrationTestFiles'));
+    expect(runner, contains('runReleaseEvidenceAfterMatrix: false'));
+    expect(runner, contains('Supplemental only; cannot satisfy'));
+    expect(runner, contains('runReleaseEvidence(root, recordEvidence: false)'));
+  });
 }

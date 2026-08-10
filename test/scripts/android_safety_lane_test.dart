@@ -202,6 +202,96 @@ void main() {
     },
   );
 
+  test(
+    'Phase 62 prerequisites and primary matrix fail closed before execution',
+    () {
+      expect(
+        lane
+            .validateAndroidPhase62Prerequisites(
+              javaMajor: 17,
+              hasSdkManager: true,
+              hasAvdManager: true,
+              hasEmulator: true,
+              hasAdb: true,
+              hasPrimaryImage: true,
+            )
+            .passed,
+        isTrue,
+      );
+      for (final invalid in <lane.AndroidPrerequisiteRecord>[
+        lane.validateAndroidPhase62Prerequisites(
+          javaMajor: null,
+          hasSdkManager: true,
+          hasAvdManager: true,
+          hasEmulator: true,
+          hasAdb: true,
+          hasPrimaryImage: true,
+        ),
+        lane.validateAndroidPhase62Prerequisites(
+          javaMajor: 21,
+          hasSdkManager: true,
+          hasAvdManager: true,
+          hasEmulator: true,
+          hasAdb: true,
+          hasPrimaryImage: true,
+        ),
+        lane.validateAndroidPhase62Prerequisites(
+          javaMajor: 17,
+          hasSdkManager: false,
+          hasAvdManager: false,
+          hasEmulator: false,
+          hasAdb: false,
+          hasPrimaryImage: false,
+        ),
+      ]) {
+        expect(invalid.passed, isFalse);
+        expect(invalid.result, 'BLOCKED');
+      }
+      expect(
+        lane.validatePrimaryIntegrationMatrix(const [], const []),
+        isNotEmpty,
+      );
+      expect(
+        lane.validatePrimaryIntegrationMatrix(
+          const ['one_test.dart'],
+          const [
+            {'file': 'one_test.dart', 'exit_code': 0, 'timed_out': false},
+            {'file': 'one_test.dart', 'exit_code': 0, 'timed_out': false},
+          ],
+        ),
+        isNotEmpty,
+      );
+    },
+  );
+
+  test(
+    'supplemental x86 status cannot satisfy arm64 or physical-device claims',
+    () {
+      expect(lane.classifyPhase62Supplemental('PASS').affectsPrimary, isFalse);
+      expect(
+        lane.classifyPhase62Supplemental('UNAVAILABLE').result,
+        'LIMITATION',
+      );
+      final evidence = lane.Phase62AndroidEvidence(
+        result: 'PASS',
+        candidate: CandidateFingerprint(
+          commit: 'a' * 40,
+          inputDigests: const {'pubspec.lock': 'b'},
+        ),
+        prerequisites: const lane.AndroidPrerequisiteRecord.ready(),
+        primary: const lane.AndroidPhase62PrimaryResult(
+          result: 'BLOCKED',
+          discoveredFiles: ['critical_test.dart'],
+          executedFiles: [],
+        ),
+        release: const lane.AndroidPhase62ReleaseResult.pass(),
+        supplemental: lane.classifyPhase62Supplemental('PASS'),
+        physicalDevice: 'NOT_PERFORMED_NOT_CLAIMED',
+      );
+      expect(lane.validatePhase62AndroidEvidence(evidence), isNotEmpty);
+    },
+  );
+
   test('candidate transaction migrates every coupled Android input', () {
     final migrated = lane.migrateCandidateInputs(
       settingsGradle: File('android/settings.gradle.kts').readAsStringSync(),
