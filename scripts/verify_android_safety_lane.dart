@@ -1341,7 +1341,14 @@ String scrubCandidateOutput(String raw) {
   var scrubbed = raw
       .replaceAll(RegExp(r'/Users/[^\s]+'), '<local-path>')
       .replaceAll(RegExp(r'/private/(?:tmp|var)/[^\s]+'), '<temp-path>')
-      .replaceAll(RegExp(r'emulator-\d{4}'), '<emulator-redacted>');
+      .replaceAll(RegExp(r'emulator-\d{4}'), '<emulator-redacted>')
+      .replaceAllMapped(
+        RegExp(
+          r'((?:"?(?:password|secret|token|credential|api[_-]?key)"?)\s*[:=]\s*)(?:"[^"]*"|\S+)',
+          caseSensitive: false,
+        ),
+        (match) => '${match.group(1)}<redacted>',
+      );
   if (scrubbed.length > maxDurableOutputChars) {
     const marker = '\n...<bounded-output>...\n';
     final side = (maxDurableOutputChars - marker.length) ~/ 2;
@@ -1820,7 +1827,8 @@ Future<List<Map<String, Object?>>> _runPrimaryIntegrationMatrix(
     });
     if (command.exitCode != 0 || command.timedOut) {
       throw StateError(
-        'primary integration test failed: $file: ${_diagnosticLine(command.output)}',
+        'primary integration test failed: $file:\n'
+        '${formatPrimaryIntegrationFailure(command.output)}',
       );
     }
   }
@@ -1828,6 +1836,11 @@ Future<List<Map<String, Object?>>> _runPrimaryIntegrationMatrix(
   if (issues.isNotEmpty) throw StateError(issues.join('; '));
   return records;
 }
+
+/// Retains the bounded, privacy-scrubbed Flutter transcript needed to
+/// distinguish a product failure from the runner's own cleanup failure.
+String formatPrimaryIntegrationFailure(String output) =>
+    scrubCandidateOutput(output);
 
 void _recordEmulatorPreparation({
   required Directory root,
