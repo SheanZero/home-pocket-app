@@ -20,6 +20,18 @@ void main() {
       () => lane.parseAndroidSafetyOptions(['--mode=unknown']),
       throwsArgumentError,
     );
+    final phase62 = lane.parseAndroidSafetyOptions([
+      '--mode=phase62',
+      '--candidate-commit=${'a' * 40}',
+      '--candidate-digest=pubspec.lock=${'b' * 64}',
+      '--result=build/release_gate/android.json',
+    ]);
+    expect(phase62.candidate?.commit, 'a' * 40);
+    expect(phase62.resultPath, 'build/release_gate/android.json');
+    expect(
+      () => lane.parseAndroidSafetyOptions(['--mode=phase62']),
+      throwsArgumentError,
+    );
   });
 
   test('evidence parser rejects missing markers and sensitive values', () {
@@ -143,7 +155,11 @@ void main() {
         captureCurrentCandidate: () async => candidate,
         inspectPrerequisites: () async =>
             lane.AndroidPrerequisiteRecord.ready(),
-        runPrimary: () async => const lane.AndroidPhase62PrimaryResult.pass(),
+        runPrimary: () async => const lane.AndroidPhase62PrimaryResult(
+          result: 'PASS',
+          discoveredFiles: ['critical_test.dart'],
+          executedFiles: ['critical_test.dart'],
+        ),
         runRelease: () async => const lane.AndroidPhase62ReleaseResult.pass(),
       );
 

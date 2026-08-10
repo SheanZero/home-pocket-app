@@ -10,7 +10,7 @@ import 'package:crypto/crypto.dart';
 
 import 'release_gate/models.dart';
 
-enum AndroidSafetyMode { verify, candidateProbe, release, emulator }
+enum AndroidSafetyMode { verify, candidateProbe, release, emulator, phase62 }
 
 enum AndroidCertificateClass { debug, nonDebug }
 
@@ -57,11 +57,15 @@ class AndroidSafetyOptions {
     required this.mode,
     required this.allowNotRun,
     required this.prepareOnly,
+    this.candidate,
+    this.resultPath,
   });
 
   final AndroidSafetyMode mode;
   final bool allowNotRun;
   final bool prepareOnly;
+  final CandidateFingerprint? candidate;
+  final String? resultPath;
 }
 
 /// A normalized, non-authoritative Android stage result for the Phase 62 gate.
@@ -278,6 +282,17 @@ List<String> validatePhase62AndroidEvidence(Phase62AndroidEvidence evidence) {
       'PASS requires prerequisite, primary, and release hygiene success',
     );
   }
+  if (evidence.result == 'PASS' && evidence.primary.passed) {
+    final discovered = evidence.primary.discoveredFiles.toSet();
+    final executed = evidence.primary.executedFiles.toSet();
+    if (discovered.isEmpty ||
+        discovered.length != evidence.primary.discoveredFiles.length ||
+        executed.length != evidence.primary.executedFiles.length ||
+        discovered.length != executed.length ||
+        !discovered.containsAll(executed)) {
+      issues.add('primary arm64 discovery and execution must be complete');
+    }
+  }
   if (evidence.result != 'PASS' && evidence.result != 'BLOCKED') {
     issues.add('Phase 62 Android result must be PASS or BLOCKED');
   }
@@ -448,6 +463,9 @@ AndroidSafetyOptions parseAndroidSafetyOptions(List<String> arguments) {
   AndroidSafetyMode? mode;
   var allowNotRun = false;
   var prepareOnly = false;
+  String? candidateCommit;
+  String? resultPath;
+  final inputDigests = <String, String>{};
   for (final argument in arguments) {
     if (argument.startsWith('--mode=')) {
       if (mode != null) throw ArgumentError('mode supplied more than once');
@@ -456,8 +474,35 @@ AndroidSafetyOptions parseAndroidSafetyOptions(List<String> arguments) {
         'candidate-probe' => AndroidSafetyMode.candidateProbe,
         'release' => AndroidSafetyMode.release,
         'emulator' => AndroidSafetyMode.emulator,
+        'phase62' => AndroidSafetyMode.phase62,
         _ => throw ArgumentError('unknown Android safety mode'),
       };
+    } else if (argument.startsWith('--candidate-commit=')) {
+      if (candidateCommit != null) {
+        throw ArgumentError('candidate commit supplied more than once');
+      }
+      candidateCommit = argument.substring('--candidate-commit='.length);
+    } else if (argument.startsWith('--candidate-digest=')) {
+      final value = argument.substring('--candidate-digest='.length);
+      final separator = value.indexOf('=');
+      if (separator <= 0 || separator == value.length - 1) {
+        throw ArgumentError('candidate digest must be path=sha256');
+      }
+      final path = value.substring(0, separator);
+      final digest = value.substring(separator + 1);
+      if (path.startsWith('/') ||
+          path.contains('..') ||
+          !RegExp(r'^[A-Za-z0-9_./-]+$').hasMatch(path) ||
+          !RegExp(r'^[a-f0-9]{64}$').hasMatch(digest) ||
+          inputDigests.containsKey(path)) {
+        throw ArgumentError('candidate digest is invalid or duplicated');
+      }
+      inputDigests[path] = digest;
+    } else if (argument.startsWith('--result=')) {
+      if (resultPath != null) {
+        throw ArgumentError('result supplied more than once');
+      }
+      resultPath = argument.substring('--result='.length);
     } else if (argument == '--allow-not-run') {
       if (allowNotRun) {
         throw ArgumentError('allow-not-run supplied more than once');
@@ -478,10 +523,34 @@ AndroidSafetyOptions parseAndroidSafetyOptions(List<String> arguments) {
       '[--allow-not-run] [--prepare-only for emulator]',
     );
   }
+  CandidateFingerprint? candidate;
+  if (mode == AndroidSafetyMode.phase62) {
+    if (candidateCommit == null ||
+        !RegExp(r'^[a-f0-9]{40}$').hasMatch(candidateCommit) ||
+        inputDigests.isEmpty ||
+        resultPath == null ||
+        !_validPhase62ResultPath(resultPath)) {
+      throw ArgumentError(
+        'phase62 requires --candidate-commit, one or more --candidate-digest=path=sha256, and --result=build/release_gate/<name>.json',
+      );
+    }
+    candidate = CandidateFingerprint(
+      commit: candidateCommit,
+      inputDigests: inputDigests,
+    );
+  } else if (candidateCommit != null ||
+      inputDigests.isNotEmpty ||
+      resultPath != null) {
+    throw ArgumentError(
+      'candidate and result arguments require --mode=phase62',
+    );
+  }
   return AndroidSafetyOptions(
     mode: mode,
     allowNotRun: allowNotRun,
     prepareOnly: prepareOnly,
+    candidate: candidate,
+    resultPath: resultPath,
   );
 }
 
@@ -528,6 +597,17 @@ Future<void> main(List<String> arguments) async {
           return;
         }
         stdout.writeln(result.message);
+      case AndroidSafetyMode.phase62:
+        final evidence = await runPhase62AndroidEvidence(
+          Directory.current,
+          candidate: options.candidate!,
+          resultPath: options.resultPath!,
+          ledgerPath: '${Directory.current.path}/$evidencePath',
+        );
+        stdout.writeln(evidence.result);
+        if (evidence.result != 'PASS') {
+          exitCode = 2;
+        }
     }
   } on Object catch (error) {
     stderr.writeln('ERROR: $error');
@@ -1552,6 +1632,9 @@ List<String> validatePrimaryIntegrationMatrix(
   List<Map<String, Object?>> records,
 ) {
   final issues = <String>[];
+  if (discoveredFiles.isEmpty) {
+    issues.add('integration matrix must discover at least one test file');
+  }
   final recorded = <String>{};
   for (final record in records) {
     final file = '${record['file'] ?? ''}';
