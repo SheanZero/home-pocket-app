@@ -904,7 +904,7 @@ String _gitRaw(Directory root, List<String> arguments) {
   if (result.exitCode != 0) {
     throw _CandidateFailure('git ${arguments.join(' ')} failed');
   }
-  return result.stdout.toString().trim();
+  return result.stdout.toString();
 }
 
 void _assertIgnoredArtifactPath(Directory root, String resultPath) {
