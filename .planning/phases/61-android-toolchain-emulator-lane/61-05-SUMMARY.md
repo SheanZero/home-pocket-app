@@ -14,7 +14,7 @@ affects: [61-06, phase-62-release-gates]
 actuals:
   tokens: 16868
   tasks: 2
-  commits: 6
+  commits: 7
 tech-stack:
   added: []
   patterns:
@@ -78,7 +78,7 @@ status: complete
 ## Task Commits
 
 1. **Task 1: Provision and verify a deterministic API 36 arm64 primary AVD boundary** — `d2657cfb` (RED), `8f8d6306` (GREEN), `87093201` (cleanup correctness), with `f569e8a6` reconciling the owner-approved contract.
-2. **Task 2: Run the complete integration matrix and post-test release rescan** — `e6b5cbf6` (matrix runner), `a117e865` (observed runtime and package evidence).
+2. **Task 2: Run the complete integration matrix and post-test release rescan** — `e6b5cbf6` (matrix runner), `a117e865` (observed runtime and package evidence), `8766440e` (post-runtime contract correction).
 
 ## Files Created/Modified
 
@@ -129,7 +129,7 @@ Plan 06 can converge the final Phase 61 ledger using observed API 36 arm64 runti
 ## Self-Check: PASSED
 
 - `scripts/verify_android_safety_lane.dart` and all recorded contract files exist.
-- Commits `f569e8a6`, `d2657cfb`, `8f8d6306`, `87093201`, `e6b5cbf6`, and `a117e865` exist.
+- Commits `f569e8a6`, `d2657cfb`, `8f8d6306`, `87093201`, `e6b5cbf6`, `a117e865`, and `8766440e` exist.
 
 ---
 *Phase: 61-android-toolchain-emulator-lane*
