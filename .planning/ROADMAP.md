@@ -262,17 +262,19 @@ Plans:
   3. A clean release preflight regenerates native registrants and proves the production Runner excludes development-only plugins while CI pins the same Flutter stable, lockfile, and generation steps.
   4. iPhone Simulator and Android Emulator prerequisites pass, and a compatibility report records exact commands, environment, commit, version deltas, intentional holds, fixes, residual debt, and the absence of Android physical-device validation.
 
-**Plans**: 7 plans
+**Plans**: 9 plans
 
 Plans:
 
-- [ ] 62-01-PLAN.md — Prove the candidate-bound release-gate tracer and immutable fingerprint.
-- [ ] 62-02-PLAN.md — Lock host tests, coverage, retry, timeout recovery, and resume semantics.
-- [ ] 62-03-PLAN.md — Emit current-candidate Android arm64 evidence and close Phase 61 provenance gaps.
-- [ ] 62-04-PLAN.md — Execute the complete isolated iOS Simulator stage and restore release hygiene.
-- [ ] 62-05-PLAN.md — Converge discovery, skips, verdicts, privacy, and deterministic evidence rendering.
-- [ ] 62-06-PLAN.md — Route PR/main CI through one authority and implement report-only attestation publication.
-- [ ] 62-07-PLAN.md — Run the formal full candidate and publish the final compatibility attestation.
+- [ ] 62-01-PLAN.md — Create the Wave 0 release-gate and CI-contract test seams before production implementation.
+- [ ] 62-02-PLAN.md — Obtain release-owner decisions for report lifecycle, Apple-Silicon CI topology, and Phase 61 signing-path ownership.
+- [ ] 62-03-PLAN.md — Prove the candidate-bound release-gate tracer and immutable fingerprint under the selected report lifecycle.
+- [ ] 62-04-PLAN.md — Lock host tests, coverage, retry, timeout recovery, and resume semantics.
+- [ ] 62-05-PLAN.md — Emit current-candidate Android arm64 evidence under the selected Phase 61 signing-path decision.
+- [ ] 62-06-PLAN.md — Execute the complete isolated iOS Simulator stage and restore release hygiene.
+- [ ] 62-07-PLAN.md — Converge discovery, skips, verdicts, privacy, and deterministic evidence rendering.
+- [ ] 62-08-PLAN.md — Route PR/main CI through the owner-approved topology and implement the selected report lifecycle.
+- [ ] 62-09-PLAN.md — Run the formal full candidate and publish the final compatibility attestation.
 
 ### Phase 63: Isolated Wired-iPhone Acceptance
 

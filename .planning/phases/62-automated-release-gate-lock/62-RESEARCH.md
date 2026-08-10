@@ -286,21 +286,25 @@ This is a design skeleton, not copied production code; the exact types/enum spel
 | A3 | `build/release_gate/` is the best ignored location for raw JSON/log/checkpoint artifacts. | Recommended Project Structure | Low; any ignored, privacy-filtered location satisfying D-04/D-06/D-13 is acceptable. |
 | A4 | The exact `ReleaseVerdict` type names in the code skeleton. | Code Examples | Low; the required external values are locked by D-16, but implementation symbols remain discretionary. |
 
-## Open Questions
+## Decision-Gated Research Resolutions
 
-1. **How is the checked-in Markdown report finalized without invalidating its own candidate commit?**
+> **Status:** RESOLVED IN THE EXECUTABLE PLAN CONTRACT. The research evidence does not claim that the release owner already selected an option. Plan 62-02 contains three blocking `checkpoint:decision` tasks; its SUMMARY must record one RPT-*, CI-*, and SIGN-* code before any dependent implementation runs. A `*-HOLD` selection remains an honest phase blocker rather than an inferred default.
+
+1. **Checked-in Markdown lifecycle — RESOLVED BY Plan 62-02 Task 1 (RPT-A / RPT-B / RPT-HOLD).**
    - What we know: D-02/D-04 require a clean committed candidate and no final repository mutation; D-13 simultaneously requires a checked-in Markdown rendering bound to that candidate. [VERIFIED: .planning/phases/62-automated-release-gate-lock/62-CONTEXT.md:17-20,34-36]
    - What's unclear: Whether the report is committed as a metadata-only successor that explicitly references the tested parent candidate, or whether the final candidate definition must exclude a permitted generated report change.
    - Recommendation: Add a planner checkpoint for the release owner to lock this evidence-publication lifecycle before implementation; do not create a loophole that lets source/config drift be mistaken for report-only drift. [ASSUMED]
 
-2. **Which CI topology can actually execute the required local Apple-Silicon arm64 Android primary lane on every `main` merge?**
+2. **Apple-Silicon every-main topology — RESOLVED BY Plan 62-02 Task 2 (CI-A / CI-B / CI-HOLD).**
    - What we know: the current GitHub Android job is Ubuntu x86_64 supplemental, whereas D-11 makes the local arm64 lane mandatory for the aggregate authority. [VERIFIED: .github/workflows/device-e2e.yml:37-76; .planning/phases/62-automated-release-gate-lock/62-CONTEXT.md:28-32]
    - What's unclear: Whether a self-hosted Apple-Silicon runner is available/authorized or whether CI should trigger/verify a local runner-owned invocation through an approved mechanism.
    - Recommendation: Plan a `checkpoint:decision` before altering CI because runner ownership/availability changes the executable architecture and cannot be assumed. [ASSUMED]
 
-3. **Does Phase 62 own a clean repair of the `PHASE61_GRADLE_JAVA_HOME` preflight package path?**
+3. **Phase 61 JDK/signing-path ownership — RESOLVED BY Plan 62-02 Task 3 (SIGN-A / SIGN-B / SIGN-HOLD).**
    - What we know: Phase 61 documents this path as a warning because it adds `-Pphase61SigningEvidence=true`; the Phase 62 scope forbids weakening signing/hygiene but does not explicitly lock a repair choice. [VERIFIED: .planning/phases/61-android-toolchain-emulator-lane/61-VERIFICATION.md:129-150]
    - Recommendation: Treat it as a required release-gate test/repair if the Phase 62 authority invokes the signed Android evidence path; otherwise record a precise limitation and do not claim its package proof. [ASSUMED]
+
+**Resolution record contract:** 62-02-SUMMARY is the sole durable record of these owner selections. Plans 62-03, 62-05, 62-08, and 62-09 read that record and stop on a missing or HOLD code. JDK 17 and ordinary signing/release-hygiene failures remain blocking under every SIGN option.
 
 ## Environment Availability
 
