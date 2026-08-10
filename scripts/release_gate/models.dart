@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:convert';
 
 enum ReleaseVerdict {
   pass,
@@ -23,6 +24,9 @@ enum GateStage {
   serialHostSuite,
   coverageFilter,
   coverageGate,
+  ios,
+  android,
+  postDevicePreflight,
   finalDrift,
   privacy,
 }
@@ -152,6 +156,154 @@ class GateResult {
     'stages': stages.map((stage) => stage.toJson()).toList(),
   };
 }
+
+/// A checked-in exception to a platform execution.  The aggregate gate treats
+/// it as accounting data only: it never converts an unavailable mandatory
+/// journey into a passing platform result.
+class ReleaseSkip {
+  const ReleaseSkip({
+    required this.path,
+    required this.reason,
+    required this.ownerPhase,
+    required this.exitCondition,
+  });
+
+  final String path;
+  final String reason;
+  final String ownerPhase;
+  final String exitCondition;
+
+  bool get isComplete =>
+      _isNormalizedIntegrationPath(path) &&
+      reason.trim().isNotEmpty &&
+      ownerPhase.trim().isNotEmpty &&
+      exitCondition.trim().isNotEmpty;
+}
+
+/// Strict, versioned expected-skip allowlist.  Its absence is deliberately
+/// not equivalent to an empty list: callers must load the committed manifest.
+class ReleaseSkipManifest {
+  ReleaseSkipManifest._(Iterable<ReleaseSkip> entries)
+    : entries = List<ReleaseSkip>.unmodifiable(entries);
+
+  factory ReleaseSkipManifest.empty() =>
+      ReleaseSkipManifest._(const <ReleaseSkip>[]);
+
+  factory ReleaseSkipManifest.parse(
+    Map<String, Object?> value, {
+    required Iterable<String> discovered,
+  }) {
+    if (value.length != 2 || value['schema_version'] != 1) {
+      throw const FormatException('expected skip manifest schema is invalid');
+    }
+    final rawEntries = value['skips'];
+    if (rawEntries is! List) {
+      throw const FormatException('expected skip manifest skips is invalid');
+    }
+    final canonicalDiscovered = _canonicalInventory(discovered);
+    if (canonicalDiscovered == null) {
+      throw const FormatException('integration inventory is invalid');
+    }
+    final entries = <ReleaseSkip>[];
+    final paths = <String>{};
+    for (final raw in rawEntries) {
+      if (raw is! Map || raw.length != 4) {
+        throw const FormatException('expected skip entry is invalid');
+      }
+      String field(String name) {
+        final entry = raw[name];
+        if (entry is! String) {
+          throw FormatException('expected skip $name is invalid');
+        }
+        return entry;
+      }
+
+      final entry = ReleaseSkip(
+        path: field('path'),
+        reason: field('reason'),
+        ownerPhase: field('owner_phase'),
+        exitCondition: field('exit_condition'),
+      );
+      if (!entry.isComplete ||
+          !canonicalDiscovered.contains(entry.path) ||
+          !paths.add(entry.path)) {
+        throw const FormatException('expected skip entry is stale or invalid');
+      }
+      entries.add(entry);
+    }
+    return ReleaseSkipManifest._(entries);
+  }
+
+  factory ReleaseSkipManifest.fromJsonText(
+    String value, {
+    required Iterable<String> discovered,
+  }) {
+    final decoded = jsonDecode(value);
+    if (decoded is! Map) {
+      throw const FormatException(
+        'expected skip manifest must be a JSON object',
+      );
+    }
+    return ReleaseSkipManifest.parse(
+      Map<String, Object?>.from(decoded),
+      discovered: discovered,
+    );
+  }
+
+  final List<ReleaseSkip> entries;
+
+  Map<String, ReleaseSkip> get byPath => Map<String, ReleaseSkip>.unmodifiable({
+    for (final entry in entries) entry.path: entry,
+  });
+}
+
+/// Returns a human-readable issue for every incomplete relationship between a
+/// recursive inventory and a single platform's recorded execution.
+List<String> validatePlatformInventory({
+  required Iterable<String> discovered,
+  required Iterable<String> executed,
+  required ReleaseSkipManifest skips,
+}) {
+  final canonicalDiscovered = _canonicalInventory(discovered);
+  final canonicalExecuted = _canonicalInventory(executed);
+  if (canonicalDiscovered == null || canonicalDiscovered.isEmpty) {
+    return const <String>['integration discovery must be nonempty and unique'];
+  }
+  if (canonicalExecuted == null) {
+    return const <String>[
+      'executed integration paths must be normalized and unique',
+    ];
+  }
+  final skipPaths = skips.byPath.keys.toSet();
+  if (skipPaths.length != skips.entries.length ||
+      !canonicalDiscovered.containsAll(skipPaths)) {
+    return const <String>['expected skips must be unique discovered paths'];
+  }
+  final accounted = <String>{...canonicalExecuted, ...skipPaths};
+  if (canonicalExecuted.any(skipPaths.contains) ||
+      accounted.length != canonicalDiscovered.length ||
+      !accounted.containsAll(canonicalDiscovered)) {
+    return const <String>[
+      'platform execution plus expected skips must equal discovery',
+    ];
+  }
+  return const <String>[];
+}
+
+Set<String>? _canonicalInventory(Iterable<String> paths) {
+  final result = <String>{};
+  for (final path in paths) {
+    if (!_isNormalizedIntegrationPath(path) || !result.add(path)) return null;
+  }
+  return result;
+}
+
+bool _isNormalizedIntegrationPath(String path) =>
+    path.startsWith('integration_test/') &&
+    path.endsWith('_test.dart') &&
+    !path.contains('..') &&
+    !path.contains('\\') &&
+    !path.contains('//');
 
 bool _mapsEqual(Map<String, String> left, Map<String, String> right) =>
     left.length == right.length &&

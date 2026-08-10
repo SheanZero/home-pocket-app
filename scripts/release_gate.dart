@@ -9,6 +9,8 @@ import 'package:crypto/crypto.dart';
 import 'release_gate/models.dart';
 import 'release_gate/process_adapter.dart';
 import 'release_gate/execution.dart';
+import 'release_gate/ios_simulator_stage.dart';
+import 'verify_android_safety_lane.dart' as android_lane;
 
 export 'release_gate/models.dart'
     show ReleaseGateRetry, ReleaseVerdict, validateResume;
@@ -56,6 +58,25 @@ class ReleaseGateOptions {
   final String scope;
   final String resultPath;
   final bool resume;
+}
+
+/// The two device adapters are injected only for deterministic tests. The
+/// repository owns their default construction and no adapter returns a verdict.
+class ReleaseGatePlatformAdapters {
+  const ReleaseGatePlatformAdapters({
+    required this.runIos,
+    required this.runAndroid,
+  });
+
+  final Future<IosSimulatorEvidence> Function(
+    CandidateFingerprint candidate,
+    Map<String, IosAllowedSkip> skips,
+  )
+  runIos;
+  final Future<android_lane.Phase62AndroidEvidence> Function(
+    CandidateFingerprint candidate,
+  )
+  runAndroid;
 }
 
 ReleaseGateOptions parseReleaseGateOptions(List<String> arguments) {
@@ -121,13 +142,14 @@ Future<GateResult> runReleaseGate({
   String resultPath = 'build/release_gate/result.json',
   String scope = 'tracer',
   bool resume = false,
+  ReleaseGatePlatformAdapters? platformAdapters,
 }) async {
   final root = workingDirectory ?? Directory.current;
   final stages = <StageResult>[];
   CandidateFingerprint? candidate;
   try {
-    if (scope != 'tracer' && scope != 'host') {
-      throw const _CandidateFailure('full execution graph is not configured');
+    if (scope != 'tracer' && scope != 'host' && scope != 'full') {
+      throw const _CandidateFailure('release gate scope is not configured');
     }
     // A missing or untrusted checkpoint is deliberately equivalent to a full
     // run. Candidate capture below happens before every child process, so
@@ -178,24 +200,87 @@ Future<GateResult> runReleaseGate({
       );
     }
 
-    if (scope == 'host') {
+    if (scope == 'host' || scope == 'full') {
       final hostStages = await HostExecutionGraph().run(
         processAdapter: processAdapter ?? const SystemProcessAdapter(),
         workingDirectory: root.path,
         timeout: _gateTimeout,
       );
       stages.addAll(hostStages);
-      if (hostStages.any((stage) => !stage.succeeded)) {
-        return await _persist(
-          root,
-          resultPath,
-          GateResult(
-            candidate: candidate,
-            verdict: ReleaseVerdict.blocked,
-            stages: stages,
+    }
+
+    if (scope == 'full') {
+      final inventory = _discoverReleaseIntegrationTests(root);
+      final skipManifest = _loadExpectedSkips(root, inventory);
+      final adapters = platformAdapters ?? _defaultPlatformAdapters(root);
+      final ios = await adapters.runIos(candidate, <String, IosAllowedSkip>{
+        for (final skip in skipManifest.entries)
+          skip.path: IosAllowedSkip(
+            reason: skip.reason,
+            ownerPhase: skip.ownerPhase,
+            exitCondition: skip.exitCondition,
           ),
-        );
-      }
+      });
+      stages.add(
+        _platformStage(
+          GateStage.ios,
+          ios.isReady &&
+              validatePlatformInventory(
+                discovered: inventory,
+                executed: ios.executedTests,
+                skips: skipManifest,
+              ).isEmpty,
+          ios.failure?.name ?? 'iOS simulator completed',
+        ),
+      );
+
+      // The current Android adapter has no accepted skips. A nonempty shared
+      // allowlist therefore blocks instead of silently omitting Android work.
+      final android = skipManifest.entries.isEmpty
+          ? await adapters.runAndroid(candidate)
+          : null;
+      final androidInventoryIssues = android == null
+          ? const <String>[
+              'Android adapter does not accept the configured skip',
+            ]
+          : validatePlatformInventory(
+              discovered: inventory,
+              executed: android.primary.executedFiles,
+              skips: skipManifest,
+            );
+      stages.add(
+        _platformStage(
+          GateStage.android,
+          android != null &&
+              android.result == 'PASS' &&
+              androidInventoryIssues.isEmpty,
+          android?.failure ?? androidInventoryIssues.join('; '),
+        ),
+      );
+
+      final postDevicePreflight =
+          await (processAdapter ?? const SystemProcessAdapter()).run(
+            'bash',
+            const <String>['scripts/release_preflight.sh', '--platform', 'all'],
+            timeout: _gateTimeout,
+            workingDirectory: root.path,
+          );
+      stages.add(
+        _stage(
+          stage: GateStage.postDevicePreflight,
+          command: const <String>[
+            'bash',
+            'scripts/release_preflight.sh',
+            '--platform',
+            'all',
+          ],
+          exitCode: postDevicePreflight.exitCode,
+          classification: postDevicePreflight.exitCode == 0
+              ? StageClassification.succeeded
+              : StageClassification.commandFailed,
+          diagnostic: postDevicePreflight.diagnostic,
+        ),
+      );
     }
 
     CandidateFingerprint? after;
@@ -275,6 +360,78 @@ Future<GateResult> runReleaseGate({
     stages: stages,
   );
 }
+
+ReleaseGatePlatformAdapters _defaultPlatformAdapters(Directory root) =>
+    ReleaseGatePlatformAdapters(
+      runIos: (candidate, skips) async {
+        final adapter = SimctlIosSimulatorAdapter(
+          processAdapter: const SystemProcessAdapter(),
+          candidateProvider: () => validateCandidate(root),
+        );
+        return adapter.runFullSuite(
+          IosSimulatorOptions(
+            candidate: candidate,
+            workingDirectory: root.path,
+            allowedSkips: skips,
+          ),
+        );
+      },
+      runAndroid: (candidate) => android_lane.runPhase62AndroidEvidence(
+        root,
+        candidate: candidate,
+        resultPath: 'build/release_gate/android_evidence.json',
+        captureCurrentCandidate: () async => validateCandidate(root),
+      ),
+    );
+
+ReleaseSkipManifest _loadExpectedSkips(
+  Directory root,
+  List<String> discovered,
+) {
+  final file = File('${root.path}/scripts/release_gate/expected_skips.json');
+  if (!file.existsSync()) {
+    throw const _CandidateFailure('expected skip manifest is missing');
+  }
+  try {
+    return ReleaseSkipManifest.fromJsonText(
+      file.readAsStringSync(),
+      discovered: discovered,
+    );
+  } on FormatException catch (error) {
+    throw _CandidateFailure(
+      'expected skip manifest is invalid: ${error.message}',
+    );
+  }
+}
+
+List<String> _discoverReleaseIntegrationTests(Directory root) {
+  final directory = Directory('${root.path}/integration_test');
+  if (!directory.existsSync()) return const <String>[];
+  final paths =
+      directory
+          .listSync(recursive: true)
+          .whereType<File>()
+          .map(
+            (file) => file.path
+                .replaceFirst('${root.path}/', '')
+                .replaceAll('\\', '/'),
+          )
+          .where((path) => path.endsWith('_test.dart'))
+          .toList()
+        ..sort();
+  return List<String>.unmodifiable(paths);
+}
+
+StageResult _platformStage(GateStage stage, bool passed, String diagnostic) =>
+    _stage(
+      stage: stage,
+      command: <String>['release-gate', stage.name],
+      exitCode: passed ? 0 : 1,
+      classification: passed
+          ? StageClassification.succeeded
+          : StageClassification.commandFailed,
+      diagnostic: diagnostic.isEmpty ? 'platform stage failed' : diagnostic,
+    );
 
 Future<GateResult> _persist(
   Directory root,

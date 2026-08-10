@@ -4,8 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../scripts/release_gate.dart';
 import '../../scripts/release_gate/execution.dart';
+import '../../scripts/release_gate/ios_simulator_stage.dart';
 import '../../scripts/release_gate/models.dart';
 import '../../scripts/release_gate/process_adapter.dart';
+import '../../scripts/verify_android_safety_lane.dart' as android_lane;
 import '../helpers/release_gate_test_support.dart';
 
 void main() {
@@ -197,6 +199,102 @@ void main() {
         expect(
           result.stages.last.classification,
           StageClassification.commandFailed,
+        );
+      },
+    );
+
+    test(
+      'full scope runs one canonical inventory through both platforms',
+      () async {
+        File('${fixture.root.path}/scripts/release_gate/expected_skips.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"schema_version":1,"skips":[]}');
+        for (final path in const <String>[
+          'integration_test/device_critical_journey_test.dart',
+          'integration_test/nested/child_test.dart',
+        ]) {
+          File('${fixture.root.path}/$path').createSync(recursive: true);
+        }
+        _runFixtureGit(fixture.root, const <String>['add', '.']);
+        _runFixtureGit(fixture.root, const <String>[
+          'commit',
+          '-m',
+          'add aggregate inventory',
+        ]);
+        final adapter = _RecordingProcessAdapter(<ProcessOutcome>[
+          const ProcessOutcome(exitCode: 0, diagnostic: 'prerequisite'),
+          const ProcessOutcome(exitCode: 0, diagnostic: 'targeted'),
+          const ProcessOutcome(exitCode: 0, diagnostic: 'host'),
+          const ProcessOutcome(exitCode: 0, diagnostic: 'filter'),
+          const ProcessOutcome(exitCode: 0, diagnostic: 'coverage'),
+          const ProcessOutcome(exitCode: 0, diagnostic: 'post-device'),
+        ]);
+        final result = await runReleaseGate(
+          workingDirectory: fixture.root,
+          processAdapter: adapter,
+          trackedInputPaths: const <String>[
+            'pubspec.lock',
+            'config/release_gate_input.txt',
+          ],
+          resultPath: 'build/release_gate/full.json',
+          scope: 'full',
+          platformAdapters: ReleaseGatePlatformAdapters(
+            runIos: (candidate, skips) async => IosSimulatorEvidence(
+              candidate: candidate,
+              profile: const IosSimulatorProfile.unavailable(),
+              appDataIsolated: true,
+              discoveredTests: const <String>[
+                'integration_test/device_critical_journey_test.dart',
+                'integration_test/nested/child_test.dart',
+              ],
+              executedTests: const <String>[
+                'integration_test/device_critical_journey_test.dart',
+                'integration_test/nested/child_test.dart',
+              ],
+              preflightRan: true,
+            ),
+            runAndroid: (candidate) async =>
+                android_lane.Phase62AndroidEvidence(
+                  result: 'PASS',
+                  candidate: candidate,
+                  prerequisites:
+                      const android_lane.AndroidPrerequisiteRecord.ready(),
+                  primary: const android_lane.AndroidPhase62PrimaryResult(
+                    result: 'PASS',
+                    discoveredFiles: <String>[
+                      'integration_test/device_critical_journey_test.dart',
+                      'integration_test/nested/child_test.dart',
+                    ],
+                    executedFiles: <String>[
+                      'integration_test/device_critical_journey_test.dart',
+                      'integration_test/nested/child_test.dart',
+                    ],
+                  ),
+                  release:
+                      const android_lane.AndroidPhase62ReleaseResult.pass(),
+                  supplemental: android_lane.classifyPhase62Supplemental(
+                    'UNAVAILABLE',
+                  ),
+                  physicalDevice: 'NOT_PERFORMED_NOT_CLAIMED',
+                ),
+          ),
+        );
+
+        expect(result.verdict, ReleaseVerdict.pass);
+        expect(
+          result.stages.map((stage) => stage.stage),
+          orderedEquals(<GateStage>[
+            GateStage.candidate,
+            GateStage.prerequisite,
+            GateStage.targetRegressions,
+            GateStage.hostSuite,
+            GateStage.coverageFilter,
+            GateStage.coverageGate,
+            GateStage.ios,
+            GateStage.android,
+            GateStage.postDevicePreflight,
+            GateStage.finalDrift,
+          ]),
         );
       },
     );
