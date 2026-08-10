@@ -187,7 +187,7 @@
     "pubspec.yaml": { "role": "direct dependency constraints, notification-free MVP graph, and SQLCipher Native Asset selection", "sha256": "570fe20c6a00751c36d81c310e04dcc39e26a60e1198ea18f1cdd8b03df21ee0" },
     "pubspec.lock": { "role": "resolved notification-free Pub and Native Assets graph", "sha256": "a2a80891ca4596ab5e9eb1fe6b51a6a86088fa029fe1a65bbfbf55a7f1659ecd" },
     "android/settings.gradle.kts": { "role": "Android plugin versions", "sha256": "be41fc440623b67c9c43f3ca8d878d9194c32231e318169c2b330bc92c6125d6" },
-    "android/app/build.gradle.kts": { "role": "inherited Android floor without Firebase registration", "sha256": "6281a8f720bdb7794df57cb8edca1ccd6b95a445a0f06238d312d0060cf2cf8d" },
+    "android/app/build.gradle.kts": { "role": "inherited Android floor without Firebase registration", "sha256": "608765c967b5d49f5a2b7f11a39c50831a71bc76ac9412d5a3a1a1f89d67d46d" },
     "android/gradle.properties": { "role": "legacy Android DSL controls", "sha256": "4922e39cd2ea910bd97156fd4320b0be9217df262fc45435ce408bad534a20d0" },
     "android/gradle/wrapper/gradle-wrapper.properties": { "role": "Gradle distribution", "sha256": "297c9e63b6fa6e7e8b221900fa1787c1a0e38869d8957da66389fd0f6b00f78e" },
     "ios/Podfile": { "role": "iOS platform settings without legacy sqlite3 strip", "sha256": "448e56cb0f04aceee5901428fab3584ec035213798fcaff5bc93c2c27cee2d7a" },

@@ -178,6 +178,10 @@ void main() {
         '"file": "device_critical_journey_test.dart",',
         '"file": "missing_test.dart",',
       ),
+      'missing convergence gate': current['evidence']!.replaceFirst(
+        '"working_tree": "SCOPED_TASK_CHANGES_ONLY"',
+        '"working_tree": "NOT_RECORDED"',
+      ),
     };
 
     for (final entry in cases.entries) {

@@ -607,6 +607,34 @@ void _validateEvidence(
       ),
     );
   }
+  if (stageIndex >= 4) {
+    final convergence = _object(evidence['convergence_gates']);
+    _expect(
+      _isCommitHash(convergence['verification_commit']) &&
+          _isUtcTimestamp(convergence['executed_utc']),
+      issues,
+      'convergence gates must record an attributable commit and UTC timestamp',
+    );
+    for (final name in [
+      'flutter_analyze',
+      'focused_flutter_test',
+      'baseline_validator',
+      'evidence_verifier',
+      'whitespace',
+    ]) {
+      final gate = _object(convergence[name]);
+      _expect(
+        gate['exit_code'] == 0,
+        issues,
+        'convergence gate $name must exit zero',
+      );
+    }
+    _expect(
+      convergence['working_tree'] == 'SCOPED_TASK_CHANGES_ONLY',
+      issues,
+      'convergence gates must record the scoped working-tree state',
+    );
+  }
   final supplemental = _object(evidence['x86_64_supplemental']);
   _expect(
     supplemental['result'] == 'UNAVAILABLE_LIMITATION' &&
@@ -1225,8 +1253,9 @@ Future<List<Map<String, Object?>>> _runPrimaryIntegrationMatrix(
   final files = discoverIntegrationTestFiles(
     Directory('${root.path}/integration_test'),
   );
-  if (files.isEmpty)
+  if (files.isEmpty) {
     throw StateError('no integration_test files were discovered');
+  }
   final environment = <String, String>{
     'JAVA_HOME': jdkHome,
     'ANDROID_HOME': androidSdk,
@@ -1615,40 +1644,6 @@ Future<void> _withPreparedEmulator(
       throw StateError('runner-owned AVD cleanup failed');
     }
   }
-}
-
-Future<String> _resolveEmulatorExecutable({
-  required String nativeEmulator,
-  required String hostArchitecture,
-}) async {
-  if (hostArchitecture != 'arm64') return nativeEmulator;
-  final overrideHome = Platform.environment['PHASE61_X86_EMULATOR_HOME'];
-  final overrideArchive = Platform.environment['PHASE61_X86_EMULATOR_ARCHIVE'];
-  if (overrideHome == null && overrideArchive == null) return nativeEmulator;
-  if (overrideHome == null || overrideArchive == null) {
-    throw StateError(
-      'both PHASE61_X86_EMULATOR_HOME and '
-      'PHASE61_X86_EMULATOR_ARCHIVE are required',
-    );
-  }
-  final executable = File('$overrideHome/emulator');
-  final archive = File(overrideArchive);
-  if (!executable.existsSync() || !archive.existsSync()) {
-    throw StateError('official x86_64 Emulator override is incomplete');
-  }
-  final architecture = await Process.run('file', [executable.path]);
-  final actualSha1 = (await sha1.bind(archive.openRead()).first).toString();
-  final issues = validateX86EmulatorArchiveIdentity(
-    fileOutput: '${architecture.stdout}${architecture.stderr}',
-    actualSha1: actualSha1,
-  );
-  if (architecture.exitCode != 0 || issues.isNotEmpty) {
-    throw StateError(
-      'official x86_64 Emulator override validation failed: '
-      '${issues.join('; ')}',
-    );
-  }
-  return executable.path;
 }
 
 Future<BoundedCommandResult> _adbCommand({

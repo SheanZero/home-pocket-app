@@ -282,7 +282,17 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
       "timed_out": false,
       "duration_ms": 14849
     }
-  ]
+  ],
+  "convergence_gates": {
+    "verification_commit": "54a63ca63ad4f7e725425ffa2f41324c1b1788c7",
+    "executed_utc": "2026-08-10T00:59:39Z",
+    "working_tree": "SCOPED_TASK_CHANGES_ONLY",
+    "flutter_analyze": { "exit_code": 0, "issues": 0 },
+    "focused_flutter_test": { "exit_code": 0, "passed_tests": 117 },
+    "baseline_validator": { "exit_code": 0, "errors": 0, "warnings": 0 },
+    "evidence_verifier": { "exit_code": 0 },
+    "whitespace": { "exit_code": 0 }
+  }
 }
 ```
 <!-- phase61-evidence-json:end -->
