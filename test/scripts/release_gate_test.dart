@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../scripts/release_gate.dart';
+import '../../scripts/release_gate/execution.dart';
 import '../../scripts/release_gate/models.dart';
 import '../../scripts/release_gate/process_adapter.dart';
 import '../helpers/release_gate_test_support.dart';
@@ -361,6 +362,133 @@ void main() {
         contents,
         contains('scrub'),
         reason: 'Missing Phase 62 privacy-safe evidence contract: redact',
+      );
+    });
+  });
+
+  group('Phase 62 host execution graph contracts', () {
+    final candidate = CandidateFingerprint(
+      commit: 'a' * 40,
+      inputDigests: const <String, String>{'pubspec.lock': 'lock'},
+    );
+
+    test('only closed infrastructure classes receive one retry', () {
+      for (final failure in <FailureClass>[
+        FailureClass.startupReadiness,
+        FailureClass.deviceTransport,
+        FailureClass.dependencyNetwork,
+        FailureClass.runnerTimeout,
+      ]) {
+        expect(
+          retryDecisionFor(failure, priorAttempts: 0),
+          RetryDecision.retry,
+        );
+        expect(retryDecisionFor(failure, priorAttempts: 1), RetryDecision.stop);
+      }
+      for (final failure in <FailureClass>[
+        FailureClass.assertion,
+        FailureClass.compilation,
+        FailureClass.signingHygiene,
+        FailureClass.privacy,
+        FailureClass.coverage,
+        FailureClass.drift,
+        FailureClass.schema,
+        FailureClass.unknown,
+      ]) {
+        expect(retryDecisionFor(failure, priorAttempts: 0), RetryDecision.stop);
+      }
+    });
+
+    test('classifier is conservative and terminal for unknown output', () {
+      expect(
+        classifyFailure(
+          const ProcessOutcome(exitCode: 124, diagnostic: 'process timed out'),
+        ),
+        FailureClass.runnerTimeout,
+      );
+      expect(
+        classifyFailure(
+          const ProcessOutcome(exitCode: 1, diagnostic: 'assertion failed'),
+        ),
+        FailureClass.assertion,
+      );
+      expect(
+        classifyFailure(
+          const ProcessOutcome(exitCode: 1, diagnostic: 'mystery'),
+        ),
+        FailureClass.unknown,
+      );
+    });
+
+    test('checkpoint rejects every identity and integrity mutation', () {
+      final checkpoint = ResumeCheckpoint.create(
+        candidate: candidate,
+        configurationDigests: const <String, String>{'workflow': 'cfg'},
+        environmentFingerprint: const <String, String>{'os': 'macos'},
+        completedStageDigests: const <GateStage, String>{
+          GateStage.prerequisite: 'pre',
+        },
+      );
+      expect(
+        checkpoint.isValidFor(
+          candidate: candidate,
+          configurationDigests: const <String, String>{'workflow': 'cfg'},
+          environmentFingerprint: const <String, String>{'os': 'macos'},
+          stageGraphVersion: releaseGraphVersion,
+        ),
+        isTrue,
+      );
+      expect(
+        checkpoint.isValidFor(
+          candidate: CandidateFingerprint(
+            commit: 'b' * 40,
+            inputDigests: const <String, String>{'pubspec.lock': 'lock'},
+          ),
+          configurationDigests: const <String, String>{'workflow': 'cfg'},
+          environmentFingerprint: const <String, String>{'os': 'macos'},
+          stageGraphVersion: releaseGraphVersion,
+        ),
+        isFalse,
+      );
+      expect(
+        checkpoint
+            .copyWith(integrity: 'tampered')
+            .isValidFor(
+              candidate: candidate,
+              configurationDigests: const <String, String>{'workflow': 'cfg'},
+              environmentFingerprint: const <String, String>{'os': 'macos'},
+              stageGraphVersion: releaseGraphVersion,
+            ),
+        isFalse,
+      );
+    });
+
+    test('resume restarts at earliest invalidated stable stage', () {
+      expect(
+        earliestInvalidatedStage(
+          const <GateStage, String>{
+            GateStage.prerequisite: 'old',
+            GateStage.targetRegressions: 'same',
+          },
+          const <GateStage, String>{
+            GateStage.prerequisite: 'new',
+            GateStage.targetRegressions: 'same',
+          },
+        ),
+        GateStage.prerequisite,
+      );
+      expect(
+        earliestInvalidatedStage(
+          const <GateStage, String>{
+            GateStage.prerequisite: 'same',
+            GateStage.targetRegressions: 'same',
+          },
+          const <GateStage, String>{
+            GateStage.prerequisite: 'same',
+            GateStage.targetRegressions: 'same',
+          },
+        ),
+        isNull,
       );
     });
   });
