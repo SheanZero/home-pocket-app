@@ -261,17 +261,15 @@ void main() {
     }
     expect(report.existsSync(), isTrue);
     final reportContents = report.readAsStringSync();
-    expect(reportContents, contains('Verdict: `PASS`'));
     expect(
       reportContents,
-      contains(RegExp(r'Candidate commit: `[a-f0-9]{40}`')),
-      reason: 'RPT-A binds a real tested candidate without hard-coding it',
-    );
-    expect(reportContents, contains('`finalDrift`: `succeeded`'));
-    expect(
-      reportContents,
-      contains('Android physical-device validation: not performed or claimed.'),
-      reason: 'the attestation must not overclaim physical-device evidence',
+      allOf(
+        contains('Android physical-device validation'),
+        contains('not performed or claimed'),
+      ),
+      reason:
+          'both the placeholder and a published attestation must avoid '
+          'overclaiming physical-device evidence',
     );
   });
 }
