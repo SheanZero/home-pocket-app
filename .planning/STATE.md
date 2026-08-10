@@ -4,11 +4,11 @@ milestone: v2.1
 milestone_name: 依赖与原生工具链现代化
 current_phase: 61
 current_phase_name: Android Toolchain & Emulator Lane
-status: verifying
+status: planning
 stopped_at: Completed 61-06-PLAN.md
-last_updated: "2026-08-10T01:02:05.458Z"
+last_updated: "2026-08-10T01:21:26.807Z"
 last_activity: 2026-08-10
-last_activity_desc: owner-approved API 36 google_apis arm64-v8a primary gate is being executed; x86_64 GitHub/Intel remains supplemental
+last_activity_desc: "Phase 61 verification found 2 closure gaps: current-source evidence binding and non-blocking x86 supplemental routing"
 progress:
   total_phases: 7
   completed_phases: 5
@@ -30,8 +30,8 @@ See: .planning/PROJECT.md (updated 2026-08-09 after Phase 59 completion)
 
 Phase: 61 — Android Toolchain & Emulator Lane
 Plan: 6 of 6
-Status: Phase complete — ready for verification
-Last activity: 2026-08-10 — owner-approved API 36 google_apis arm64-v8a primary gate is being executed; x86_64 GitHub/Intel remains supplemental
+Status: Verification gaps found — gap closure planning required
+Last activity: 2026-08-10 — Phase 61 verification found 2 closure gaps: current-source evidence binding and non-blocking x86 supplemental routing
 
 Progress: [██████████] 100%
 
