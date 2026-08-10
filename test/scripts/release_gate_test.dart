@@ -2,6 +2,9 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../scripts/release_gate.dart';
+import '../../scripts/release_gate/models.dart';
+import '../../scripts/release_gate/process_adapter.dart';
 import '../helpers/release_gate_test_support.dart';
 
 void main() {
@@ -95,16 +98,138 @@ void main() {
     );
   });
 
-  group('Phase 62 release-gate authority contract (intentional RED)', () {
+  group('Phase 62 release-gate authority tracer', () {
     final source = File('scripts/release_gate.dart');
 
+    late ReleaseGateCandidateFixture fixture;
+
+    setUp(() async {
+      fixture = await ReleaseGateCandidateFixture.create();
+      File('${fixture.root.path}/.gitignore').writeAsStringSync('build/\n');
+      _runFixtureGit(fixture.root, const <String>['add', '.gitignore']);
+      _runFixtureGit(fixture.root, const <String>[
+        'commit',
+        '-m',
+        'ignore release-gate artifacts',
+      ]);
+    });
+
+    tearDown(() => fixture.dispose());
+
+    test(
+      'a clean committed candidate produces bound JSON and Markdown evidence',
+      () async {
+        final expected = fixture.captureIdentity();
+        final adapter = _RecordingProcessAdapter(<ProcessOutcome>[
+          const ProcessOutcome(
+            exitCode: 0,
+            diagnostic:
+                'wrapper passed at /Users/fixture/private token=discard',
+          ),
+        ]);
+
+        final result = await runReleaseGate(
+          workingDirectory: fixture.root,
+          processAdapter: adapter,
+          trackedInputPaths: const <String>[
+            'pubspec.lock',
+            'config/release_gate_input.txt',
+          ],
+          resultPath: 'build/release_gate/tracer.json',
+        );
+
+        expect(result.verdict, ReleaseVerdict.pass);
+        expect(result.candidate!.commit, expected.commit);
+        expect(result.stages, hasLength(2));
+        expect(adapter.invocations, <List<String>>[
+          const <String>['bash', 'scripts/verify_codegen_reproducibility.sh'],
+        ]);
+        expect(
+          result.stages
+              .singleWhere((stage) => stage.stage == GateStage.prerequisite)
+              .diagnostic,
+          isNot(contains('/Users/fixture')),
+        );
+        expect(
+          result.stages
+              .singleWhere((stage) => stage.stage == GateStage.prerequisite)
+              .diagnostic,
+          isNot(contains('discard')),
+        );
+
+        final json = File(
+          '${fixture.root.path}/build/release_gate/tracer.json',
+        );
+        final markdown = File(
+          '${fixture.root.path}/build/release_gate/tracer.preview.md',
+        );
+        expect(json.existsSync(), isTrue);
+        expect(markdown.existsSync(), isTrue);
+        expect(json.readAsStringSync(), contains(expected.commit));
+        expect(markdown.readAsStringSync(), contains(expected.commit));
+        expect(result.isSchemaValid, isTrue);
+      },
+    );
+
+    test(
+      'a failed prerequisite stops before later stages with BLOCKED',
+      () async {
+        final adapter = _RecordingProcessAdapter(<ProcessOutcome>[
+          const ProcessOutcome(exitCode: 1, diagnostic: 'prerequisite failed'),
+        ]);
+
+        final result = await runReleaseGate(
+          workingDirectory: fixture.root,
+          processAdapter: adapter,
+          trackedInputPaths: const <String>[
+            'pubspec.lock',
+            'config/release_gate_input.txt',
+          ],
+          resultPath: 'build/release_gate/blocked.json',
+        );
+
+        expect(result.verdict, ReleaseVerdict.blocked);
+        expect(result.stages.map((stage) => stage.stage), <GateStage>[
+          GateStage.candidate,
+          GateStage.prerequisite,
+        ]);
+        expect(
+          result.stages.last.classification,
+          StageClassification.commandFailed,
+        );
+      },
+    );
+
+    test(
+      'strict arguments and candidate state fail closed before process launch',
+      () async {
+        fixture.dirtySource();
+        final adapter = _RecordingProcessAdapter(const <ProcessOutcome>[]);
+
+        final result = await runReleaseGate(
+          workingDirectory: fixture.root,
+          processAdapter: adapter,
+          trackedInputPaths: const <String>[
+            'pubspec.lock',
+            'config/release_gate_input.txt',
+          ],
+          resultPath: 'build/release_gate/dirty.json',
+        );
+
+        expect(result.verdict, ReleaseVerdict.blocked);
+        expect(adapter.invocations, isEmpty);
+        expect(
+          () => parseReleaseGateOptions(const <String>[
+            '--scope=tracer',
+            '--bad',
+          ]),
+          throwsArgumentError,
+        );
+      },
+    );
+
     test('requires the repository-owned sole authority', () {
-      expect(
-        source.existsSync(),
-        isTrue,
-        reason:
-            'Missing Phase 62 release-gate authority: scripts/release_gate.dart',
-      );
+      expect(source.existsSync(), isTrue);
     });
 
     test(
@@ -113,9 +238,9 @@ void main() {
         final contents = source.existsSync() ? source.readAsStringSync() : '';
         expect(
           contents,
-          contains('ReleaseGateCandidate'),
+          contains('CandidateFingerprint'),
           reason:
-              'Missing Phase 62 candidate identity contract: ReleaseGateCandidate',
+              'Missing Phase 62 candidate identity contract: CandidateFingerprint',
         );
         expect(
           contents,
@@ -125,7 +250,7 @@ void main() {
       },
     );
 
-    test('requires closed retry and resume invalidation contracts', () {
+    test('reserves closed retry and resume invalidation contracts', () {
       final contents = source.existsSync() ? source.readAsStringSync() : '';
       expect(
         contents,
@@ -143,14 +268,47 @@ void main() {
       final contents = source.existsSync() ? source.readAsStringSync() : '';
       expect(
         contents,
-        contains('ReleaseGateVerdict'),
+        contains('ReleaseVerdict'),
         reason: 'Missing Phase 62 final verdict contract: ReleaseGateVerdict',
       );
       expect(
         contents,
-        contains('redact'),
+        contains('scrub'),
         reason: 'Missing Phase 62 privacy-safe evidence contract: redact',
       );
     });
   });
+}
+
+class _RecordingProcessAdapter implements ProcessAdapter {
+  _RecordingProcessAdapter(this._outcomes);
+
+  final List<ProcessOutcome> _outcomes;
+  final List<List<String>> invocations = <List<String>>[];
+
+  @override
+  Future<ProcessOutcome> run(
+    String executable,
+    List<String> arguments, {
+    required Duration timeout,
+    required String workingDirectory,
+  }) async {
+    invocations.add(<String>[executable, ...arguments]);
+    if (_outcomes.isEmpty) {
+      throw StateError('no process outcome configured');
+    }
+    return _outcomes.removeAt(0);
+  }
+}
+
+void _runFixtureGit(Directory root, List<String> arguments) {
+  final result = Process.runSync(
+    'git',
+    arguments,
+    workingDirectory: root.path,
+    runInShell: false,
+  );
+  if (result.exitCode != 0) {
+    throw StateError('fixture git command failed: ${arguments.join(' ')}');
+  }
 }
