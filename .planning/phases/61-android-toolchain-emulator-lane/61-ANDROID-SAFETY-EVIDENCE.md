@@ -176,9 +176,9 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
   },
   "emulator_preparation": {
     "result": "UNAVAILABLE",
-    "source_commit": "36d48912c3c7780c10c05eeba03c9feba369fd2f",
-    "started_utc": "2026-08-09T16:02:50.306774Z",
-    "completed_utc": "2026-08-09T16:02:54.312064Z",
+    "source_commit": "cc048bcb62120796a3208c5096c82635e0b08888",
+    "started_utc": "2026-08-10T00:20:24.365853Z",
+    "completed_utc": "2026-08-10T00:20:29.220476Z",
     "api": 36,
     "abi": "x86_64",
     "profile": "pixel_6",
@@ -187,6 +187,9 @@ Only the JSON block between the markers is machine-authoritative. `NOT_RUN` is i
     "host_architecture": "arm64",
     "runtime": "cross-architecture software translation requested (-no-accel)",
     "emulator_version": "Android emulator version 36.3.10.0 (build_id 14472402) (CL:N/A)",
+    "emulator_host_binary": {
+      "architecture": "arm64"
+    },
     "serial_redacted": "NOT_RUN",
     "boot_started_utc": "NOT_RUN",
     "boot_ready_utc": "NOT_RUN",
