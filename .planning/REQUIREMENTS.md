@@ -39,8 +39,8 @@
 
 ### Android Toolchain & Emulator（Android 工具链与模拟器）
 
-- [ ] **AND-01**: 重新确认并尝试完整的 production-stable Android 候选组合（2026-08-05 候选为 AGP 9.0.1、Gradle 9.1、JDK 17、API 36），同时保持 minSdk 24
-- [ ] **AND-02**: 若最终采用 AGP 9，则 built-in Kotlin/new DSL、旧 KGP 移除和 Flutter 临时 opt-out flags 清理必须一次完成并覆盖所有插件；若插件链不兼容则整体回退到最后绿色 AGP 8 组合并记录 blocker
+- [x] **AND-01**: 重新确认并尝试完整的 production-stable Android 候选组合（2026-08-05 候选为 AGP 9.0.1、Gradle 9.1、JDK 17、API 36），同时保持 minSdk 24
+- [x] **AND-02**: 若最终采用 AGP 9，则 built-in Kotlin/new DSL、旧 KGP 移除和 Flutter 临时 opt-out flags 清理必须一次完成并覆盖所有插件；若插件链不兼容则整体回退到最后绿色 AGP 8 组合并记录 blocker
 - [x] **AND-03**: 最终 Android 组合生成非 debug signing 的 release AAB/APK，签名合同继续拒绝缺失或 debug 凭据，release artifact 不含测试专用 registrar/plugin
 - [x] **AND-04**: 在此 Apple Silicon 主机的 API 36 `google_apis` `arm64-v8a` Android Emulator 上完成关键 integration tests（冷启动、wipe/no-snapshot、确定性 readiness、redacted serial、runner ownership 与完整 `integration_test/` 发现/执行均为阻塞验收）；保留 API 36 `google_apis` `x86_64` GitHub/Intel lane 为独立、可测试的补充 lane，其未运行或失败必须明确记录为限制，不能作为通过。最终报告明确写明未执行、也不宣称 Android 真机验收。
 
@@ -106,8 +106,8 @@ Every current requirement maps to exactly one v2.1 roadmap phase.
 | SEC-04 | Phase 60 | Descoped / Not Applicable — pre-release owner decision 2026-08-09 |
 | SEC-05 | Phase 60 | Complete |
 | SEC-06 | Phase 60 | Complete |
-| AND-01 | Phase 61 | Pending |
-| AND-02 | Phase 61 | Pending |
+| AND-01 | Phase 61 | Complete |
+| AND-02 | Phase 61 | Complete |
 | AND-03 | Phase 61 | Complete |
 | AND-04 | Phase 61 | Complete |
 | QA-01 | Phase 62 | Pending |
