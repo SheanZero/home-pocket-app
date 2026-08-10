@@ -48,7 +48,7 @@ v2.1 is active and roadmapped. It upgrades the SDK, generator, native-toolchain,
 - [x] **Phase 58: Flutter, Analyzer & Code Generation Lane** - Select a coherent SDK, analyzer, lint, and generator graph without weakening architecture enforcement. (completed 2026-08-08)
 - [x] **Phase 59: Controlled Platform Plugin Cohorts** - Upgrade or evidence-hold native plugin groups through narrow behavioral compatibility lanes. (completed 2026-08-09)
 - [x] **Phase 60: SQLCipher & iOS Native Safety Lane** - Prove current-schema encrypted lifecycle and current `.hpb` backup safety from clean native artifacts. (completed 2026-08-09)
-- [ ] **Phase 61: Android Toolchain & Emulator Lane** - Complete an all-or-hold AGP/Gradle/Kotlin migration with signed release and emulator evidence.
+- [x] **Phase 61: Android Toolchain & Emulator Lane** - Complete an all-or-hold AGP/Gradle/Kotlin migration with signed release and emulator evidence. (completed 2026-08-10)
 - [ ] **Phase 62: Automated Release-Gate Lock** - Reproduce the final candidate through all generation, analysis, test, release, and simulator/emulator gates.
 - [ ] **Phase 63: Isolated Wired-iPhone Acceptance** - Validate the final candidate only in a separate test identity on the current wired iPhone.
 
@@ -289,6 +289,6 @@ Plans:
 | 58. Flutter, Analyzer & Code Generation Lane | 10/10 | Complete    | 2026-08-08 |
 | 59. Controlled Platform Plugin Cohorts | 7/7 | Complete    | 2026-08-09 |
 | 60. SQLCipher & iOS Native Safety Lane | 10/10 | Complete    | 2026-08-09 |
-| 61. Android Toolchain & Emulator Lane | 6/6 | In Progress|  |
+| 61. Android Toolchain & Emulator Lane | 6/6 | Complete    | 2026-08-10 |
 | 62. Automated Release-Gate Lock | 0/TBD | Not started | - |
 | 63. Isolated Wired-iPhone Acceptance | 0/TBD | Not started | - |
