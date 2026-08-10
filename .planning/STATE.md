@@ -5,15 +5,15 @@ milestone_name: 依赖与原生工具链现代化
 current_phase: 62
 current_phase_name: automated-release-gate-lock
 status: executing
-stopped_at: Completed 62-06-PLAN.md
-last_updated: "2026-08-10T05:00:37.817Z"
+stopped_at: Completed 62-07-PLAN.md
+last_updated: "2026-08-10T05:15:10.308Z"
 last_activity: 2026-08-10
 last_activity_desc: Phase 62 execution started
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 45
-  completed_plans: 42
+  completed_plans: 43
   percent: 71
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-08-10 after Phase 61 completion)
 ## Current Position
 
 Phase: 62 (automated-release-gate-lock) — EXECUTING
-Plan: 7 of 9
+Plan: 8 of 9
 Status: Ready to execute
 Last activity: 2026-08-10 — Phase 62 execution started
 
-Progress: [█████████░] 93%
+Progress: [██████████] 96%
 
 ### Decisions
 
@@ -144,6 +144,8 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: Android API 36 arm64-v8a remains mandatory; x86_64 stays supplemental and Android physical-device validation is not claimed.
 - [Phase ?]: Require exactly one available iPhone Simulator and reject ambiguous or non-iPhone destinations before destructive commands.
 - [Phase ?]: Use recursive inventory equality (executed plus explicit, complete skip records) rather than Phase 60's two-test runtime allowlist.
+- [Phase ?]: 62-07: Expected skips are explicit versioned inventory exceptions; absent, stale, duplicate, or incomplete records block platform evidence.
+- [Phase ?]: 62-07: computeVerdict is the sole authority; manual overrides, mandatory failures, schema/privacy faults, and unclassified limitations are BLOCKED.
 
 ### Quick Tasks Completed
 
@@ -333,8 +335,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-08-10T05:00:37.801Z
-Stopped at: Completed 62-06-PLAN.md
+Last session: 2026-08-10T05:15:10.293Z
+Stopped at: Completed 62-07-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -461,6 +463,7 @@ Resume file: None
 | Phase 62 P04 | 12min | 2 tasks | 4 files |
 | Phase 62 P05 | 12 min | 2 tasks | 5 files |
 | Phase 62 P06 | 13min | 2 tasks | 4 files |
+| Phase 62 P07 | 7min | 2 tasks | 5 files |
 
 ## Decisions
 
