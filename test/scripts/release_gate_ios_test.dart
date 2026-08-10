@@ -8,7 +8,7 @@ import '../../scripts/release_gate/models.dart';
 import '../../scripts/release_gate/process_adapter.dart';
 
 void main() {
-  test('preserves a redacted complete simulator inventory for parsing', () {
+  test('preserves a complete simulator inventory for local parsing', () {
     final inventory = jsonEncode(<String, Object>{
       'devices': <String, Object>{
         'com.apple.CoreSimulator.SimRuntime.iOS-26-2': List<Object>.generate(
@@ -26,7 +26,7 @@ void main() {
 
     expect(jsonDecode(preserved), isA<Map<Object?, Object?>>());
     expect(preserved, contains('iPhone diagnostic ${'x' * 80} 9'));
-    expect(preserved, isNot(contains('SIMULATOR-UDID')));
+    expect(preserved, contains('SIMULATOR-UDID-9'));
   });
 
   group('Phase 62 iOS Simulator stage', () {
