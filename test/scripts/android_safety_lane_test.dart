@@ -335,7 +335,10 @@ void main() {
     final merged = lane.mergeEmulatorPreparationRecord(previous, current);
 
     expect(merged['failure'], current['failure']);
-    expect(merged['cross_architecture_attempts'], previous['cross_architecture_attempts']);
+    expect(
+      merged['cross_architecture_attempts'],
+      previous['cross_architecture_attempts'],
+    );
     expect(merged['cleanup'], previous['cleanup']);
     expect(merged['exit_condition'], previous['exit_condition']);
   });

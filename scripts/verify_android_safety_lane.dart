@@ -1022,7 +1022,8 @@ void _recordEmulatorPreparation({
   final evidence = parseEvidenceMarkdown(markdown, issues);
   if (issues.isNotEmpty) throw StateError(issues.join('; '));
   final hostArchitecture = _hostArchitectureSync();
-  evidence['emulator_preparation'] = {
+  final priorPreparation = _object(evidence['emulator_preparation']);
+  final currentPreparation = <String, Object?>{
     'result': prepared != null && failure == null ? 'PASS' : 'UNAVAILABLE',
     'source_commit': _gitOutput(root, ['rev-parse', 'HEAD']),
     'started_utc': started.toIso8601String(),
@@ -1051,6 +1052,10 @@ void _recordEmulatorPreparation({
     'boot_ready_utc': prepared?.ready.toIso8601String() ?? 'NOT_RUN',
     if (failure != null) 'failure': _diagnosticLine(failure),
   };
+  evidence['emulator_preparation'] = mergeEmulatorPreparationRecord(
+    priorPreparation,
+    currentPreparation,
+  );
   final rendered = const JsonEncoder.withIndent('  ').convert(evidence);
   final start = markdown.indexOf(_evidenceStart) + _evidenceStart.length;
   final end = markdown.indexOf(_evidenceEnd);
@@ -1058,6 +1063,32 @@ void _recordEmulatorPreparation({
     '${markdown.substring(0, start)}\n```json\n$rendered\n```\n'
     '${markdown.substring(end)}',
   );
+}
+
+/// Retains the bounded handoff evidence when a later exact retry is unavailable.
+///
+/// A current result always owns timestamps and the observed failure, while prior
+/// Rosetta diagnostics, cleanup proof, and the x86_64-host exit condition remain
+/// material to the fail-closed record until a preparation pass supersedes them.
+Map<String, Object?> mergeEmulatorPreparationRecord(
+  Map<String, Object?> previous,
+  Map<String, Object?> current,
+) {
+  final merged = Map<String, Object?>.from(current);
+  if (previous['result'] != 'UNAVAILABLE' ||
+      current['result'] != 'UNAVAILABLE') {
+    return merged;
+  }
+  for (final key in const [
+    'cross_architecture_attempts',
+    'cleanup',
+    'exit_condition',
+  ]) {
+    if (!merged.containsKey(key) && previous.containsKey(key)) {
+      merged[key] = previous[key];
+    }
+  }
+  return merged;
 }
 
 Future<void> _withPreparedEmulator(
