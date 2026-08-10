@@ -5,15 +5,15 @@ milestone_name: 依赖与原生工具链现代化
 current_phase: 62
 current_phase_name: automated-release-gate-lock
 status: executing
-stopped_at: Completed 62-01-PLAN.md
-last_updated: "2026-08-10T03:34:18.651Z"
+stopped_at: Completed 62-02-PLAN.md
+last_updated: "2026-08-10T03:57:32.645Z"
 last_activity: 2026-08-10
 last_activity_desc: Phase 62 execution started
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 45
-  completed_plans: 37
+  completed_plans: 38
   percent: 71
 ---
 
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-08-10 after Phase 61 completion)
 ## Current Position
 
 Phase: 62 (automated-release-gate-lock) — EXECUTING
-Plan: 2 of 9
+Plan: 3 of 9
 Status: Ready to execute
 Last activity: 2026-08-10 — Phase 62 execution started
 
-Progress: [████████░░] 82%
+Progress: [████████░░] 84%
 
 ### Decisions
 
@@ -133,6 +133,9 @@ v1.9 decisions (D-18..D-21 + the 52-0x plan decisions) are archived in `.plannin
 - [Phase ?]: Phase 61 records Android physical-device validation as NOT_PERFORMED_NOT_CLAIMED; Phase 62 owns broad full-suite and coverage gates.
 - [Phase ?]: Wave 0 release-gate contracts stay source-based until Plan 62-03 supplies the authority.
 - [Phase ?]: CI and report contracts require the 62-02 RPT/CI decision ledger; no topology or lifecycle is inferred.
+- [Phase ?]: 62-02 RPT-A: immutable candidate C with exactly one explicitly candidate-bound metadata-only compatibility-report successor; source/config changes require a new candidate.
+- [Phase ?]: 62-02 CI-A: every main merge requires the owner-operated self-hosted macOS ARM64 happy-pocket-release runner and fails closed if its required result is unavailable; authorization is not runtime proof.
+- [Phase ?]: 62-02 SIGN-A: Phase 62/release owner repair JDK 17 selection versus signing-evidence switching; only an exercised current-candidate release path may be claimed.
 
 ### Quick Tasks Completed
 
@@ -322,8 +325,8 @@ Acknowledged via the pre-close artifact audit (35 items) — all benign, matchin
 
 ## Session Continuity
 
-Last session: 2026-08-10T03:34:18.635Z
-Stopped at: Completed 62-01-PLAN.md
+Last session: 2026-08-10T03:57:32.630Z
+Stopped at: Completed 62-02-PLAN.md
 Resume file: None
 
 ## Performance Metrics
@@ -445,6 +448,7 @@ Resume file: None
 | Phase 61 P05 | 17m | 2 tasks | 12 files |
 | Phase 61 P06 | 5m | 2 tasks | 7 files |
 | Phase 62 P01 | 3min | 2 tasks | 3 files |
+| Phase 62 P02 | 3min | 3 tasks | 1 files |
 
 ## Decisions
 

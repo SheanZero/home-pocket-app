@@ -26,11 +26,11 @@ decisions:
   - CI-A: require an owner-operated, labeled GitHub self-hosted Apple-Silicon runner after every main merge; fail closed if unavailable.
   - SIGN-A: Phase 62 repairs the Phase 61 JDK/signing switch seam and may claim only the exercised current-candidate release path.
 metrics:
-  duration: 0min
+  duration: 3min
   completed: 2026-08-10
 status: complete
 actuals:
-  tokens: 1795
+  tokens: 1826
   tasks: 3
   commits: 2
 ---
@@ -117,7 +117,10 @@ No action is required to record these decisions. Subsequent implementation must 
 
 Plans 62-03, 62-05, 62-08, and 62-09 may consume this ledger without reopening the decisions. They must enforce the RPT-A candidate-bound report lifecycle, CI-A's fail-closed Apple-Silicon main-merge topology, and SIGN-A's independently controlled JDK/signing path.
 
-## Self-Check: PENDING
+## Self-Check: PASSED
+
+- Found `.planning/phases/62-automated-release-gate-lock/62-02-SUMMARY.md`.
+- Found task commit `77c691a6` in Git history.
 
 ---
 *Phase: 62-automated-release-gate-lock*
