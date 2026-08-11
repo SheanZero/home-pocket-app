@@ -12,7 +12,7 @@ import '../../shared/constants/voice_tuning.dart';
 /// platform differences (sound level normalization).
 class SpeechRecognitionService {
   SpeechRecognitionService({stt.SpeechToText? speech})
-      : _speech = speech ?? stt.SpeechToText();
+    : _speech = speech ?? stt.SpeechToText();
 
   final stt.SpeechToText _speech;
   bool _isInitialized = false;
@@ -40,7 +40,8 @@ class SpeechRecognitionService {
     Duration listenFor,
     Duration pauseFor,
     bool allowOnDeviceFallback,
-  })? _lastConfig;
+  })?
+  _lastConfig;
 
   /// Initialize speech recognition.
   ///

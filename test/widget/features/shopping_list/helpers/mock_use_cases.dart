@@ -12,7 +12,6 @@ import 'package:mocktail/mocktail.dart';
 // TODO(Wave-1): Uncomment once state_shopping_filter.dart lands in Phase 38 Wave 1.
 // import 'package:home_pocket/features/shopping_list/presentation/providers/state_shopping_filter.dart';
 
-
 // TODO(Wave-1): Uncomment provider overrides once use-case providers land in Phase 38 Wave 1.
 // import 'package:home_pocket/features/shopping_list/presentation/providers/use_case_providers.dart';
 
@@ -44,9 +43,7 @@ class MockShoppingItemRepository extends Mock
 /// Wave 1 will extend this with per-use-case provider overrides once
 /// the use-case providers land (see TODO comments above).
 List<Override> shoppingRepositoryOverride(MockShoppingItemRepository mock) {
-  return [
-    shoppingItemRepositoryProvider.overrideWithValue(mock),
-  ];
+  return [shoppingItemRepositoryProvider.overrideWithValue(mock)];
 }
 
 // TODO(Wave-1): Replace with full shoppingTestOverrides(...) helper that accepts

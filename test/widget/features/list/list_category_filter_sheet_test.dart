@@ -122,10 +122,12 @@ Future<ProviderContainer> _pumpSheet(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        categoryRepositoryProvider
-            .overrideWithValue(_FakeCategoryRepository(_testCategories)),
-        locale_providers.currentLocaleProvider
-            .overrideWith((_) async => const Locale('ja')),
+        categoryRepositoryProvider.overrideWithValue(
+          _FakeCategoryRepository(_testCategories),
+        ),
+        locale_providers.currentLocaleProvider.overrideWith(
+          (_) async => const Locale('ja'),
+        ),
       ],
       child: Builder(
         builder: (context) {
@@ -150,9 +152,9 @@ Future<ProviderContainer> _pumpSheet(
 
 void main() {
   group('CategoryFilterSheet', () {
-    testWidgets(
-        'Apply button calls setCategories with _localSelected',
-        (tester) async {
+    testWidgets('Apply button calls setCategories with _localSelected', (
+      tester,
+    ) async {
       final container = await _pumpSheet(tester, initialSelected: {});
       // Tap Apply button — with empty selection, provider categoryIds stays empty
       await tester.tap(find.text('適用'));
@@ -161,9 +163,7 @@ void main() {
       expect(container.read(listFilterProvider).categoryIds, isEmpty);
     });
 
-    testWidgets(
-        'D-02: L1 tap cascades to all its L2 children',
-        (tester) async {
+    testWidgets('D-02: L1 tap cascades to all its L2 children', (tester) async {
       await _pumpSheet(tester, initialSelected: {});
       // Categories loaded; find the L1 Checkbox (first Checkbox in list)
       final l1Checkboxes = find.byType(Checkbox);
@@ -175,18 +175,19 @@ void main() {
     });
 
     testWidgets(
-        'tristate: L1 renders partial when some L2 selected, all when all L2 selected, none when none selected',
-        (tester) async {
-      // Scenario: pump with only one of two L2 children selected → L1 should be partial (null)
-      await _pumpSheet(
-        tester,
-        initialSelected: {'convenience'}, // half of food's L2 children
-      );
-      // L1 "food" should render with tristate=true (partial), value==null
-      final l1PartialCheckbox = find.byWidgetPredicate(
-        (w) => w is Checkbox && w.tristate == true && w.value == null,
-      );
-      expect(l1PartialCheckbox, findsAtLeastNWidgets(1));
-    });
+      'tristate: L1 renders partial when some L2 selected, all when all L2 selected, none when none selected',
+      (tester) async {
+        // Scenario: pump with only one of two L2 children selected → L1 should be partial (null)
+        await _pumpSheet(
+          tester,
+          initialSelected: {'convenience'}, // half of food's L2 children
+        );
+        // L1 "food" should render with tristate=true (partial), value==null
+        final l1PartialCheckbox = find.byWidgetPredicate(
+          (w) => w is Checkbox && w.tristate == true && w.value == null,
+        );
+        expect(l1PartialCheckbox, findsAtLeastNWidgets(1));
+      },
+    );
   });
 }

@@ -4,9 +4,7 @@ import 'package:home_pocket/features/analytics/domain/models/time_window.dart';
 void main() {
   group('TimeWindow.range', () {
     test('week returns Monday start and Sunday inclusive end', () {
-      final range = TimeWindow.week(
-        mondayStart: DateTime(2026, 5, 11),
-      ).range;
+      final range = TimeWindow.week(mondayStart: DateTime(2026, 5, 11)).range;
 
       expect(range.start, DateTime(2026, 5, 11));
       expect(range.end, DateTime(2026, 5, 17, 23, 59, 59));

@@ -173,28 +173,51 @@ void main() {
   });
 
   group('getLedgerSnapshotAcrossBooks (family pool)', () {
-    test('pools rows across books per ledger_type (no GROUP BY book_id)', () async {
-      // bookA: 2 joy rows summing to 300
-      await seedTx(id: 'a_joy_1', bookId: 'book_a', amount: 100, ledgerType: 'joy');
-      await seedTx(id: 'a_joy_2', bookId: 'book_a', amount: 200, ledgerType: 'joy');
-      // bookB: 1 joy row + 1 daily row
-      await seedTx(id: 'b_joy_1', bookId: 'book_b', amount: 50, ledgerType: 'joy');
-      await seedTx(id: 'b_surv_1', bookId: 'book_b', amount: 700, ledgerType: 'daily');
+    test(
+      'pools rows across books per ledger_type (no GROUP BY book_id)',
+      () async {
+        // bookA: 2 joy rows summing to 300
+        await seedTx(
+          id: 'a_joy_1',
+          bookId: 'book_a',
+          amount: 100,
+          ledgerType: 'joy',
+        );
+        await seedTx(
+          id: 'a_joy_2',
+          bookId: 'book_a',
+          amount: 200,
+          ledgerType: 'joy',
+        );
+        // bookB: 1 joy row + 1 daily row
+        await seedTx(
+          id: 'b_joy_1',
+          bookId: 'book_b',
+          amount: 50,
+          ledgerType: 'joy',
+        );
+        await seedTx(
+          id: 'b_surv_1',
+          bookId: 'book_b',
+          amount: 700,
+          ledgerType: 'daily',
+        );
 
-      final rows = await dao.getLedgerSnapshotAcrossBooks(
-        bookIds: ['book_a', 'book_b'],
-        startDate: windowStart,
-        endDate: windowEnd,
-      );
+        final rows = await dao.getLedgerSnapshotAcrossBooks(
+          bookIds: ['book_a', 'book_b'],
+          startDate: windowStart,
+          endDate: windowEnd,
+        );
 
-      // Pool: one row per ledger_type — joy (count=3, total=350), daily (count=1, total=700)
-      expect(rows, hasLength(2));
-      final indexed = indexByLedger(rows);
-      expect(indexed['joy']!.entryCount, 3);
-      expect(indexed['joy']!.totalAmount, 350);
-      expect(indexed['daily']!.entryCount, 1);
-      expect(indexed['daily']!.totalAmount, 700);
-    });
+        // Pool: one row per ledger_type — joy (count=3, total=350), daily (count=1, total=700)
+        expect(rows, hasLength(2));
+        final indexed = indexByLedger(rows);
+        expect(indexed['joy']!.entryCount, 3);
+        expect(indexed['joy']!.totalAmount, 350);
+        expect(indexed['daily']!.entryCount, 1);
+        expect(indexed['daily']!.totalAmount, 700);
+      },
+    );
 
     test('empty bookIds → empty list, no DB call', () async {
       // Seed data that would otherwise match — verify NOT returned

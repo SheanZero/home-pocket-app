@@ -4,10 +4,12 @@ import 'dart:typed_data';
 
 import '../../features/accounting/domain/models/book.dart';
 import '../../features/accounting/domain/models/category.dart';
+import '../../features/accounting/domain/models/category_ledger_config.dart';
 import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/models/transaction_photo_sync_policy.dart';
 import '../../features/accounting/domain/repositories/book_repository.dart';
 import '../../features/accounting/domain/repositories/category_repository.dart';
+import '../../features/accounting/domain/repositories/category_ledger_config_repository.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
 import '../../features/currency/domain/models/exchange_rate.dart';
 import '../../features/currency/domain/repositories/exchange_rate_repository.dart';
@@ -15,8 +17,11 @@ import '../../features/settings/domain/models/app_settings.dart';
 import '../../features/settings/domain/models/backup_data.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
 import '../../features/settings/domain/repositories/unit_of_work.dart';
+import '../../features/shopping_list/domain/models/shopping_item_backup_policy.dart';
+import '../../features/shopping_list/domain/repositories/shopping_item_repository.dart';
 import '../../infrastructure/crypto/services/backup_crypto_service.dart';
 import '../../shared/utils/currency_conversion.dart';
+import '../../shared/constants/default_categories.dart';
 import '../../shared/utils/result.dart';
 
 /// Restores app data from an encrypted backup file (.hpb).
@@ -30,7 +35,9 @@ class ImportBackupUseCase {
   ImportBackupUseCase({
     required this._transactionRepo,
     required this._categoryRepo,
+    required this._categoryLedgerConfigRepo,
     required this._bookRepo,
+    required this._shoppingItemRepo,
     required this._settingsRepo,
     required this._exchangeRateRepo,
     required this._unitOfWork,
@@ -40,7 +47,9 @@ class ImportBackupUseCase {
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;
+  final CategoryLedgerConfigRepository _categoryLedgerConfigRepo;
   final BookRepository _bookRepo;
+  final ShoppingItemRepository _shoppingItemRepo;
   final SettingsRepository _settingsRepo;
   final ExchangeRateRepository _exchangeRateRepo;
   final UnitOfWork _unitOfWork;
@@ -174,6 +183,8 @@ class ImportBackupUseCase {
         for (final book in existingBooks) {
           await _transactionRepo.deleteAllByBook(book.id);
         }
+        await _shoppingItemRepo.deleteAll();
+        await _categoryLedgerConfigRepo.deleteAll();
         await _categoryRepo.deleteAll();
         await _bookRepo.deleteAll();
 
@@ -187,6 +198,34 @@ class ImportBackupUseCase {
         for (final catJson in backupData.categories) {
           final category = Category.fromJson(catJson);
           await _categoryRepo.insert(category);
+        }
+
+        // Restore category behavior after category rows exist. Older backups
+        // omit this additive field, so system categories fall back to their
+        // default ledger assignments while remaining importable.
+        final restoredCategoryIds = backupData.categories
+            .map((category) => category['id'])
+            .whereType<String>()
+            .toSet();
+        final categoryConfigs = backupData.categoryLedgerConfigs.isNotEmpty
+            ? backupData.categoryLedgerConfigs
+                  .map(CategoryLedgerConfig.fromJson)
+                  .toList(growable: false)
+            : DefaultCategories.defaultLedgerConfigs
+                  .where(
+                    (config) => restoredCategoryIds.contains(config.categoryId),
+                  )
+                  .toList(growable: false);
+        for (final config in categoryConfigs) {
+          await _categoryLedgerConfigRepo.upsert(config);
+        }
+
+        // Backup restore is a local recovery path. Repository upsert writes the
+        // encrypted local row without producing family-sync outbox operations.
+        for (final itemJson in backupData.shoppingItems) {
+          await _shoppingItemRepo.upsert(
+            ShoppingItemBackupPolicy.fromBackupJson(itemJson),
+          );
         }
 
         // Import transactions

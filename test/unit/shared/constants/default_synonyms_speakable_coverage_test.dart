@@ -73,38 +73,35 @@ void main() {
       expect(speakableL2, isNotEmpty);
     });
 
-    test(
-      'every L2 has >=1 zh direct seed AND >=1 ja direct seed',
-      () {
-        final offenders = <String>[];
-        for (final id in speakableL2) {
-          // DIRECT seeds only — an L1 seed covers only that L1's _other bucket
-          // via _ensureL2, never an arbitrary sibling L2. So set-completeness
-          // requires a seed whose categoryId == this exact L2 id.
-          final direct = DefaultVoiceSynonyms.all
-              .where((s) => s.categoryId == id)
-              .map((s) => s.keyword)
-              .toList();
-          final hasZh = direct.any(isZh);
-          final hasJa = direct.any(isJa);
-          if (!hasZh && !hasJa) {
-            offenders.add('$id (missing: both)');
-          } else if (!hasZh) {
-            offenders.add('$id (missing: zh)');
-          } else if (!hasJa) {
-            offenders.add('$id (missing: ja)');
-          }
+    test('every L2 has >=1 zh direct seed AND >=1 ja direct seed', () {
+      final offenders = <String>[];
+      for (final id in speakableL2) {
+        // DIRECT seeds only — an L1 seed covers only that L1's _other bucket
+        // via _ensureL2, never an arbitrary sibling L2. So set-completeness
+        // requires a seed whose categoryId == this exact L2 id.
+        final direct = DefaultVoiceSynonyms.all
+            .where((s) => s.categoryId == id)
+            .map((s) => s.keyword)
+            .toList();
+        final hasZh = direct.any(isZh);
+        final hasJa = direct.any(isJa);
+        if (!hasZh && !hasJa) {
+          offenders.add('$id (missing: both)');
+        } else if (!hasZh) {
+          offenders.add('$id (missing: zh)');
+        } else if (!hasJa) {
+          offenders.add('$id (missing: ja)');
         }
+      }
 
-        expect(
-          offenders,
-          isEmpty,
-          reason:
-              'These L2 categories lack a zh and/or ja direct seed '
-              '(D-04 full-coverage gap):\n${offenders.join('\n')}',
-        );
-      },
-    );
+      expect(
+        offenders,
+        isEmpty,
+        reason:
+            'These L2 categories lack a zh and/or ja direct seed '
+            '(D-04 full-coverage gap):\n${offenders.join('\n')}',
+      );
+    });
 
     test('coverage check iterates the FULL speakable set (no sampling)', () {
       // Re-assert per-id (not just the aggregate offenders list) so the count

@@ -81,7 +81,8 @@ class _FabTestShell extends ConsumerWidget {
             // Uses _ManualEntryRoute for testability.
             await Navigator.of(context).push<void>(
               _ManualEntryRoute(
-                builder: (_) => const SizedBox.shrink(), // stub — route type is the signal
+                builder: (_) =>
+                    const SizedBox.shrink(), // stub — route type is the signal
               ),
             );
           }
@@ -137,52 +138,74 @@ Future<_CapturingNavigatorObserver> _pumpShell(
 
 void main() {
   group('MainShellScreen FAB routing (NAV-01)', () {
-    testWidgets('index 3 (shopping tab): FAB routes to ShoppingItemFormScreen',
-        (tester) async {
+    testWidgets('index 3 (shopping tab): FAB routes to ShoppingItemFormScreen', (
+      tester,
+    ) async {
       final observer = await _pumpShell(tester, tabIndex: 3);
 
       await tester.tap(find.byKey(const Key('fab')));
       await tester.pump();
       await tester.pump(); // settle animation start
 
-      expect(observer.pushed, isNotEmpty,
-          reason: 'FAB should push a route at index 3');
+      expect(
+        observer.pushed,
+        isNotEmpty,
+        reason: 'FAB should push a route at index 3',
+      );
       // Route must be the shopping-specific subclass
-      expect(observer.pushed.last, isA<_ShoppingItemFormRoute>(),
-          reason: 'Shopping tab FAB must use _ShoppingItemFormRoute → ShoppingItemFormScreen');
+      expect(
+        observer.pushed.last,
+        isA<_ShoppingItemFormRoute>(),
+        reason:
+            'Shopping tab FAB must use _ShoppingItemFormRoute → ShoppingItemFormScreen',
+      );
       expect(observer.pushed.last, isNot(isA<_ManualEntryRoute>()));
     });
 
     testWidgets(
-        'index 0 (home tab): FAB routes to ManualEntryRoute (not ShoppingItemFormScreen)',
-        (tester) async {
-      final observer = await _pumpShell(tester, tabIndex: 0);
+      'index 0 (home tab): FAB routes to ManualEntryRoute (not ShoppingItemFormScreen)',
+      (tester) async {
+        final observer = await _pumpShell(tester, tabIndex: 0);
 
-      await tester.tap(find.byKey(const Key('fab')));
-      await tester.pump();
-      await tester.pump();
+        await tester.tap(find.byKey(const Key('fab')));
+        await tester.pump();
+        await tester.pump();
 
-      expect(observer.pushed, isNotEmpty,
-          reason: 'FAB should push a route at index 0');
-      expect(observer.pushed.last, isA<_ManualEntryRoute>(),
-          reason: 'Non-shopping tab must use _ManualEntryRoute');
-      expect(observer.pushed.last, isNot(isA<_ShoppingItemFormRoute>()));
-    });
+        expect(
+          observer.pushed,
+          isNotEmpty,
+          reason: 'FAB should push a route at index 0',
+        );
+        expect(
+          observer.pushed.last,
+          isA<_ManualEntryRoute>(),
+          reason: 'Non-shopping tab must use _ManualEntryRoute',
+        );
+        expect(observer.pushed.last, isNot(isA<_ShoppingItemFormRoute>()));
+      },
+    );
 
     testWidgets(
-        'index 1 (list tab): FAB routes to ManualEntryRoute (not ShoppingItemFormScreen)',
-        (tester) async {
-      final observer = await _pumpShell(tester, tabIndex: 1);
+      'index 1 (list tab): FAB routes to ManualEntryRoute (not ShoppingItemFormScreen)',
+      (tester) async {
+        final observer = await _pumpShell(tester, tabIndex: 1);
 
-      await tester.tap(find.byKey(const Key('fab')));
-      await tester.pump();
-      await tester.pump();
+        await tester.tap(find.byKey(const Key('fab')));
+        await tester.pump();
+        await tester.pump();
 
-      expect(observer.pushed, isNotEmpty,
-          reason: 'FAB should push a route at index 1');
-      expect(observer.pushed.last, isA<_ManualEntryRoute>(),
-          reason: 'Non-shopping tab must use _ManualEntryRoute');
-      expect(observer.pushed.last, isNot(isA<_ShoppingItemFormRoute>()));
-    });
+        expect(
+          observer.pushed,
+          isNotEmpty,
+          reason: 'FAB should push a route at index 1',
+        );
+        expect(
+          observer.pushed.last,
+          isA<_ManualEntryRoute>(),
+          reason: 'Non-shopping tab must use _ManualEntryRoute',
+        );
+        expect(observer.pushed.last, isNot(isA<_ShoppingItemFormRoute>()));
+      },
+    );
   });
 }

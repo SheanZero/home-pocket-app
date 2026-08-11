@@ -14,6 +14,7 @@ import 'package:home_pocket/application/shopping_list/clear_completed_items_use_
 import 'package:home_pocket/application/shopping_list/delete_shopping_item_use_case.dart';
 import 'package:home_pocket/application/shopping_list/reorder_shopping_items_use_case.dart';
 import 'package:home_pocket/application/shopping_list/toggle_item_completed_use_case.dart';
+import 'package:home_pocket/core/theme/app_palette.dart';
 import 'package:home_pocket/core/theme/app_text_styles.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_active_group.dart';
@@ -71,6 +72,7 @@ Future<void> _pumpScreen(
   Stream<List<ShoppingItem>>? itemsStream,
   Stream<List<ShoppingItem>> Function()? itemsStreamFactory,
   VoidCallback? onSettingsTap,
+  Locale locale = const Locale('en'),
   List<Override> extraOverrides = const [],
 }) async {
   final deleteUC = delete ?? MockDeleteShoppingItemUseCase();
@@ -111,6 +113,7 @@ Future<void> _pumpScreen(
         ...extraOverrides,
       ],
       child: MaterialApp(
+        locale: locale,
         localizationsDelegates: S.localizationsDelegates,
         supportedLocales: S.supportedLocales,
         home: Scaffold(body: ShoppingListScreen(onSettingsTap: onSettingsTap)),
@@ -180,6 +183,46 @@ void main() {
 
       await tester.tap(settings);
       expect(settingsTaps, 1);
+    });
+  });
+
+  group('ShoppingListScreen — section headers', () {
+    testWidgets('matches the analytics subtitle treatment in Chinese', (
+      tester,
+    ) async {
+      await _pumpScreen(
+        tester,
+        locale: const Locale('zh'),
+        items: [
+          _makeItem(id: 'active', isCompleted: false),
+          _makeItem(id: 'completed', isCompleted: true),
+        ],
+      );
+
+      final pendingTitle = tester.widget<Text>(
+        find.byKey(const Key('shopping-to-buy-section-title')),
+      );
+      final completedTitle = tester.widget<Text>(
+        find.byKey(const Key('shopping-completed-section-title')),
+      );
+
+      expect(pendingTitle.data, '待购买');
+      expect(completedTitle.data, '已完成');
+      for (final title in [pendingTitle, completedTitle]) {
+        expect(title.style?.fontSize, AppTypography.sectionTitle);
+        expect(title.style?.fontWeight, AppTypography.sectionTitleWeight);
+        expect(title.style?.color, AppPalette.light.textSecondary);
+      }
+
+      for (final key in const [
+        Key('shopping-to-buy-section-accent'),
+        Key('shopping-completed-section-accent'),
+      ]) {
+        final accent = tester.widget<Container>(find.byKey(key));
+        expect(tester.getSize(find.byKey(key)), const Size(3, 16));
+        final decoration = accent.decoration! as BoxDecoration;
+        expect(decoration.color, AppPalette.light.accentPrimary);
+      }
     });
   });
 

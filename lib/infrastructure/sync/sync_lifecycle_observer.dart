@@ -10,10 +10,7 @@ typedef SyncPausedCallback = void Function();
 /// When the app returns to the foreground (resumed), calls [onResume].
 /// When the app enters the background (paused), calls [onPaused].
 class SyncLifecycleObserver with WidgetsBindingObserver {
-  SyncLifecycleObserver({
-    required this._onResume,
-    this._onPaused,
-  });
+  SyncLifecycleObserver({required this._onResume, this._onPaused});
 
   final SyncResumeCallback _onResume;
   final SyncPausedCallback? _onPaused;

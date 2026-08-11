@@ -35,8 +35,9 @@ class JapaneseNumeralStateMachine extends NumeralStateMachine {
 
   /// One-time sort, descending by key length — longest first so greedy match
   /// finds はっぴゃく (5 chars) before はち (2 chars) before は (1 char).
-  static final List<String> _sortedKeys = japaneseNumeralDictionary.keys.toList()
-    ..sort((a, b) => b.length.compareTo(a.length));
+  static final List<String> _sortedKeys =
+      japaneseNumeralDictionary.keys.toList()
+        ..sort((a, b) => b.length.compareTo(a.length));
 
   /// Kanji single-char digit fallback (covers `一万二千` → tokens [Digit(1), Unit(10000), Digit(2), Unit(1000)]).
   static const _kanjiDigits = <String, int>{

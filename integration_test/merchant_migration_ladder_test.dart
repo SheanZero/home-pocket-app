@@ -50,8 +50,10 @@ const Set<String> _expectedIndexes = {
 /// MasterKeyRepositoryImpl.deriveKey). No second key path is introduced (V6).
 class _FixedKeyMasterKeyRepository implements MasterKeyRepository {
   // Deterministic 32-byte master key (NOT a production key — test fixture only).
-  static final List<int> _key =
-      List<int>.generate(32, (i) => (i * 7 + 13) & 0xFF);
+  static final List<int> _key = List<int>.generate(
+    32,
+    (i) => (i * 7 + 13) & 0xFF,
+  );
 
   static const String _hkdfSalt = 'homepocket-v1-2026';
   final Map<String, SecretKey> _cache = {};
@@ -87,9 +89,13 @@ class _FixedKeyMasterKeyRepository implements MasterKeyRepository {
 /// before we ever got here). This is the Pitfall #2 / T-49-03 gate.
 Future<void> _assertCipherActive(AppDatabase db) async {
   final rows = await db.customSelect('PRAGMA cipher_version').get();
-  expect(rows, isNotEmpty,
-      reason: 'PRAGMA cipher_version empty — SQLCipher NOT loaded (plain '
-          'libsqlite3). Encrypted ladder is invalid on this backend.');
+  expect(
+    rows,
+    isNotEmpty,
+    reason:
+        'PRAGMA cipher_version empty — SQLCipher NOT loaded (plain '
+        'libsqlite3). Encrypted ladder is invalid on this backend.',
+  );
   final version = rows.first.data.values.first;
   expect(version, isNotNull);
   expect(version.toString(), isNotEmpty);
@@ -152,8 +158,9 @@ void main() {
       await db.close();
     });
 
-    testWidgets('cipher_version non-empty (SQLCipher loaded, not plain)',
-        (tester) async {
+    testWidgets('cipher_version non-empty (SQLCipher loaded, not plain)', (
+      tester,
+    ) async {
       await _assertCipherActive(db);
     });
 
@@ -166,47 +173,61 @@ void main() {
       expect(diskVersion, db.schemaVersion);
     });
 
-    testWidgets('merchant indexes exist + PRAGMA index_list non-empty',
-        (tester) async {
+    testWidgets('merchant indexes exist + PRAGMA index_list non-empty', (
+      tester,
+    ) async {
       final all = <String>{
         ...await _indexNames(db, 'merchants'),
         ...await _indexNames(db, 'merchant_match_keys'),
       };
       expect(all, containsAll(_expectedIndexes));
 
-      final merchantsIdx =
-          await db.customSelect('PRAGMA index_list(merchants)').get();
-      final matchKeysIdx =
-          await db.customSelect('PRAGMA index_list(merchant_match_keys)').get();
+      final merchantsIdx = await db
+          .customSelect('PRAGMA index_list(merchants)')
+          .get();
+      final matchKeysIdx = await db
+          .customSelect('PRAGMA index_list(merchant_match_keys)')
+          .get();
       expect(merchantsIdx, isNotEmpty);
       expect(matchKeysIdx, isNotEmpty);
     });
 
-    testWidgets('seed populates merchants + every categoryId resolves to L2',
-        (tester) async {
+    testWidgets('seed populates merchants + every categoryId resolves to L2', (
+      tester,
+    ) async {
       // Drive the production seed use case against the encrypted DB.
       final repo = MerchantRepositoryImpl(dao: MerchantDao(db));
-      final result = await SeedMerchantsUseCase(merchantRepository: repo)
-          .execute();
+      final result = await SeedMerchantsUseCase(
+        merchantRepository: repo,
+      ).execute();
       expect(result.isSuccess, isTrue);
 
       final merchants = await repo.findAll();
-      expect(merchants, isNotEmpty,
-          reason: 'seed produced no merchant rows on the encrypted DB');
+      expect(
+        merchants,
+        isNotEmpty,
+        reason: 'seed produced no merchant rows on the encrypted DB',
+      );
 
       // Every categoryId must be a real L2 id (count assertion only — V7).
-      final orphanCount =
-          merchants.where((m) => !l2Ids.contains(m.categoryId)).length;
-      expect(orphanCount, equals(0),
-          reason: 'merchant rows reference a non-L2 categoryId on the '
-              'encrypted DB');
+      final orphanCount = merchants
+          .where((m) => !l2Ids.contains(m.categoryId))
+          .length;
+      expect(
+        orphanCount,
+        equals(0),
+        reason:
+            'merchant rows reference a non-L2 categoryId on the '
+            'encrypted DB',
+      );
 
       // cipher still active after the seed transaction.
       await _assertCipherActive(db);
     });
 
-    testWidgets('re-seed converges (idempotent, row counts unchanged)',
-        (tester) async {
+    testWidgets('re-seed converges (idempotent, row counts unchanged)', (
+      tester,
+    ) async {
       final repo = MerchantRepositoryImpl(dao: MerchantDao(db));
       final seed = SeedMerchantsUseCase(merchantRepository: repo);
       await seed.execute();
@@ -218,8 +239,7 @@ void main() {
   });
 
   group('encrypted ladder — v21→current (onUpgrade under SQLCipher)', () {
-    testWidgets(
-        'onUpgrade fires under SQLCipher: tables + 4 indexes built, '
+    testWidgets('onUpgrade fires under SQLCipher: tables + 4 indexes built, '
         'cipher_version non-empty', (tester) async {
       final keyRepo = _FixedKeyMasterKeyRepository();
 
@@ -250,8 +270,10 @@ void main() {
             "AND name IN ('merchants', 'merchant_match_keys')",
           )
           .get();
-      expect(tables.map((r) => r.read<String>('name')).toSet(),
-          containsAll(<String>{'merchants', 'merchant_match_keys'}));
+      expect(
+        tables.map((r) => r.read<String>('name')).toSet(),
+        containsAll(<String>{'merchants', 'merchant_match_keys'}),
+      );
 
       // All four explicit indexes recreated by `_createMerchantIndexes()` in the
       // upgrade path (decorative-customIndices defense).
@@ -261,19 +283,22 @@ void main() {
       };
       expect(all, containsAll(_expectedIndexes));
 
-      final merchantsIdx =
-          await upgraded.customSelect('PRAGMA index_list(merchants)').get();
+      final merchantsIdx = await upgraded
+          .customSelect('PRAGMA index_list(merchants)')
+          .get();
       expect(merchantsIdx, isNotEmpty);
 
       // Post-upgrade the seed can populate the migrated encrypted DB.
       final repo = MerchantRepositoryImpl(dao: MerchantDao(upgraded));
-      final result =
-          await SeedMerchantsUseCase(merchantRepository: repo).execute();
+      final result = await SeedMerchantsUseCase(
+        merchantRepository: repo,
+      ).execute();
       expect(result.isSuccess, isTrue);
       final merchants = await repo.findAll();
       expect(merchants, isNotEmpty);
-      final orphanCount =
-          merchants.where((m) => !l2Ids.contains(m.categoryId)).length;
+      final orphanCount = merchants
+          .where((m) => !l2Ids.contains(m.categoryId))
+          .length;
       expect(orphanCount, equals(0));
     });
   });

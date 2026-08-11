@@ -31,8 +31,7 @@ ListFilterState listFilterSansSearch(Ref ref) =>
 /// search edits only. A non-search filter change yields the same token and does
 /// not notify through this path (it already rebuilds the base) (P2-1).
 @riverpod
-String listSearchQuery(Ref ref) =>
-    ref.watch(listFilterProvider).searchQuery;
+String listSearchQuery(Ref ref) => ref.watch(listFilterProvider).searchQuery;
 
 /// SQL + structural pipeline for the transaction list, WITHOUT the in-memory
 /// text search (P2-1).
@@ -167,11 +166,10 @@ Future<List<TaggedTransaction>> listTransactions(
 
   return base.where((tagged) {
     final tx = tagged.transaction;
-    final localizedCategory =
-        CategoryLocalizationService.resolveFromId(
-          tx.categoryId,
-          locale,
-        ).toLowerCase();
+    final localizedCategory = CategoryLocalizationService.resolveFromId(
+      tx.categoryId,
+      locale,
+    ).toLowerCase();
     final merchant = (tx.merchant?.toLowerCase() ?? '');
     final note = (tx.note?.toLowerCase() ?? '');
     return localizedCategory.contains(q) ||

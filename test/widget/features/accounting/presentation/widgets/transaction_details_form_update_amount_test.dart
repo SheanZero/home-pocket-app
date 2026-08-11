@@ -249,8 +249,11 @@ void main() {
         success: (_) => false,
         orElse: () => true,
       );
-      expect(isNotSuccess, isTrue,
-          reason: 'submit() with amount=0 and no category must not succeed');
+      expect(
+        isNotSuccess,
+        isTrue,
+        reason: 'submit() with amount=0 and no category must not succeed',
+      );
 
       // Use case should not be invoked because category guard fires first
       verifyNever(() => mockCreate.execute(any()));
@@ -269,9 +272,9 @@ void main() {
       final formKey = GlobalKey<TransactionDetailsFormState>();
       final mockCreate = _MockCreateTransactionUseCase();
 
-      when(() => mockCreate.execute(any())).thenAnswer(
-        (_) async => Result.success(_fakeSuccessTx(amount: 1500)),
-      );
+      when(
+        () => mockCreate.execute(any()),
+      ).thenAnswer((_) async => Result.success(_fakeSuccessTx(amount: 1500)));
 
       await tester.pumpWidget(
         _buildForm(
@@ -299,12 +302,19 @@ void main() {
 
       // Assert create use case was called once with amount == 1500
       final captured = verify(() => mockCreate.execute(captureAny())).captured;
-      expect(captured.length, 1, reason: 'execute should be called exactly once');
+      expect(
+        captured.length,
+        1,
+        reason: 'execute should be called exactly once',
+      );
       final params = captured.first as CreateTransactionParams;
       expect(params.amount, 1500);
 
       // Assert success
-      final isSuccess = result.maybeWhen(success: (_) => true, orElse: () => false);
+      final isSuccess = result.maybeWhen(
+        success: (_) => true,
+        orElse: () => false,
+      );
       expect(isSuccess, isTrue);
     },
   );
@@ -321,9 +331,9 @@ void main() {
       final formKey = GlobalKey<TransactionDetailsFormState>();
       final mockCreate = _MockCreateTransactionUseCase();
 
-      when(() => mockCreate.execute(any())).thenAnswer(
-        (_) async => Result.success(_fakeSuccessTx(amount: 500)),
-      );
+      when(
+        () => mockCreate.execute(any()),
+      ).thenAnswer((_) async => Result.success(_fakeSuccessTx(amount: 500)));
 
       await tester.pumpWidget(
         _buildForm(
@@ -357,10 +367,16 @@ void main() {
       final captured = verify(() => mockCreate.execute(captureAny())).captured;
       expect(captured.length, 1, reason: 'execute called exactly once');
       final params = captured.first as CreateTransactionParams;
-      expect(params.amount, 500,
-          reason: 'amount should be 500 after two updateAmount(500) calls');
+      expect(
+        params.amount,
+        500,
+        reason: 'amount should be 500 after two updateAmount(500) calls',
+      );
 
-      final isSuccess = result.maybeWhen(success: (_) => true, orElse: () => false);
+      final isSuccess = result.maybeWhen(
+        success: (_) => true,
+        orElse: () => false,
+      );
       expect(isSuccess, isTrue);
     },
   );
@@ -389,7 +405,8 @@ void main() {
       expect(
         find.byType(AmountDisplay),
         findsNothing,
-        reason: 'AmountDisplay must be externalized — form no longer renders it',
+        reason:
+            'AmountDisplay must be externalized — form no longer renders it',
       );
     },
   );
@@ -474,7 +491,8 @@ void main() {
       expect(
         merchantFn.hasFocus,
         isTrue,
-        reason: 'merchantFocusNode from the widget must be wired to merchant TextField',
+        reason:
+            'merchantFocusNode from the widget must be wired to merchant TextField',
       );
 
       // Request focus on the note FocusNode

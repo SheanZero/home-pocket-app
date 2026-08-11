@@ -49,10 +49,22 @@ const List<VoiceCorpusCase> voiceCorpusJa = [
   // Anchor cases (5) — note must contain "anchor"
   // ---------------------------------------------------------------------------
   (input: 'にせんにひゃくよん', expected: 2204, note: 'anchor: pure hiragana VOICE-01'),
-  (input: 'にせんにひゃくよん円', expected: 2204, note: 'anchor: pure hiragana + currency suffix'),
-  (input: 'せんはっぴゃくよんじゅう', expected: 1840, note: 'anchor: sokuon+voicing single-pass'),
+  (
+    input: 'にせんにひゃくよん円',
+    expected: 2204,
+    note: 'anchor: pure hiragana + currency suffix',
+  ),
+  (
+    input: 'せんはっぴゃくよんじゅう',
+    expected: 1840,
+    note: 'anchor: sokuon+voicing single-pass',
+  ),
   (input: 'せんはっぴゃくよんじゅう円', expected: 1840, note: 'anchor: same + currency'),
-  (input: '一万二千', expected: 12000, note: 'anchor: 万-scale regression guard VOICE-03'),
+  (
+    input: '一万二千',
+    expected: 12000,
+    note: 'anchor: 万-scale regression guard VOICE-03',
+  ),
 
   // ---------------------------------------------------------------------------
   // Baseline digit ranges + voicing/sokuon forms (~15)
@@ -109,7 +121,11 @@ const List<VoiceCorpusCase> voiceCorpusJa = [
   // ---------------------------------------------------------------------------
   // Kanji digits + units (~5 edge)
   // ---------------------------------------------------------------------------
-  (input: '三千九百八十', expected: 3980, note: 'kanji — legacy regression from voice_text_parser_test:55'),
+  (
+    input: '三千九百八十',
+    expected: 3980,
+    note: 'kanji — legacy regression from voice_text_parser_test:55',
+  ),
   (input: '千二百', expected: 1200, note: 'kanji bare-千 implicit-1'),
   (input: '六百八十円', expected: 680, note: 'kanji + currency suffix'),
   (input: '一万二千三百四十五', expected: 12345, note: 'kanji 5-unit full parse'),
@@ -119,7 +135,11 @@ const List<VoiceCorpusCase> voiceCorpusJa = [
   // Quick task 260526-l0o (Issue 1) — comma-separated amounts (ja-side guard)
   // ---------------------------------------------------------------------------
   (input: '12,450円', expected: 12450, note: 'l0o Issue 1 repro ja: comma + 円'),
-  (input: '1,234,567円', expected: 1234567, note: 'l0o Issue 1: million separator ja'),
+  (
+    input: '1,234,567円',
+    expected: 1234567,
+    note: 'l0o Issue 1: million separator ja',
+  ),
   (input: '12，450円', expected: 12450, note: 'l0o Issue 1: full-width comma ja'),
 ];
 
@@ -167,7 +187,8 @@ const List<VoiceKnownGapCaseJa> voiceCorpusJaKnownGaps = [
   (
     input: '一万五',
     expected: 15000,
-    reason: '口语「整万+裸尾数」缩放语义缺失；与位值直读 anchor'
+    reason:
+        '口语「整万+裸尾数」缩放语义缺失；与位值直读 anchor'
         '（にせんにひゃくよん=2204）冲突，非浅修（现返回 10005）',
   ),
   (

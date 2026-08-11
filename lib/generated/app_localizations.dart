@@ -804,7 +804,7 @@ abstract class S {
   /// No description provided for @backupHeroDescription.
   ///
   /// In en, this message translates to:
-  /// **'Encrypt your records and settings with a password, then save them on your device or in a cloud drive you choose.'**
+  /// **'Encrypt transactions, shopping lists, categories, and settings with a password, then save them on your device or in a cloud drive you choose.'**
   String get backupHeroDescription;
 
   /// No description provided for @backupEncryptionChip.
@@ -4679,7 +4679,7 @@ abstract class S {
   /// **'Public'**
   String get shoppingSegmentPublic;
 
-  /// Shopping list — section heading above the active (to-buy) items list (v15)
+  /// Shopping list — analytics-style section heading above pending items
   ///
   /// In en, this message translates to:
   /// **'To Buy'**

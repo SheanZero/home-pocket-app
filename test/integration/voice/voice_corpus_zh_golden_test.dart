@@ -39,18 +39,13 @@ void main() {
 
   group('zh known-gap corpus (skip-documented, strict body preserved)', () {
     for (final c in voiceCorpusZhKnownGaps) {
-      test(
-        '${c.input} -> ${c.expected}',
-        () {
-          expect(
-            parse(c.input),
-            c.expected,
-            reason:
-                'known-gap vector: input="${c.input}" expected=${c.expected}',
-          );
-        },
-        skip: 'known-gap: ${c.reason}',
-      );
+      test('${c.input} -> ${c.expected}', () {
+        expect(
+          parse(c.input),
+          c.expected,
+          reason: 'known-gap vector: input="${c.input}" expected=${c.expected}',
+        );
+      }, skip: 'known-gap: ${c.reason}');
     }
   });
 

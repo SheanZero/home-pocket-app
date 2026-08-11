@@ -1049,9 +1049,7 @@ void main() {
         final markdownFile = File('${shardRoot.path}/ISSUES.md')
           ..writeAsStringSync(oldMarkdown);
         File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
-          jsonEncode(
-            _shardWith([_f(filePath: 'lib/new.dart')], 'import_lint'),
-          ),
+          jsonEncode(_shardWith([_f(filePath: 'lib/new.dart')], 'import_lint')),
         );
 
         final interrupted = await _runMerger(
@@ -1085,9 +1083,7 @@ void main() {
         final markdownFile = File('${shardRoot.path}/ISSUES.md')
           ..writeAsStringSync(oldMarkdown);
         File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
-          jsonEncode(
-            _shardWith([_f(filePath: 'lib/new.dart')], 'import_lint'),
-          ),
+          jsonEncode(_shardWith([_f(filePath: 'lib/new.dart')], 'import_lint')),
         );
 
         final interrupted = await _runMerger(
@@ -1121,9 +1117,7 @@ void main() {
         final markdownFile = File('${shardRoot.path}/ISSUES.md')
           ..writeAsStringSync(oldMarkdown);
         File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
-          jsonEncode(
-            _shardWith([_f(filePath: 'lib/new.dart')], 'import_lint'),
-          ),
+          jsonEncode(_shardWith([_f(filePath: 'lib/new.dart')], 'import_lint')),
         );
 
         final interrupted = await _runMerger(
@@ -1165,9 +1159,7 @@ void main() {
           '${shardRoot.path}/.merge-findings-pair.json',
         ).writeAsStringSync('{corrupt journal');
         File('${shardRoot.path}/shards/layer.json').writeAsStringSync(
-          jsonEncode(
-            _shardWith([_f(filePath: 'lib/new.dart')], 'import_lint'),
-          ),
+          jsonEncode(_shardWith([_f(filePath: 'lib/new.dart')], 'import_lint')),
         );
 
         final result = await _runMerger(tmp);

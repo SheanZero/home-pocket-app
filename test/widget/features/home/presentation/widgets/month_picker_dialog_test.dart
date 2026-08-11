@@ -51,31 +51,30 @@ void main() {
       }
     });
 
-    testWidgets(
-      'future months in current year are disabled (not tappable)',
-      (tester) async {
-        final now = DateTime.now();
-        // Only meaningful when there IS a future month this year.
-        if (now.month == 12) {
-          // December: skip — no future month exists in the current year.
-          return;
-        }
-        final result = await openDialog(
-          tester,
-          selectedYear: now.year,
-          selectedMonth: now.month,
-        );
+    testWidgets('future months in current year are disabled (not tappable)', (
+      tester,
+    ) async {
+      final now = DateTime.now();
+      // Only meaningful when there IS a future month this year.
+      if (now.month == 12) {
+        // December: skip — no future month exists in the current year.
+        return;
+      }
+      final result = await openDialog(
+        tester,
+        selectedYear: now.year,
+        selectedMonth: now.month,
+      );
 
-        // Tap a future month (current real month + 1). It must NOT pop.
-        final futureMonth = now.month + 1;
-        await tester.tap(find.text('$futureMonth月'));
-        await tester.pumpAndSettle();
+      // Tap a future month (current real month + 1). It must NOT pop.
+      final futureMonth = now.month + 1;
+      await tester.tap(find.text('$futureMonth月'));
+      await tester.pumpAndSettle();
 
-        // Dialog stays open (future tap is a no-op) and nothing was returned.
-        expect(result, isNull);
-        expect(find.text('$futureMonth月'), findsOneWidget);
-      },
-    );
+      // Dialog stays open (future tap is a no-op) and nothing was returned.
+      expect(result, isNull);
+      expect(find.text('$futureMonth月'), findsOneWidget);
+    });
 
     testWidgets(
       'previous-year arrow always present; next-year arrow disabled at current year',

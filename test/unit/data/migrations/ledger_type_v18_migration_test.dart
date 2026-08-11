@@ -31,7 +31,8 @@ import 'package:sqlite3/sqlite3.dart';
 
 // ─── Target schema version ─────────────────────────────────────────────────────
 
-const _targetSchemaVersion = 18; // minimum version including v18 ledger_type migration
+const _targetSchemaVersion =
+    18; // minimum version including v18 ledger_type migration
 
 // ─── v17 table creation ────────────────────────────────────────────────────────
 
@@ -592,11 +593,7 @@ void _createV3TransactionsTable(Database db) {
   ''');
 }
 
-void _insertV3Tx(
-  Database db,
-  String id, {
-  String ledgerType = 'survival',
-}) {
+void _insertV3Tx(Database db, String id, {String ledgerType = 'survival'}) {
   final now = DateTime(2026, 6, 1).millisecondsSinceEpoch;
   db.execute(
     '''

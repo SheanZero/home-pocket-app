@@ -3,7 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/applock/presentation/widgets/pin_dots.dart';
 
 Widget _host(Widget child) {
-  return MaterialApp(home: Scaffold(body: Center(child: child)));
+  return MaterialApp(
+    home: Scaffold(body: Center(child: child)),
+  );
 }
 
 void main() {
@@ -23,9 +25,7 @@ void main() {
     testWidgets('the error animation runs and settles without throwing', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        _host(const PinDots(filledCount: 4)),
-      );
+      await tester.pumpWidget(_host(const PinDots(filledCount: 4)));
       await tester.pumpAndSettle();
 
       // Bump errorTrigger to fire the shake-and-clear animation; the State is

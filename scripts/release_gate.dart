@@ -92,7 +92,7 @@ String resolveAttestedCandidateCommit(Directory root) {
       '--no-commit-id',
       '--name-only',
       '-r',
-      if (parents.length == 1) '--root' else '${commit}^1',
+      if (parents.length == 1) '--root' else '$commit^1',
       commit,
     ]).split('\n').where((path) => path.isNotEmpty);
     if (changed.any(isCandidateScopedPath)) return commit;

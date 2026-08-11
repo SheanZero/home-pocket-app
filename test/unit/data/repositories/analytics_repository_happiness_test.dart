@@ -112,37 +112,34 @@ void main() {
       },
     );
 
-    test(
-      'getJoyFullnessOverview maps DAO result to domain type',
-      () async {
-        when(
-          () => dao.getJoyFullnessOverview(
-            bookId: 'book-1',
-            startDate: startDate,
-            endDate: endDate,
-          ),
-        ).thenAnswer(
-          (_) async =>
-              const SatisfactionOverviewResult(avgSatisfaction: 7.5, count: 8),
-        );
-
-        final result = await repository.getJoyFullnessOverview(
+    test('getJoyFullnessOverview maps DAO result to domain type', () async {
+      when(
+        () => dao.getJoyFullnessOverview(
           bookId: 'book-1',
           startDate: startDate,
           endDate: endDate,
-        );
+        ),
+      ).thenAnswer(
+        (_) async =>
+            const SatisfactionOverviewResult(avgSatisfaction: 7.5, count: 8),
+      );
 
-        expect(result.avgSatisfaction, 7.5);
-        expect(result.count, 8);
-        verify(
-          () => dao.getJoyFullnessOverview(
-            bookId: 'book-1',
-            startDate: startDate,
-            endDate: endDate,
-          ),
-        ).called(1);
-      },
-    );
+      final result = await repository.getJoyFullnessOverview(
+        bookId: 'book-1',
+        startDate: startDate,
+        endDate: endDate,
+      );
+
+      expect(result.avgSatisfaction, 7.5);
+      expect(result.count, 8);
+      verify(
+        () => dao.getJoyFullnessOverview(
+          bookId: 'book-1',
+          startDate: startDate,
+          endDate: endDate,
+        ),
+      ).called(1);
+    });
 
     test(
       'getSatisfactionDistribution maps DAO buckets to domain buckets',

@@ -7,9 +7,7 @@ import '../../features/shopping_list/domain/repositories/shopping_unit_usage_rep
 /// A history containing only the default `piece` unit also remains hidden,
 /// because repeating the already-selected default would not reduce effort.
 class WatchShoppingUnitSuggestionsUseCase {
-  const WatchShoppingUnitSuggestionsUseCase({
-    required this._repository,
-  });
+  const WatchShoppingUnitSuggestionsUseCase({required this._repository});
 
   final ShoppingUnitUsageRepository _repository;
 

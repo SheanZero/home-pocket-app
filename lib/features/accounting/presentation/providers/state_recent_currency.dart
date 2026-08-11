@@ -49,8 +49,9 @@ class RecentCurrency extends _$RecentCurrency {
   /// remaining common-zone codes in their canonical order. JPY is never part
   /// of this list (the sheet pins it first separately).
   List<String> orderedCommonZone() {
-    final recentCommon =
-        state.where(kCommonZoneCurrencies.contains).toList(growable: false);
+    final recentCommon = state
+        .where(kCommonZoneCurrencies.contains)
+        .toList(growable: false);
     final rest = kCommonZoneCurrencies
         .where((c) => !recentCommon.contains(c))
         .toList(growable: false);

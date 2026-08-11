@@ -16,16 +16,10 @@
 /// Values map to Drift table columns in `TransactionDao`:
 /// - [timestamp] → `transactions.timestamp` (transaction date entered by user)
 /// - [amount]    → `transactions.amount` (absolute value, descending for large first)
-enum SortField {
-  timestamp,
-  amount,
-}
+enum SortField { timestamp, amount }
 
 /// The direction of a sorted query result.
 ///
 /// - [asc]  → ascending order (oldest first / smallest first)
 /// - [desc] → descending order (newest first / largest first)
-enum SortDirection {
-  asc,
-  desc,
-}
+enum SortDirection { asc, desc }

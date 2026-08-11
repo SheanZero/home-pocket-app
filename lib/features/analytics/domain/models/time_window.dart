@@ -18,17 +18,13 @@ sealed class TimeWindow with _$TimeWindow {
 
   /// Calendar month: [year]-[month] (month in 1..12).
   @Assert('month >= 1 && month <= 12')
-  const factory TimeWindow.month({
-    required int year,
-    required int month,
-  }) = MonthWindow;
+  const factory TimeWindow.month({required int year, required int month}) =
+      MonthWindow;
 
   /// Calendar quarter (1..4). Q1=Jan-Mar, Q2=Apr-Jun, Q3=Jul-Sep, Q4=Oct-Dec.
   @Assert('quarter >= 1 && quarter <= 4')
-  const factory TimeWindow.quarter({
-    required int year,
-    required int quarter,
-  }) = QuarterWindow;
+  const factory TimeWindow.quarter({required int year, required int quarter}) =
+      QuarterWindow;
 
   /// Calendar year.
   const factory TimeWindow.year({required int year}) = YearWindow;

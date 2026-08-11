@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/voice/recognition/category_recognizer.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_keyword_preference_repository.dart';
@@ -55,7 +56,8 @@ void main() {
       expect(
         anchors.length,
         greaterThanOrEqualTo(5),
-        reason: 'Fixture must contain ≥5 anchor cases (Plan 21-06 / D-10 contract)',
+        reason:
+            'Fixture must contain ≥5 anchor cases (Plan 21-06 / D-10 contract)',
       );
     });
 
@@ -92,7 +94,6 @@ void main() {
         } else {
           // Soft per-case failure: log mismatch for inspection but do NOT
           // throw — the ≥95% aggregate gate in tearDownAll is the only gate.
-          // ignore: avoid_print
           printOnFailure(
             'mismatch: input="${c.input}" keyword="${c.keyword}" expected=${c.expectedCategoryId} actual=$actual note=${c.note ?? ""}',
           );
@@ -102,20 +103,33 @@ void main() {
   });
 
   // ─── VOICE-06 extensibility test — runtime data-source insert ───
-  group('VOICE-06 extensibility: runtime data-source insert without resolver code change', () {
-    test('new keyword row resolves end-to-end without resolver code change', () async {
-      // タピオカ is NOT in DefaultVoiceSynonyms — insert at runtime.
-      await prefRepo.recordCorrection(
-        keyword: 'タピオカ',
-        categoryId: 'cat_food_drinks',
+  group(
+    'VOICE-06 extensibility: runtime data-source insert without resolver code change',
+    () {
+      test(
+        'new keyword row resolves end-to-end without resolver code change',
+        () async {
+          // タピオカ is NOT in DefaultVoiceSynonyms — insert at runtime.
+          await prefRepo.recordCorrection(
+            keyword: 'タピオカ',
+            categoryId: 'cat_food_drinks',
+          );
+          final actual = await resolver.resolve('タピオカ');
+          expect(
+            actual,
+            isNotNull,
+            reason: 'Resolver must pick up the runtime-inserted keyword',
+          );
+          expect(
+            actual!.categoryId,
+            'cat_food_drinks',
+            reason:
+                'VOICE-06: data source extensible without resolver code change',
+          );
+        },
       );
-      final actual = await resolver.resolve('タピオカ');
-      expect(actual, isNotNull,
-          reason: 'Resolver must pick up the runtime-inserted keyword');
-      expect(actual!.categoryId, 'cat_food_drinks',
-          reason: 'VOICE-06: data source extensible without resolver code change');
-    });
-  });
+    },
+  );
 
   // ─── Phase 23 D-15 / IN-06 override anchor ───
   // Exercises the cat_other_expense → cat_other_other override path in
@@ -123,9 +137,13 @@ void main() {
   group('D-15 other-expense override (Phase 23 / IN-06)', () {
     test('D-15: "その他" -> cat_other_other override (Phase 23)', () async {
       final result = await resolver.resolve('その他');
-      expect(result, isNotNull,
-          reason: 'Phase 23 D-15: その他 must seed-route through cat_other_expense '
-              'override to cat_other_other');
+      expect(
+        result,
+        isNotNull,
+        reason:
+            'Phase 23 D-15: その他 must seed-route through cat_other_expense '
+            'override to cat_other_other',
+      );
       expect(result!.categoryId, 'cat_other_other');
     });
   });
@@ -133,13 +151,12 @@ void main() {
   tearDownAll(() {
     container.dispose();
     final pct = totalCount == 0 ? 0.0 : (passCount / totalCount * 100);
-    // Print is the deliberate test reporter output per Phase 20 pattern.
-    // ignore: avoid_print
-    print('═══════════════════════════════════════════');
-    // ignore: avoid_print
-    print('ja category corpus: $passCount/$totalCount (${pct.toStringAsFixed(1)}%)');
-    // ignore: avoid_print
-    print('═══════════════════════════════════════════');
+    // This is deliberate test reporter output per the Phase 20 pattern.
+    debugPrint('═══════════════════════════════════════════');
+    debugPrint(
+      'ja category corpus: $passCount/$totalCount (${pct.toStringAsFixed(1)}%)',
+    );
+    debugPrint('═══════════════════════════════════════════');
     expect(
       totalCount == 0 ? 0.0 : passCount / totalCount,
       greaterThanOrEqualTo(0.95),

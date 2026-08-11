@@ -63,12 +63,14 @@ void main() {
       expect(await service.isLockEffective(), isFalse);
     });
 
-    test('appLockEnabled=true, pinHash=null -> false (no PIN never locks)',
-        () async {
-      stubSettings(appLockEnabled: true);
-      storedHash = null;
-      expect(await service.isLockEffective(), isFalse);
-    });
+    test(
+      'appLockEnabled=true, pinHash=null -> false (no PIN never locks)',
+      () async {
+        stubSettings(appLockEnabled: true);
+        storedHash = null;
+        expect(await service.isLockEffective(), isFalse);
+      },
+    );
 
     test('appLockEnabled=false, pinHash present -> false', () async {
       stubSettings(appLockEnabled: false);
@@ -106,38 +108,50 @@ void main() {
   group('reauth (D-05 biometric-or-PIN gate)', () {
     test('biometricUnlockEnabled && authenticate success -> true', () async {
       stubSettings(appLockEnabled: true, biometricUnlockEnabled: true);
-      when(() => biometric.authenticate(
-            reason: any(named: 'reason'),
-            biometricOnly: any(named: 'biometricOnly'),
-          )).thenAnswer((_) async => const AuthResult.success());
+      when(
+        () => biometric.authenticate(
+          reason: any(named: 'reason'),
+          biometricOnly: any(named: 'biometricOnly'),
+        ),
+      ).thenAnswer((_) async => const AuthResult.success());
       expect(await service.reauth(), isTrue);
       // G2 (55-12 / LOCK-06,D-05): the reauth gate must authenticate
       // biometric-only so the iOS device passcode can never clear it.
-      verify(() => biometric.authenticate(
-            reason: any(named: 'reason'),
-            biometricOnly: true,
-          )).called(1);
+      verify(
+        () => biometric.authenticate(
+          reason: any(named: 'reason'),
+          biometricOnly: true,
+        ),
+      ).called(1);
     });
 
-    test('biometricUnlockEnabled && fallbackToPIN -> false (caller does PIN)',
-        () async {
-      stubSettings(appLockEnabled: true, biometricUnlockEnabled: true);
-      when(() => biometric.authenticate(
+    test(
+      'biometricUnlockEnabled && fallbackToPIN -> false (caller does PIN)',
+      () async {
+        stubSettings(appLockEnabled: true, biometricUnlockEnabled: true);
+        when(
+          () => biometric.authenticate(
             reason: any(named: 'reason'),
             biometricOnly: any(named: 'biometricOnly'),
-          )).thenAnswer((_) async => const AuthResult.fallbackToPIN());
-      expect(await service.reauth(), isFalse);
-    });
+          ),
+        ).thenAnswer((_) async => const AuthResult.fallbackToPIN());
+        expect(await service.reauth(), isFalse);
+      },
+    );
 
-    test('biometricUnlockEnabled=false -> false without calling biometric',
-        () async {
-      stubSettings(appLockEnabled: true, biometricUnlockEnabled: false);
-      expect(await service.reauth(), isFalse);
-      verifyNever(() => biometric.authenticate(
+    test(
+      'biometricUnlockEnabled=false -> false without calling biometric',
+      () async {
+        stubSettings(appLockEnabled: true, biometricUnlockEnabled: false);
+        expect(await service.reauth(), isFalse);
+        verifyNever(
+          () => biometric.authenticate(
             reason: any(named: 'reason'),
             biometricOnly: any(named: 'biometricOnly'),
-          ));
-    });
+          ),
+        );
+      },
+    );
   });
 
   group('disableLock side-effects (T-55-16: no stale hash re-arms lock)', () {

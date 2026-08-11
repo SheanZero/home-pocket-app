@@ -14,8 +14,7 @@ void main() {
               tagText: '太',
               tagBgColor: const Color(0xFFE8F0F8),
               tagTextColor: AppPalette.light.daily,
-              merchant:
-                  'スーパーマーケット',
+              merchant: 'スーパーマーケット',
               category: '食費',
               categoryColor: const Color(0xFFABABAB),
               formattedAmount: '-¥3,480',
@@ -26,10 +25,7 @@ void main() {
       );
 
       expect(find.text('太'), findsOneWidget);
-      expect(
-        find.text('スーパーマーケット'),
-        findsOneWidget,
-      );
+      expect(find.text('スーパーマーケット'), findsOneWidget);
       expect(find.text('食費'), findsOneWidget);
       expect(find.text('-¥3,480'), findsOneWidget);
     });
@@ -119,9 +115,7 @@ void main() {
       );
 
       // categoryColor now tints the leading L1 icon (matches the list tile).
-      final iconWidget = tester.widget<Icon>(
-        find.byIcon(Icons.sports_esports),
-      );
+      final iconWidget = tester.widget<Icon>(find.byIcon(Icons.sports_esports));
       expect(iconWidget.color, catColor);
     });
 

@@ -45,16 +45,8 @@ void main() {
     });
 
     test('accepts inclusive CHECK boundaries 1 and 10', () async {
-      await _insertTransaction(
-        db,
-        id: 'tx_min',
-        joyFullness: const Value(1),
-      );
-      await _insertTransaction(
-        db,
-        id: 'tx_max',
-        joyFullness: const Value(10),
-      );
+      await _insertTransaction(db, id: 'tx_min', joyFullness: const Value(1));
+      await _insertTransaction(db, id: 'tx_max', joyFullness: const Value(10));
 
       final rows = await db.select(db.transactions).get();
 

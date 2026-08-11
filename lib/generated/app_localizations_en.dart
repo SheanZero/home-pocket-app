@@ -380,7 +380,7 @@ class SEn extends S {
 
   @override
   String get backupHeroDescription =>
-      'Encrypt your records and settings with a password, then save them on your device or in a cloud drive you choose.';
+      'Encrypt transactions, shopping lists, categories, and settings with a password, then save them on your device or in a cloud drive you choose.';
 
   @override
   String get backupEncryptionChip => 'AES-256-GCM';

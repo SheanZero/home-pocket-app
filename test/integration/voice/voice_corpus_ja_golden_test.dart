@@ -39,18 +39,13 @@ void main() {
 
   group('ja known-gap corpus (skip-documented, strict body preserved)', () {
     for (final c in voiceCorpusJaKnownGaps) {
-      test(
-        '${c.input} -> ${c.expected}',
-        () {
-          expect(
-            parse(c.input),
-            c.expected,
-            reason:
-                'known-gap vector: input="${c.input}" expected=${c.expected}',
-          );
-        },
-        skip: 'known-gap: ${c.reason}',
-      );
+      test('${c.input} -> ${c.expected}', () {
+        expect(
+          parse(c.input),
+          c.expected,
+          reason: 'known-gap vector: input="${c.input}" expected=${c.expected}',
+        );
+      }, skip: 'known-gap: ${c.reason}');
     }
   });
 

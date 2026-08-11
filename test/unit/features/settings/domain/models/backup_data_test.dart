@@ -71,6 +71,8 @@ void main() {
       expect(backup.categories, isEmpty);
       expect(backup.books, isEmpty);
       expect(backup.settings, isEmpty);
+      expect(backup.shoppingItems, isEmpty);
+      expect(backup.categoryLedgerConfigs, isEmpty);
     });
 
     test('creates with sample data', () {
@@ -118,6 +120,20 @@ void main() {
       expect(restored.categories, backup.categories);
       expect(restored.books, backup.books);
       expect(restored.settings, backup.settings);
+    });
+
+    test('old JSON without additive fields remains compatible', () {
+      final restored = BackupData.fromJson({
+        'metadata': sampleMetadata.toJson(),
+        'transactions': <Map<String, dynamic>>[],
+        'categories': <Map<String, dynamic>>[],
+        'books': <Map<String, dynamic>>[],
+        'settings': <String, dynamic>{},
+      });
+
+      expect(restored.shoppingItems, isEmpty);
+      expect(restored.categoryLedgerConfigs, isEmpty);
+      expect(restored.exchangeRates, isEmpty);
     });
   });
 }

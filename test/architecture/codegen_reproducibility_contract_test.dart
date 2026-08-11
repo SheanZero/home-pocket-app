@@ -34,7 +34,10 @@ List<String> _generatedOutputGuardViolations(String source) {
   if (_countOf(source, 'git ls-files --others --exclude-standard --') != 1) {
     violations.add('the generated-output guard must include non-ignored files');
   }
-  if (_countOf(source, 'git ls-files --others --ignored --exclude-standard --') !=
+  if (_countOf(
+        source,
+        'git ls-files --others --ignored --exclude-standard --',
+      ) !=
       1) {
     violations.add('the generated-output guard must include ignored files');
   }
@@ -127,7 +130,9 @@ List<String> _twoPassContractViolations(String source) {
       l10nMatches[1].start < pass2 ||
       l10nMatches[1].start > executable.lastIndexOf(buildRunner) ||
       executable.lastIndexOf(buildRunner) > pass2Diff) {
-    violations.add('each clean generation boundary must follow l10n then build_runner');
+    violations.add(
+      'each clean generation boundary must follow l10n then build_runner',
+    );
   }
   if (analyzer < pass2Diff ||
       importLint < analyzer ||
@@ -210,9 +215,9 @@ void main() {
 
     expect(source, isNot(contains('build_runner watch')));
     expect(
-      RegExp(r'git (?:reset|checkout|clean)|(?:dart|flutter) format').hasMatch(
-        source,
-      ),
+      RegExp(
+        r'git (?:reset|checkout|clean)|(?:dart|flutter) format',
+      ).hasMatch(source),
       isFalse,
     );
   });
@@ -233,9 +238,9 @@ void main() {
       _twoPassContractViolations(
         source.replaceFirst(
           "  assert_clean_generation_scope 'after generation pass 2'\n\n"
-          '  flutter analyze --no-fatal-infos',
+              '  flutter analyze --no-fatal-infos',
           '  flutter analyze --no-fatal-infos\n\n'
-          "  assert_clean_generation_scope 'after generation pass 2'",
+              "  assert_clean_generation_scope 'after generation pass 2'",
         ),
       ),
       isNotEmpty,
@@ -314,7 +319,7 @@ void main() {
         source.replaceFirst(
           'dart run import_lint',
           'dart run import_lint\n'
-          'dart run import_lint',
+              'dart run import_lint',
         ),
       ),
       isNotEmpty,
@@ -351,7 +356,8 @@ void main() {
         ),
       ),
       isNotEmpty,
-      reason: 'ignored generated output must not bypass the reproducibility gate',
+      reason:
+          'ignored generated output must not bypass the reproducibility gate',
     );
     expect(
       _generatedOutputGuardViolations(
@@ -379,77 +385,84 @@ untracked_generation_outputs() {''',
     );
   });
 
-  test('untracked-output probe catches ignored and non-ignored artifacts', () async {
-    final fixture = await Directory.systemTemp.createTemp('codegen-output-');
-    addTearDown(() => fixture.delete(recursive: true));
+  test(
+    'untracked-output probe catches ignored and non-ignored artifacts',
+    () async {
+      final fixture = await Directory.systemTemp.createTemp('codegen-output-');
+      addTearDown(() => fixture.delete(recursive: true));
 
-    await File('${fixture.path}/.gitignore').writeAsString('lib/generated/\n');
-    for (final path in [
-      'lib/generated/new_localization.dart',
-      'lib/feature/new_provider.g.dart',
-      'lib/feature/new_model.freezed.dart',
-    ]) {
-      final file = File('${fixture.path}/$path');
-      await file.parent.create(recursive: true);
-      await file.writeAsString('// fixture\n');
-    }
-    final init = await Process.run('git', ['init', '-q'], workingDirectory: fixture.path);
-    expect(init.exitCode, 0, reason: init.stderr);
-    final email = await Process.run(
-      'git',
-      ['config', 'user.email', 'codegen-fixture@example.invalid'],
-      workingDirectory: fixture.path,
-    );
-    final name = await Process.run(
-      'git',
-      ['config', 'user.name', 'Codegen Fixture'],
-      workingDirectory: fixture.path,
-    );
-    final add = await Process.run(
-      'git',
-      ['add', '.gitignore'],
-      workingDirectory: fixture.path,
-    );
-    final commit = await Process.run(
-      'git',
-      ['commit', '-qm', 'fixture baseline'],
-      workingDirectory: fixture.path,
-    );
-    expect(email.exitCode, 0, reason: email.stderr);
-    expect(name.exitCode, 0, reason: name.stderr);
-    expect(add.exitCode, 0, reason: add.stderr);
-    expect(commit.exitCode, 0, reason: commit.stderr);
+      await File(
+        '${fixture.path}/.gitignore',
+      ).writeAsString('lib/generated/\n');
+      for (final path in [
+        'lib/generated/new_localization.dart',
+        'lib/feature/new_provider.g.dart',
+        'lib/feature/new_model.freezed.dart',
+      ]) {
+        final file = File('${fixture.path}/$path');
+        await file.parent.create(recursive: true);
+        await file.writeAsString('// fixture\n');
+      }
+      final init = await Process.run('git', [
+        'init',
+        '-q',
+      ], workingDirectory: fixture.path);
+      expect(init.exitCode, 0, reason: init.stderr);
+      final email = await Process.run('git', [
+        'config',
+        'user.email',
+        'codegen-fixture@example.invalid',
+      ], workingDirectory: fixture.path);
+      final name = await Process.run('git', [
+        'config',
+        'user.name',
+        'Codegen Fixture',
+      ], workingDirectory: fixture.path);
+      final add = await Process.run('git', [
+        'add',
+        '.gitignore',
+      ], workingDirectory: fixture.path);
+      final commit = await Process.run('git', [
+        'commit',
+        '-qm',
+        'fixture baseline',
+      ], workingDirectory: fixture.path);
+      expect(email.exitCode, 0, reason: email.stderr);
+      expect(name.exitCode, 0, reason: name.stderr);
+      expect(add.exitCode, 0, reason: add.stderr);
+      expect(commit.exitCode, 0, reason: commit.stderr);
 
-    final result = await Process.run('bash', [
-      '-c',
-      r'source "$1"; cd "$2"; untracked_generation_outputs',
-      'codegen-output-probe',
-      File(_scriptPath).absolute.path,
-      fixture.path,
-    ]);
+      final result = await Process.run('bash', [
+        '-c',
+        r'source "$1"; cd "$2"; untracked_generation_outputs',
+        'codegen-output-probe',
+        File(_scriptPath).absolute.path,
+        fixture.path,
+      ]);
 
-    expect(result.exitCode, 0, reason: result.stderr);
-    expect(
-      result.stdout,
-      contains('lib/generated/new_localization.dart'),
-      reason: 'ignored localization output must still be reported',
-    );
-    expect(result.stdout, contains('lib/feature/new_provider.g.dart'));
-    expect(result.stdout, contains('lib/feature/new_model.freezed.dart'));
+      expect(result.exitCode, 0, reason: result.stderr);
+      expect(
+        result.stdout,
+        contains('lib/generated/new_localization.dart'),
+        reason: 'ignored localization output must still be reported',
+      );
+      expect(result.stdout, contains('lib/feature/new_provider.g.dart'));
+      expect(result.stdout, contains('lib/feature/new_model.freezed.dart'));
 
-    final gateResult = await Process.run('bash', [
-      '-c',
-      r'source "$1"; cd "$2"; assert_clean_generation_scope "after generation pass 2"',
-      'codegen-gate-fixture',
-      File(_scriptPath).absolute.path,
-      fixture.path,
-    ]);
+      final gateResult = await Process.run('bash', [
+        '-c',
+        r'source "$1"; cd "$2"; assert_clean_generation_scope "after generation pass 2"',
+        'codegen-gate-fixture',
+        File(_scriptPath).absolute.path,
+        fixture.path,
+      ]);
 
-    expect(gateResult.exitCode, 1);
-    expect(gateResult.stderr, contains('Untracked generated output'));
-    expect(
-      gateResult.stderr,
-      contains('Generator nondeterminism occurred on the second pass.'),
-    );
-  });
+      expect(gateResult.exitCode, 1);
+      expect(gateResult.stderr, contains('Untracked generated output'));
+      expect(
+        gateResult.stderr,
+        contains('Generator nondeterminism occurred on the second pass.'),
+      );
+    },
+  );
 }

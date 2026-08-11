@@ -307,7 +307,10 @@ final List<CategoryKeywordPreference> _housingUtilitiesCommunicationCar = [
   seed('水费', 'cat_utilities_water'),
   seed('电费', 'cat_utilities_electricity'),
   seed('やちん', 'cat_housing_rent'), // ja — rent (hiragana reading; 家賃 is Han)
-  seed('でんきだい', 'cat_utilities_electricity'), // ja — electricity bill (hiragana)
+  seed(
+    'でんきだい',
+    'cat_utilities_electricity',
+  ), // ja — electricity bill (hiragana)
   seed('すいどう', 'cat_utilities_water'), // ja — water (hiragana)
   seed('燃气费', 'cat_utilities_gas'), // zh — gas bill
   seed('天然气', 'cat_utilities_gas'), // zh — natural gas
@@ -343,9 +346,15 @@ final List<CategoryKeywordPreference> _housingUtilitiesCommunicationCar = [
   seed('引越し費用', 'cat_housing_utilities_setup'), // ja — moving cost (mixed)
   seed('かいせつ', 'cat_housing_utilities_setup'), // ja — opening/setup (hiragana)
   seed('房屋保险', 'cat_housing_insurance'), // zh — home insurance
-  seed('かさいほけん', 'cat_housing_insurance'), // ja — fire insurance (hiragana reading; 火災保険 is Han)
+  seed(
+    'かさいほけん',
+    'cat_housing_insurance',
+  ), // ja — fire insurance (hiragana reading; 火災保険 is Han)
   seed('房产税', 'cat_housing_property_tax'), // zh — property tax
-  seed('こていしさんぜい', 'cat_housing_property_tax'), // ja — property tax (hiragana reading; 固定資産税 is Han)
+  seed(
+    'こていしさんぜい',
+    'cat_housing_property_tax',
+  ), // ja — property tax (hiragana reading; 固定資産税 is Han)
   seed('其他住房', 'cat_housing_other'), // zh — other housing
   seed('その他住居', 'cat_housing_other'), // ja — other housing (kana)
   // ===== Communication — direct coverage =====
@@ -409,9 +418,15 @@ final List<CategoryKeywordPreference> _housingUtilitiesCommunicationCar = [
   seed('教習所', 'cat_car_driving_school'), // ja — driving school (Han)
   seed('きょうしゅうじょ', 'cat_car_driving_school'), // ja — driving school (hiragana)
   seed('车险', 'cat_car_insurance'), // zh — car insurance
-  seed('じどうしゃほけん', 'cat_car_insurance'), // ja — auto insurance (hiragana reading; 自動車保険 is Han)
+  seed(
+    'じどうしゃほけん',
+    'cat_car_insurance',
+  ), // ja — auto insurance (hiragana reading; 自動車保険 is Han)
   seed('汽车税', 'cat_car_tax'), // zh — automobile tax
-  seed('じどうしゃぜい', 'cat_car_tax'), // ja — automobile tax (hiragana reading; 自動車税 is Han)
+  seed(
+    'じどうしゃぜい',
+    'cat_car_tax',
+  ), // ja — automobile tax (hiragana reading; 自動車税 is Han)
   seed('其他车辆', 'cat_car_other'), // zh — other car expense
   seed('その他車両', 'cat_car_other'), // ja — other car (kana その他)
   // ===== Housing / Utilities / Communication / Car (en) — VEN-01 / D-12 =====
@@ -422,7 +437,10 @@ final List<CategoryKeywordPreference> _housingUtilitiesCommunicationCar = [
   seed('kerosene', 'cat_utilities_kerosene'), // en — kerosene
   seed('other utilities', 'cat_utilities_other'), // en — other utilities
   seed('mortgage', 'cat_housing_mortgage'), // en — mortgage
-  seed('management fee', 'cat_housing_management'), // en — property management fee
+  seed(
+    'management fee',
+    'cat_housing_management',
+  ), // en — property management fee
   seed('furniture', 'cat_housing_furniture'), // en — furniture
   seed('appliances', 'cat_housing_appliances'), // en — home appliances
   seed('renovation', 'cat_housing_renovation'), // en — renovation

@@ -23,10 +23,7 @@ import 'package:home_pocket/features/settings/presentation/providers/state_local
     as locale_providers;
 import 'package:home_pocket/generated/app_localizations.dart';
 
-Widget _wrap({
-  required Locale locale,
-  ThemeMode themeMode = ThemeMode.light,
-}) {
+Widget _wrap({required Locale locale, ThemeMode themeMode = ThemeMode.light}) {
   return ProviderScope(
     overrides: [
       // Prevents async retry timers from currentLocaleProvider.

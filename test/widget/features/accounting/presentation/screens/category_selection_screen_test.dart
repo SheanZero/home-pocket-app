@@ -476,10 +476,7 @@ void main() {
       tester,
     ) async {
       final repo = FakeCategoryRepository(categories);
-      final hideUseCase = HideCategoryUseCase(
-        repo,
-        _ImmediateUnitOfWork(),
-      );
+      final hideUseCase = HideCategoryUseCase(repo, _ImmediateUnitOfWork());
       await tester.pumpWidget(
         createLocalizedWidget(
           const CategorySelectionScreen(),

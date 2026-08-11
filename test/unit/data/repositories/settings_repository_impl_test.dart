@@ -122,9 +122,7 @@ void main() {
     });
 
     test('updateSettings persists appLockEnabled', () async {
-      await repository.updateSettings(
-        const AppSettings(appLockEnabled: true),
-      );
+      await repository.updateSettings(const AppSettings(appLockEnabled: true));
       expect((await repository.getSettings()).appLockEnabled, true);
     });
   });
@@ -143,7 +141,9 @@ void main() {
     });
 
     test('reads stored biometric_unlock_enabled key', () async {
-      SharedPreferences.setMockInitialValues({'biometric_unlock_enabled': true});
+      SharedPreferences.setMockInitialValues({
+        'biometric_unlock_enabled': true,
+      });
       final prefs = await SharedPreferences.getInstance();
       repository = SettingsRepositoryImpl(prefs: prefs);
 

@@ -82,21 +82,23 @@ void main() {
       );
     });
 
-    test('half-yen 750.5 rounds AWAY from zero to 751 (pins .round() semantics)',
-        () {
-      // 1501 × 0.5 = 750.5 exactly (0.5 is exact in binary). Dart's .round()
-      // is half-away-from-zero → 751. Banker's rounding would give 750 (round
-      // half to even) — this test pins which semantics convertToJpy has
-      // (WR-08: the old header comment claimed banker's rounding, wrongly).
-      expect(
-        convertToJpy(
-          originalMinorUnits: 1501,
-          appliedRate: '0.5',
-          subunitToUnit: 1,
-        ),
-        equals(751),
-      );
-    });
+    test(
+      'half-yen 750.5 rounds AWAY from zero to 751 (pins .round() semantics)',
+      () {
+        // 1501 × 0.5 = 750.5 exactly (0.5 is exact in binary). Dart's .round()
+        // is half-away-from-zero → 751. Banker's rounding would give 750 (round
+        // half to even) — this test pins which semantics convertToJpy has
+        // (WR-08: the old header comment claimed banker's rounding, wrongly).
+        expect(
+          convertToJpy(
+            originalMinorUnits: 1501,
+            appliedRate: '0.5',
+            subunitToUnit: 1,
+          ),
+          equals(751),
+        );
+      },
+    );
 
     test('half-yen 749.5 rounds up to 750', () {
       expect(
@@ -109,19 +111,21 @@ void main() {
       );
     });
 
-    test("float-precision stressor: rate '0.1' × 1,000,000 → exactly 100000",
-        () {
-      // 0.1 is not exactly representable in binary; 1000000 × 0.1 =
-      // 100000.00000000001 as doubles — .round() must still land on 100000.
-      expect(
-        convertToJpy(
-          originalMinorUnits: 1000000,
-          appliedRate: '0.1',
-          subunitToUnit: 1,
-        ),
-        equals(100000),
-      );
-    });
+    test(
+      "float-precision stressor: rate '0.1' × 1,000,000 → exactly 100000",
+      () {
+        // 0.1 is not exactly representable in binary; 1000000 × 0.1 =
+        // 100000.00000000001 as doubles — .round() must still land on 100000.
+        expect(
+          convertToJpy(
+            originalMinorUnits: 1000000,
+            appliedRate: '0.1',
+            subunitToUnit: 1,
+          ),
+          equals(100000),
+        );
+      },
+    );
 
     test('USD 50 at 148.30 → 7415 (STORE-02 specification example)', () {
       // 5000 cents / 100 × 148.30 = 7415.0 JPY
@@ -215,10 +219,19 @@ void main() {
       }
     });
 
-    test('rejects scientific notation, signs, whitespace, and non-numbers',
-        () {
-      for (final bad in ['1.493e2', '+149.30', '-1.5', ' 149.30 ', 'abc',
-          '', 'NaN', 'Infinity', '.5', '5.']) {
+    test('rejects scientific notation, signs, whitespace, and non-numbers', () {
+      for (final bad in [
+        '1.493e2',
+        '+149.30',
+        '-1.5',
+        ' 149.30 ',
+        'abc',
+        '',
+        'NaN',
+        'Infinity',
+        '.5',
+        '5.',
+      ]) {
         expect(validateAppliedRate(bad), isNotNull, reason: bad);
       }
     });

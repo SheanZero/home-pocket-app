@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/settings/import_backup_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
+import 'package:home_pocket/features/accounting/domain/models/category_ledger_config.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction_photo_sync_policy.dart';
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
@@ -14,12 +15,17 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
+import 'package:home_pocket/features/accounting/domain/repositories/category_ledger_config_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/currency/domain/models/exchange_rate.dart';
 import 'package:home_pocket/features/currency/domain/repositories/exchange_rate_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/unit_of_work.dart';
 import 'package:home_pocket/infrastructure/crypto/services/backup_crypto_service.dart';
+import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
+import 'package:home_pocket/features/shopping_list/domain/models/shopping_item_backup_policy.dart';
+import 'package:home_pocket/features/shopping_list/domain/models/shopping_unit.dart';
+import 'package:home_pocket/features/shopping_list/domain/repositories/shopping_item_repository.dart';
 
 /// Passthrough — these mock-based tests assert repository interactions, not
 /// transactional rollback (covered by the *_atomicity_test with a real DB).
@@ -32,12 +38,18 @@ class MockTransactionRepository extends Mock implements TransactionRepository {}
 
 class MockCategoryRepository extends Mock implements CategoryRepository {}
 
+class MockCategoryLedgerConfigRepository extends Mock
+    implements CategoryLedgerConfigRepository {}
+
 class MockBookRepository extends Mock implements BookRepository {}
 
 class MockSettingsRepository extends Mock implements SettingsRepository {}
 
 class MockExchangeRateRepository extends Mock
     implements ExchangeRateRepository {}
+
+class MockShoppingItemRepository extends Mock
+    implements ShoppingItemRepository {}
 
 /// Helper to create a current HPB v2 encrypted backup file for testing.
 Future<File> _createEncryptedBackup({
@@ -62,24 +74,34 @@ void main() {
   late ImportBackupUseCase useCase;
   late MockTransactionRepository mockTransactionRepo;
   late MockCategoryRepository mockCategoryRepo;
+  late MockCategoryLedgerConfigRepository mockCategoryLedgerConfigRepo;
   late MockBookRepository mockBookRepo;
   late MockSettingsRepository mockSettingsRepo;
   late MockExchangeRateRepository mockExchangeRateRepo;
+  late MockShoppingItemRepository mockShoppingItemRepo;
   late Directory tempDir;
 
   setUp(() async {
     mockTransactionRepo = MockTransactionRepository();
     mockCategoryRepo = MockCategoryRepository();
+    mockCategoryLedgerConfigRepo = MockCategoryLedgerConfigRepository();
     mockBookRepo = MockBookRepository();
     mockSettingsRepo = MockSettingsRepository();
     when(
       () => mockSettingsRepo.getSettings(),
     ).thenAnswer((_) async => const AppSettings());
     mockExchangeRateRepo = MockExchangeRateRepository();
+    mockShoppingItemRepo = MockShoppingItemRepository();
+    when(
+      () => mockCategoryLedgerConfigRepo.deleteAll(),
+    ).thenAnswer((_) async {});
+    when(() => mockShoppingItemRepo.deleteAll()).thenAnswer((_) async {});
     useCase = ImportBackupUseCase(
       transactionRepo: mockTransactionRepo,
       categoryRepo: mockCategoryRepo,
+      categoryLedgerConfigRepo: mockCategoryLedgerConfigRepo,
       bookRepo: mockBookRepo,
+      shoppingItemRepo: mockShoppingItemRepo,
       settingsRepo: mockSettingsRepo,
       exchangeRateRepo: mockExchangeRateRepo,
       unitOfWork: _FakeUnitOfWork(),
@@ -114,6 +136,22 @@ void main() {
         icon: '',
         color: '',
         level: 0,
+        createdAt: DateTime(2026),
+      ),
+    );
+    registerFallbackValue(
+      CategoryLedgerConfig(
+        categoryId: '',
+        ledgerType: LedgerType.daily,
+        updatedAt: DateTime(2026),
+      ),
+    );
+    registerFallbackValue(
+      ShoppingItem(
+        id: '',
+        deviceId: '',
+        listType: 'private',
+        name: '',
         createdAt: DateTime(2026),
       ),
     );
@@ -229,6 +267,25 @@ void main() {
       icon: 'food',
       color: '#FF0000',
       level: 1,
+      isArchived: true,
+      sortOrder: 8,
+      createdAt: now,
+    );
+    final categoryConfig = CategoryLedgerConfig(
+      categoryId: category.id,
+      ledgerType: LedgerType.joy,
+      updatedAt: now,
+    );
+    final shoppingItem = ShoppingItem(
+      id: 'shopping-1',
+      deviceId: 'dev',
+      listType: 'private',
+      name: 'Coffee',
+      categoryId: category.id,
+      note: 'Medium roast',
+      quantity: 2,
+      unit: ShoppingUnit.pack,
+      sortOrder: 5,
       createdAt: now,
     );
     final transaction = Transaction(
@@ -255,6 +312,8 @@ void main() {
       categories: [category.toJson()],
       books: [book.toJson()],
       settings: const AppSettings(language: 'en').toJson(),
+      categoryLedgerConfigs: [categoryConfig.toJson()],
+      shoppingItems: [ShoppingItemBackupPolicy.toBackupJson(shoppingItem)],
     );
 
     final file = await _createEncryptedBackup(
@@ -271,6 +330,10 @@ void main() {
     when(() => mockBookRepo.deleteAll()).thenAnswer((_) async {});
     when(() => mockBookRepo.insert(any())).thenAnswer((_) async {});
     when(() => mockCategoryRepo.insert(any())).thenAnswer((_) async {});
+    when(
+      () => mockCategoryLedgerConfigRepo.upsert(any()),
+    ).thenAnswer((_) async {});
+    when(() => mockShoppingItemRepo.upsert(any())).thenAnswer((_) async {});
     when(() => mockTransactionRepo.insert(any())).thenAnswer((_) async {});
     when(() => mockSettingsRepo.updateSettings(any())).thenAnswer((_) async {});
     when(() => mockExchangeRateRepo.upsert(any())).thenAnswer((_) async {});
@@ -284,7 +347,21 @@ void main() {
     // Assert
     expect(result.isSuccess, true);
     verify(() => mockBookRepo.insert(any())).called(1);
-    verify(() => mockCategoryRepo.insert(any())).called(1);
+    final restoredCategory =
+        verify(() => mockCategoryRepo.insert(captureAny())).captured.single
+            as Category;
+    expect(restoredCategory.isArchived, isTrue);
+    expect(restoredCategory.sortOrder, 8);
+    verify(() => mockCategoryLedgerConfigRepo.upsert(categoryConfig)).called(1);
+    final restoredShoppingItem =
+        verify(() => mockShoppingItemRepo.upsert(captureAny())).captured.single
+            as ShoppingItem;
+    expect(restoredShoppingItem.id, shoppingItem.id);
+    expect(restoredShoppingItem.name, shoppingItem.name);
+    expect(restoredShoppingItem.note, shoppingItem.note);
+    expect(restoredShoppingItem.quantity, shoppingItem.quantity);
+    expect(restoredShoppingItem.unit, shoppingItem.unit);
+    expect(restoredShoppingItem.sortOrder, shoppingItem.sortOrder);
     verify(() => mockTransactionRepo.insert(any())).called(1);
     verify(() => mockSettingsRepo.updateSettings(any())).called(1);
   });

@@ -12,16 +12,10 @@ void main() {
 
   setUp(() {
     mockRepo = _MockShoppingItemRepository();
-    useCase = ReorderShoppingItemsUseCase(
-      shoppingItemRepository: mockRepo,
-    );
+    useCase = ReorderShoppingItemsUseCase(shoppingItemRepository: mockRepo);
 
-    when(
-      () => mockRepo.reorder(any(), any()),
-    ).thenAnswer((_) async {});
-    when(
-      () => mockRepo.reorderBatch(any()),
-    ).thenAnswer((_) async {});
+    when(() => mockRepo.reorder(any(), any())).thenAnswer((_) async {});
+    when(() => mockRepo.reorderBatch(any())).thenAnswer((_) async {});
   });
 
   setUpAll(() {
@@ -29,15 +23,12 @@ void main() {
   });
 
   group('ReorderShoppingItemsUseCase', () {
-    test(
-      'reorder calls repo.reorder with correct params (D37-01)',
-      () async {
-        final result = await useCase.execute('item-1', 3);
+    test('reorder calls repo.reorder with correct params (D37-01)', () async {
+      final result = await useCase.execute('item-1', 3);
 
-        expect(result.isSuccess, isTrue);
-        verify(() => mockRepo.reorder('item-1', 3)).called(1);
-      },
-    );
+      expect(result.isSuccess, isTrue);
+      verify(() => mockRepo.reorder('item-1', 3)).called(1);
+    });
 
     test('reorder does NOT call tracker (D37-01)', () async {
       // D37-01: sortOrder is local-per-device — NOT synced; no tracker involved.
@@ -62,16 +53,13 @@ void main() {
       verify(() => mockRepo.reorder('item-abc', 10)).called(1);
     });
 
-    test(
-      'applyOrder persists the full contiguous order via repo.reorderBatch '
-      '(quick-260609-pmc-04)',
-      () async {
-        final result = await useCase.applyOrder(['c', 'a', 'b']);
+    test('applyOrder persists the full contiguous order via repo.reorderBatch '
+        '(quick-260609-pmc-04)', () async {
+      final result = await useCase.applyOrder(['c', 'a', 'b']);
 
-        expect(result.isSuccess, isTrue);
-        verify(() => mockRepo.reorderBatch(['c', 'a', 'b'])).called(1);
-      },
-    );
+      expect(result.isSuccess, isTrue);
+      verify(() => mockRepo.reorderBatch(['c', 'a', 'b'])).called(1);
+    });
 
     test('applyOrder with an empty id returns Result.error', () async {
       final result = await useCase.applyOrder(['a', '', 'b']);

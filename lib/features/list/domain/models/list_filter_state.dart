@@ -34,9 +34,9 @@ abstract class ListFilterState with _$ListFilterState {
   /// Creates a filter state anchored to the current calendar month with all
   /// filters cleared. Used as the initial state and by [clearAll].
   factory ListFilterState.initial() => ListFilterState(
-        selectedYear: DateTime.now().year,
-        selectedMonth: DateTime.now().month,
-      );
+    selectedYear: DateTime.now().year,
+    selectedMonth: DateTime.now().month,
+  );
 
   /// Resets all filters to [ListFilterState.initial] — clears day filter,
   /// sort config, ledger type, category, search query, and member book filter,

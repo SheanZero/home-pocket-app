@@ -63,6 +63,24 @@ class ShoppingItemDao {
     )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
+  /// Return shopping rows in stable backup order.
+  Future<List<ShoppingItemRow>> findAll({bool includeDeleted = false}) {
+    final query = _db.select(_db.shoppingItems);
+    if (!includeDeleted) {
+      query.where((row) => row.isDeleted.equals(false));
+    }
+    query.orderBy([
+      (row) => OrderingTerm.asc(row.listType),
+      (row) => OrderingTerm.asc(row.isCompleted),
+      (row) => OrderingTerm.asc(row.sortOrder),
+      (row) => OrderingTerm.asc(row.createdAt),
+    ]);
+    return query.get();
+  }
+
+  /// Hard-delete every shopping row during a whole-archive restore.
+  Future<void> deleteAll() => _db.delete(_db.shoppingItems).go();
+
   Future<List<ShoppingItemRow>> findByListTypeIncludingDeleted(
     String listType,
   ) =>

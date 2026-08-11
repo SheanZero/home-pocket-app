@@ -26,11 +26,10 @@ Widget _wrap({
 
 void main() {
   group('ListTypeSelector', () {
-    testWidgets('renders both chips with provided labels, public chip first',
-        (tester) async {
-      await tester.pumpWidget(
-        _wrap(selected: 'public', onChanged: (_) {}),
-      );
+    testWidgets('renders both chips with provided labels, public chip first', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_wrap(selected: 'public', onChanged: (_) {}));
       await tester.pump();
 
       // Both chips present
@@ -48,54 +47,59 @@ void main() {
       );
 
       // Verify order: public chip appears before private chip
-      final publicOffset = tester
-          .getTopLeft(find.byKey(const ValueKey('list_type_public_chip')));
-      final privateOffset = tester
-          .getTopLeft(find.byKey(const ValueKey('list_type_private_chip')));
-      expect(publicOffset.dx, lessThan(privateOffset.dx),
-          reason: 'Public chip must appear before private chip');
+      final publicOffset = tester.getTopLeft(
+        find.byKey(const ValueKey('list_type_public_chip')),
+      );
+      final privateOffset = tester.getTopLeft(
+        find.byKey(const ValueKey('list_type_private_chip')),
+      );
+      expect(
+        publicOffset.dx,
+        lessThan(privateOffset.dx),
+        reason: 'Public chip must appear before private chip',
+      );
     });
 
     testWidgets(
-        'tapping the non-selected chip calls onChanged with its value',
-        (tester) async {
-      String? changed;
-      await tester.pumpWidget(
-        _wrap(
-          selected: 'public',
-          onChanged: (v) => changed = v,
-        ),
-      );
-      await tester.pump();
+      'tapping the non-selected chip calls onChanged with its value',
+      (tester) async {
+        String? changed;
+        await tester.pumpWidget(
+          _wrap(selected: 'public', onChanged: (v) => changed = v),
+        );
+        await tester.pump();
 
-      // Tap the private chip (non-selected)
-      await tester.tap(find.byKey(const ValueKey('list_type_private_chip')));
-      await tester.pump();
+        // Tap the private chip (non-selected)
+        await tester.tap(find.byKey(const ValueKey('list_type_private_chip')));
+        await tester.pump();
 
-      expect(changed, equals('private'),
-          reason: 'Tapping private chip must call onChanged with "private"');
-    });
+        expect(
+          changed,
+          equals('private'),
+          reason: 'Tapping private chip must call onChanged with "private"',
+        );
+      },
+    );
 
     testWidgets(
-        'selected="public" → tapping public chip calls onChanged("public")',
-        (tester) async {
-      String? changed;
-      await tester.pumpWidget(
-        _wrap(
-          selected: 'private',
-          onChanged: (v) => changed = v,
-        ),
-      );
-      await tester.pump();
+      'selected="public" → tapping public chip calls onChanged("public")',
+      (tester) async {
+        String? changed;
+        await tester.pumpWidget(
+          _wrap(selected: 'private', onChanged: (v) => changed = v),
+        );
+        await tester.pump();
 
-      await tester.tap(find.byKey(const ValueKey('list_type_public_chip')));
-      await tester.pump();
+        await tester.tap(find.byKey(const ValueKey('list_type_public_chip')));
+        await tester.pump();
 
-      expect(changed, equals('public'));
-    });
+        expect(changed, equals('public'));
+      },
+    );
 
-    testWidgets('enabled:false → tapping a chip does NOT call onChanged',
-        (tester) async {
+    testWidgets('enabled:false → tapping a chip does NOT call onChanged', (
+      tester,
+    ) async {
       bool called = false;
       await tester.pumpWidget(
         _wrap(
@@ -108,15 +112,22 @@ void main() {
 
       // Tapping either chip must not call onChanged (IgnorePointer active).
       // warnIfMissed:false — the tap intentionally lands on an IgnorePointer.
-      await tester.tap(find.byKey(const ValueKey('list_type_private_chip')),
-          warnIfMissed: false);
+      await tester.tap(
+        find.byKey(const ValueKey('list_type_private_chip')),
+        warnIfMissed: false,
+      );
       await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('list_type_public_chip')),
-          warnIfMissed: false);
+      await tester.tap(
+        find.byKey(const ValueKey('list_type_public_chip')),
+        warnIfMissed: false,
+      );
       await tester.pump();
 
-      expect(called, isFalse,
-          reason: 'IgnorePointer must prevent onChanged calls when disabled');
+      expect(
+        called,
+        isFalse,
+        reason: 'IgnorePointer must prevent onChanged calls when disabled',
+      );
     });
   });
 }

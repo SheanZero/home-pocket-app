@@ -2,7 +2,8 @@ import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
 
-const _targetSchemaVersion = 17; // minimum version including v17 entry_source migration
+const _targetSchemaVersion =
+    17; // minimum version including v17 entry_source migration
 
 void main() {
   late AppDatabase db;

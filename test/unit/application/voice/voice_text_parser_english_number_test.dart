@@ -90,13 +90,19 @@ void main() {
       expect(parseEnglishNumberWords('zero', moneyContext: true), isNull);
     });
 
-    test('clamp keeps in-range max: "nineteen hundred thousand" stays bounded', () {
-      // 19 * 100 * 1000 = 1_900_000 — under the 10_000_000 ceiling, returned.
-      expect(
-        parseEnglishNumberWords('nineteen hundred thousand', moneyContext: true),
-        equals(1900000),
-      );
-    });
+    test(
+      'clamp keeps in-range max: "nineteen hundred thousand" stays bounded',
+      () {
+        // 19 * 100 * 1000 = 1_900_000 — under the 10_000_000 ceiling, returned.
+        expect(
+          parseEnglishNumberWords(
+            'nineteen hundred thousand',
+            moneyContext: true,
+          ),
+          equals(1900000),
+        );
+      },
+    );
   });
 
   group('english_number_words isolation (Task 1)', () {

@@ -23,43 +23,49 @@ void main() {
 
   group('zh date corpus (Item 4 of 260526-k92)', () {
     for (final c in voiceDateCorpusZh) {
-      test('${c.input} → today ${c.offsetFromToday >= 0 ? "+" : ""}${c.offsetFromToday}d  [${c.note}]', () {
-        final actual = parser.extractDate(c.input);
-        expect(
-          actual,
-          isNotNull,
-          reason: 'parser must extract a date for "${c.input}"',
-        );
-        final actualDay = DateTime(actual!.year, actual.month, actual.day);
-        final deltaDays = actualDay.difference(expectedToday).inDays;
-        expect(
-          deltaDays,
-          equals(c.offsetFromToday),
-          reason:
-              'offset mismatch: input="${c.input}" expected=${c.offsetFromToday}d actual=${deltaDays}d',
-        );
-      });
+      test(
+        '${c.input} → today ${c.offsetFromToday >= 0 ? "+" : ""}${c.offsetFromToday}d  [${c.note}]',
+        () {
+          final actual = parser.extractDate(c.input);
+          expect(
+            actual,
+            isNotNull,
+            reason: 'parser must extract a date for "${c.input}"',
+          );
+          final actualDay = DateTime(actual!.year, actual.month, actual.day);
+          final deltaDays = actualDay.difference(expectedToday).inDays;
+          expect(
+            deltaDays,
+            equals(c.offsetFromToday),
+            reason:
+                'offset mismatch: input="${c.input}" expected=${c.offsetFromToday}d actual=${deltaDays}d',
+          );
+        },
+      );
     }
   });
 
   group('ja date corpus (Item 4 of 260526-k92)', () {
     for (final c in voiceDateCorpusJa) {
-      test('${c.input} → today ${c.offsetFromToday >= 0 ? "+" : ""}${c.offsetFromToday}d  [${c.note}]', () {
-        final actual = parser.extractDate(c.input);
-        expect(
-          actual,
-          isNotNull,
-          reason: 'parser must extract a date for "${c.input}"',
-        );
-        final actualDay = DateTime(actual!.year, actual.month, actual.day);
-        final deltaDays = actualDay.difference(expectedToday).inDays;
-        expect(
-          deltaDays,
-          equals(c.offsetFromToday),
-          reason:
-              'offset mismatch: input="${c.input}" expected=${c.offsetFromToday}d actual=${deltaDays}d',
-        );
-      });
+      test(
+        '${c.input} → today ${c.offsetFromToday >= 0 ? "+" : ""}${c.offsetFromToday}d  [${c.note}]',
+        () {
+          final actual = parser.extractDate(c.input);
+          expect(
+            actual,
+            isNotNull,
+            reason: 'parser must extract a date for "${c.input}"',
+          );
+          final actualDay = DateTime(actual!.year, actual.month, actual.day);
+          final deltaDays = actualDay.difference(expectedToday).inDays;
+          expect(
+            deltaDays,
+            equals(c.offsetFromToday),
+            reason:
+                'offset mismatch: input="${c.input}" expected=${c.offsetFromToday}d actual=${deltaDays}d',
+          );
+        },
+      );
     }
   });
 }

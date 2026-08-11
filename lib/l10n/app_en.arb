@@ -464,7 +464,7 @@
   "backupAndRestore": "Backup & Restore",
   "backupAndRestoreDescription": "Encrypted file",
   "backupHeroTitle": "Keep your data safely in your hands",
-  "backupHeroDescription": "Encrypt your records and settings with a password, then save them on your device or in a cloud drive you choose.",
+  "backupHeroDescription": "Encrypt transactions, shopping lists, categories, and settings with a password, then save them on your device or in a cloud drive you choose.",
   "backupEncryptionChip": "AES-256-GCM",
   "backupCompressedChip": "Compressed",
   "backupNoUploadChip": "No automatic upload",
@@ -3005,7 +3005,7 @@
   },
   "shoppingSectionToBuy": "To Buy",
   "@shoppingSectionToBuy": {
-    "description": "Shopping list — section heading above the active (to-buy) items list (v15)"
+    "description": "Shopping list — analytics-style section heading above pending items"
   },
   "shoppingListScreenTitle": "Shopping List",
   "@shoppingListScreenTitle": {

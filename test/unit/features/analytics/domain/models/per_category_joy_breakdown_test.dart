@@ -119,20 +119,22 @@ void main() {
   });
 
   group('PerCategoryJoyBreakdown empty construction', () {
-    test('empty items + zero counts is allowed (use case wraps Empty separately)',
-        () {
-      const breakdown = PerCategoryJoyBreakdown(
-        items: <PerCategoryJoyBreakdownItem>[],
-        totalCount: 0,
-        otherCount: 0,
-        otherCategoryCount: 0,
-      );
+    test(
+      'empty items + zero counts is allowed (use case wraps Empty separately)',
+      () {
+        const breakdown = PerCategoryJoyBreakdown(
+          items: <PerCategoryJoyBreakdownItem>[],
+          totalCount: 0,
+          otherCount: 0,
+          otherCategoryCount: 0,
+        );
 
-      expect(breakdown.items, isEmpty);
-      expect(breakdown.totalCount, 0);
-      expect(breakdown.otherCount, 0);
-      expect(breakdown.otherCategoryCount, 0);
-    });
+        expect(breakdown.items, isEmpty);
+        expect(breakdown.totalCount, 0);
+        expect(breakdown.otherCount, 0);
+        expect(breakdown.otherCategoryCount, 0);
+      },
+    );
 
     test('manual constructor allows mixed item + Other totals to add up '
         '(12 qualifying + 3 other = 15)', () {

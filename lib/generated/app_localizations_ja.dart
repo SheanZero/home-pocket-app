@@ -375,7 +375,7 @@ class SJa extends S {
 
   @override
   String get backupHeroDescription =>
-      '記録と設定をパスワードで暗号化し、端末やクラウドストレージなど好きな場所に保存できます。';
+      '取引、買い物リスト、カテゴリ、設定をパスワードで暗号化し、端末やクラウドストレージなど好きな場所に保存できます。';
 
   @override
   String get backupEncryptionChip => 'AES-256-GCM';

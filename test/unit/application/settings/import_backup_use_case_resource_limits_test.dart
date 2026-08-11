@@ -6,11 +6,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/settings/import_backup_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
+import 'package:home_pocket/features/accounting/domain/repositories/category_ledger_config_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/currency/domain/repositories/exchange_rate_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/unit_of_work.dart';
 import 'package:home_pocket/infrastructure/crypto/services/backup_crypto_service.dart';
+import 'package:home_pocket/features/shopping_list/domain/repositories/shopping_item_repository.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockTransactionRepository extends Mock
@@ -18,12 +20,18 @@ class _MockTransactionRepository extends Mock
 
 class _MockCategoryRepository extends Mock implements CategoryRepository {}
 
+class _MockCategoryLedgerConfigRepository extends Mock
+    implements CategoryLedgerConfigRepository {}
+
 class _MockBookRepository extends Mock implements BookRepository {}
 
 class _MockSettingsRepository extends Mock implements SettingsRepository {}
 
 class _MockExchangeRateRepository extends Mock
     implements ExchangeRateRepository {}
+
+class _MockShoppingItemRepository extends Mock
+    implements ShoppingItemRepository {}
 
 class _FakeUnitOfWork implements UnitOfWork {
   @override
@@ -47,17 +55,21 @@ void main() {
   late Directory tempDir;
   late _MockTransactionRepository transactionRepo;
   late _MockCategoryRepository categoryRepo;
+  late _MockCategoryLedgerConfigRepository categoryLedgerConfigRepo;
   late _MockBookRepository bookRepo;
   late _MockSettingsRepository settingsRepo;
   late _MockExchangeRateRepository exchangeRateRepo;
+  late _MockShoppingItemRepository shoppingItemRepo;
 
   setUp(() async {
     tempDir = await Directory.systemTemp.createTemp('backup_limits_test_');
     transactionRepo = _MockTransactionRepository();
     categoryRepo = _MockCategoryRepository();
+    categoryLedgerConfigRepo = _MockCategoryLedgerConfigRepository();
     bookRepo = _MockBookRepository();
     settingsRepo = _MockSettingsRepository();
     exchangeRateRepo = _MockExchangeRateRepository();
+    shoppingItemRepo = _MockShoppingItemRepository();
   });
 
   tearDown(() async {
@@ -73,7 +85,9 @@ void main() {
     return ImportBackupUseCase(
       transactionRepo: transactionRepo,
       categoryRepo: categoryRepo,
+      categoryLedgerConfigRepo: categoryLedgerConfigRepo,
       bookRepo: bookRepo,
+      shoppingItemRepo: shoppingItemRepo,
       settingsRepo: settingsRepo,
       exchangeRateRepo: exchangeRateRepo,
       unitOfWork: _FakeUnitOfWork(),

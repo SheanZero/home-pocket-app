@@ -34,18 +34,21 @@ void main() {
       );
     });
 
-    test('every merchant categoryId resolves the FULL seed list (no sampling)',
-        () {
-      // Exercise EVERY entry, not a subset — guards against a partial-coverage
-      // gate that would let a tail offender slip through.
-      for (final m in DefaultMerchants.all) {
-        expect(
-          l2Ids.contains(m.categoryId),
-          isTrue,
-          reason: 'Merchant ${m.id} maps to non-L2 categoryId ${m.categoryId}',
-        );
-      }
-    });
+    test(
+      'every merchant categoryId resolves the FULL seed list (no sampling)',
+      () {
+        // Exercise EVERY entry, not a subset — guards against a partial-coverage
+        // gate that would let a tail offender slip through.
+        for (final m in DefaultMerchants.all) {
+          expect(
+            l2Ids.contains(m.categoryId),
+            isTrue,
+            reason:
+                'Merchant ${m.id} maps to non-L2 categoryId ${m.categoryId}',
+          );
+        }
+      },
+    );
 
     test('merchant ids are unique', () {
       final ids = DefaultMerchants.all.map((m) => m.id).toList();

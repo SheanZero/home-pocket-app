@@ -26,15 +26,11 @@ Future<void> _pumpEmptyState(
 }) async {
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [
-        isGroupModeProvider.overrideWith((_) => isGroupMode),
-      ],
+      overrides: [isGroupModeProvider.overrideWith((_) => isGroupMode)],
       child: MaterialApp(
         localizationsDelegates: S.localizationsDelegates,
         supportedLocales: S.supportedLocales,
-        home: Scaffold(
-          body: ShoppingEmptyState(listType: listType),
-        ),
+        home: Scaffold(body: ShoppingEmptyState(listType: listType)),
       ),
     ),
   );
@@ -44,45 +40,31 @@ Future<void> _pumpEmptyState(
 void main() {
   group('ShoppingEmptyState', () {
     // SHOP-04: private list → privateEmpty variant
-    testWidgets(
-      'SHOP-04 private: shopping_bag_outlined icon rendered',
-      (tester) async {
-        await _pumpEmptyState(
-          tester,
-          listType: 'private',
-          isGroupMode: false,
-        );
+    testWidgets('SHOP-04 private: shopping_bag_outlined icon rendered', (
+      tester,
+    ) async {
+      await _pumpEmptyState(tester, listType: 'private', isGroupMode: false);
 
-        expect(find.byIcon(Icons.shopping_bag_outlined), findsOneWidget);
-        // CTA button always present for all variants
-        expect(find.byType(FilledButton), findsOneWidget);
-      },
-    );
+      expect(find.byIcon(Icons.shopping_bag_outlined), findsOneWidget);
+      // CTA button always present for all variants
+      expect(find.byType(FilledButton), findsOneWidget);
+    });
 
     // SHOP-04: public + no family → publicSolo variant
-    testWidgets(
-      'SHOP-04 public solo: group_outlined icon rendered',
-      (tester) async {
-        await _pumpEmptyState(
-          tester,
-          listType: 'public',
-          isGroupMode: false,
-        );
+    testWidgets('SHOP-04 public solo: group_outlined icon rendered', (
+      tester,
+    ) async {
+      await _pumpEmptyState(tester, listType: 'public', isGroupMode: false);
 
-        expect(find.byIcon(Icons.group_outlined), findsOneWidget);
-        expect(find.byType(FilledButton), findsOneWidget);
-      },
-    );
+      expect(find.byIcon(Icons.group_outlined), findsOneWidget);
+      expect(find.byType(FilledButton), findsOneWidget);
+    });
 
     // SHOP-04: public + family → publicFamily variant
     testWidgets(
       'SHOP-04 public family: add_shopping_cart_outlined icon rendered',
       (tester) async {
-        await _pumpEmptyState(
-          tester,
-          listType: 'public',
-          isGroupMode: true,
-        );
+        await _pumpEmptyState(tester, listType: 'public', isGroupMode: true);
 
         expect(find.byIcon(Icons.add_shopping_cart_outlined), findsOneWidget);
         expect(find.byType(FilledButton), findsOneWidget);
@@ -90,39 +72,29 @@ void main() {
     );
 
     // CTA button tapping: should navigate to ShoppingItemFormScreen
-    testWidgets(
-      'CTA button navigates to ShoppingItemFormScreen',
-      (tester) async {
-        await _pumpEmptyState(
-          tester,
-          listType: 'private',
-          isGroupMode: false,
-        );
+    testWidgets('CTA button navigates to ShoppingItemFormScreen', (
+      tester,
+    ) async {
+      await _pumpEmptyState(tester, listType: 'private', isGroupMode: false);
 
-        await tester.tap(find.byType(FilledButton));
-        // Use pump() instead of pumpAndSettle() — the stub screen has a
-        // CircularProgressIndicator that never settles.
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 300));
+      await tester.tap(find.byType(FilledButton));
+      // Use pump() instead of pumpAndSettle() — the stub screen has a
+      // CircularProgressIndicator that never settles.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
-        // ShoppingItemFormScreen stub is pushed
-        expect(find.byType(ShoppingItemFormScreen), findsOneWidget);
-      },
-    );
+      // ShoppingItemFormScreen stub is pushed
+      expect(find.byType(ShoppingItemFormScreen), findsOneWidget);
+    });
 
     // Private always privateEmpty regardless of isGroupMode
-    testWidgets(
-      'private list always privateEmpty even when isGroupMode=true',
-      (tester) async {
-        await _pumpEmptyState(
-          tester,
-          listType: 'private',
-          isGroupMode: true,
-        );
+    testWidgets('private list always privateEmpty even when isGroupMode=true', (
+      tester,
+    ) async {
+      await _pumpEmptyState(tester, listType: 'private', isGroupMode: true);
 
-        expect(find.byIcon(Icons.shopping_bag_outlined), findsOneWidget);
-        expect(find.byIcon(Icons.add_shopping_cart_outlined), findsNothing);
-      },
-    );
+      expect(find.byIcon(Icons.shopping_bag_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.add_shopping_cart_outlined), findsNothing);
+    });
   });
 }

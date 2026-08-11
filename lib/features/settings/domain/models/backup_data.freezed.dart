@@ -23,6 +23,15 @@ mixin _$BackupData {
   /// backward-compat: old `.hpb` files without the field deserialize to `[]`.
   List<Map<String, dynamic>> get exchangeRates;
 
+  /// Full shopping-list state, including completion and local sort order.
+  /// Optional so backups created before this capability remain importable.
+  List<Map<String, dynamic>> get shoppingItems;
+
+  /// Personal ledger assignment for custom/system categories. Category rows
+  /// already retain custom names, hidden state and sort order; these configs
+  /// preserve the remaining category behavior after restore.
+  List<Map<String, dynamic>> get categoryLedgerConfigs;
+
   /// Create a copy of BackupData
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -53,6 +62,14 @@ mixin _$BackupData {
             const DeepCollectionEquality().equals(
               other.exchangeRates,
               exchangeRates,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other.shoppingItems,
+              shoppingItems,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other.categoryLedgerConfigs,
+              categoryLedgerConfigs,
             ));
   }
 
@@ -66,11 +83,13 @@ mixin _$BackupData {
     const DeepCollectionEquality().hash(books),
     const DeepCollectionEquality().hash(settings),
     const DeepCollectionEquality().hash(exchangeRates),
+    const DeepCollectionEquality().hash(shoppingItems),
+    const DeepCollectionEquality().hash(categoryLedgerConfigs),
   );
 
   @override
   String toString() {
-    return 'BackupData(metadata: $metadata, transactions: $transactions, categories: $categories, books: $books, settings: $settings, exchangeRates: $exchangeRates)';
+    return 'BackupData(metadata: $metadata, transactions: $transactions, categories: $categories, books: $books, settings: $settings, exchangeRates: $exchangeRates, shoppingItems: $shoppingItems, categoryLedgerConfigs: $categoryLedgerConfigs)';
   }
 }
 
@@ -88,6 +107,8 @@ abstract mixin class $BackupDataCopyWith<$Res> {
     List<Map<String, dynamic>> books,
     Map<String, dynamic> settings,
     List<Map<String, dynamic>> exchangeRates,
+    List<Map<String, dynamic>> shoppingItems,
+    List<Map<String, dynamic>> categoryLedgerConfigs,
   });
 
   $BackupMetadataCopyWith<$Res> get metadata;
@@ -111,6 +132,8 @@ class _$BackupDataCopyWithImpl<$Res> implements $BackupDataCopyWith<$Res> {
     Object? books = null,
     Object? settings = null,
     Object? exchangeRates = null,
+    Object? shoppingItems = null,
+    Object? categoryLedgerConfigs = null,
   }) {
     return _then(
       _self.copyWith(
@@ -137,6 +160,14 @@ class _$BackupDataCopyWithImpl<$Res> implements $BackupDataCopyWith<$Res> {
         exchangeRates: null == exchangeRates
             ? _self.exchangeRates
             : exchangeRates // ignore: cast_nullable_to_non_nullable
+                  as List<Map<String, dynamic>>,
+        shoppingItems: null == shoppingItems
+            ? _self.shoppingItems
+            : shoppingItems // ignore: cast_nullable_to_non_nullable
+                  as List<Map<String, dynamic>>,
+        categoryLedgerConfigs: null == categoryLedgerConfigs
+            ? _self.categoryLedgerConfigs
+            : categoryLedgerConfigs // ignore: cast_nullable_to_non_nullable
                   as List<Map<String, dynamic>>,
       ),
     );
@@ -253,6 +284,8 @@ extension BackupDataPatterns on BackupData {
       List<Map<String, dynamic>> books,
       Map<String, dynamic> settings,
       List<Map<String, dynamic>> exchangeRates,
+      List<Map<String, dynamic>> shoppingItems,
+      List<Map<String, dynamic>> categoryLedgerConfigs,
     )?
     $default, {
     required TResult orElse(),
@@ -267,6 +300,8 @@ extension BackupDataPatterns on BackupData {
           _that.books,
           _that.settings,
           _that.exchangeRates,
+          _that.shoppingItems,
+          _that.categoryLedgerConfigs,
         );
       case _:
         return orElse();
@@ -295,6 +330,8 @@ extension BackupDataPatterns on BackupData {
       List<Map<String, dynamic>> books,
       Map<String, dynamic> settings,
       List<Map<String, dynamic>> exchangeRates,
+      List<Map<String, dynamic>> shoppingItems,
+      List<Map<String, dynamic>> categoryLedgerConfigs,
     )
     $default,
   ) {
@@ -308,6 +345,8 @@ extension BackupDataPatterns on BackupData {
           _that.books,
           _that.settings,
           _that.exchangeRates,
+          _that.shoppingItems,
+          _that.categoryLedgerConfigs,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -335,6 +374,8 @@ extension BackupDataPatterns on BackupData {
       List<Map<String, dynamic>> books,
       Map<String, dynamic> settings,
       List<Map<String, dynamic>> exchangeRates,
+      List<Map<String, dynamic>> shoppingItems,
+      List<Map<String, dynamic>> categoryLedgerConfigs,
     )?
     $default,
   ) {
@@ -348,6 +389,8 @@ extension BackupDataPatterns on BackupData {
           _that.books,
           _that.settings,
           _that.exchangeRates,
+          _that.shoppingItems,
+          _that.categoryLedgerConfigs,
         );
       case _:
         return null;
@@ -366,11 +409,17 @@ class _BackupData implements BackupData {
     required final Map<String, dynamic> settings,
     final List<Map<String, dynamic>> exchangeRates =
         const <Map<String, dynamic>>[],
+    final List<Map<String, dynamic>> shoppingItems =
+        const <Map<String, dynamic>>[],
+    final List<Map<String, dynamic>> categoryLedgerConfigs =
+        const <Map<String, dynamic>>[],
   }) : _transactions = transactions,
        _categories = categories,
        _books = books,
        _settings = settings,
-       _exchangeRates = exchangeRates;
+       _exchangeRates = exchangeRates,
+       _shoppingItems = shoppingItems,
+       _categoryLedgerConfigs = categoryLedgerConfigs;
   factory _BackupData.fromJson(Map<String, dynamic> json) =>
       _$BackupDataFromJson(json);
 
@@ -422,6 +471,37 @@ class _BackupData implements BackupData {
     return EqualUnmodifiableListView(_exchangeRates);
   }
 
+  /// Full shopping-list state, including completion and local sort order.
+  /// Optional so backups created before this capability remain importable.
+  final List<Map<String, dynamic>> _shoppingItems;
+
+  /// Full shopping-list state, including completion and local sort order.
+  /// Optional so backups created before this capability remain importable.
+  @override
+  @JsonKey()
+  List<Map<String, dynamic>> get shoppingItems {
+    if (_shoppingItems is EqualUnmodifiableListView) return _shoppingItems;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_shoppingItems);
+  }
+
+  /// Personal ledger assignment for custom/system categories. Category rows
+  /// already retain custom names, hidden state and sort order; these configs
+  /// preserve the remaining category behavior after restore.
+  final List<Map<String, dynamic>> _categoryLedgerConfigs;
+
+  /// Personal ledger assignment for custom/system categories. Category rows
+  /// already retain custom names, hidden state and sort order; these configs
+  /// preserve the remaining category behavior after restore.
+  @override
+  @JsonKey()
+  List<Map<String, dynamic>> get categoryLedgerConfigs {
+    if (_categoryLedgerConfigs is EqualUnmodifiableListView)
+      return _categoryLedgerConfigs;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_categoryLedgerConfigs);
+  }
+
   /// Create a copy of BackupData
   /// with the given fields replaced by the non-null parameter values.
   @override
@@ -455,6 +535,14 @@ class _BackupData implements BackupData {
             const DeepCollectionEquality().equals(
               other._exchangeRates,
               _exchangeRates,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._shoppingItems,
+              _shoppingItems,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._categoryLedgerConfigs,
+              _categoryLedgerConfigs,
             ));
   }
 
@@ -468,11 +556,13 @@ class _BackupData implements BackupData {
     const DeepCollectionEquality().hash(_books),
     const DeepCollectionEquality().hash(_settings),
     const DeepCollectionEquality().hash(_exchangeRates),
+    const DeepCollectionEquality().hash(_shoppingItems),
+    const DeepCollectionEquality().hash(_categoryLedgerConfigs),
   );
 
   @override
   String toString() {
-    return 'BackupData(metadata: $metadata, transactions: $transactions, categories: $categories, books: $books, settings: $settings, exchangeRates: $exchangeRates)';
+    return 'BackupData(metadata: $metadata, transactions: $transactions, categories: $categories, books: $books, settings: $settings, exchangeRates: $exchangeRates, shoppingItems: $shoppingItems, categoryLedgerConfigs: $categoryLedgerConfigs)';
   }
 }
 
@@ -492,6 +582,8 @@ abstract mixin class _$BackupDataCopyWith<$Res>
     List<Map<String, dynamic>> books,
     Map<String, dynamic> settings,
     List<Map<String, dynamic>> exchangeRates,
+    List<Map<String, dynamic>> shoppingItems,
+    List<Map<String, dynamic>> categoryLedgerConfigs,
   });
 
   @override
@@ -516,6 +608,8 @@ class __$BackupDataCopyWithImpl<$Res> implements _$BackupDataCopyWith<$Res> {
     Object? books = null,
     Object? settings = null,
     Object? exchangeRates = null,
+    Object? shoppingItems = null,
+    Object? categoryLedgerConfigs = null,
   }) {
     return _then(
       _BackupData(
@@ -542,6 +636,14 @@ class __$BackupDataCopyWithImpl<$Res> implements _$BackupDataCopyWith<$Res> {
         exchangeRates: null == exchangeRates
             ? _self._exchangeRates
             : exchangeRates // ignore: cast_nullable_to_non_nullable
+                  as List<Map<String, dynamic>>,
+        shoppingItems: null == shoppingItems
+            ? _self._shoppingItems
+            : shoppingItems // ignore: cast_nullable_to_non_nullable
+                  as List<Map<String, dynamic>>,
+        categoryLedgerConfigs: null == categoryLedgerConfigs
+            ? _self._categoryLedgerConfigs
+            : categoryLedgerConfigs // ignore: cast_nullable_to_non_nullable
                   as List<Map<String, dynamic>>,
       ),
     );

@@ -20,59 +20,70 @@ void main() {
   });
 
   group('ShoppingItemDao', () {
-    test('watchByListType returns active items ordered by sort_order ASC, completed last',
-        () async {
-      // Insert: item B (active, sortOrder=1), item A (active, sortOrder=2), item C (completed, sortOrder=0)
-      await dao.upsert(_makeItem(id: 'item_b', sortOrder: 1));
-      await dao.upsert(_makeItem(id: 'item_a', sortOrder: 2));
-      await dao.upsert(_makeItem(id: 'item_c', isCompleted: true, sortOrder: 0));
-
-      // Capture the first stream emission
-      final items = await dao.watchByListType('private').first;
-
-      // DONE-02: ORDER BY is_completed ASC, sort_order ASC, created_at ASC
-      // Expected: item_b (active,sort=1), item_a (active,sort=2), item_c (completed,sort=0)
-      expect(items.length, 3);
-      expect(items[0].id, 'item_b');
-      expect(items[1].id, 'item_a');
-      expect(items[2].id, 'item_c');
-      expect(items[2].isCompleted, isTrue);
-    });
-
     test(
-        'watchByListType orders completed items by completed_at DESC '
+      'watchByListType returns active items ordered by sort_order ASC, completed last',
+      () async {
+        // Insert: item B (active, sortOrder=1), item A (active, sortOrder=2), item C (completed, sortOrder=0)
+        await dao.upsert(_makeItem(id: 'item_b', sortOrder: 1));
+        await dao.upsert(_makeItem(id: 'item_a', sortOrder: 2));
+        await dao.upsert(
+          _makeItem(id: 'item_c', isCompleted: true, sortOrder: 0),
+        );
+
+        // Capture the first stream emission
+        final items = await dao.watchByListType('private').first;
+
+        // DONE-02: ORDER BY is_completed ASC, sort_order ASC, created_at ASC
+        // Expected: item_b (active,sort=1), item_a (active,sort=2), item_c (completed,sort=0)
+        expect(items.length, 3);
+        expect(items[0].id, 'item_b');
+        expect(items[1].id, 'item_a');
+        expect(items[2].id, 'item_c');
+        expect(items[2].isCompleted, isTrue);
+      },
+    );
+
+    test('watchByListType orders completed items by completed_at DESC '
         '(most recently completed first) while active stay by sort_order '
-        '(quick-260609-pmc-06)',
-        () async {
+        '(quick-260609-pmc-06)', () async {
       // Two active items (sort_order 0,1) + three completed with distinct
       // completed_at. Completed must appear newest-first regardless of sort_order.
       await dao.upsert(_makeItem(id: 'active_0', sortOrder: 0));
       await dao.upsert(_makeItem(id: 'active_1', sortOrder: 1));
-      await dao.upsert(_makeItem(
-        id: 'done_old',
-        isCompleted: true,
-        sortOrder: 5,
-        completedAt: DateTime(2026, 6, 9, 8),
-      ));
-      await dao.upsert(_makeItem(
-        id: 'done_new',
-        isCompleted: true,
-        sortOrder: 99,
-        completedAt: DateTime(2026, 6, 9, 12),
-      ));
-      await dao.upsert(_makeItem(
-        id: 'done_mid',
-        isCompleted: true,
-        sortOrder: 1,
-        completedAt: DateTime(2026, 6, 9, 10),
-      ));
+      await dao.upsert(
+        _makeItem(
+          id: 'done_old',
+          isCompleted: true,
+          sortOrder: 5,
+          completedAt: DateTime(2026, 6, 9, 8),
+        ),
+      );
+      await dao.upsert(
+        _makeItem(
+          id: 'done_new',
+          isCompleted: true,
+          sortOrder: 99,
+          completedAt: DateTime(2026, 6, 9, 12),
+        ),
+      );
+      await dao.upsert(
+        _makeItem(
+          id: 'done_mid',
+          isCompleted: true,
+          sortOrder: 1,
+          completedAt: DateTime(2026, 6, 9, 10),
+        ),
+      );
 
       final items = await dao.watchByListType('private').first;
 
-      expect(
-        items.map((r) => r.id).toList(),
-        ['active_0', 'active_1', 'done_new', 'done_mid', 'done_old'],
-      );
+      expect(items.map((r) => r.id).toList(), [
+        'active_0',
+        'active_1',
+        'done_new',
+        'done_mid',
+        'done_old',
+      ]);
     });
 
     test('watchByListType excludes soft-deleted items', () async {
@@ -122,9 +133,10 @@ void main() {
 
       // Update same id with changed name
       await dao.upsert(
-        _makeItem(id: 'item_upsert', sortOrder: 0).copyWith(
-          name: const Value('Updated Name'),
-        ),
+        _makeItem(
+          id: 'item_upsert',
+          sortOrder: 0,
+        ).copyWith(name: const Value('Updated Name')),
       );
       final after = await dao.findById('item_upsert');
       expect(after, isNotNull);
@@ -132,10 +144,26 @@ void main() {
     });
 
     test(
-        'reorderBatch writes a contiguous 0..N-1 order so drag-to-top lands '
+      'findAll excludes tombstones and deleteAll hard-deletes rows',
+      () async {
+        await dao.upsert(_makeItem(id: 'active'));
+        await dao.upsert(_makeItem(id: 'deleted'));
+        await dao.softDelete('deleted');
+
+        expect((await dao.findAll()).map((row) => row.id), ['active']);
+        expect(
+          (await dao.findAll(includeDeleted: true)).map((row) => row.id),
+          containsAll(['active', 'deleted']),
+        );
+
+        await dao.deleteAll();
+        expect(await dao.findAll(includeDeleted: true), isEmpty);
+      },
+    );
+
+    test('reorderBatch writes a contiguous 0..N-1 order so drag-to-top lands '
         'first even when items hold stale non-contiguous values '
-        '(quick-260609-pmc-04)',
-        () async {
+        '(quick-260609-pmc-04)', () async {
       // Reproduce the bug precondition: item_a was previously "置顶" to a stale
       // sort_order = -1; b and c are 0 and 1. Display order: a, b, c.
       await dao.upsert(_makeItem(id: 'a', sortOrder: -1));

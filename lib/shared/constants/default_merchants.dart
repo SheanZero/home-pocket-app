@@ -62,15 +62,15 @@ class DefaultMerchant {
 /// 600-800 ceiling).
 abstract final class DefaultMerchants {
   static List<DefaultMerchant> get all => [
-        ...convenienceMerchants,
-        ...supermarketMerchants,
-        ...diningMerchants,
-        ...cafeMerchants,
-        ...dailyDrugstoreMerchants,
-        ...homeElectronicsMerchants,
-        ...fashionMerchants,
-        ...transportFuelMerchants,
-        ...leisureHobbyMerchants,
-        ...subscriptionDeliveryMerchants,
-      ];
+    ...convenienceMerchants,
+    ...supermarketMerchants,
+    ...diningMerchants,
+    ...cafeMerchants,
+    ...dailyDrugstoreMerchants,
+    ...homeElectronicsMerchants,
+    ...fashionMerchants,
+    ...transportFuelMerchants,
+    ...leisureHobbyMerchants,
+    ...subscriptionDeliveryMerchants,
+  ];
 }

@@ -48,34 +48,31 @@ LedgerType? _resolveLedger(String categoryId) {
 
 void main() {
   group('Reachable-L2 ledger non-null invariant (Phase 51 D-19)', () {
-    test(
-      'every expense L1 and every L2 resolves to a non-null LedgerType',
-      () {
-        // Sanity guard: 19 expense L1 per PRD §10.0. A count change means
-        // `default_categories.dart`'s tree was edited — re-validate that every
-        // L1 still carries a ledger config before adjusting this gate.
-        expect(
-          DefaultCategories.expenseL1.length,
-          19,
-          reason:
-              'Expected exactly 19 expense L1 categories per PRD §10.0; '
-              'a count change suggests `default_categories.dart` was edited '
-              '— re-validate that every reachable category still resolves to a '
-              'non-null ledger (D-19) before adjusting this gate.',
-        );
+    test('every expense L1 and every L2 resolves to a non-null LedgerType', () {
+      // Sanity guard: 19 expense L1 per PRD §10.0. A count change means
+      // `default_categories.dart`'s tree was edited — re-validate that every
+      // L1 still carries a ledger config before adjusting this gate.
+      expect(
+        DefaultCategories.expenseL1.length,
+        19,
+        reason:
+            'Expected exactly 19 expense L1 categories per PRD §10.0; '
+            'a count change suggests `default_categories.dart` was edited '
+            '— re-validate that every reachable category still resolves to a '
+            'non-null ledger (D-19) before adjusting this gate.',
+      );
 
-        for (final cat in DefaultCategories.all) {
-          expect(
-            _resolveLedger(cat.id),
-            isNotNull,
-            reason:
-                'category ${cat.id} (level ${cat.level}) resolves to null '
-                'ledger — silent daily fallback would mask a config gap '
-                '(LEDGER-02 D-19). Add a ledger config for this category (or '
-                'for its parent L1) in `_defaultLedgerConfigs`.',
-          );
-        }
-      },
-    );
+      for (final cat in DefaultCategories.all) {
+        expect(
+          _resolveLedger(cat.id),
+          isNotNull,
+          reason:
+              'category ${cat.id} (level ${cat.level}) resolves to null '
+              'ledger — silent daily fallback would mask a config gap '
+              '(LEDGER-02 D-19). Add a ledger config for this category (or '
+              'for its parent L1) in `_defaultLedgerConfigs`.',
+        );
+      }
+    });
   });
 }

@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/accounting/presentation/providers/repository_providers.dart'
-    show bookByIdProvider;
+    show bookByIdProvider, categoryByIdProvider;
+import '../../features/accounting/presentation/providers/state_category_reorder.dart';
 import '../../features/analytics/presentation/providers/state_analytics.dart';
 import '../../features/analytics/presentation/providers/state_happiness.dart';
 import '../../features/home/presentation/providers/state_shadow_books.dart';
@@ -10,6 +11,9 @@ import '../../features/list/presentation/providers/state_calendar_totals.dart';
 import '../../features/list/presentation/providers/state_list_transactions.dart';
 import '../../features/settings/presentation/providers/state_locale.dart';
 import '../../features/settings/presentation/providers/state_settings.dart';
+import '../../features/shopping_list/presentation/providers/repository_providers.dart'
+    show filteredShoppingItemsProvider, shoppingUnitSuggestionsProvider;
+import '../../features/shopping_list/presentation/providers/state_shopping_filter.dart';
 
 /// Full-wipe sibling of [invalidateTransactionDependents].
 ///
@@ -59,6 +63,16 @@ void invalidateAllDataProviders(WidgetRef ref) {
 
   // Accounting (book lookup by id — used by the shell + settings header).
   ref.invalidate(bookByIdProvider);
+  ref.invalidate(categoryByIdProvider);
+  ref.invalidate(categoryReorderProvider);
+
+  // Shopping list and device-local view filters. The Drift stream normally
+  // re-emits after restore, but explicit invalidation also discards cached
+  // category filters that may reference categories replaced by the archive.
+  ref.invalidate(filteredShoppingItemsProvider);
+  ref.invalidate(shoppingUnitSuggestionsProvider);
+  ref.invalidate(shoppingFilterProvider);
+  ref.invalidate(listTypeProvider);
 
   // Settings / locale (reset to defaults on clear, so they must refresh live).
   ref.invalidate(appSettingsProvider);

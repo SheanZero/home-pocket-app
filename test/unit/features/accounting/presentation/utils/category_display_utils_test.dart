@@ -95,25 +95,22 @@ void main() {
         );
       });
 
-      test(
-        'falls back to the category own icon when the parent is missing '
-        'from defaults',
-        () {
-          // Exercises the parent-missing branch: an L2 whose parentId points
-          // at a non-default id resolves to its OWN icon (menu_book), never
-          // throwing.
-          final orphan = Category(
-            id: 'custom_orphan_l2',
-            name: 'custom',
-            icon: 'menu_book',
-            color: '#9C27B0',
-            parentId: 'cat_nonexistent_parent',
-            level: 2,
-            createdAt: DateTime(2026, 1, 1),
-          );
-          expect(parentCategoryIconForCategory(orphan), Icons.menu_book);
-        },
-      );
+      test('falls back to the category own icon when the parent is missing '
+          'from defaults', () {
+        // Exercises the parent-missing branch: an L2 whose parentId points
+        // at a non-default id resolves to its OWN icon (menu_book), never
+        // throwing.
+        final orphan = Category(
+          id: 'custom_orphan_l2',
+          name: 'custom',
+          icon: 'menu_book',
+          color: '#9C27B0',
+          parentId: 'cat_nonexistent_parent',
+          level: 2,
+          createdAt: DateTime(2026, 1, 1),
+        );
+        expect(parentCategoryIconForCategory(orphan), Icons.menu_book);
+      });
     });
   });
 }

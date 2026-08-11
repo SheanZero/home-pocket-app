@@ -5,9 +5,7 @@ import '../daos/category_keyword_preference_dao.dart';
 
 class CategoryKeywordPreferenceRepositoryImpl
     implements CategoryKeywordPreferenceRepository {
-  CategoryKeywordPreferenceRepositoryImpl({
-    required this._dao,
-  });
+  CategoryKeywordPreferenceRepositoryImpl({required this._dao});
 
   final CategoryKeywordPreferenceDao _dao;
 
@@ -51,7 +49,9 @@ class CategoryKeywordPreferenceRepositoryImpl
   }
 
   @override
-  Future<List<CategoryKeywordPreference>> findTopLearned({int limit = 20}) async {
+  Future<List<CategoryKeywordPreference>> findTopLearned({
+    int limit = 20,
+  }) async {
     final rows = await _dao.findTopLearned(limit: limit);
     return rows.map(_toModel).toList();
   }

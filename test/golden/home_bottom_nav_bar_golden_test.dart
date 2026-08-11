@@ -12,10 +12,7 @@ import '../helpers/load_numeral_font.dart';
 void main() {
   setUpAll(loadNumeralFont);
 
-  Future<void> pumpNav(
-    WidgetTester tester, {
-    required ThemeData theme,
-  }) async {
+  Future<void> pumpNav(WidgetTester tester, {required ThemeData theme}) async {
     tester.view.physicalSize = const Size(390, 160);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);

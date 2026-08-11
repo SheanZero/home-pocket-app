@@ -70,9 +70,7 @@ Future<bool> showSoftConfirmDialog(
                   const SizedBox(width: 8),
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, true),
-                    style: TextButton.styleFrom(
-                      foregroundColor: palette.error,
-                    ),
+                    style: TextButton.styleFrom(foregroundColor: palette.error),
                     child: Text(
                       confirmLabel,
                       style: AppTextStyles.titleSmall.copyWith(

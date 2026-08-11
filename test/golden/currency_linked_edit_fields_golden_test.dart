@@ -121,10 +121,7 @@ void main() {
 
       // Quick 260613-ufn (D-3): the clickable date-change trigger is removed;
       // a non-clickable labeled 汇率日期 row shows the formatted date.
-      expect(
-        find.byKey(const Key('edit_date_change_trigger')),
-        findsNothing,
-      );
+      expect(find.byKey(const Key('edit_date_change_trigger')), findsNothing);
       expect(find.byKey(const Key('edit_rate_date')), findsOneWidget);
       expect(find.text('06/13/2026'), findsOneWidget);
     });

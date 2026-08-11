@@ -12,10 +12,8 @@ part 'tagged_transaction.freezed.dart';
 /// Phase 29.
 @freezed
 abstract class MemberTag with _$MemberTag {
-  const factory MemberTag({
-    required String emoji,
-    required String name,
-  }) = _MemberTag;
+  const factory MemberTag({required String emoji, required String name}) =
+      _MemberTag;
 }
 
 /// A transaction enriched with optional family-member attribution.

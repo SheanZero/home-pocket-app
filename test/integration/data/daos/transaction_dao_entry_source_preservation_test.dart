@@ -34,12 +34,12 @@ void main() {
 
     // Stub encryption to pass through plaintext — the use case delegates
     // note encryption to TransactionRepositoryImpl; tests don't test crypto.
-    when(() => encryptionService.encryptField(any())).thenAnswer(
-      (inv) async => inv.positionalArguments.first as String,
-    );
-    when(() => encryptionService.decryptField(any())).thenAnswer(
-      (inv) async => inv.positionalArguments.first as String,
-    );
+    when(
+      () => encryptionService.encryptField(any()),
+    ).thenAnswer((inv) async => inv.positionalArguments.first as String);
+    when(
+      () => encryptionService.decryptField(any()),
+    ).thenAnswer((inv) async => inv.positionalArguments.first as String);
 
     final transactionRepository = TransactionRepositoryImpl(
       dao: transactionDao,
@@ -102,51 +102,66 @@ void main() {
 
   // ─── tests: three EntrySource literals ────────────────────────────────────
 
-  test('preserves entry_source: manual through edit round-trip (SC-3)', () async {
-    final seed = await insertSeed(entrySource: EntrySource.manual);
+  test(
+    'preserves entry_source: manual through edit round-trip (SC-3)',
+    () async {
+      final seed = await insertSeed(entrySource: EntrySource.manual);
 
-    final result = await useCase.execute(
-      UpdateTransactionParams(seed: seed, amount: 1500),
-    );
+      final result = await useCase.execute(
+        UpdateTransactionParams(seed: seed, amount: 1500),
+      );
 
-    expect(result.isSuccess, isTrue, reason: result.error);
+      expect(result.isSuccess, isTrue, reason: result.error);
 
-    final row = await transactionDao.findById(seed.id);
-    expect(row, isNotNull);
+      final row = await transactionDao.findById(seed.id);
+      expect(row, isNotNull);
 
-    // SC-3: entry_source preserved verbatim
-    expect(row!.entrySource, 'manual');
+      // SC-3: entry_source preserved verbatim
+      expect(row!.entrySource, 'manual');
 
-    // D-08: hash chain frozen across edit
-    expect(row.prevHash, 'prev-hash-abc',
-        reason: 'prevHash must not change on edit (D-08)');
-    expect(row.currentHash, 'current-hash-xyz',
-        reason: 'currentHash must not change on edit (D-08)');
-  });
+      // D-08: hash chain frozen across edit
+      expect(
+        row.prevHash,
+        'prev-hash-abc',
+        reason: 'prevHash must not change on edit (D-08)',
+      );
+      expect(
+        row.currentHash,
+        'current-hash-xyz',
+        reason: 'currentHash must not change on edit (D-08)',
+      );
+    },
+  );
 
-  test('preserves entry_source: voice through edit round-trip (SC-3)', () async {
-    final seed = await insertSeed(
-      entrySource: EntrySource.voice,
-      id: 'tx-voice',
-    );
+  test(
+    'preserves entry_source: voice through edit round-trip (SC-3)',
+    () async {
+      final seed = await insertSeed(
+        entrySource: EntrySource.voice,
+        id: 'tx-voice',
+      );
 
-    final result = await useCase.execute(
-      UpdateTransactionParams(seed: seed, amount: 2000),
-    );
+      final result = await useCase.execute(
+        UpdateTransactionParams(seed: seed, amount: 2000),
+      );
 
-    expect(result.isSuccess, isTrue, reason: result.error);
+      expect(result.isSuccess, isTrue, reason: result.error);
 
-    final row = await transactionDao.findById(seed.id);
-    expect(row, isNotNull);
+      final row = await transactionDao.findById(seed.id);
+      expect(row, isNotNull);
 
-    // SC-3: voice entrySource preserved — must NOT flip to 'manual'
-    expect(row!.entrySource, 'voice',
-        reason: 'voice entry_source must not be flipped to manual on edit');
+      // SC-3: voice entrySource preserved — must NOT flip to 'manual'
+      expect(
+        row!.entrySource,
+        'voice',
+        reason: 'voice entry_source must not be flipped to manual on edit',
+      );
 
-    // D-08: hash chain frozen
-    expect(row.prevHash, 'prev-hash-abc');
-    expect(row.currentHash, 'current-hash-xyz');
-  });
+      // D-08: hash chain frozen
+      expect(row.prevHash, 'prev-hash-abc');
+      expect(row.currentHash, 'current-hash-xyz');
+    },
+  );
 
   test(
     'preserves entry_source: ocr through edit round-trip (SC-3 + D-12 reserved literal)',
@@ -154,10 +169,7 @@ void main() {
       // D-12: 'ocr' is type-reserved; v17 CHECK constraint accepts it.
       // Phase 18 stamps no live rows with 'ocr', but the DAO must preserve
       // it verbatim if a row carries it (future MOD-005 compatibility).
-      final seed = await insertSeed(
-        entrySource: EntrySource.ocr,
-        id: 'tx-ocr',
-      );
+      final seed = await insertSeed(entrySource: EntrySource.ocr, id: 'tx-ocr');
 
       final result = await useCase.execute(
         UpdateTransactionParams(seed: seed, amount: 3000),
@@ -169,8 +181,11 @@ void main() {
       expect(row, isNotNull);
 
       // SC-3 + D-12: reserved 'ocr' literal preserved verbatim
-      expect(row!.entrySource, 'ocr',
-          reason: "'ocr' entry_source must survive a round-trip through edit");
+      expect(
+        row!.entrySource,
+        'ocr',
+        reason: "'ocr' entry_source must survive a round-trip through edit",
+      );
 
       // D-08: hash chain frozen even for ocr rows
       expect(row.prevHash, 'prev-hash-abc');
@@ -184,9 +199,7 @@ void main() {
       final seed = await insertSeed(entrySource: EntrySource.manual);
       final before = DateTime.now();
 
-      await useCase.execute(
-        UpdateTransactionParams(seed: seed, amount: 4000),
-      );
+      await useCase.execute(UpdateTransactionParams(seed: seed, amount: 4000));
 
       final row = await transactionDao.findById(seed.id);
       expect(row, isNotNull);

@@ -8,27 +8,27 @@ import 'package:home_pocket/features/analytics/domain/models/monthly_report.dart
 /// Fixtures: an L1 "Food" (l1_food, level 1) with two L2 children
 /// (l2_dining, l2_grocery), plus an unrelated L1 "Transport" (l1_transport).
 Category _l1(String id) => Category(
-      id: id,
-      name: id,
-      icon: '🍔',
-      color: '#000000',
-      level: 1,
-      createdAt: DateTime(2026, 1, 1),
-    );
+  id: id,
+  name: id,
+  icon: '🍔',
+  color: '#000000',
+  level: 1,
+  createdAt: DateTime(2026, 1, 1),
+);
 
 Category _l2(String id, String parentId) => Category(
-      id: id,
-      name: id,
-      icon: '🍴',
-      color: '#000000',
-      parentId: parentId,
-      level: 2,
-      createdAt: DateTime(2026, 1, 1),
-    );
+  id: id,
+  name: id,
+  icon: '🍴',
+  color: '#000000',
+  parentId: parentId,
+  level: 2,
+  createdAt: DateTime(2026, 1, 1),
+);
 
 Map<String, Category> _categoryMap(List<Category> cats) => {
-      for (final c in cats) c.id: c,
-    };
+  for (final c in cats) c.id: c,
+};
 
 CategoryBreakdown _breakdown(String categoryId, int amount, int count) =>
     CategoryBreakdown(
@@ -42,18 +42,18 @@ CategoryBreakdown _breakdown(String categoryId, int amount, int count) =>
     );
 
 Transaction _tx(String id, String categoryId, int amount) => Transaction(
-      id: id,
-      bookId: 'book_1',
-      deviceId: 'device_1',
-      amount: amount,
-      type: TransactionType.expense,
-      categoryId: categoryId,
-      ledgerType: LedgerType.daily,
-      timestamp: DateTime(2026, 6, 1),
-      currentHash: 'hash_$id',
-      createdAt: DateTime(2026, 6, 1),
-      entrySource: EntrySource.manual,
-    );
+  id: id,
+  bookId: 'book_1',
+  deviceId: 'device_1',
+  amount: amount,
+  type: TransactionType.expense,
+  categoryId: categoryId,
+  ledgerType: LedgerType.daily,
+  timestamp: DateTime(2026, 6, 1),
+  currentHash: 'hash_$id',
+  createdAt: DateTime(2026, 6, 1),
+  entrySource: EntrySource.manual,
+);
 
 void main() {
   final categoryMap = _categoryMap([
@@ -115,13 +115,10 @@ void main() {
 
   group('rollupCategoryBreakdownsToL1', () {
     test('two L2 siblings sum into one L1 entry (amount + count)', () {
-      final result = rollupCategoryBreakdownsToL1(
-        [
-          _breakdown('l2_dining', 300, 2),
-          _breakdown('l2_grocery', 200, 3),
-        ],
-        categoryMap,
-      );
+      final result = rollupCategoryBreakdownsToL1([
+        _breakdown('l2_dining', 300, 2),
+        _breakdown('l2_grocery', 200, 3),
+      ], categoryMap);
 
       expect(result, hasLength(1));
       expect(result.first.categoryId, 'l1_food');
@@ -130,10 +127,9 @@ void main() {
     });
 
     test('an L1-direct breakdown rolls up to itself (Pitfall 2)', () {
-      final result = rollupCategoryBreakdownsToL1(
-        [_breakdown('l1_food', 400, 1)],
-        categoryMap,
-      );
+      final result = rollupCategoryBreakdownsToL1([
+        _breakdown('l1_food', 400, 1),
+      ], categoryMap);
 
       expect(result, hasLength(1));
       expect(result.first.categoryId, 'l1_food');
@@ -142,13 +138,10 @@ void main() {
     });
 
     test('L1-direct + L2-child of the same L1 aggregate together', () {
-      final result = rollupCategoryBreakdownsToL1(
-        [
-          _breakdown('l1_food', 400, 1),
-          _breakdown('l2_dining', 100, 2),
-        ],
-        categoryMap,
-      );
+      final result = rollupCategoryBreakdownsToL1([
+        _breakdown('l1_food', 400, 1),
+        _breakdown('l2_dining', 100, 2),
+      ], categoryMap);
 
       expect(result, hasLength(1));
       expect(result.first.categoryId, 'l1_food');
@@ -157,13 +150,10 @@ void main() {
     });
 
     test('entries are sorted amount-descending', () {
-      final result = rollupCategoryBreakdownsToL1(
-        [
-          _breakdown('l2_dining', 100, 1),
-          _breakdown('l1_transport', 900, 1),
-        ],
-        categoryMap,
-      );
+      final result = rollupCategoryBreakdownsToL1([
+        _breakdown('l2_dining', 100, 1),
+        _breakdown('l1_transport', 900, 1),
+      ], categoryMap);
 
       expect(result, hasLength(2));
       expect(result[0].categoryId, 'l1_transport');
@@ -211,17 +201,20 @@ void main() {
       expect(rollup.transactionCount, 2);
     });
 
-    test('L1-direct AND L2-child transactions are both counted (Pitfall 2)', () {
-      final txns = [
-        _tx('t1', 'l1_food', 400), // filed directly on L1
-        _tx('t2', 'l2_dining', 100), // filed on L2 child
-      ];
+    test(
+      'L1-direct AND L2-child transactions are both counted (Pitfall 2)',
+      () {
+        final txns = [
+          _tx('t1', 'l1_food', 400), // filed directly on L1
+          _tx('t2', 'l2_dining', 100), // filed on L2 child
+        ];
 
-      final rollup = l1RollupFromTransactions(txns, categoryMap, 'l1_food');
+        final rollup = l1RollupFromTransactions(txns, categoryMap, 'l1_food');
 
-      expect(rollup.amount, 500);
-      expect(rollup.transactionCount, 2);
-    });
+        expect(rollup.amount, 500);
+        expect(rollup.transactionCount, 2);
+      },
+    );
 
     test('target L1 with no matching transactions returns a zero rollup', () {
       final txns = [_tx('t1', 'l1_transport', 999)];
@@ -242,8 +235,7 @@ void main() {
   });
 
   group('single-source contract (D-11)', () {
-    test(
-        'l1RollupFromTransactions and rollupCategoryBreakdownsToL1 agree '
+    test('l1RollupFromTransactions and rollupCategoryBreakdownsToL1 agree '
         'on amount + count for the same L1', () {
       // Equivalent fixtures: same txns expressed as L2-grain breakdowns.
       final txns = [
@@ -259,8 +251,7 @@ void main() {
         _breakdown('l2_grocery', 200, 1),
       ];
 
-      final fromTxns =
-          l1RollupFromTransactions(txns, categoryMap, 'l1_food');
+      final fromTxns = l1RollupFromTransactions(txns, categoryMap, 'l1_food');
       final fromBreakdowns = rollupCategoryBreakdownsToL1(
         breakdowns,
         categoryMap,

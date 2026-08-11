@@ -43,23 +43,17 @@ void main() {
       expect(a.hashCode, equals(b.hashCode));
     });
 
-    test(
-      'D-04 type-system gate: DailyLedgerSnapshot.toString() MUST NOT '
-      "expose the 'avgSatisfaction' field name — the field literally cannot "
-      'exist (compile-time gate). transactions.joy_fullness defaults to '
-      '2 and the picker only renders for joy-ledger entries (ADR-014 D-10), '
-      'so AVG over daily rows is default-2-dominated and reads as '
-      '"daily = always neutral/unhappy". Adding avgSatisfaction here is '
-      'the regression mode this gate prevents.',
-      () {
-        const daily = DailyLedgerSnapshot(
-          entryCount: 10,
-          totalSpend: 45000,
-        );
+    test('D-04 type-system gate: DailyLedgerSnapshot.toString() MUST NOT '
+        "expose the 'avgSatisfaction' field name — the field literally cannot "
+        'exist (compile-time gate). transactions.joy_fullness defaults to '
+        '2 and the picker only renders for joy-ledger entries (ADR-014 D-10), '
+        'so AVG over daily rows is default-2-dominated and reads as '
+        '"daily = always neutral/unhappy". Adding avgSatisfaction here is '
+        'the regression mode this gate prevents.', () {
+      const daily = DailyLedgerSnapshot(entryCount: 10, totalSpend: 45000);
 
-        expect(daily.toString(), isNot(contains('avgSatisfaction')));
-      },
-    );
+      expect(daily.toString(), isNot(contains('avgSatisfaction')));
+    });
   });
 
   group('DailyVsJoySnapshot composition', () {
@@ -69,10 +63,7 @@ void main() {
         totalSpend: 12000,
         avgSatisfaction: 7.5,
       );
-      const daily = DailyLedgerSnapshot(
-        entryCount: 10,
-        totalSpend: 45000,
-      );
+      const daily = DailyLedgerSnapshot(entryCount: 10, totalSpend: 45000);
 
       const snapshot = DailyVsJoySnapshot(joy: joy, daily: daily);
 
@@ -88,10 +79,7 @@ void main() {
         totalSpend: 12000,
         avgSatisfaction: 7.5,
       );
-      const daily = DailyLedgerSnapshot(
-        entryCount: 10,
-        totalSpend: 45000,
-      );
+      const daily = DailyLedgerSnapshot(entryCount: 10, totalSpend: 45000);
       const familyJoy = JoyLedgerSnapshot(
         entryCount: 12,
         totalSpend: 36000,
@@ -128,16 +116,10 @@ void main() {
           totalSpend: 36000,
           avgSatisfaction: 8.1,
         ),
-        familyDaily: DailyLedgerSnapshot(
-          entryCount: 32,
-          totalSpend: 140000,
-        ),
+        familyDaily: DailyLedgerSnapshot(entryCount: 32, totalSpend: 140000),
       );
 
-      final cleared = snapshot.copyWith(
-        familyJoy: null,
-        familyDaily: null,
-      );
+      final cleared = snapshot.copyWith(familyJoy: null, familyDaily: null);
 
       expect(cleared.familyJoy, isNull);
       expect(cleared.familyDaily, isNull);

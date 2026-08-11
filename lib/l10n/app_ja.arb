@@ -464,7 +464,7 @@
   "backupAndRestore": "バックアップと復元",
   "backupAndRestoreDescription": "暗号化ファイル",
   "backupHeroTitle": "データを、自分で安全に保管",
-  "backupHeroDescription": "記録と設定をパスワードで暗号化し、端末やクラウドストレージなど好きな場所に保存できます。",
+  "backupHeroDescription": "取引、買い物リスト、カテゴリ、設定をパスワードで暗号化し、端末やクラウドストレージなど好きな場所に保存できます。",
   "backupEncryptionChip": "AES-256-GCM",
   "backupCompressedChip": "圧縮済み",
   "backupNoUploadChip": "自動アップロードなし",
@@ -3019,7 +3019,7 @@
   },
   "shoppingSectionToBuy": "買うもの",
   "@shoppingSectionToBuy": {
-    "description": "Shopping list — section heading above the active (to-buy) items list (v15)"
+    "description": "Shopping list — analytics-style section heading above pending items"
   },
   "shoppingListScreenTitle": "買い物リスト",
   "@shoppingListScreenTitle": {

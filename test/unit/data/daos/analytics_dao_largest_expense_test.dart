@@ -69,11 +69,7 @@ void main() {
           ledgerType: 'daily',
           timestamp: DateTime(2026, 5, 15, 20),
         );
-        await seedTx(
-          id: 'smaller_daily',
-          amount: 7000,
-          ledgerType: 'daily',
-        );
+        await seedTx(id: 'smaller_daily', amount: 7000, ledgerType: 'daily');
 
         final largest = await dao.getLargestMonthlyExpense(
           bookId: 'book_total',

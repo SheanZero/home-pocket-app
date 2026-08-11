@@ -60,7 +60,10 @@ void main() {
           ),
         );
 
-        final result = await apiClient.fetchRate('USD', DateTime.utc(2026, 6, 11));
+        final result = await apiClient.fetchRate(
+          'USD',
+          DateTime.utc(2026, 6, 11),
+        );
 
         expect(result.rate, (1.0 / 0.00623).toStringAsPrecision(7));
         expect(result.actualRateDate, isNull);
@@ -81,7 +84,10 @@ void main() {
           ),
         );
 
-        final result = await apiClient.fetchRate('USD', DateTime.utc(2026, 6, 13));
+        final result = await apiClient.fetchRate(
+          'USD',
+          DateTime.utc(2026, 6, 13),
+        );
 
         // CR-02 / IN-03: actualRateDate is parsed as UTC-midnight of the bare
         // YYYY-MM-DD (not a local DateTime), sharing the rateDate key basis.
@@ -106,13 +112,14 @@ void main() {
             ),
           ),
         ).thenAnswer(
-          (_) async => http.Response(
-            '{"date":"2026-06-12","jpy":{"twd":0.0304}}',
-            200,
-          ),
+          (_) async =>
+              http.Response('{"date":"2026-06-12","jpy":{"twd":0.0304}}', 200),
         );
 
-        final result = await apiClient.fetchRate('TWD', DateTime.utc(2026, 6, 12));
+        final result = await apiClient.fetchRate(
+          'TWD',
+          DateTime.utc(2026, 6, 12),
+        );
 
         expect(result.rate, (1.0 / 0.0304).toStringAsPrecision(7));
         expect(result.actualRateDate, isNull);
@@ -140,13 +147,14 @@ void main() {
             ),
           ),
         ).thenAnswer(
-          (_) async => http.Response(
-            '{"date":"2026-06-12","jpy":{"twd":0.0304}}',
-            200,
-          ),
+          (_) async =>
+              http.Response('{"date":"2026-06-12","jpy":{"twd":0.0304}}', 200),
         );
 
-        final result = await apiClient.fetchRate('TWD', DateTime.utc(2026, 6, 12));
+        final result = await apiClient.fetchRate(
+          'TWD',
+          DateTime.utc(2026, 6, 12),
+        );
 
         expect(result.rate, (1.0 / 0.0304).toStringAsPrecision(7));
         expect(result.source, 'fawazahmed0');
@@ -155,20 +163,17 @@ void main() {
   });
 
   group('All-sources-fail behavior', () {
-    test(
-      'every source fails → throws ExchangeRateApiException',
-      () async {
-        // All three sources return non-200 → chain exhausts.
-        when(() => httpClient.get(any())).thenAnswer(
-          (_) async => http.Response('Not Found', 404),
-        );
+    test('every source fails → throws ExchangeRateApiException', () async {
+      // All three sources return non-200 → chain exhausts.
+      when(
+        () => httpClient.get(any()),
+      ).thenAnswer((_) async => http.Response('Not Found', 404));
 
-        expect(
-          () => apiClient.fetchRate('TWD', DateTime.utc(2026, 6, 12)),
-          throwsA(isA<ExchangeRateApiException>()),
-        );
-      },
-    );
+      expect(
+        () => apiClient.fetchRate('TWD', DateTime.utc(2026, 6, 12)),
+        throwsA(isA<ExchangeRateApiException>()),
+      );
+    });
   });
 
   group('SC-5: URL privacy (no user data in constructed URLs)', () {
@@ -198,14 +203,13 @@ void main() {
         );
         for (final uri in capturedUrls) {
           final s = uri.toString();
-          expect(pattern.hasMatch(s), isTrue, reason: 'URL host not allowed: $s');
+          expect(
+            pattern.hasMatch(s),
+            isTrue,
+            reason: 'URL host not allowed: $s',
+          );
           // No user-derived data leaks into the URL.
-          for (final forbidden in [
-            'userId',
-            'bookId',
-            'amount',
-            'deviceId',
-          ]) {
+          for (final forbidden in ['userId', 'bookId', 'amount', 'deviceId']) {
             expect(
               s.contains(forbidden),
               isFalse,

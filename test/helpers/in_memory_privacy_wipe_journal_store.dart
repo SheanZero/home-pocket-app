@@ -35,4 +35,3 @@ class InMemoryPrivacyWipeJournalStore implements PrivacyWipeJournalStore {
   @override
   Future<void> write(PrivacyWipeJournalEntry entry) async => _entry = entry;
 }
-

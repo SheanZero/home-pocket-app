@@ -8,8 +8,10 @@ import 'package:path_provider/path_provider.dart';
 import '../../core/constants/app_info.dart' as app_info;
 import '../../features/accounting/domain/models/book.dart';
 import '../../features/accounting/domain/models/category.dart';
+import '../../features/accounting/domain/models/category_ledger_config.dart';
 import '../../features/accounting/domain/models/transaction.dart';
 import '../../features/accounting/domain/repositories/book_repository.dart';
+import '../../features/accounting/domain/repositories/category_ledger_config_repository.dart';
 import '../../features/accounting/domain/repositories/category_repository.dart';
 import '../../features/accounting/domain/repositories/transaction_repository.dart';
 import '../../features/accounting/domain/models/transaction_photo_sync_policy.dart';
@@ -18,6 +20,9 @@ import '../../features/currency/domain/models/exchange_rate.dart';
 import '../../features/settings/domain/models/backup_data.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
 import '../../features/settings/domain/repositories/unit_of_work.dart';
+import '../../features/shopping_list/domain/models/shopping_item.dart';
+import '../../features/shopping_list/domain/models/shopping_item_backup_policy.dart';
+import '../../features/shopping_list/domain/repositories/shopping_item_repository.dart';
 import '../../infrastructure/crypto/services/backup_crypto_service.dart';
 import '../../shared/utils/result.dart';
 
@@ -29,7 +34,9 @@ class ExportBackupUseCase {
   ExportBackupUseCase({
     required this._transactionRepo,
     required this._categoryRepo,
+    required this._categoryLedgerConfigRepo,
     required this._bookRepo,
+    required this._shoppingItemRepo,
     required this._settingsRepo,
     required this._exchangeRateRepo,
     required this._unitOfWork,
@@ -41,7 +48,9 @@ class ExportBackupUseCase {
 
   final TransactionRepository _transactionRepo;
   final CategoryRepository _categoryRepo;
+  final CategoryLedgerConfigRepository _categoryLedgerConfigRepo;
   final BookRepository _bookRepo;
+  final ShoppingItemRepository _shoppingItemRepo;
   final SettingsRepository _settingsRepo;
   final ExchangeRateRepository _exchangeRateRepo;
   final UnitOfWork _unitOfWork;
@@ -77,7 +86,9 @@ class ExportBackupUseCase {
         return _BackupSnapshot(
           transactions: transactions.expand((items) => items).toList(),
           categories: await _categoryRepo.findAll(),
+          categoryLedgerConfigs: await _categoryLedgerConfigRepo.findAll(),
           books: books,
+          shoppingItems: await _shoppingItemRepo.findAll(includeDeleted: true),
           exchangeRates: await _exchangeRateRepo.findAll(),
         );
       });
@@ -95,7 +106,13 @@ class ExportBackupUseCase {
             .map(TransactionPhotoSyncPolicy.toBackupJson)
             .toList(),
         categories: snapshot.categories.map((cat) => cat.toJson()).toList(),
+        categoryLedgerConfigs: snapshot.categoryLedgerConfigs
+            .map((config) => config.toJson())
+            .toList(),
         books: snapshot.books.map((book) => book.toJson()).toList(),
+        shoppingItems: snapshot.shoppingItems
+            .map(ShoppingItemBackupPolicy.toBackupJson)
+            .toList(),
         settings: settings.toJson(),
         // D-10: epoch-seconds serialization per RESEARCH.md backup shape.
         exchangeRates: snapshot.exchangeRates
@@ -238,12 +255,16 @@ class _BackupSnapshot {
   const _BackupSnapshot({
     required this.transactions,
     required this.categories,
+    required this.categoryLedgerConfigs,
     required this.books,
+    required this.shoppingItems,
     required this.exchangeRates,
   });
 
   final List<Transaction> transactions;
   final List<Category> categories;
+  final List<CategoryLedgerConfig> categoryLedgerConfigs;
   final List<Book> books;
+  final List<ShoppingItem> shoppingItems;
   final List<ExchangeRate> exchangeRates;
 }

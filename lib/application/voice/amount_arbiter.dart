@@ -148,10 +148,7 @@ class AmountArbiter {
         parsed != null &&
         merged != null &&
         merged != parsed) {
-      final expected = expectedDigitCountForAmount(
-        rawText,
-        localeId: localeId,
-      );
+      final expected = expectedDigitCountForAmount(rawText, localeId: localeId);
       if (expected != null &&
           '$merged'.length != expected &&
           '$parsed'.length == expected) {

@@ -549,10 +549,7 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 100));
-    await _matchScreen(
-      tester,
-      'family_unable_to_join_safe_area_dark_zh.png',
-    );
+    await _matchScreen(tester, 'family_unable_to_join_safe_area_dark_zh.png');
   });
 
   testWidgets('family management — light ja', (tester) async {

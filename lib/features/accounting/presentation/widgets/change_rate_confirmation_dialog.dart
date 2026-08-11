@@ -69,8 +69,7 @@ class ChangeRateConfirmationDialog extends StatelessWidget {
       actions: [
         TextButton(
           key: const Key('dialog_keep_manual_rate'),
-          onPressed: () =>
-              Navigator.pop(context, ChangeRateChoice.keepManual),
+          onPressed: () => Navigator.pop(context, ChangeRateChoice.keepManual),
           style: TextButton.styleFrom(foregroundColor: palette.textSecondary),
           child: Text(
             l10n.keepManual,

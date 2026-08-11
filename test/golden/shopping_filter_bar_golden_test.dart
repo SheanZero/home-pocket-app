@@ -61,11 +61,7 @@ Widget _wrap({required Locale locale, ThemeMode themeMode = ThemeMode.light}) {
       darkTheme: ThemeData.dark(),
       themeMode: themeMode,
       home: const Scaffold(
-        body: SizedBox(
-          width: 390,
-          height: 150,
-          child: ShoppingFilterBar(),
-        ),
+        body: SizedBox(width: 390, height: 150, child: ShoppingFilterBar()),
       ),
     ),
   );
@@ -78,8 +74,9 @@ void main() {
       const Locale('zh'),
       const Locale('en'),
     ]) {
-      testWidgets('filter_bar_active — ${locale.languageCode} light',
-          (tester) async {
+      testWidgets('filter_bar_active — ${locale.languageCode} light', (
+        tester,
+      ) async {
         await tester.pumpWidget(_wrap(locale: locale));
         await tester.pumpAndSettle();
         await expectLater(
@@ -90,8 +87,9 @@ void main() {
         );
       });
 
-      testWidgets('filter_bar_active — ${locale.languageCode} dark',
-          (tester) async {
+      testWidgets('filter_bar_active — ${locale.languageCode} dark', (
+        tester,
+      ) async {
         await tester.pumpWidget(
           _wrap(locale: locale, themeMode: ThemeMode.dark),
         );

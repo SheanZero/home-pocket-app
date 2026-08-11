@@ -25,6 +25,8 @@ import '../../../../infrastructure/security/providers.dart' as security;
 import '../../../../infrastructure/storage/app_owned_user_files_cleaner.dart';
 import '../../../../infrastructure/storage/file_privacy_wipe_journal_store.dart';
 import '../../../accounting/presentation/providers/repository_providers.dart';
+import '../../../shopping_list/presentation/providers/repository_providers.dart'
+    show shoppingItemRepositoryProvider;
 import '../../domain/models/app_settings.dart';
 import '../../domain/repositories/settings_repository.dart';
 import '../../domain/repositories/unit_of_work.dart';
@@ -64,7 +66,9 @@ ExportBackupUseCase exportBackupUseCase(Ref ref) {
   return ExportBackupUseCase(
     transactionRepo: ref.watch(transactionRepositoryProvider),
     categoryRepo: ref.watch(categoryRepositoryProvider),
+    categoryLedgerConfigRepo: ref.watch(categoryLedgerConfigRepositoryProvider),
     bookRepo: ref.watch(bookRepositoryProvider),
+    shoppingItemRepo: ref.watch(shoppingItemRepositoryProvider),
     settingsRepo: ref.watch(settingsRepositoryProvider),
     exchangeRateRepo: ref.watch(appExchangeRateRepositoryProvider),
     unitOfWork: ref.watch(unitOfWorkProvider),
@@ -77,7 +81,9 @@ ImportBackupUseCase importBackupUseCase(Ref ref) {
   return ImportBackupUseCase(
     transactionRepo: ref.watch(transactionRepositoryProvider),
     categoryRepo: ref.watch(categoryRepositoryProvider),
+    categoryLedgerConfigRepo: ref.watch(categoryLedgerConfigRepositoryProvider),
     bookRepo: ref.watch(bookRepositoryProvider),
+    shoppingItemRepo: ref.watch(shoppingItemRepositoryProvider),
     settingsRepo: ref.watch(settingsRepositoryProvider),
     exchangeRateRepo: ref.watch(appExchangeRateRepositoryProvider),
     unitOfWork: ref.watch(unitOfWorkProvider),

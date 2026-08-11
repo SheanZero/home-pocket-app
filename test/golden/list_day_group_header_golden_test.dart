@@ -49,10 +49,7 @@ void main() {
       await tester.pumpWidget(
         _wrap(
           locale: const Locale('ja'),
-          child: ListDayGroupHeader(
-            date: _date,
-            locale: const Locale('ja'),
-          ),
+          child: ListDayGroupHeader(date: _date, locale: const Locale('ja')),
         ),
       );
       await tester.pumpAndSettle();
@@ -67,10 +64,7 @@ void main() {
         _wrap(
           locale: const Locale('ja'),
           themeMode: ThemeMode.dark,
-          child: ListDayGroupHeader(
-            date: _date,
-            locale: const Locale('ja'),
-          ),
+          child: ListDayGroupHeader(date: _date, locale: const Locale('ja')),
         ),
       );
       await tester.pumpAndSettle();
@@ -84,10 +78,7 @@ void main() {
       await tester.pumpWidget(
         _wrap(
           locale: const Locale('zh'),
-          child: ListDayGroupHeader(
-            date: _date,
-            locale: const Locale('zh'),
-          ),
+          child: ListDayGroupHeader(date: _date, locale: const Locale('zh')),
         ),
       );
       await tester.pumpAndSettle();
@@ -102,10 +93,7 @@ void main() {
         _wrap(
           locale: const Locale('zh'),
           themeMode: ThemeMode.dark,
-          child: ListDayGroupHeader(
-            date: _date,
-            locale: const Locale('zh'),
-          ),
+          child: ListDayGroupHeader(date: _date, locale: const Locale('zh')),
         ),
       );
       await tester.pumpAndSettle();
@@ -119,10 +107,7 @@ void main() {
       await tester.pumpWidget(
         _wrap(
           locale: const Locale('en'),
-          child: ListDayGroupHeader(
-            date: _date,
-            locale: const Locale('en'),
-          ),
+          child: ListDayGroupHeader(date: _date, locale: const Locale('en')),
         ),
       );
       await tester.pumpAndSettle();
@@ -137,10 +122,7 @@ void main() {
         _wrap(
           locale: const Locale('en'),
           themeMode: ThemeMode.dark,
-          child: ListDayGroupHeader(
-            date: _date,
-            locale: const Locale('en'),
-          ),
+          child: ListDayGroupHeader(date: _date, locale: const Locale('en')),
         ),
       );
       await tester.pumpAndSettle();

@@ -64,135 +64,147 @@ void main() {
 
     // SC#3 + SORT-02: valid params forwarded to repo with default sort
     // Note: default sort changed from updatedAt to timestamp in quick task 260531-oqn.
-    test('execute() forwards params to repository with default timestamp/desc sort',
-        () async {
-      final txList = [makeTransaction('tx1', 100)];
-      when(
-        () => mockRepo.findByBookIds(
-          ['b1'],
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          sortField: any(named: 'sortField'),
-          sortDirection: any(named: 'sortDirection'),
-        ),
-      ).thenAnswer((_) async => txList);
+    test(
+      'execute() forwards params to repository with default timestamp/desc sort',
+      () async {
+        final txList = [makeTransaction('tx1', 100)];
+        when(
+          () => mockRepo.findByBookIds(
+            ['b1'],
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            sortField: any(named: 'sortField'),
+            sortDirection: any(named: 'sortDirection'),
+          ),
+        ).thenAnswer((_) async => txList);
 
-      final result = await useCase.execute(
-        GetListParams(bookIds: ['b1'], filter: baseFilter),
-      );
+        final result = await useCase.execute(
+          GetListParams(bookIds: ['b1'], filter: baseFilter),
+        );
 
-      expect(result.isSuccess, isTrue);
-      expect(result.data!.length, 1);
+        expect(result.isSuccess, isTrue);
+        expect(result.data!.length, 1);
 
-      verify(
-        () => mockRepo.findByBookIds(
-          ['b1'],
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          sortField: SortField.timestamp,
-          sortDirection: SortDirection.desc,
-        ),
-      ).called(1);
-    });
+        verify(
+          () => mockRepo.findByBookIds(
+            ['b1'],
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            sortField: SortField.timestamp,
+            sortDirection: SortDirection.desc,
+          ),
+        ).called(1);
+      },
+    );
 
     // SORT-01: SortField.timestamp forwarding
-    test('SORT-01: execute() forwards sortField=timestamp to repository',
-        () async {
-      when(
-        () => mockRepo.findByBookIds(
-          ['b1'],
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          sortField: any(named: 'sortField'),
-          sortDirection: any(named: 'sortDirection'),
-        ),
-      ).thenAnswer((_) async => []);
+    test(
+      'SORT-01: execute() forwards sortField=timestamp to repository',
+      () async {
+        when(
+          () => mockRepo.findByBookIds(
+            ['b1'],
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            sortField: any(named: 'sortField'),
+            sortDirection: any(named: 'sortDirection'),
+          ),
+        ).thenAnswer((_) async => []);
 
-      final filter = baseFilter.copyWith(
-        sortConfig: const ListSortConfig(sortField: SortField.timestamp),
-      );
+        final filter = baseFilter.copyWith(
+          sortConfig: const ListSortConfig(sortField: SortField.timestamp),
+        );
 
-      await useCase.execute(GetListParams(bookIds: ['b1'], filter: filter));
+        await useCase.execute(GetListParams(bookIds: ['b1'], filter: filter));
 
-      verify(
-        () => mockRepo.findByBookIds(
-          ['b1'],
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          sortField: SortField.timestamp,
-          sortDirection: any(named: 'sortDirection'),
-        ),
-      ).called(1);
-    });
+        verify(
+          () => mockRepo.findByBookIds(
+            ['b1'],
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            sortField: SortField.timestamp,
+            sortDirection: any(named: 'sortDirection'),
+          ),
+        ).called(1);
+      },
+    );
 
     // SORT-03: SortField.amount forwarding
-    test('SORT-03: execute() forwards sortField=amount to repository', () async {
-      when(
-        () => mockRepo.findByBookIds(
-          ['b1'],
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          sortField: any(named: 'sortField'),
-          sortDirection: any(named: 'sortDirection'),
-        ),
-      ).thenAnswer((_) async => []);
+    test(
+      'SORT-03: execute() forwards sortField=amount to repository',
+      () async {
+        when(
+          () => mockRepo.findByBookIds(
+            ['b1'],
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            sortField: any(named: 'sortField'),
+            sortDirection: any(named: 'sortDirection'),
+          ),
+        ).thenAnswer((_) async => []);
 
-      final filter = baseFilter.copyWith(
-        sortConfig: const ListSortConfig(sortField: SortField.amount),
-      );
+        final filter = baseFilter.copyWith(
+          sortConfig: const ListSortConfig(sortField: SortField.amount),
+        );
 
-      await useCase.execute(GetListParams(bookIds: ['b1'], filter: filter));
+        await useCase.execute(GetListParams(bookIds: ['b1'], filter: filter));
 
-      verify(
-        () => mockRepo.findByBookIds(
-          ['b1'],
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          sortField: SortField.amount,
-          sortDirection: any(named: 'sortDirection'),
-        ),
-      ).called(1);
-    });
+        verify(
+          () => mockRepo.findByBookIds(
+            ['b1'],
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            sortField: SortField.amount,
+            sortDirection: any(named: 'sortDirection'),
+          ),
+        ).called(1);
+      },
+    );
 
     // SORT-04: SortDirection.asc forwarding
-    test('SORT-04: execute() forwards sortDirection=asc to repository', () async {
-      when(
-        () => mockRepo.findByBookIds(
-          ['b1'],
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          sortField: any(named: 'sortField'),
-          sortDirection: any(named: 'sortDirection'),
-        ),
-      ).thenAnswer((_) async => []);
+    test(
+      'SORT-04: execute() forwards sortDirection=asc to repository',
+      () async {
+        when(
+          () => mockRepo.findByBookIds(
+            ['b1'],
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            sortField: any(named: 'sortField'),
+            sortDirection: any(named: 'sortDirection'),
+          ),
+        ).thenAnswer((_) async => []);
 
-      final filter = baseFilter.copyWith(
-        sortConfig: const ListSortConfig(sortDirection: SortDirection.asc),
-      );
+        final filter = baseFilter.copyWith(
+          sortConfig: const ListSortConfig(sortDirection: SortDirection.asc),
+        );
 
-      await useCase.execute(GetListParams(bookIds: ['b1'], filter: filter));
+        await useCase.execute(GetListParams(bookIds: ['b1'], filter: filter));
 
-      verify(
-        () => mockRepo.findByBookIds(
-          ['b1'],
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          sortField: any(named: 'sortField'),
-          sortDirection: SortDirection.asc,
-        ),
-      ).called(1);
-    });
+        verify(
+          () => mockRepo.findByBookIds(
+            ['b1'],
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            sortField: any(named: 'sortField'),
+            sortDirection: SortDirection.asc,
+          ),
+        ).called(1);
+      },
+    );
 
     // SC#4: Freezed copyWith immutability
-    test('SC#4: ListSortConfig.copyWith creates new object, original unchanged',
-        () {
-      const original = ListSortConfig(sortField: SortField.timestamp);
-      final copy = original.copyWith(sortField: SortField.amount);
+    test(
+      'SC#4: ListSortConfig.copyWith creates new object, original unchanged',
+      () {
+        const original = ListSortConfig(sortField: SortField.timestamp);
+        final copy = original.copyWith(sortField: SortField.amount);
 
-      expect(identical(original, copy), isFalse);
-      expect(original.sortField, SortField.timestamp);
-      expect(copy.sortField, SortField.amount);
-    });
+        expect(identical(original, copy), isFalse);
+        expect(original.sortField, SortField.timestamp);
+        expect(copy.sortField, SortField.amount);
+      },
+    );
 
     // D-03: watch() throws ArgumentError synchronously on empty bookIds
     test('watch() throws ArgumentError when bookIds is empty', () {

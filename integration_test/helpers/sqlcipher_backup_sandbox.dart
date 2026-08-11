@@ -11,12 +11,16 @@ import 'package:home_pocket/application/settings/restore_backup_use_case.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/data/daos/book_dao.dart';
 import 'package:home_pocket/data/daos/category_dao.dart';
+import 'package:home_pocket/data/daos/category_ledger_config_dao.dart';
 import 'package:home_pocket/data/daos/exchange_rate_dao.dart';
+import 'package:home_pocket/data/daos/shopping_item_dao.dart';
 import 'package:home_pocket/data/daos/transaction_dao.dart';
 import 'package:home_pocket/data/repositories/book_repository_impl.dart';
 import 'package:home_pocket/data/repositories/category_repository_impl.dart';
+import 'package:home_pocket/data/repositories/category_ledger_config_repository_impl.dart';
 import 'package:home_pocket/data/repositories/exchange_rate_repository_impl.dart';
 import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
+import 'package:home_pocket/data/repositories/shopping_item_repository_impl.dart';
 import 'package:home_pocket/data/repositories/unit_of_work_impl.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
@@ -115,7 +119,9 @@ class SqlCipherBackupSandbox {
   late AppDatabase _database;
   late BookRepositoryImpl _books;
   late CategoryRepositoryImpl _categories;
+  late CategoryLedgerConfigRepositoryImpl _categoryLedgerConfigs;
   late TransactionRepositoryImpl _transactions;
+  late ShoppingItemRepositoryImpl _shoppingItems;
   late ExchangeRateRepositoryImpl _exchangeRates;
   late ExportBackupUseCase _export;
   late ImportBackupUseCase _import;
@@ -148,11 +154,19 @@ class SqlCipherBackupSandbox {
     );
     _books = BookRepositoryImpl(dao: BookDao(_database));
     _categories = CategoryRepositoryImpl(dao: CategoryDao(_database));
+    _categoryLedgerConfigs = CategoryLedgerConfigRepositoryImpl(
+      dao: CategoryLedgerConfigDao(_database),
+    );
+    final fieldEncryption = FieldEncryptionService(
+      repository: EncryptionRepositoryImpl(masterKeyRepository: _masterKeys),
+    );
     _transactions = TransactionRepositoryImpl(
       dao: TransactionDao(_database),
-      encryptionService: FieldEncryptionService(
-        repository: EncryptionRepositoryImpl(masterKeyRepository: _masterKeys),
-      ),
+      encryptionService: fieldEncryption,
+    );
+    _shoppingItems = ShoppingItemRepositoryImpl(
+      dao: ShoppingItemDao(_database),
+      encryptionService: fieldEncryption,
     );
     _exchangeRates = ExchangeRateRepositoryImpl(
       dao: ExchangeRateDao(_database),
@@ -164,7 +178,9 @@ class SqlCipherBackupSandbox {
     _export = ExportBackupUseCase(
       transactionRepo: _transactions,
       categoryRepo: _categories,
+      categoryLedgerConfigRepo: _categoryLedgerConfigs,
       bookRepo: _books,
+      shoppingItemRepo: _shoppingItems,
       settingsRepo: _settings,
       exchangeRateRepo: _exchangeRates,
       unitOfWork: unitOfWork,
@@ -173,7 +189,9 @@ class SqlCipherBackupSandbox {
     _import = ImportBackupUseCase(
       transactionRepo: _transactions,
       categoryRepo: _categories,
+      categoryLedgerConfigRepo: _categoryLedgerConfigs,
       bookRepo: _books,
+      shoppingItemRepo: _shoppingItems,
       settingsRepo: _settings,
       exchangeRateRepo: _exchangeRates,
       unitOfWork: unitOfWork,
@@ -623,7 +641,9 @@ class SqlCipherBackupSandbox {
     return ImportBackupUseCase(
       transactionRepo: _transactions,
       categoryRepo: _categories,
+      categoryLedgerConfigRepo: _categoryLedgerConfigs,
       bookRepo: _books,
+      shoppingItemRepo: _shoppingItems,
       settingsRepo: _settings,
       exchangeRateRepo: _exchangeRates,
       unitOfWork: unitOfWork ?? UnitOfWorkImpl(db: _database),

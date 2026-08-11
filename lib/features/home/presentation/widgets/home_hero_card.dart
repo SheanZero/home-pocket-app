@@ -844,7 +844,7 @@ class HomeHeroCard extends StatelessWidget {
           category,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.supporting.copyWith(
+          style: AppTextStyles.itemTitle.copyWith(
             fontWeight: FontWeight.w700,
             color: palette.textPrimary,
           ),

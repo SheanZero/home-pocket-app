@@ -35,16 +35,16 @@ void main() {
     test('Arabic still wins: "50 dollars" (en-US) -> 50 via Arabic path', () {
       // 「50 dollars」 has Arabic digits — _extractArabicAmount must win and the
       // word fallback is never consulted.
-      expect(
-        parser.extractAmount('50 dollars', localeId: 'en-US'),
-        equals(50),
-      );
+      expect(parser.extractAmount('50 dollars', localeId: 'en-US'), equals(50));
     });
 
-    test('no money context: "fifty" alone (en-US) -> null (fallback gated)', () {
-      // No currency token / $ / dollar word → money context absent → no fire.
-      expect(parser.extractAmount('fifty', localeId: 'en-US'), isNull);
-    });
+    test(
+      'no money context: "fifty" alone (en-US) -> null (fallback gated)',
+      () {
+        // No currency token / $ / dollar word → money context absent → no fire.
+        expect(parser.extractAmount('fifty', localeId: 'en-US'), isNull);
+      },
+    );
 
     test('"\$fifty" symbol money context (en-US) -> 50', () {
       expect(parser.extractAmount(r'$fifty', localeId: 'en-US'), equals(50));
@@ -94,20 +94,17 @@ void main() {
       },
     );
 
-    test(
-      'an en-US session routes amounts through the en path (not zh/ja)',
-      () {
-        // Confirms the pttVoiceLocaleId mirror value ("en-US") carries the en
-        // number-word fallback + en currency detection into the parse path.
-        final voiceLocale = voiceLocaleIdFromLanguageCode('en');
-        expect(
-          parser.extractAmount('fifty dollars', localeId: voiceLocale),
-          equals(50),
-        );
-        // And the same en-US session does NOT mis-route a CJK amount through
-        // the CJK machine.
-        expect(parser.extractAmount('五百円', localeId: voiceLocale), isNull);
-      },
-    );
+    test('an en-US session routes amounts through the en path (not zh/ja)', () {
+      // Confirms the pttVoiceLocaleId mirror value ("en-US") carries the en
+      // number-word fallback + en currency detection into the parse path.
+      final voiceLocale = voiceLocaleIdFromLanguageCode('en');
+      expect(
+        parser.extractAmount('fifty dollars', localeId: voiceLocale),
+        equals(50),
+      );
+      // And the same en-US session does NOT mis-route a CJK amount through
+      // the CJK machine.
+      expect(parser.extractAmount('五百円', localeId: voiceLocale), isNull);
+    });
   });
 }

@@ -22,11 +22,7 @@ void main() {
         final hits = <String>[];
         final literalPattern = RegExp(r'Color\(0[xX]');
 
-        for (final dir in [
-          'lib/features',
-          'lib/application',
-          'lib/shared',
-        ]) {
+        for (final dir in ['lib/features', 'lib/application', 'lib/shared']) {
           final directory = Directory(dir);
           if (!directory.existsSync()) continue;
 
@@ -36,7 +32,9 @@ void main() {
             final source = entity.readAsStringSync();
             final matches = literalPattern.allMatches(source).toList();
             if (matches.isNotEmpty) {
-              hits.add('${_normalizePath(entity.path)}: ${matches.length} hit(s)');
+              hits.add(
+                '${_normalizePath(entity.path)}: ${matches.length} hit(s)',
+              );
             }
           }
         }

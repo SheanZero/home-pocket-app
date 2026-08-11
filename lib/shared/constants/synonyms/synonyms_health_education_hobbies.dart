@@ -17,8 +17,14 @@ final List<CategoryKeywordPreference> _health = [
   seed('薬', 'cat_health_medicine'),
   seed('医院', 'cat_health_hospital'),
   seed('药', 'cat_health_medicine'),
-  seed('びょういん', 'cat_health_hospital'), // ja — hospital (hiragana reading; 病院 is Han)
-  seed('くすり', 'cat_health_medicine'), // ja — medicine (hiragana reading; 薬 is Han)
+  seed(
+    'びょういん',
+    'cat_health_hospital',
+  ), // ja — hospital (hiragana reading; 病院 is Han)
+  seed(
+    'くすり',
+    'cat_health_medicine',
+  ), // ja — medicine (hiragana reading; 薬 is Han)
   // ===== Health & Medical — direct coverage =====
   seed('健身', 'cat_health_fitness'), // zh — fitness
   seed('健身房', 'cat_health_fitness'), // zh — gym
@@ -86,9 +92,15 @@ final List<CategoryKeywordPreference> _education = [
   seed('受験', 'cat_education_entrance_exam'), // ja — entrance exam (Han)
   seed('じゅけん', 'cat_education_entrance_exam'), // ja — taking exams (hiragana)
   seed('学资保险', 'cat_education_gakushi_hoken'), // zh — education insurance
-  seed('教育金保险', 'cat_education_gakushi_hoken'), // zh — education savings insurance
+  seed(
+    '教育金保险',
+    'cat_education_gakushi_hoken',
+  ), // zh — education savings insurance
   seed('学資保険', 'cat_education_gakushi_hoken'), // ja — gakushi hoken (Han)
-  seed('がくしほけん', 'cat_education_gakushi_hoken'), // ja — education insurance (hiragana)
+  seed(
+    'がくしほけん',
+    'cat_education_gakushi_hoken',
+  ), // ja — education insurance (hiragana)
   seed('讲座', 'cat_education_seminar'), // zh — seminar
   seed('研讨会', 'cat_education_seminar'), // zh — workshop
   seed('セミナー', 'cat_education_seminar'), // ja — seminar
@@ -103,7 +115,10 @@ final List<CategoryKeywordPreference> _education = [
   seed('tuition', 'cat_education_tuition'), // en — tuition
   seed('cram school', 'cat_education_cram_school'), // en — cram school
   seed('entrance exam', 'cat_education_entrance_exam'), // en — entrance exam
-  seed('education insurance', 'cat_education_gakushi_hoken'), // en — education insurance
+  seed(
+    'education insurance',
+    'cat_education_gakushi_hoken',
+  ), // en — education insurance
   seed('seminar', 'cat_education_seminar'), // en — seminar
   seed('other education', 'cat_education_other'), // en — other education
 ];
@@ -158,7 +173,10 @@ final List<CategoryKeywordPreference> _hobbies = [
   seed('manga', 'cat_hobbies_books'), // en — manga / comics
   seed('travel', 'cat_hobbies_travel'), // en — travel
   seed('music', 'cat_hobbies_music'), // en — music
-  seed('streaming', 'cat_hobbies_subscription'), // en — hobby/streaming subscription
+  seed(
+    'streaming',
+    'cat_hobbies_subscription',
+  ), // en — hobby/streaming subscription
   seed('oshikatsu', 'cat_hobbies_oshikatsu'), // en — idol fandom spending
   seed('other hobbies', 'cat_hobbies_other'), // en — other hobbies
 ];

@@ -5,32 +5,33 @@ import 'package:home_pocket/features/family_sync/presentation/screens/confirm_jo
 import '../../../../../helpers/test_localizations.dart';
 
 void main() {
-  testWidgets('keeps empty-family cleanup as an internal implementation detail', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      createLocalizedWidget(
-        const ConfirmJoinScreen(
-          result: JoinGroupVerified(
-            groupId: 'target-group',
-            groupName: 'Target Family',
-            ownerDeviceId: 'target-owner',
-            ownerDisplayName: 'Owner',
-            ownerAvatarEmoji: '🏠',
-            replacesEmptyOwnedGroup: true,
+  testWidgets(
+    'keeps empty-family cleanup as an internal implementation detail',
+    (tester) async {
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const ConfirmJoinScreen(
+            result: JoinGroupVerified(
+              groupId: 'target-group',
+              groupName: 'Target Family',
+              ownerDeviceId: 'target-owner',
+              ownerDisplayName: 'Owner',
+              ownerAvatarEmoji: '🏠',
+              replacesEmptyOwnedGroup: true,
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(
-      find.text(
-        'After you submit the join request, your current family with no '
-        'other members will be deleted automatically.',
-      ),
-      findsNothing,
-    );
-    expect(find.text('Request to join'), findsOneWidget);
-  });
+      expect(
+        find.text(
+          'After you submit the join request, your current family with no '
+          'other members will be deleted automatically.',
+        ),
+        findsNothing,
+      );
+      expect(find.text('Request to join'), findsOneWidget);
+    },
+  );
 }

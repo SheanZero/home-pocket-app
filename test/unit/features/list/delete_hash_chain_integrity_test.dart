@@ -87,15 +87,18 @@ void main() {
     mockEncryption = _MockFieldEncryptionService();
 
     // Passthrough encryption — no actual notes in test transactions
-    when(() => mockEncryption.encryptField(any())).thenAnswer(
-      (inv) async => 'enc_${inv.positionalArguments[0]}',
-    );
+    when(
+      () => mockEncryption.encryptField(any()),
+    ).thenAnswer((inv) async => 'enc_${inv.positionalArguments[0]}');
     when(() => mockEncryption.decryptField(any())).thenAnswer((inv) async {
       final cipher = inv.positionalArguments[0] as String;
       return cipher.startsWith('enc_') ? cipher.substring(4) : cipher;
     });
 
-    repo = TransactionRepositoryImpl(dao: dao, encryptionService: mockEncryption);
+    repo = TransactionRepositoryImpl(
+      dao: dao,
+      encryptionService: mockEncryption,
+    );
     hashChain = HashChainService();
     deleteUseCase = DeleteTransactionUseCase(
       transactionRepository: repo,
@@ -108,9 +111,7 @@ void main() {
   });
 
   group('ROW-02 soft-delete hash-chain integrity', () {
-    test(
-        'soft-delete sets isDeleted=true and remaining rows retain valid hashes',
-        () async {
+    test('soft-delete sets isDeleted=true and remaining rows retain valid hashes', () async {
       // ── 1. Build 3 transactions (each from genesis — independent hash units)
       final t1 = DateTime(2026, 5, 15, 10, 0);
       final t2 = DateTime(2026, 5, 15, 11, 0);
@@ -148,14 +149,20 @@ void main() {
       // ── 3. Soft-delete the middle transaction (tx2) ────────────────────────
       final middleId = tx2.id;
       final deleteResult = await deleteUseCase.execute(middleId);
-      expect(deleteResult.isError, isFalse,
-          reason: 'DeleteTransactionUseCase.execute should not error');
+      expect(
+        deleteResult.isError,
+        isFalse,
+        reason: 'DeleteTransactionUseCase.execute should not error',
+      );
 
       // ── 4. Assert isDeleted = true on the soft-deleted row ──────────────────
       final deletedRow = await dao.findById(middleId);
       expect(deletedRow, isNotNull);
-      expect(deletedRow!.isDeleted, isTrue,
-          reason: 'SC#3: soft-delete must set isDeleted=true on the target row');
+      expect(
+        deletedRow!.isDeleted,
+        isTrue,
+        reason: 'SC#3: soft-delete must set isDeleted=true on the target row',
+      );
 
       // ── 5. Verify the soft-deleted row's hash data is NOT corrupted ─────────
       // Soft-delete must only flip isDeleted=true; it must NOT modify
@@ -169,15 +176,21 @@ void main() {
         'currentHash': deletedRow.currentHash,
       };
       final deletedRowVerification = hashChain.verifyChain([deletedMap]);
-      expect(deletedRowVerification.isValid, isTrue,
-          reason:
-              'SC#3: soft-delete must not corrupt the deleted row\'s stored hash data');
+      expect(
+        deletedRowVerification.isValid,
+        isTrue,
+        reason:
+            'SC#3: soft-delete must not corrupt the deleted row\'s stored hash data',
+      );
 
       // ── 6. Fetch remaining non-deleted rows ────────────────────────────────
       // findAllByBook excludes soft-deleted rows (is_deleted = 0)
       final remainingRows = await dao.findAllByBook(bookId);
-      expect(remainingRows, hasLength(2),
-          reason: 'After deleting tx2, only tx1 and tx3 should remain');
+      expect(
+        remainingRows,
+        hasLength(2),
+        reason: 'After deleting tx2, only tx1 and tx3 should remain',
+      );
 
       // ── 7. Verify each remaining row's individual hash integrity ──────────
       // Each surviving row's stored hash must match what HashChainService
@@ -192,9 +205,12 @@ void main() {
           'currentHash': row.currentHash,
         };
         final rowVerification = hashChain.verifyChain([rowMap]);
-        expect(rowVerification.isValid, isTrue,
-            reason:
-                'SC#3: surviving row ${row.id} must have a valid hash after soft-delete of tx2');
+        expect(
+          rowVerification.isValid,
+          isTrue,
+          reason:
+              'SC#3: surviving row ${row.id} must have a valid hash after soft-delete of tx2',
+        );
       }
     });
   });

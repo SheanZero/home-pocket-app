@@ -16,12 +16,7 @@ const _arbFiles = {
 // 260622-nhs: `ocrScan` was the manual/voice/OCR mode-Tab label, removed with
 // the EntryModeSwitcher (single-page push-to-talk entry, D-3). The OCR scanner
 // screen's own strings (ocrScanTitle / ocrHint) are the surviving OCR stubs.
-const _ocrStubKeys = [
-  'ocrScanTitle',
-  'ocrHint',
-  '@ocrScanTitle',
-  '@ocrHint',
-];
+const _ocrStubKeys = ['ocrScanTitle', 'ocrHint', '@ocrScanTitle', '@ocrHint'];
 
 void main() {
   group('ARB key parity', () {

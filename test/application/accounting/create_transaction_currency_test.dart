@@ -130,8 +130,9 @@ void main() {
         expect(result.data!.originalAmount, originalMinorUnits);
         expect(result.data!.appliedRate, rate);
 
-        final captured =
-            verify(() => mockTransactionRepo.insert(captureAny())).captured;
+        final captured = verify(
+          () => mockTransactionRepo.insert(captureAny()),
+        ).captured;
         expect(captured, hasLength(1));
         final persisted = captured.single as Transaction;
         expect(persisted.amount, expectedJpy);

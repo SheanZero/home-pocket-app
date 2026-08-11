@@ -9,9 +9,7 @@ import '../../features/accounting/domain/repositories/category_keyword_preferenc
 class RecordCategoryCorrectionUseCase {
   final CategoryKeywordPreferenceRepository _preferenceRepository;
 
-  RecordCategoryCorrectionUseCase({
-    required this._preferenceRepository,
-  });
+  RecordCategoryCorrectionUseCase({required this._preferenceRepository});
 
   /// Records that [keyword] should map to [correctedCategoryId].
   ///

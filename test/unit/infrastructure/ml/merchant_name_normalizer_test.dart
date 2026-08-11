@@ -23,7 +23,6 @@ void main() {
 
     // --- Fullwidth/ideographic space stripped ---
     ('Ａ　Ｂ', 'ab'), // U+3000 ideographic space between fullwidth A/B
-
     // --- Katakana → hiragana ---
     ('マック', 'まっく'),
     ('セブン', 'せぶん'),
@@ -37,12 +36,10 @@ void main() {
     ('ﾏｯｸ', 'まっく'), // ﾏ ｯ(small tsu) ｸ
     ('ﾊﾟﾝ', 'ぱん'), // ﾊ +ﾟ(handakuten) ﾝ → ぱん
     ('ｶﾞ', 'が'), // ｶ +ﾞ → が
-
     // --- Combining dakuten / handakuten compose (standard kana base) ---
     ('が', 'が'), // か + combining dakuten == precomposed が
     ('ぱ', 'ぱ'), // は + combining handakuten == precomposed ぱ
     ('ガ', 'が'), // katakana カ + combining dakuten → fold to が
-
     // --- Case folding ---
     ('McDonald', 'mcdonald'),
     ('UNIQLO', 'uniqlo'),
@@ -65,7 +62,6 @@ void main() {
     // --- Combined real-world surfaces ---
     ('ＵＮＩＱＬＯ', 'uniqlo'), // fullwidth → halfwidth → lower
     ('スターバックス コーヒー', 'すたーばっくすこーひー'), // kana fold + ー kept + space strip
-
     // --- Empty / passthrough ---
     ('', ''),
     ('lawson', 'lawson'),

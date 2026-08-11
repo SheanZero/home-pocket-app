@@ -69,7 +69,10 @@ Future<List<int>> _deriveArgon2id(_PinKdfArgs args) async {
 /// the same PIN produce different PHC strings), runs the derivation off the main
 /// isolate via [Isolate.run], and returns the PHC-encoded result.
 Future<String> derivePinPhc(String pin) async {
-  final salt = List<int>.generate(_kSaltLength, (_) => Random.secure().nextInt(256));
+  final salt = List<int>.generate(
+    _kSaltLength,
+    (_) => Random.secure().nextInt(256),
+  );
   final hash = await Isolate.run(() => _deriveArgon2id(_PinKdfArgs(pin, salt)));
   return _encodePhc(salt: salt, hash: hash);
 }

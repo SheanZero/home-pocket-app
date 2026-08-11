@@ -53,13 +53,13 @@ Transaction _makeTransaction({
 
 /// Minimal Book fixture for shadow-book stubs.
 Book _stubBook(String id) => Book(
-      id: id,
-      name: 'Shadow $id',
-      currency: 'JPY',
-      deviceId: 'device-$id',
-      createdAt: DateTime(2026, 1, 1),
-      isShadow: true,
-    );
+  id: id,
+  name: 'Shadow $id',
+  currency: 'JPY',
+  deviceId: 'device-$id',
+  createdAt: DateTime(2026, 1, 1),
+  isShadow: true,
+);
 
 // Build a ProviderContainer with standard overrides for listTransactionsProvider tests.
 ProviderContainer _makeContainer(
@@ -75,9 +75,7 @@ ProviderContainer _makeContainer(
       isGroupModeProvider.overrideWithValue(isGroupMode),
       shadowBooksProvider.overrideWith((_) async => shadows),
       if (filterState != null)
-        listFilterProvider.overrideWith(
-          () => _FixedListFilter(filterState),
-        ),
+        listFilterProvider.overrideWith(() => _FixedListFilter(filterState)),
     ],
   );
 }
@@ -95,44 +93,46 @@ void main() {
     registerFallbackValue(SortField.timestamp);
     registerFallbackValue(SortDirection.desc);
     registerFallbackValue(DateTime(2026));
-    registerFallbackValue(const GetListParams(
-      bookIds: ['book1'],
-      filter: ListFilterState(
-        selectedYear: 2026,
-        selectedMonth: 5,
+    registerFallbackValue(
+      const GetListParams(
+        bookIds: ['book1'],
+        filter: ListFilterState(selectedYear: 2026, selectedMonth: 5),
       ),
-    ));
+    );
   });
 
   group('listTransactionsProvider', () {
-    test('returns List<TaggedTransaction> wrapping each Transaction (SC#3 return type)',
-        () async {
-      final mock = _MockGetListTransactionsUseCase();
-      final tx = _makeTransaction();
-      when(() => mock.execute(any())).thenAnswer(
-        (_) async => Result.success([tx]),
-      );
-
-      final container = _makeContainer(mock);
-      final result = await waitForFirstValue<List<TaggedTransaction>>(
-        container,
-        listTransactionsProvider(bookId: 'book1'),
-      );
-
-      expect(result.hasValue, isTrue);
-      final list = result.value!;
-      expect(list, hasLength(1));
-      expect(list.first, isA<TaggedTransaction>());
-      expect(list.first.transaction, equals(tx));
-      expect(list.first.memberTag, isNull); // Phase 29 seam
-    });
-
     test(
-        'text search matches localized category name (FILTER-01): '
+      'returns List<TaggedTransaction> wrapping each Transaction (SC#3 return type)',
+      () async {
+        final mock = _MockGetListTransactionsUseCase();
+        final tx = _makeTransaction();
+        when(
+          () => mock.execute(any()),
+        ).thenAnswer((_) async => Result.success([tx]));
+
+        final container = _makeContainer(mock);
+        final result = await waitForFirstValue<List<TaggedTransaction>>(
+          container,
+          listTransactionsProvider(bookId: 'book1'),
+        );
+
+        expect(result.hasValue, isTrue);
+        final list = result.value!;
+        expect(list, hasLength(1));
+        expect(list.first, isA<TaggedTransaction>());
+        expect(list.first.transaction, equals(tx));
+        expect(list.first.memberTag, isNull); // Phase 29 seam
+      },
+    );
+
+    test('text search matches localized category name (FILTER-01): '
         'cat_food + searchQuery=食費 → returned', () async {
       final mock = _MockGetListTransactionsUseCase();
       final tx = _makeTransaction(categoryId: 'cat_food');
-      when(() => mock.execute(any())).thenAnswer((_) async => Result.success([tx]));
+      when(
+        () => mock.execute(any()),
+      ).thenAnswer((_) async => Result.success([tx]));
 
       final container = _makeContainer(
         mock,
@@ -149,17 +149,21 @@ void main() {
       );
 
       expect(result.hasValue, isTrue);
-      expect(result.value!, hasLength(1),
-          reason:
-              'cat_food should match localized name 食費 via CategoryLocalizationService');
+      expect(
+        result.value!,
+        hasLength(1),
+        reason:
+            'cat_food should match localized name 食費 via CategoryLocalizationService',
+      );
     });
 
-    test(
-        'text search does NOT match raw categoryId (FILTER-01 correctness): '
+    test('text search does NOT match raw categoryId (FILTER-01 correctness): '
         'cat_food + searchQuery=food → NOT returned', () async {
       final mock = _MockGetListTransactionsUseCase();
       final tx = _makeTransaction(categoryId: 'cat_food');
-      when(() => mock.execute(any())).thenAnswer((_) async => Result.success([tx]));
+      when(
+        () => mock.execute(any()),
+      ).thenAnswer((_) async => Result.success([tx]));
 
       final container = _makeContainer(
         mock,
@@ -179,15 +183,20 @@ void main() {
       // 'food' matches raw categoryId but NOT the Japanese localized name
       // If CategoryLocalizationService is used correctly, cat_food → 食費 (ja)
       // which does not contain 'food'
-      expect(result.value!, isEmpty,
-          reason:
-              'Provider must use CategoryLocalizationService — raw categoryId must not leak through');
+      expect(
+        result.value!,
+        isEmpty,
+        reason:
+            'Provider must use CategoryLocalizationService — raw categoryId must not leak through',
+      );
     });
 
     test('text search by merchant (FILTER-01): merchant match', () async {
       final mock = _MockGetListTransactionsUseCase();
       final tx = _makeTransaction(merchant: 'スターバックス');
-      when(() => mock.execute(any())).thenAnswer((_) async => Result.success([tx]));
+      when(
+        () => mock.execute(any()),
+      ).thenAnswer((_) async => Result.success([tx]));
 
       final container = _makeContainer(
         mock,
@@ -204,14 +213,15 @@ void main() {
       );
 
       expect(result.hasValue, isTrue);
-      expect(result.value!, hasLength(1),
-          reason: 'スターバックス contains スターバック');
+      expect(result.value!, hasLength(1), reason: 'スターバックス contains スターバック');
     });
 
     test('text search by note (FILTER-01): note match', () async {
       final mock = _MockGetListTransactionsUseCase();
       final tx = _makeTransaction(note: '誕生日プレゼント');
-      when(() => mock.execute(any())).thenAnswer((_) async => Result.success([tx]));
+      when(
+        () => mock.execute(any()),
+      ).thenAnswer((_) async => Result.success([tx]));
 
       final container = _makeContainer(
         mock,
@@ -228,15 +238,15 @@ void main() {
       );
 
       expect(result.hasValue, isTrue);
-      expect(result.value!, hasLength(1),
-          reason: '誕生日プレゼント contains 誕生日');
+      expect(result.value!, hasLength(1), reason: '誕生日プレゼント contains 誕生日');
     });
 
-    test('null note handled gracefully (D-06): no crash, not returned',
-        () async {
+    test('null note handled gracefully (D-06): no crash, not returned', () async {
       final mock = _MockGetListTransactionsUseCase();
       final tx = _makeTransaction(note: null);
-      when(() => mock.execute(any())).thenAnswer((_) async => Result.success([tx]));
+      when(
+        () => mock.execute(any()),
+      ).thenAnswer((_) async => Result.success([tx]));
 
       final container = _makeContainer(
         mock,
@@ -253,60 +263,73 @@ void main() {
         listTransactionsProvider(bookId: 'book1'),
       );
 
-      expect(result.hasValue, isTrue,
-          reason: 'null note must not cause an exception');
+      expect(
+        result.hasValue,
+        isTrue,
+        reason: 'null note must not cause an exception',
+      );
       // cat_food in ja = 食費, does not contain 'test'; merchant is null; note is null
       expect(result.value!, isEmpty);
     });
 
     test(
-        'AND-composition with ledger filter (FILTER-02 + FILTER-04): '
-        'use case receives ledgerType; text search applied Dart-side', () async {
-      final mock = _MockGetListTransactionsUseCase();
-      // Use case already returns pre-filtered (joy-only) transactions;
-      // we verify text search then AND-composes
-      final joyTx = _makeTransaction(
-        id: 'joy-tx',
-        categoryId: 'cat_food',
-        ledgerType: LedgerType.joy,
-      );
-      when(() => mock.execute(any())).thenAnswer(
-        (_) async => Result.success([joyTx]),
-      );
-
-      final container = _makeContainer(
-        mock,
-        filterState: ListFilterState(
-          selectedYear: 2026,
-          selectedMonth: 5,
+      'AND-composition with ledger filter (FILTER-02 + FILTER-04): '
+      'use case receives ledgerType; text search applied Dart-side',
+      () async {
+        final mock = _MockGetListTransactionsUseCase();
+        // Use case already returns pre-filtered (joy-only) transactions;
+        // we verify text search then AND-composes
+        final joyTx = _makeTransaction(
+          id: 'joy-tx',
+          categoryId: 'cat_food',
           ledgerType: LedgerType.joy,
-          searchQuery: '食費', // matches cat_food → 食費 (ja)
-        ),
-      );
+        );
+        when(
+          () => mock.execute(any()),
+        ).thenAnswer((_) async => Result.success([joyTx]));
 
-      final result = await waitForFirstValue<List<TaggedTransaction>>(
-        container,
-        listTransactionsProvider(bookId: 'book1'),
-      );
+        final container = _makeContainer(
+          mock,
+          filterState: ListFilterState(
+            selectedYear: 2026,
+            selectedMonth: 5,
+            ledgerType: LedgerType.joy,
+            searchQuery: '食費', // matches cat_food → 食費 (ja)
+          ),
+        );
 
-      expect(result.hasValue, isTrue);
-      expect(result.value!, hasLength(1));
-      // Verify use case was called with the ledgerType filter
-      final captured = verify(() => mock.execute(captureAny())).captured;
-      final params = captured.first as GetListParams;
-      expect(params.filter.ledgerType, equals(LedgerType.joy),
-          reason: 'FILTER-02: ledgerType forwarded to use case');
-    });
+        final result = await waitForFirstValue<List<TaggedTransaction>>(
+          container,
+          listTransactionsProvider(bookId: 'book1'),
+        );
 
-    test(
-        'categoryIds Dart-side filter (FILTER-03 D-01): '
+        expect(result.hasValue, isTrue);
+        expect(result.value!, hasLength(1));
+        // Verify use case was called with the ledgerType filter
+        final captured = verify(() => mock.execute(captureAny())).captured;
+        final params = captured.first as GetListParams;
+        expect(
+          params.filter.ledgerType,
+          equals(LedgerType.joy),
+          reason: 'FILTER-02: ledgerType forwarded to use case',
+        );
+      },
+    );
+
+    test('categoryIds Dart-side filter (FILTER-03 D-01): '
         'only transactions matching categoryIds are returned', () async {
       final mock = _MockGetListTransactionsUseCase();
-      final matching = _makeTransaction(id: 'tx-match', categoryId: 'cat_transport');
-      final notMatching = _makeTransaction(id: 'tx-no-match', categoryId: 'cat_food');
-      when(() => mock.execute(any())).thenAnswer(
-        (_) async => Result.success([matching, notMatching]),
+      final matching = _makeTransaction(
+        id: 'tx-match',
+        categoryId: 'cat_transport',
       );
+      final notMatching = _makeTransaction(
+        id: 'tx-no-match',
+        categoryId: 'cat_food',
+      );
+      when(
+        () => mock.execute(any()),
+      ).thenAnswer((_) async => Result.success([matching, notMatching]));
 
       final container = _makeContainer(
         mock,
@@ -326,16 +349,24 @@ void main() {
       // D-01: category filtering is Dart-side; use case receives null categoryId
       final captured = verify(() => mock.execute(captureAny())).captured;
       final params = captured.first as GetListParams;
-      expect(params.filter.categoryIds, equals({'cat_transport'}),
-          reason: 'FILTER-03 D-01: categoryIds present in filter state');
+      expect(
+        params.filter.categoryIds,
+        equals({'cat_transport'}),
+        reason: 'FILTER-03 D-01: categoryIds present in filter state',
+      );
       // Dart-side filter should keep only matching transaction
-      expect(result.value!.length, equals(1),
-          reason: 'FILTER-03: Dart-side filter keeps only matching tx');
-      expect(result.value!.first.transaction.categoryId, equals('cat_transport'));
+      expect(
+        result.value!.length,
+        equals(1),
+        reason: 'FILTER-03: Dart-side filter keeps only matching tx',
+      );
+      expect(
+        result.value!.first.transaction.categoryId,
+        equals('cat_transport'),
+      );
     });
 
-    test(
-        'day filter applies year+month+day check (activeDayFilter)', () async {
+    test('day filter applies year+month+day check (activeDayFilter)', () async {
       final mock = _MockGetListTransactionsUseCase();
       final targetDay = DateTime(2026, 5, 15);
       final inDay = _makeTransaction(
@@ -346,9 +377,9 @@ void main() {
         id: 'tx-no-match',
         timestamp: DateTime(2026, 5, 16, 10, 0),
       );
-      when(() => mock.execute(any())).thenAnswer(
-        (_) async => Result.success([inDay, outOfDay]),
-      );
+      when(
+        () => mock.execute(any()),
+      ).thenAnswer((_) async => Result.success([inDay, outOfDay]));
 
       final container = _makeContainer(
         mock,
@@ -366,9 +397,11 @@ void main() {
 
       expect(result.hasValue, isTrue);
       expect(result.value!, hasLength(1));
-      expect(result.value!.first.transaction.id, equals('tx-match'),
-          reason:
-              'Day filter uses year+month+day — only May 15 tx retained');
+      expect(
+        result.value!.first.transaction.id,
+        equals('tx-match'),
+        reason: 'Day filter uses year+month+day — only May 15 tx retained',
+      );
     });
   });
 
@@ -380,211 +413,197 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('Phase 29: family-mode FAM-01/02/03/04', () {
-    test(
-      'FAM-01: group mode bookIds includes own + shadow book IDs',
-      () async {
-        final mock = _MockGetListTransactionsUseCase();
-        final ownTx = _makeTransaction(id: 'own-tx', bookId: 'book1');
-        final shadowTx = _makeTransaction(id: 'shadow-tx', bookId: 'shadow-1');
+    test('FAM-01: group mode bookIds includes own + shadow book IDs', () async {
+      final mock = _MockGetListTransactionsUseCase();
+      final ownTx = _makeTransaction(id: 'own-tx', bookId: 'book1');
+      final shadowTx = _makeTransaction(id: 'shadow-tx', bookId: 'shadow-1');
 
-        // Use case is called with merged bookIds — returns rows from both books
-        when(() => mock.execute(any())).thenAnswer(
-          (_) async => Result.success([ownTx, shadowTx]),
-        );
+      // Use case is called with merged bookIds — returns rows from both books
+      when(
+        () => mock.execute(any()),
+      ).thenAnswer((_) async => Result.success([ownTx, shadowTx]));
 
-        final shadows = [
-          ShadowBookInfo(
-            book: _stubBook('shadow-1'),
-            memberDisplayName: '太郎',
-            memberAvatarEmoji: '🐻',
-          ),
-        ];
+      final shadows = [
+        ShadowBookInfo(
+          book: _stubBook('shadow-1'),
+          memberDisplayName: '太郎',
+          memberAvatarEmoji: '🐻',
+        ),
+      ];
 
-        final container = _makeContainer(
-          mock,
-          isGroupMode: true,
-          shadows: shadows,
-          filterState: const ListFilterState(
-            selectedYear: 2026,
-            selectedMonth: 5,
-          ),
-        );
+      final container = _makeContainer(
+        mock,
+        isGroupMode: true,
+        shadows: shadows,
+        filterState: const ListFilterState(
+          selectedYear: 2026,
+          selectedMonth: 5,
+        ),
+      );
 
-        final result = await waitForFirstValue<List<TaggedTransaction>>(
-          container,
-          listTransactionsProvider(bookId: 'book1'),
-        );
+      final result = await waitForFirstValue<List<TaggedTransaction>>(
+        container,
+        listTransactionsProvider(bookId: 'book1'),
+      );
 
-        expect(result.hasValue, isTrue);
-        // RED: provider currently passes only ['book1'] to use case;
-        // after Plan 02 it will pass ['book1', 'shadow-1']
-        expect(
-          result.value!,
-          hasLength(2),
-          reason: 'FAM-01: group mode includes own + shadow rows',
-        );
+      expect(result.hasValue, isTrue);
+      // RED: provider currently passes only ['book1'] to use case;
+      // after Plan 02 it will pass ['book1', 'shadow-1']
+      expect(
+        result.value!,
+        hasLength(2),
+        reason: 'FAM-01: group mode includes own + shadow rows',
+      );
 
-        // Verify the use case was called with both book IDs
-        final captured = verify(() => mock.execute(captureAny())).captured;
-        final params = captured.first as GetListParams;
-        expect(
-          params.bookIds,
-          containsAll(['book1', 'shadow-1']),
-          reason: 'FAM-01: bookIds must include shadow book ID in group mode',
-        );
-      },
-    );
+      // Verify the use case was called with both book IDs
+      final captured = verify(() => mock.execute(captureAny())).captured;
+      final params = captured.first as GetListParams;
+      expect(
+        params.bookIds,
+        containsAll(['book1', 'shadow-1']),
+        reason: 'FAM-01: bookIds must include shadow book ID in group mode',
+      );
+    });
 
-    test(
-      'FAM-02: shadow-book rows have memberTag non-null',
-      () async {
-        final mock = _MockGetListTransactionsUseCase();
-        final ownTx = _makeTransaction(id: 'own-tx', bookId: 'book1');
-        final shadowTx = _makeTransaction(id: 'shadow-tx', bookId: 'shadow-1');
+    test('FAM-02: shadow-book rows have memberTag non-null', () async {
+      final mock = _MockGetListTransactionsUseCase();
+      final ownTx = _makeTransaction(id: 'own-tx', bookId: 'book1');
+      final shadowTx = _makeTransaction(id: 'shadow-tx', bookId: 'shadow-1');
 
-        when(() => mock.execute(any())).thenAnswer(
-          (_) async => Result.success([ownTx, shadowTx]),
-        );
+      when(
+        () => mock.execute(any()),
+      ).thenAnswer((_) async => Result.success([ownTx, shadowTx]));
 
-        final shadows = [
-          ShadowBookInfo(
-            book: _stubBook('shadow-1'),
-            memberDisplayName: '太郎',
-            memberAvatarEmoji: '🐻',
-          ),
-        ];
+      final shadows = [
+        ShadowBookInfo(
+          book: _stubBook('shadow-1'),
+          memberDisplayName: '太郎',
+          memberAvatarEmoji: '🐻',
+        ),
+      ];
 
-        final container = _makeContainer(
-          mock,
-          isGroupMode: true,
-          shadows: shadows,
-          filterState: const ListFilterState(
-            selectedYear: 2026,
-            selectedMonth: 5,
-          ),
-        );
+      final container = _makeContainer(
+        mock,
+        isGroupMode: true,
+        shadows: shadows,
+        filterState: const ListFilterState(
+          selectedYear: 2026,
+          selectedMonth: 5,
+        ),
+      );
 
-        final result = await waitForFirstValue<List<TaggedTransaction>>(
-          container,
-          listTransactionsProvider(bookId: 'book1'),
-        );
+      final result = await waitForFirstValue<List<TaggedTransaction>>(
+        container,
+        listTransactionsProvider(bookId: 'book1'),
+      );
 
-        expect(result.hasValue, isTrue);
-        final list = result.value!;
+      expect(result.hasValue, isTrue);
+      final list = result.value!;
 
-        // RED: provider always returns memberTag == null until Plan 02 lands
-        final shadowRows = list.where(
-          (t) => t.transaction.bookId == 'shadow-1',
-        );
-        expect(
-          shadowRows.every((t) => t.memberTag != null),
-          isTrue,
-          reason: 'FAM-02: shadow-book rows must have memberTag != null',
-        );
-      },
-    );
+      // RED: provider always returns memberTag == null until Plan 02 lands
+      final shadowRows = list.where((t) => t.transaction.bookId == 'shadow-1');
+      expect(
+        shadowRows.every((t) => t.memberTag != null),
+        isTrue,
+        reason: 'FAM-02: shadow-book rows must have memberTag != null',
+      );
+    });
 
-    test(
-      'FAM-02/D-01: own-book rows have memberTag null',
-      () async {
-        final mock = _MockGetListTransactionsUseCase();
-        final ownTx = _makeTransaction(id: 'own-tx', bookId: 'book1');
-        final shadowTx = _makeTransaction(id: 'shadow-tx', bookId: 'shadow-1');
+    test('FAM-02/D-01: own-book rows have memberTag null', () async {
+      final mock = _MockGetListTransactionsUseCase();
+      final ownTx = _makeTransaction(id: 'own-tx', bookId: 'book1');
+      final shadowTx = _makeTransaction(id: 'shadow-tx', bookId: 'shadow-1');
 
-        when(() => mock.execute(any())).thenAnswer(
-          (_) async => Result.success([ownTx, shadowTx]),
-        );
+      when(
+        () => mock.execute(any()),
+      ).thenAnswer((_) async => Result.success([ownTx, shadowTx]));
 
-        final shadows = [
-          ShadowBookInfo(
-            book: _stubBook('shadow-1'),
-            memberDisplayName: '太郎',
-            memberAvatarEmoji: '🐻',
-          ),
-        ];
+      final shadows = [
+        ShadowBookInfo(
+          book: _stubBook('shadow-1'),
+          memberDisplayName: '太郎',
+          memberAvatarEmoji: '🐻',
+        ),
+      ];
 
-        final container = _makeContainer(
-          mock,
-          isGroupMode: true,
-          shadows: shadows,
-          filterState: const ListFilterState(
-            selectedYear: 2026,
-            selectedMonth: 5,
-          ),
-        );
+      final container = _makeContainer(
+        mock,
+        isGroupMode: true,
+        shadows: shadows,
+        filterState: const ListFilterState(
+          selectedYear: 2026,
+          selectedMonth: 5,
+        ),
+      );
 
-        final result = await waitForFirstValue<List<TaggedTransaction>>(
-          container,
-          listTransactionsProvider(bookId: 'book1'),
-        );
+      final result = await waitForFirstValue<List<TaggedTransaction>>(
+        container,
+        listTransactionsProvider(bookId: 'book1'),
+      );
 
-        expect(result.hasValue, isTrue);
-        final list = result.value!;
+      expect(result.hasValue, isTrue);
+      final list = result.value!;
 
-        // Own-book rows must always have memberTag == null (D-01)
-        // This test may pass before implementation if list only has own rows
-        final ownRows = list.where((t) => t.transaction.bookId == 'book1');
-        expect(
-          ownRows.every((t) => t.memberTag == null),
-          isTrue,
-          reason: 'FAM-02/D-01: own-book rows must have memberTag == null',
-        );
-      },
-    );
+      // Own-book rows must always have memberTag == null (D-01)
+      // This test may pass before implementation if list only has own rows
+      final ownRows = list.where((t) => t.transaction.bookId == 'book1');
+      expect(
+        ownRows.every((t) => t.memberTag == null),
+        isTrue,
+        reason: 'FAM-02/D-01: own-book rows must have memberTag == null',
+      );
+    });
 
-    test(
-      'FAM-03: member filter narrows to selected shadow book SQL',
-      () async {
-        final mock = _MockGetListTransactionsUseCase();
-        // Use case returns only shadow-1 rows when memberBookId is set
-        final shadowTx = _makeTransaction(id: 'shadow-tx', bookId: 'shadow-1');
+    test('FAM-03: member filter narrows to selected shadow book SQL', () async {
+      final mock = _MockGetListTransactionsUseCase();
+      // Use case returns only shadow-1 rows when memberBookId is set
+      final shadowTx = _makeTransaction(id: 'shadow-tx', bookId: 'shadow-1');
 
-        when(() => mock.execute(any())).thenAnswer(
-          (_) async => Result.success([shadowTx]),
-        );
+      when(
+        () => mock.execute(any()),
+      ).thenAnswer((_) async => Result.success([shadowTx]));
 
-        final shadows = [
-          ShadowBookInfo(
-            book: _stubBook('shadow-1'),
-            memberDisplayName: '太郎',
-            memberAvatarEmoji: '🐻',
-          ),
-        ];
+      final shadows = [
+        ShadowBookInfo(
+          book: _stubBook('shadow-1'),
+          memberDisplayName: '太郎',
+          memberAvatarEmoji: '🐻',
+        ),
+      ];
 
-        final container = _makeContainer(
-          mock,
-          isGroupMode: true,
-          shadows: shadows,
-          filterState: const ListFilterState(
-            selectedYear: 2026,
-            selectedMonth: 5,
-            memberBookId: 'shadow-1',
-          ),
-        );
+      final container = _makeContainer(
+        mock,
+        isGroupMode: true,
+        shadows: shadows,
+        filterState: const ListFilterState(
+          selectedYear: 2026,
+          selectedMonth: 5,
+          memberBookId: 'shadow-1',
+        ),
+      );
 
-        final result = await waitForFirstValue<List<TaggedTransaction>>(
-          container,
-          listTransactionsProvider(bookId: 'book1'),
-        );
+      final result = await waitForFirstValue<List<TaggedTransaction>>(
+        container,
+        listTransactionsProvider(bookId: 'book1'),
+      );
 
-        expect(result.hasValue, isTrue);
-        // RED: provider currently ignores memberBookId; Plan 02 will pass only
-        // effectiveBookIds = ['shadow-1'] to the use case
-        expect(
-          result.value!.every((t) => t.transaction.bookId == 'shadow-1'),
-          isTrue,
-          reason: 'FAM-03: member filter must narrow to selected shadow book',
-        );
+      expect(result.hasValue, isTrue);
+      // RED: provider currently ignores memberBookId; Plan 02 will pass only
+      // effectiveBookIds = ['shadow-1'] to the use case
+      expect(
+        result.value!.every((t) => t.transaction.bookId == 'shadow-1'),
+        isTrue,
+        reason: 'FAM-03: member filter must narrow to selected shadow book',
+      );
 
-        final captured = verify(() => mock.execute(captureAny())).captured;
-        final params = captured.first as GetListParams;
-        expect(
-          params.bookIds,
-          equals(['shadow-1']),
-          reason: 'FAM-03: only shadow-1 in bookIds when memberFilter active',
-        );
-      },
-    );
+      final captured = verify(() => mock.execute(captureAny())).captured;
+      final params = captured.first as GetListParams;
+      expect(
+        params.bookIds,
+        equals(['shadow-1']),
+        reason: 'FAM-03: only shadow-1 in bookIds when memberFilter active',
+      );
+    });
 
     test(
       'FAM-04: Mine-only = setMemberFilter(ownBookId) shows only own rows',
@@ -593,9 +612,9 @@ void main() {
         // Use case returns only own rows when memberBookId == ownBookId
         final ownTx = _makeTransaction(id: 'own-tx', bookId: 'book1');
 
-        when(() => mock.execute(any())).thenAnswer(
-          (_) async => Result.success([ownTx]),
-        );
+        when(
+          () => mock.execute(any()),
+        ).thenAnswer((_) async => Result.success([ownTx]));
 
         final shadows = [
           ShadowBookInfo(
@@ -651,9 +670,9 @@ void main() {
         final mock = _MockGetListTransactionsUseCase();
         final ownTx = _makeTransaction(id: 'own-tx', bookId: 'book1');
 
-        when(() => mock.execute(any())).thenAnswer(
-          (_) async => Result.success([ownTx]),
-        );
+        when(
+          () => mock.execute(any()),
+        ).thenAnswer((_) async => Result.success([ownTx]));
 
         final shadows = [
           ShadowBookInfo(
@@ -679,15 +698,19 @@ void main() {
           listTransactionsProvider(bookId: 'book1'),
         );
 
-        expect(result.hasValue, isTrue,
-            reason: 'CR-01: stale member filter must not produce an error state');
+        expect(
+          result.hasValue,
+          isTrue,
+          reason: 'CR-01: stale member filter must not produce an error state',
+        );
 
         final captured = verify(() => mock.execute(captureAny())).captured;
         final params = captured.first as GetListParams;
         expect(
           params.bookIds,
           equals(['book1', 'shadow-1']),
-          reason: 'CR-01: stale memberBookId must fall back to the full book '
+          reason:
+              'CR-01: stale memberBookId must fall back to the full book '
               'set (own + shadows), never an empty list',
         );
       },
@@ -699,9 +722,9 @@ void main() {
         final mock = _MockGetListTransactionsUseCase();
         final ownTx = _makeTransaction(id: 'own-tx', bookId: 'book1');
 
-        when(() => mock.execute(any())).thenAnswer(
-          (_) async => Result.success([ownTx]),
-        );
+        when(
+          () => mock.execute(any()),
+        ).thenAnswer((_) async => Result.success([ownTx]));
 
         // Solo mode — no shadow books
         final container = _makeContainer(

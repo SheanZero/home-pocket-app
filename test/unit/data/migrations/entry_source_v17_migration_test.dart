@@ -2,7 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-const _targetSchemaVersion = 17; // minimum version including v17 entry_source migration
+const _targetSchemaVersion =
+    17; // minimum version including v17 entry_source migration
 
 void main() {
   test('AppDatabase schemaVersion includes v17 entry_source migration', () {

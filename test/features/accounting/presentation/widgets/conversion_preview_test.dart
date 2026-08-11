@@ -24,18 +24,18 @@ const _kRate = '148.30';
 final _kTxDate = DateTime(2026, 6, 11);
 
 RateFetched _fetched({DateTime? actualDate}) => RateFetched(
-      rate: _kRate,
-      currency: _kCurrency,
-      rateDate: _kTxDate,
-      actualDate: actualDate,
-      source: 'frankfurter',
-    );
+  rate: _kRate,
+  currency: _kCurrency,
+  rateDate: _kTxDate,
+  actualDate: actualDate,
+  source: 'frankfurter',
+);
 
 RateFallback _fallback() => RateFallback(
-      rate: _kRate,
-      currency: _kCurrency,
-      cachedDate: DateTime(2026, 6, 10),
-    );
+  rate: _kRate,
+  currency: _kCurrency,
+  cachedDate: DateTime(2026, 6, 10),
+);
 
 /// Resolves the `en` [S] delegate for the staleness-label assertions.
 Future<S> _enStrings() => S.delegate.load(const Locale('en'));
@@ -75,7 +75,10 @@ void main() {
   group('rateEffectiveDateOf — actualDate wins over requested (RATE-05)', () {
     test('fetched prefers actualDate when present', () {
       final actual = DateTime(2026, 6, 12);
-      expect(rateEffectiveDateOf(_fetched(actualDate: actual), _kTxDate), actual);
+      expect(
+        rateEffectiveDateOf(_fetched(actualDate: actual), _kTxDate),
+        actual,
+      );
     });
 
     test('fetched without actualDate falls back to rateDate', () {
@@ -150,22 +153,32 @@ void main() {
     });
   });
 
-  group('ConversionPreviewArgs — value equality (keyed-provider stability)', () {
-    test('equal args are ==; differing date/currency are not; amount is NOT a '
-        'key dimension (260613-wuv2)', () {
-      final a = ConversionPreviewArgs(currency: _kCurrency, date: _kTxDate);
-      final b = ConversionPreviewArgs(currency: _kCurrency, date: _kTxDate);
-      expect(a, b);
-      expect(a.hashCode, b.hashCode);
+  group(
+    'ConversionPreviewArgs — value equality (keyed-provider stability)',
+    () {
+      test(
+        'equal args are ==; differing date/currency are not; amount is NOT a '
+        'key dimension (260613-wuv2)',
+        () {
+          final a = ConversionPreviewArgs(currency: _kCurrency, date: _kTxDate);
+          final b = ConversionPreviewArgs(currency: _kCurrency, date: _kTxDate);
+          expect(a, b);
+          expect(a.hashCode, b.hashCode);
 
-      expect(
-        a == ConversionPreviewArgs(currency: _kCurrency, date: DateTime(2026, 6, 12)),
-        isFalse,
+          expect(
+            a ==
+                ConversionPreviewArgs(
+                  currency: _kCurrency,
+                  date: DateTime(2026, 6, 12),
+                ),
+            isFalse,
+          );
+          expect(
+            a == ConversionPreviewArgs(currency: 'EUR', date: _kTxDate),
+            isFalse,
+          );
+        },
       );
-      expect(
-        a == ConversionPreviewArgs(currency: 'EUR', date: _kTxDate),
-        isFalse,
-      );
-    });
-  });
+    },
+  );
 }

@@ -41,6 +41,7 @@ Category _makeCategory(
     createdAt: DateTime(2026),
   );
 }
+
 CategoryKeywordPreference _pref(
   String keyword,
   String categoryId, {
@@ -90,9 +91,9 @@ void main() {
     });
 
     test('L1 categoryId routes through \${l1Id}_other convention', () async {
-      when(() => mockCategoryRepo.findById('cat_food')).thenAnswer(
-        (_) async => _makeCategory('cat_food', level: 1),
-      );
+      when(
+        () => mockCategoryRepo.findById('cat_food'),
+      ).thenAnswer((_) async => _makeCategory('cat_food', level: 1));
       when(() => mockCategoryRepo.findById('cat_food_other')).thenAnswer(
         (_) async => _makeCategory('cat_food_other', parentId: 'cat_food'),
       );
@@ -100,8 +101,9 @@ void main() {
     });
 
     test('unknown id returns null without throwing', () async {
-      when(() => mockCategoryRepo.findById('cat_missing'))
-          .thenAnswer((_) async => null);
+      when(
+        () => mockCategoryRepo.findById('cat_missing'),
+      ).thenAnswer((_) async => null);
       expect(await recognizer.normalizeToL2('cat_missing'), isNull);
     });
 
@@ -121,9 +123,9 @@ void main() {
     );
 
     test('hidden conventional L2 falls back to an active sibling', () async {
-      when(() => mockCategoryRepo.findById('cat_food')).thenAnswer(
-        (_) async => _makeCategory('cat_food', level: 1),
-      );
+      when(
+        () => mockCategoryRepo.findById('cat_food'),
+      ).thenAnswer((_) async => _makeCategory('cat_food', level: 1));
       when(() => mockCategoryRepo.findById('cat_food_other')).thenAnswer(
         (_) async => _makeCategory(
           'cat_food_other',
@@ -147,29 +149,32 @@ void main() {
   });
 
   group('Step 2: keyword preferences', () {
-    test('direct L2 hit returns the L2 with source=keyword (hitCount=0)', () async {
-      when(() => mockPrefRepo.findByKeyword('早餐')).thenAnswer(
-        (_) async => [_pref('早餐', 'cat_food_dining_out')],
-      );
-      when(() => mockCategoryRepo.findById('cat_food_dining_out')).thenAnswer(
-        (_) async =>
-            _makeCategory('cat_food_dining_out', parentId: 'cat_food'),
-      );
+    test(
+      'direct L2 hit returns the L2 with source=keyword (hitCount=0)',
+      () async {
+        when(
+          () => mockPrefRepo.findByKeyword('早餐'),
+        ).thenAnswer((_) async => [_pref('早餐', 'cat_food_dining_out')]);
+        when(() => mockCategoryRepo.findById('cat_food_dining_out')).thenAnswer(
+          (_) async =>
+              _makeCategory('cat_food_dining_out', parentId: 'cat_food'),
+        );
 
-      final result = await recognizer.resolve('早餐');
+        final result = await recognizer.resolve('早餐');
 
-      expect(result, isNotNull);
-      expect(result!.categoryId, 'cat_food_dining_out');
-      expect(result.source, MatchSource.keyword);
-    });
+        expect(result, isNotNull);
+        expect(result!.categoryId, 'cat_food_dining_out');
+        expect(result.source, MatchSource.keyword);
+      },
+    );
 
     test('keyword resolves to L1 → \${l1Id}_other fallback', () async {
-      when(() => mockPrefRepo.findByKeyword('吃饭')).thenAnswer(
-        (_) async => [_pref('吃饭', 'cat_food')],
-      );
-      when(() => mockCategoryRepo.findById('cat_food')).thenAnswer(
-        (_) async => _makeCategory('cat_food', level: 1),
-      );
+      when(
+        () => mockPrefRepo.findByKeyword('吃饭'),
+      ).thenAnswer((_) async => [_pref('吃饭', 'cat_food')]);
+      when(
+        () => mockCategoryRepo.findById('cat_food'),
+      ).thenAnswer((_) async => _makeCategory('cat_food', level: 1));
       when(() => mockCategoryRepo.findById('cat_food_other')).thenAnswer(
         (_) async => _makeCategory('cat_food_other', parentId: 'cat_food'),
       );
@@ -193,10 +198,8 @@ void main() {
       when(
         () => mockCategoryRepo.findById('cat_hobbies_subscription'),
       ).thenAnswer(
-        (_) async => _makeCategory(
-          'cat_hobbies_subscription',
-          parentId: 'cat_hobbies',
-        ),
+        (_) async =>
+            _makeCategory('cat_hobbies_subscription', parentId: 'cat_hobbies'),
       );
 
       final result = await recognizer.resolve('咖啡');
@@ -207,28 +210,31 @@ void main() {
       expect(result.source, MatchSource.learning);
     });
 
-    test('confidence formula clamps to 1.0 for both seed and learned', () async {
-      // Seed bonus 0.15 + base 0.85 = 1.00 (boundary).
-      when(() => mockPrefRepo.findByKeyword('seed')).thenAnswer(
-        (_) async => [_pref('seed', 'cat_seed_l2')],
-      );
-      when(() => mockCategoryRepo.findById('cat_seed_l2')).thenAnswer(
-        (_) async => _makeCategory('cat_seed_l2', parentId: 'cat_x'),
-      );
-      final seedResult = await recognizer.resolve('seed');
-      expect(seedResult!.confidence, closeTo(1.0, 1e-9));
+    test(
+      'confidence formula clamps to 1.0 for both seed and learned',
+      () async {
+        // Seed bonus 0.15 + base 0.85 = 1.00 (boundary).
+        when(
+          () => mockPrefRepo.findByKeyword('seed'),
+        ).thenAnswer((_) async => [_pref('seed', 'cat_seed_l2')]);
+        when(() => mockCategoryRepo.findById('cat_seed_l2')).thenAnswer(
+          (_) async => _makeCategory('cat_seed_l2', parentId: 'cat_x'),
+        );
+        final seedResult = await recognizer.resolve('seed');
+        expect(seedResult!.confidence, closeTo(1.0, 1e-9));
 
-      // Learned bonus 0.30 + base 0.85 = 1.15 → clamped to 1.0.
-      when(() => mockPrefRepo.findByKeyword('learned')).thenAnswer(
-        (_) async => [_pref('learned', 'cat_learned_l2', hitCount: 3)],
-      );
-      when(() => mockCategoryRepo.findById('cat_learned_l2')).thenAnswer(
-        (_) async => _makeCategory('cat_learned_l2', parentId: 'cat_x'),
-      );
-      final learnedResult = await recognizer.resolve('learned');
-      expect(learnedResult!.confidence, 1.0);
-      expect(learnedResult.source, MatchSource.learning);
-    });
+        // Learned bonus 0.30 + base 0.85 = 1.15 → clamped to 1.0.
+        when(() => mockPrefRepo.findByKeyword('learned')).thenAnswer(
+          (_) async => [_pref('learned', 'cat_learned_l2', hitCount: 3)],
+        );
+        when(() => mockCategoryRepo.findById('cat_learned_l2')).thenAnswer(
+          (_) async => _makeCategory('cat_learned_l2', parentId: 'cat_x'),
+        );
+        final learnedResult = await recognizer.resolve('learned');
+        expect(learnedResult!.confidence, 1.0);
+        expect(learnedResult.source, MatchSource.learning);
+      },
+    );
   });
 
   // ── VEN-01 / D-12: English category-keyword seeds resolve ────────────────
@@ -241,92 +247,98 @@ void main() {
   // recognizer resolves the correct L2 from a lowercase en keyword, and that a
   // capitalized iOS-STT keyword resolves once it has been lowercased upstream.
   group('VEN-01 English category seeds (D-12)', () {
-    test('lowercase en keyword resolves the correct L2 (coffee → cafe)',
-        () async {
-      when(() => mockPrefRepo.findByKeyword('coffee')).thenAnswer(
-        (_) async => [_pref('coffee', 'cat_food_cafe')],
-      );
-      when(() => mockCategoryRepo.findById('cat_food_cafe')).thenAnswer(
-        (_) async => _makeCategory('cat_food_cafe', parentId: 'cat_food'),
-      );
-
-      final result = await recognizer.resolve('coffee');
-
-      expect(result, isNotNull);
-      expect(result!.categoryId, 'cat_food_cafe');
-      expect(result.source, MatchSource.keyword);
-    });
-
-    test('lowercase en keyword resolves the correct L2 (rent → housing rent)',
-        () async {
-      when(() => mockPrefRepo.findByKeyword('rent')).thenAnswer(
-        (_) async => [_pref('rent', 'cat_housing_rent')],
-      );
-      when(() => mockCategoryRepo.findById('cat_housing_rent')).thenAnswer(
-        (_) async => _makeCategory('cat_housing_rent', parentId: 'cat_housing'),
-      );
-
-      final result = await recognizer.resolve('rent');
-
-      expect(result, isNotNull);
-      expect(result!.categoryId, 'cat_housing_rent');
-    });
-
     test(
-      'capitalized iOS-STT keyword resolves after upstream lowercasing '
-      '(Coffee → coffee → cafe)',
+      'lowercase en keyword resolves the correct L2 (coffee → cafe)',
       () async {
-        // The 52-01 _extractKeyword lowercases en residuals before the
-        // recognizer is called. We mirror that contract here: the lookup key
-        // the recognizer receives is already lowercase, so it matches the
-        // lowercase seed. A NON-lowercased "Coffee" would miss the
-        // case-sensitive findByKeyword — that is exactly why the seeds and the
-        // upstream extractor both go lowercase.
-        const sttKeyword = 'Coffee';
-        final lookupKey = sttKeyword.toLowerCase(); // = what _extractKeyword emits
-        when(() => mockPrefRepo.findByKeyword(lookupKey)).thenAnswer(
-          (_) async => [_pref('coffee', 'cat_food_cafe')],
-        );
-        // The case-sensitive seed lookup must NOT resolve the capitalized form.
-        when(() => mockPrefRepo.findByKeyword(sttKeyword))
-            .thenAnswer((_) async => []);
+        when(
+          () => mockPrefRepo.findByKeyword('coffee'),
+        ).thenAnswer((_) async => [_pref('coffee', 'cat_food_cafe')]);
         when(() => mockCategoryRepo.findById('cat_food_cafe')).thenAnswer(
           (_) async => _makeCategory('cat_food_cafe', parentId: 'cat_food'),
         );
 
-        final resolved = await recognizer.resolve(lookupKey);
-        expect(resolved, isNotNull);
-        expect(resolved!.categoryId, 'cat_food_cafe');
+        final result = await recognizer.resolve('coffee');
 
-        // Proves the casing pairing matters: the raw capitalized key misses.
-        final rawMiss = await recognizer.resolve(sttKeyword);
-        expect(
-          rawMiss,
-          isNull,
-          reason:
-              'case-sensitive findByKeyword misses "Coffee"; the 52-01 '
-              'lowercasing is what makes capitalized STT input resolve',
-        );
+        expect(result, isNotNull);
+        expect(result!.categoryId, 'cat_food_cafe');
+        expect(result.source, MatchSource.keyword);
       },
     );
 
-    test('en L1 keyword routes to its _other bucket (food → cat_food_other)',
-        () async {
-      when(() => mockPrefRepo.findByKeyword('food')).thenAnswer(
-        (_) async => [_pref('food', 'cat_food')],
-      );
-      when(() => mockCategoryRepo.findById('cat_food')).thenAnswer(
-        (_) async => _makeCategory('cat_food', level: 1),
-      );
-      when(() => mockCategoryRepo.findById('cat_food_other')).thenAnswer(
-        (_) async => _makeCategory('cat_food_other', parentId: 'cat_food'),
+    test(
+      'lowercase en keyword resolves the correct L2 (rent → housing rent)',
+      () async {
+        when(
+          () => mockPrefRepo.findByKeyword('rent'),
+        ).thenAnswer((_) async => [_pref('rent', 'cat_housing_rent')]);
+        when(() => mockCategoryRepo.findById('cat_housing_rent')).thenAnswer(
+          (_) async =>
+              _makeCategory('cat_housing_rent', parentId: 'cat_housing'),
+        );
+
+        final result = await recognizer.resolve('rent');
+
+        expect(result, isNotNull);
+        expect(result!.categoryId, 'cat_housing_rent');
+      },
+    );
+
+    test('capitalized iOS-STT keyword resolves after upstream lowercasing '
+        '(Coffee → coffee → cafe)', () async {
+      // The 52-01 _extractKeyword lowercases en residuals before the
+      // recognizer is called. We mirror that contract here: the lookup key
+      // the recognizer receives is already lowercase, so it matches the
+      // lowercase seed. A NON-lowercased "Coffee" would miss the
+      // case-sensitive findByKeyword — that is exactly why the seeds and the
+      // upstream extractor both go lowercase.
+      const sttKeyword = 'Coffee';
+      final lookupKey = sttKeyword
+          .toLowerCase(); // = what _extractKeyword emits
+      when(
+        () => mockPrefRepo.findByKeyword(lookupKey),
+      ).thenAnswer((_) async => [_pref('coffee', 'cat_food_cafe')]);
+      // The case-sensitive seed lookup must NOT resolve the capitalized form.
+      when(
+        () => mockPrefRepo.findByKeyword(sttKeyword),
+      ).thenAnswer((_) async => []);
+      when(() => mockCategoryRepo.findById('cat_food_cafe')).thenAnswer(
+        (_) async => _makeCategory('cat_food_cafe', parentId: 'cat_food'),
       );
 
-      final result = await recognizer.resolve('food');
+      final resolved = await recognizer.resolve(lookupKey);
+      expect(resolved, isNotNull);
+      expect(resolved!.categoryId, 'cat_food_cafe');
 
-      expect(result, isNotNull);
-      expect(result!.categoryId, 'cat_food_other');
+      // Proves the casing pairing matters: the raw capitalized key misses.
+      final rawMiss = await recognizer.resolve(sttKeyword);
+      expect(
+        rawMiss,
+        isNull,
+        reason:
+            'case-sensitive findByKeyword misses "Coffee"; the 52-01 '
+            'lowercasing is what makes capitalized STT input resolve',
+      );
     });
+
+    test(
+      'en L1 keyword routes to its _other bucket (food → cat_food_other)',
+      () async {
+        when(
+          () => mockPrefRepo.findByKeyword('food'),
+        ).thenAnswer((_) async => [_pref('food', 'cat_food')]);
+        when(
+          () => mockCategoryRepo.findById('cat_food'),
+        ).thenAnswer((_) async => _makeCategory('cat_food', level: 1));
+        when(() => mockCategoryRepo.findById('cat_food_other')).thenAnswer(
+          (_) async => _makeCategory('cat_food_other', parentId: 'cat_food'),
+        );
+
+        final result = await recognizer.resolve('food');
+
+        expect(result, isNotNull);
+        expect(result!.categoryId, 'cat_food_other');
+      },
+    );
   });
 
   // ── VEN-01 / D-12: the REAL seed data carries the en rows the mock tests
@@ -344,8 +356,11 @@ void main() {
       final s = findSeed('coffee');
       expect(s, isNotNull, reason: 'en seed "coffee" must exist');
       expect(s!.categoryId, 'cat_food_cafe');
-      expect(s.keyword, equals(s.keyword.toLowerCase()),
-          reason: 'en seeds MUST be authored lowercase (write==read contract)');
+      expect(
+        s.keyword,
+        equals(s.keyword.toLowerCase()),
+        reason: 'en seeds MUST be authored lowercase (write==read contract)',
+      );
     });
 
     test('rent / taxi / gym / book sample en seeds map to their L2', () {
@@ -372,61 +387,69 @@ void main() {
           .where((s) => s.keyword != s.keyword.toLowerCase())
           .map((s) => s.keyword)
           .toList();
-      expect(caps, isEmpty,
-          reason: 'Capitalized en common-word seeds break the 52-01 '
-              'case-sensitive findByKeyword pairing:\n${caps.join('\n')}');
+      expect(
+        caps,
+        isEmpty,
+        reason:
+            'Capitalized en common-word seeds break the 52-01 '
+            'case-sensitive findByKeyword pairing:\n${caps.join('\n')}',
+      );
     });
   });
 
   group('D-03 _ensureL2 fallback', () {
-    test('cat_other_expense L1 routes to cat_other_other via override map', () async {
-      when(() => mockPrefRepo.findByKeyword('其他')).thenAnswer(
-        (_) async => [_pref('其他', 'cat_other_expense')],
-      );
-      when(() => mockCategoryRepo.findById('cat_other_expense')).thenAnswer(
-        (_) async => _makeCategory('cat_other_expense', level: 1),
-      );
-      // The synthesized id (cat_other_expense_other) does NOT exist — only
-      // the override (cat_other_other) does.
-      when(
-        () => mockCategoryRepo.findById('cat_other_expense_other'),
-      ).thenAnswer((_) async => null);
-      when(() => mockCategoryRepo.findById('cat_other_other')).thenAnswer(
-        (_) async => _makeCategory(
-          'cat_other_other',
-          parentId: 'cat_other_expense',
-        ),
-      );
+    test(
+      'cat_other_expense L1 routes to cat_other_other via override map',
+      () async {
+        when(
+          () => mockPrefRepo.findByKeyword('其他'),
+        ).thenAnswer((_) async => [_pref('其他', 'cat_other_expense')]);
+        when(
+          () => mockCategoryRepo.findById('cat_other_expense'),
+        ).thenAnswer((_) async => _makeCategory('cat_other_expense', level: 1));
+        // The synthesized id (cat_other_expense_other) does NOT exist — only
+        // the override (cat_other_other) does.
+        when(
+          () => mockCategoryRepo.findById('cat_other_expense_other'),
+        ).thenAnswer((_) async => null);
+        when(() => mockCategoryRepo.findById('cat_other_other')).thenAnswer(
+          (_) async =>
+              _makeCategory('cat_other_other', parentId: 'cat_other_expense'),
+        );
 
-      final result = await recognizer.resolve('其他');
+        final result = await recognizer.resolve('其他');
 
-      expect(result, isNotNull);
-      expect(result!.categoryId, 'cat_other_other');
-    });
+        expect(result, isNotNull);
+        expect(result!.categoryId, 'cat_other_other');
+      },
+    );
 
-    test('safety net falls back to findByParent.first when _other missing', () async {
-      when(() => mockPrefRepo.findByKeyword('odd')).thenAnswer(
-        (_) async => [_pref('odd', 'cat_oddL1')],
-      );
-      when(() => mockCategoryRepo.findById('cat_oddL1')).thenAnswer(
-        (_) async => _makeCategory('cat_oddL1', level: 1),
-      );
-      // Neither override nor synthesized id resolves — fall back to children.
-      when(() => mockCategoryRepo.findById('cat_oddL1_other')).thenAnswer(
-        (_) async => null,
-      );
-      when(() => mockCategoryRepo.findByParent('cat_oddL1')).thenAnswer(
-        (_) async => [
-          _makeCategory('cat_oddL1_first', parentId: 'cat_oddL1'),
-          _makeCategory('cat_oddL1_second', parentId: 'cat_oddL1'),
-        ],
-      );
+    test(
+      'safety net falls back to findByParent.first when _other missing',
+      () async {
+        when(
+          () => mockPrefRepo.findByKeyword('odd'),
+        ).thenAnswer((_) async => [_pref('odd', 'cat_oddL1')]);
+        when(
+          () => mockCategoryRepo.findById('cat_oddL1'),
+        ).thenAnswer((_) async => _makeCategory('cat_oddL1', level: 1));
+        // Neither override nor synthesized id resolves — fall back to children.
+        when(
+          () => mockCategoryRepo.findById('cat_oddL1_other'),
+        ).thenAnswer((_) async => null);
+        when(() => mockCategoryRepo.findByParent('cat_oddL1')).thenAnswer(
+          (_) async => [
+            _makeCategory('cat_oddL1_first', parentId: 'cat_oddL1'),
+            _makeCategory('cat_oddL1_second', parentId: 'cat_oddL1'),
+          ],
+        );
 
-      final result = await recognizer.resolve('odd');
+        final result = await recognizer.resolve('odd');
 
-      expect(result, isNotNull);
-      expect(result!.categoryId, 'cat_oddL1_first');
-    });
+        expect(result, isNotNull);
+        expect(result!.categoryId, 'cat_oddL1_first');
+      },
+    );
   });
 
   group('Misses', () {
@@ -438,24 +461,29 @@ void main() {
       expect(result, isNull);
     });
 
-    test('empty input guard returns null without consulting any source', () async {
-      final result = await recognizer.resolve('');
+    test(
+      'empty input guard returns null without consulting any source',
+      () async {
+        final result = await recognizer.resolve('');
 
-      expect(result, isNull);
-      verifyNever(() => mockPrefRepo.findByKeyword(any()));
-    });
+        expect(result, isNull);
+        verifyNever(() => mockPrefRepo.findByKeyword(any()));
+      },
+    );
   });
 
   group('resolveLedgerType pass-through', () {
     test('forwards categoryId to CategoryService.resolveLedgerType', () async {
-      when(() => mockCategoryService.resolveLedgerType('cat_food_cafe'))
-          .thenAnswer((_) async => LedgerType.daily);
+      when(
+        () => mockCategoryService.resolveLedgerType('cat_food_cafe'),
+      ).thenAnswer((_) async => LedgerType.daily);
 
       final ledger = await recognizer.resolveLedgerType('cat_food_cafe');
 
       expect(ledger, LedgerType.daily);
-      verify(() => mockCategoryService.resolveLedgerType('cat_food_cafe'))
-          .called(1);
+      verify(
+        () => mockCategoryService.resolveLedgerType('cat_food_cafe'),
+      ).called(1);
     });
   });
 
@@ -465,42 +493,36 @@ void main() {
   // kLearnedPromotionThreshold = 3). Longest-key-wins is preserved across
   // the union. Seeds cached lazily; learned fetched fresh each call.
   group('Quick task 260526-pg6 — learned promotion in step 2.5', () {
-    test(
-      'Test 3.B: learned row (hitCount=3) wins substring fallback when no '
-      'seed matches; source=learning',
-      () async {
-        when(
-          () => mockPrefRepo.findByKeyword(any()),
-        ).thenAnswer((_) async => []);
-        // No seed matches.
-        when(() => mockPrefRepo.findAllSeedRows()).thenAnswer(
-          (_) async => [_pref('外食', 'cat_food_dining_out')],
-        );
-        // Learned: 新干线 → cat_transport_taxi, hitCount=3.
-        when(
-          () => mockPrefRepo.findLearnedRowsAtOrAbove(
-            kLearnedPromotionThreshold,
-          ),
-        ).thenAnswer(
-          (_) async => [_pref('新干线', 'cat_transport_taxi', hitCount: 3)],
-        );
-        when(() => mockCategoryRepo.findById('cat_transport_taxi')).thenAnswer(
-          (_) async =>
-              _makeCategory('cat_transport_taxi', parentId: 'cat_transport'),
-        );
+    test('Test 3.B: learned row (hitCount=3) wins substring fallback when no '
+        'seed matches; source=learning', () async {
+      when(() => mockPrefRepo.findByKeyword(any())).thenAnswer((_) async => []);
+      // No seed matches.
+      when(
+        () => mockPrefRepo.findAllSeedRows(),
+      ).thenAnswer((_) async => [_pref('外食', 'cat_food_dining_out')]);
+      // Learned: 新干线 → cat_transport_taxi, hitCount=3.
+      when(
+        () => mockPrefRepo.findLearnedRowsAtOrAbove(kLearnedPromotionThreshold),
+      ).thenAnswer(
+        (_) async => [_pref('新干线', 'cat_transport_taxi', hitCount: 3)],
+      );
+      when(() => mockCategoryRepo.findById('cat_transport_taxi')).thenAnswer(
+        (_) async =>
+            _makeCategory('cat_transport_taxi', parentId: 'cat_transport'),
+      );
 
-        final result = await recognizer.resolve('坐新干线去东京');
+      final result = await recognizer.resolve('坐新干线去东京');
 
-        expect(result, isNotNull);
-        expect(result!.categoryId, equals('cat_transport_taxi'));
-        expect(
-          result.source,
-          equals(MatchSource.learning),
-          reason: 'pg6 3.B: learned row in step 2.5 must surface as '
-              'MatchSource.learning, NOT keyword',
-        );
-      },
-    );
+      expect(result, isNotNull);
+      expect(result!.categoryId, equals('cat_transport_taxi'));
+      expect(
+        result.source,
+        equals(MatchSource.learning),
+        reason:
+            'pg6 3.B: learned row in step 2.5 must surface as '
+            'MatchSource.learning, NOT keyword',
+      );
+    });
 
     test(
       'Test 3.C: longest-key wins across seed-vs-learned boundary',
@@ -509,14 +531,13 @@ void main() {
           () => mockPrefRepo.findByKeyword(any()),
         ).thenAnswer((_) async => []);
         // Seed: 外食 (len=2) → cat_food_dining_out
-        when(() => mockPrefRepo.findAllSeedRows()).thenAnswer(
-          (_) async => [_pref('外食', 'cat_food_dining_out')],
-        );
+        when(
+          () => mockPrefRepo.findAllSeedRows(),
+        ).thenAnswer((_) async => [_pref('外食', 'cat_food_dining_out')]);
         // Learned: 去外食 (len=3, longer) → cat_food_other, hitCount=3
         when(
-          () => mockPrefRepo.findLearnedRowsAtOrAbove(
-            kLearnedPromotionThreshold,
-          ),
+          () =>
+              mockPrefRepo.findLearnedRowsAtOrAbove(kLearnedPromotionThreshold),
         ).thenAnswer(
           (_) async => [_pref('去外食', 'cat_food_other', hitCount: 3)],
         );
@@ -531,7 +552,8 @@ void main() {
         expect(
           result!.categoryId,
           equals('cat_food_other'),
-          reason: 'pg6 3.C: longest-key-wins preserved across seed/learned '
+          reason:
+              'pg6 3.C: longest-key-wins preserved across seed/learned '
               'union; 去外食 (3 chars, learned) beats 外食 (2 chars, seed)',
         );
         expect(result.source, equals(MatchSource.learning));
@@ -545,20 +567,17 @@ void main() {
         when(
           () => mockPrefRepo.findByKeyword(any()),
         ).thenAnswer((_) async => []);
-        when(() => mockPrefRepo.findAllSeedRows()).thenAnswer(
-          (_) async => [_pref('外食', 'cat_food_dining_out')],
-        );
+        when(
+          () => mockPrefRepo.findAllSeedRows(),
+        ).thenAnswer((_) async => [_pref('外食', 'cat_food_dining_out')]);
         // Learned 去外食 at hitCount=2 (below threshold of 3). The repo
         // call with kLearnedPromotionThreshold MUST return empty per the
         // contract (hitCount < threshold ⇒ excluded). Stub matches that.
         when(
-          () => mockPrefRepo.findLearnedRowsAtOrAbove(
-            kLearnedPromotionThreshold,
-          ),
+          () =>
+              mockPrefRepo.findLearnedRowsAtOrAbove(kLearnedPromotionThreshold),
         ).thenAnswer((_) async => []);
-        when(
-          () => mockCategoryRepo.findById('cat_food_dining_out'),
-        ).thenAnswer(
+        when(() => mockCategoryRepo.findById('cat_food_dining_out')).thenAnswer(
           (_) async =>
               _makeCategory('cat_food_dining_out', parentId: 'cat_food'),
         );
@@ -578,86 +597,69 @@ void main() {
       },
     );
 
-    test(
-      'Test 3.E: exact-match step 2 wins over step 2.5 even when a learned '
-      'row would also substring-match (short-circuit invariant)',
-      () async {
-        // Step 2 (exact match by keyword) hits — short-circuits before
-        // step 2.5 fires.
-        when(() => mockPrefRepo.findByKeyword('去外食')).thenAnswer(
-          (_) async => [_pref('去外食', 'cat_food_dining_out', hitCount: 5)],
-        );
-        when(
-          () => mockCategoryRepo.findById('cat_food_dining_out'),
-        ).thenAnswer(
-          (_) async =>
-              _makeCategory('cat_food_dining_out', parentId: 'cat_food'),
-        );
+    test('Test 3.E: exact-match step 2 wins over step 2.5 even when a learned '
+        'row would also substring-match (short-circuit invariant)', () async {
+      // Step 2 (exact match by keyword) hits — short-circuits before
+      // step 2.5 fires.
+      when(() => mockPrefRepo.findByKeyword('去外食')).thenAnswer(
+        (_) async => [_pref('去外食', 'cat_food_dining_out', hitCount: 5)],
+      );
+      when(() => mockCategoryRepo.findById('cat_food_dining_out')).thenAnswer(
+        (_) async => _makeCategory('cat_food_dining_out', parentId: 'cat_food'),
+      );
 
-        final result = await recognizer.resolve('去外食');
+      final result = await recognizer.resolve('去外食');
 
-        expect(result, isNotNull);
-        expect(result!.categoryId, equals('cat_food_dining_out'));
-        // Step 2.5 must NOT be consulted on an exact-match hit.
-        verifyNever(() => mockPrefRepo.findAllSeedRows());
-        verifyNever(
-          () => mockPrefRepo.findLearnedRowsAtOrAbove(
-            kLearnedPromotionThreshold,
-          ),
-        );
-      },
-    );
+      expect(result, isNotNull);
+      expect(result!.categoryId, equals('cat_food_dining_out'));
+      // Step 2.5 must NOT be consulted on an exact-match hit.
+      verifyNever(() => mockPrefRepo.findAllSeedRows());
+      verifyNever(
+        () => mockPrefRepo.findLearnedRowsAtOrAbove(kLearnedPromotionThreshold),
+      );
+    });
 
-    test(
-      'Backward-compat: pre-v1.3.1 polluted row (e.g. "去外食日元" written by '
-      'the divergent extractor) survives — does not poison the recognizer for '
-      'unrelated inputs',
-      () async {
-        // Pre-pg6 the form-side extractVoiceKeyword could leave a stray
-        // currency suffix (`日元`) attached. Such a learned row written to
-        // the table BEFORE Task 2 landed must survive untouched: it should
-        // still appear in findLearnedRowsAtOrAbove and the recognizer MUST
-        // ignore it when the current utterance doesn't contain that literal
-        // substring. No auto-purge, no schema migration.
-        when(
-          () => mockPrefRepo.findByKeyword(any()),
-        ).thenAnswer((_) async => []);
-        when(() => mockPrefRepo.findAllSeedRows()).thenAnswer(
-          (_) async => [_pref('外食', 'cat_food_dining_out')],
-        );
-        // Stale polluted learned row from pre-pg6 testing.
-        when(
-          () => mockPrefRepo.findLearnedRowsAtOrAbove(
-            kLearnedPromotionThreshold,
-          ),
-        ).thenAnswer(
-          (_) async => [_pref('去外食日元', 'cat_food_dining_out', hitCount: 5)],
-        );
-        when(
-          () => mockCategoryRepo.findById('cat_food_dining_out'),
-        ).thenAnswer(
-          (_) async =>
-              _makeCategory('cat_food_dining_out', parentId: 'cat_food'),
-        );
+    test('Backward-compat: pre-v1.3.1 polluted row (e.g. "去外食日元" written by '
+        'the divergent extractor) survives — does not poison the recognizer for '
+        'unrelated inputs', () async {
+      // Pre-pg6 the form-side extractVoiceKeyword could leave a stray
+      // currency suffix (`日元`) attached. Such a learned row written to
+      // the table BEFORE Task 2 landed must survive untouched: it should
+      // still appear in findLearnedRowsAtOrAbove and the recognizer MUST
+      // ignore it when the current utterance doesn't contain that literal
+      // substring. No auto-purge, no schema migration.
+      when(() => mockPrefRepo.findByKeyword(any())).thenAnswer((_) async => []);
+      when(
+        () => mockPrefRepo.findAllSeedRows(),
+      ).thenAnswer((_) async => [_pref('外食', 'cat_food_dining_out')]);
+      // Stale polluted learned row from pre-pg6 testing.
+      when(
+        () => mockPrefRepo.findLearnedRowsAtOrAbove(kLearnedPromotionThreshold),
+      ).thenAnswer(
+        (_) async => [_pref('去外食日元', 'cat_food_dining_out', hitCount: 5)],
+      );
+      when(() => mockCategoryRepo.findById('cat_food_dining_out')).thenAnswer(
+        (_) async => _makeCategory('cat_food_dining_out', parentId: 'cat_food'),
+      );
 
-        // Current utterance does NOT contain "去外食日元" — only "外食".
-        // The polluted learned row's keyword fails `contains` and is
-        // harmlessly ignored. Seed `外食` wins.
-        final result = await recognizer.resolve('我打算去外食呢');
+      // Current utterance does NOT contain "去外食日元" — only "外食".
+      // The polluted learned row's keyword fails `contains` and is
+      // harmlessly ignored. Seed `外食` wins.
+      final result = await recognizer.resolve('我打算去外食呢');
 
-        expect(result, isNotNull);
-        expect(
-          result!.categoryId,
-          equals('cat_food_dining_out'),
-          reason: 'pg6 backward-compat: polluted "去外食日元" row must NOT '
-              'pollute resolution for utterances that lack that literal '
-              'substring — no auto-purge needed',
-        );
-        // Source is keyword (seed) because the seed `外食` matched, not the
-        // polluted learned row.
-        expect(result.source, equals(MatchSource.keyword));
-      },
-    );
+      expect(result, isNotNull);
+      expect(
+        result!.categoryId,
+        equals('cat_food_dining_out'),
+        reason:
+            'pg6 backward-compat: polluted "去外食日元" row must NOT '
+            'pollute resolution for utterances that lack that literal '
+            'substring — no auto-purge needed',
+      );
+      // Source is keyword (seed) because the seed `外食` matched, not the
+      // polluted learned row.
+      expect(result.source, equals(MatchSource.keyword));
+    });
 
     test(
       'Test 3.F: seed cache persists across calls; learned set fetched fresh '
@@ -667,13 +669,10 @@ void main() {
           () => mockPrefRepo.findByKeyword(any()),
         ).thenAnswer((_) async => []);
         // Seed empty so step 2.5 never short-circuits the cache fill.
+        when(() => mockPrefRepo.findAllSeedRows()).thenAnswer((_) async => []);
         when(
-          () => mockPrefRepo.findAllSeedRows(),
-        ).thenAnswer((_) async => []);
-        when(
-          () => mockPrefRepo.findLearnedRowsAtOrAbove(
-            kLearnedPromotionThreshold,
-          ),
+          () =>
+              mockPrefRepo.findLearnedRowsAtOrAbove(kLearnedPromotionThreshold),
         ).thenAnswer((_) async => []);
 
         await recognizer.resolve('one');
@@ -683,9 +682,8 @@ void main() {
         verify(() => mockPrefRepo.findAllSeedRows()).called(1);
         // Learned: 1 call per resolve (fresh).
         verify(
-          () => mockPrefRepo.findLearnedRowsAtOrAbove(
-            kLearnedPromotionThreshold,
-          ),
+          () =>
+              mockPrefRepo.findLearnedRowsAtOrAbove(kLearnedPromotionThreshold),
         ).called(2);
       },
     );

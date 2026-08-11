@@ -254,9 +254,7 @@ void main() {
               ),
             ),
           ),
-          overrides: _baseOverrides(
-            categoryRepo: NullCategoryRepository(),
-          ),
+          overrides: _baseOverrides(categoryRepo: NullCategoryRepository()),
         ),
       );
       await tester.pumpAndSettle();

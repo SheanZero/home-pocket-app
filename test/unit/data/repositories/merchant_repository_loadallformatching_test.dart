@@ -73,13 +73,23 @@ void main() {
             merchant('mer_starbucks', 'スターバックス', 'cat_food_cafe', 'joy'),
           ],
           [
-            matchKey('mk_1', 'mer_seven_eleven', 'セブン-イレブン', 'せぶんいれぶん',
-                'name'),
-            matchKey('mk_2', 'mer_seven_eleven', '7-Eleven', '7-eleven', 'alias'),
+            matchKey('mk_1', 'mer_seven_eleven', 'セブン-イレブン', 'せぶんいれぶん', 'name'),
+            matchKey(
+              'mk_2',
+              'mer_seven_eleven',
+              '7-Eleven',
+              '7-eleven',
+              'alias',
+            ),
             matchKey('mk_3', 'mer_seven_eleven', '711', '711', 'alias'),
-            matchKey('mk_4', 'mer_starbucks', 'スターバックス', 'すたーばっくす',
-                'name'),
-            matchKey('mk_5', 'mer_starbucks', 'Starbucks', 'starbucks', 'alias'),
+            matchKey('mk_4', 'mer_starbucks', 'スターバックス', 'すたーばっくす', 'name'),
+            matchKey(
+              'mk_5',
+              'mer_starbucks',
+              'Starbucks',
+              'starbucks',
+              'alias',
+            ),
           ],
         );
 
@@ -89,10 +99,12 @@ void main() {
         expect(entries.length, 5);
 
         // (b) each entry's categoryId/ledgerHint matches its parent merchant.
-        final sevenEntries =
-            entries.where((e) => e.merchantId == 'mer_seven_eleven').toList();
-        final starbucksEntries =
-            entries.where((e) => e.merchantId == 'mer_starbucks').toList();
+        final sevenEntries = entries
+            .where((e) => e.merchantId == 'mer_seven_eleven')
+            .toList();
+        final starbucksEntries = entries
+            .where((e) => e.merchantId == 'mer_starbucks')
+            .toList();
 
         expect(sevenEntries.length, 3);
         expect(starbucksEntries.length, 2);
@@ -109,14 +121,12 @@ void main() {
         }
 
         // (c) all surfaces for one merchant share the same merchantId/categoryId.
-        expect(
-          sevenEntries.map((e) => e.categoryId).toSet(),
-          {'cat_food_convenience_store'},
-        );
-        expect(
-          starbucksEntries.map((e) => e.categoryId).toSet(),
-          {'cat_food_cafe'},
-        );
+        expect(sevenEntries.map((e) => e.categoryId).toSet(), {
+          'cat_food_convenience_store',
+        });
+        expect(starbucksEntries.map((e) => e.categoryId).toSet(), {
+          'cat_food_cafe',
+        });
 
         // The matchKey/surface pairing is preserved per row.
         final byKey = {for (final e in entries) e.matchKey: e};

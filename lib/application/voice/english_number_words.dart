@@ -17,15 +17,39 @@ library;
 import '../../shared/constants/voice_tuning.dart';
 
 const Map<String, int> _units = {
-  'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6,
-  'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10, 'eleven': 11, 'twelve': 12,
-  'thirteen': 13, 'fourteen': 14, 'fifteen': 15, 'sixteen': 16,
-  'seventeen': 17, 'eighteen': 18, 'nineteen': 19, 'a': 1, 'an': 1,
+  'zero': 0,
+  'one': 1,
+  'two': 2,
+  'three': 3,
+  'four': 4,
+  'five': 5,
+  'six': 6,
+  'seven': 7,
+  'eight': 8,
+  'nine': 9,
+  'ten': 10,
+  'eleven': 11,
+  'twelve': 12,
+  'thirteen': 13,
+  'fourteen': 14,
+  'fifteen': 15,
+  'sixteen': 16,
+  'seventeen': 17,
+  'eighteen': 18,
+  'nineteen': 19,
+  'a': 1,
+  'an': 1,
 };
 
 const Map<String, int> _tens = {
-  'twenty': 20, 'thirty': 30, 'forty': 40, 'fifty': 50, 'sixty': 60,
-  'seventy': 70, 'eighty': 80, 'ninety': 90,
+  'twenty': 20,
+  'thirty': 30,
+  'forty': 40,
+  'fifty': 50,
+  'sixty': 60,
+  'seventy': 70,
+  'eighty': 80,
+  'ninety': 90,
 };
 
 /// Parses an English number-word amount, or returns null if none / out of range.
@@ -37,7 +61,14 @@ int? parseEnglishNumberWords(String text, {required bool moneyContext}) {
   final tokens = text
       .toLowerCase()
       .split(RegExp(r'[^a-z]+'))
-      .where((t) => t.isNotEmpty && (_units.containsKey(t) || _tens.containsKey(t) || t == 'hundred' || t == 'thousand'))
+      .where(
+        (t) =>
+            t.isNotEmpty &&
+            (_units.containsKey(t) ||
+                _tens.containsKey(t) ||
+                t == 'hundred' ||
+                t == 'thousand'),
+      )
       .toList();
   if (tokens.isEmpty) return null;
 

@@ -6,13 +6,13 @@ import 'package:home_pocket/application/seed/seed_all_use_case.dart';
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
 
-class _MockSeedCategoriesUseCase extends Mock implements SeedCategoriesUseCase {}
+class _MockSeedCategoriesUseCase extends Mock
+    implements SeedCategoriesUseCase {}
 
 class _MockSeedVoiceSynonymsUseCase extends Mock
     implements SeedVoiceSynonymsUseCase {}
 
-class _MockSeedMerchantsUseCase extends Mock
-    implements SeedMerchantsUseCase {}
+class _MockSeedMerchantsUseCase extends Mock implements SeedMerchantsUseCase {}
 
 void main() {
   late _MockSeedCategoriesUseCase mockCategories;
@@ -47,9 +47,9 @@ void main() {
         return Result.success(null);
       });
 
-      when(() => mockMerchants.execute()).thenAnswer(
-        (_) async => Result.success(null),
-      );
+      when(
+        () => mockMerchants.execute(),
+      ).thenAnswer((_) async => Result.success(null));
 
       await useCase.execute();
 
@@ -58,21 +58,20 @@ void main() {
       expect(
         categoriesCompletedAt!.isBefore(synonymsStartedAt!),
         isTrue,
-        reason:
-            'Phase 23 D-14: categories must complete before synonyms start',
+        reason: 'Phase 23 D-14: categories must complete before synonyms start',
       );
     });
 
     test('D-14: synonyms not invoked when categories fails', () async {
-      when(() => mockCategories.execute()).thenAnswer(
-        (_) async => Result.error('categories seed failed'),
-      );
-      when(() => mockSynonyms.execute()).thenAnswer(
-        (_) async => Result.success(null),
-      );
-      when(() => mockMerchants.execute()).thenAnswer(
-        (_) async => Result.success(null),
-      );
+      when(
+        () => mockCategories.execute(),
+      ).thenAnswer((_) async => Result.error('categories seed failed'));
+      when(
+        () => mockSynonyms.execute(),
+      ).thenAnswer((_) async => Result.success(null));
+      when(
+        () => mockMerchants.execute(),
+      ).thenAnswer((_) async => Result.success(null));
 
       final result = await useCase.execute();
 
@@ -89,9 +88,9 @@ void main() {
         categoriesCompletedAt = DateTime.now();
         return Result.success(null);
       });
-      when(() => mockSynonyms.execute()).thenAnswer(
-        (_) async => Result.success(null),
-      );
+      when(
+        () => mockSynonyms.execute(),
+      ).thenAnswer((_) async => Result.success(null));
       when(() => mockMerchants.execute()).thenAnswer((_) async {
         merchantsStartedAt = DateTime.now();
         return Result.success(null);
@@ -113,15 +112,15 @@ void main() {
     });
 
     test('Phase 49: merchants not invoked when categories fails', () async {
-      when(() => mockCategories.execute()).thenAnswer(
-        (_) async => Result.error('categories seed failed'),
-      );
-      when(() => mockSynonyms.execute()).thenAnswer(
-        (_) async => Result.success(null),
-      );
-      when(() => mockMerchants.execute()).thenAnswer(
-        (_) async => Result.success(null),
-      );
+      when(
+        () => mockCategories.execute(),
+      ).thenAnswer((_) async => Result.error('categories seed failed'));
+      when(
+        () => mockSynonyms.execute(),
+      ).thenAnswer((_) async => Result.success(null));
+      when(
+        () => mockMerchants.execute(),
+      ).thenAnswer((_) async => Result.success(null));
 
       final result = await useCase.execute();
 

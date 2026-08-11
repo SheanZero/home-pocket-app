@@ -108,17 +108,14 @@ final _testCategories = [
   ),
 ];
 
-Widget _wrap({
-  required Locale locale,
-  ThemeMode themeMode = ThemeMode.light,
-}) {
+Widget _wrap({required Locale locale, ThemeMode themeMode = ThemeMode.light}) {
   return ProviderScope(
     overrides: [
-      categoryRepositoryProvider
-          .overrideWithValue(_FakeCategoryRepository(_testCategories)),
+      categoryRepositoryProvider.overrideWithValue(
+        _FakeCategoryRepository(_testCategories),
+      ),
       // Prevents async retry timers from currentLocaleProvider
-      locale_providers.currentLocaleProvider
-          .overrideWith((_) async => locale),
+      locale_providers.currentLocaleProvider.overrideWith((_) async => locale),
     ],
     child: MaterialApp(
       debugShowCheckedModeBanner: false,

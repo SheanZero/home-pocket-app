@@ -1,7 +1,8 @@
 import 'package:drift/drift.dart';
 
 import '../../features/accounting/domain/models/entry_source.dart';
-import '../../features/accounting/domain/models/transaction.dart' show LedgerType;
+import '../../features/accounting/domain/models/transaction.dart'
+    show LedgerType;
 import '../../features/analytics/domain/models/analytics_aggregate.dart';
 import '../../features/analytics/domain/models/best_joy_moment_row.dart';
 import '../../features/analytics/domain/models/ledger_snapshot.dart';

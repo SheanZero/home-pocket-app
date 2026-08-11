@@ -62,38 +62,42 @@ void main() {
 
   group('deriveLedgerHint == resolveLedgerType (single source of truth)', () {
     test(
-        'parity holds for every distinct categoryId used by DefaultMerchants',
-        () async {
-      final usedCategoryIds =
-          DefaultMerchants.all.map((m) => m.categoryId).toSet();
-      expect(usedCategoryIds, isNotEmpty);
+      'parity holds for every distinct categoryId used by DefaultMerchants',
+      () async {
+        final usedCategoryIds = DefaultMerchants.all
+            .map((m) => m.categoryId)
+            .toSet();
+        expect(usedCategoryIds, isNotEmpty);
 
-      for (final categoryId in usedCategoryIds) {
-        final derived = deriveLedgerHint(categoryId);
-        final authoritative = await service.resolveLedgerType(categoryId);
-        expect(
-          authoritative,
-          isNotNull,
-          reason:
-              'resolveLedgerType returned null for $categoryId — categoryId '
-              'gate should have caught this',
-        );
-        expect(
-          derived,
-          authoritative,
-          reason:
-              'Ledger desync for $categoryId: deriveLedgerHint=$derived but '
-              'resolveLedgerType=$authoritative',
-        );
-      }
-    });
+        for (final categoryId in usedCategoryIds) {
+          final derived = deriveLedgerHint(categoryId);
+          final authoritative = await service.resolveLedgerType(categoryId);
+          expect(
+            authoritative,
+            isNotNull,
+            reason:
+                'resolveLedgerType returned null for $categoryId — categoryId '
+                'gate should have caught this',
+          );
+          expect(
+            derived,
+            authoritative,
+            reason:
+                'Ledger desync for $categoryId: deriveLedgerHint=$derived but '
+                'resolveLedgerType=$authoritative',
+          );
+        }
+      },
+    );
 
     test('parity holds for EVERY L2 + L1 id in DefaultCategories', () async {
       // Broader than just the seeded ids — proves the deriver is correct across
       // the whole category tree (no override is silently missed).
       for (final cat in DefaultCategories.all) {
         final authoritative = await service.resolveLedgerType(cat.id);
-        if (authoritative == null) continue; // no config (e.g. some L2 w/o path)
+        if (authoritative == null) {
+          continue; // no config (e.g. some L2 w/o path)
+        }
         expect(
           deriveLedgerHint(cat.id),
           authoritative,
@@ -113,8 +117,7 @@ void main() {
       expect(deriveLedgerHint('cat_hobbies_subscription'), LedgerType.joy);
     });
 
-    test(
-        'parent inheritance is gated on level == 2 (structural parity with '
+    test('parent inheritance is gated on level == 2 (structural parity with '
         'resolveLedgerType, not data-shape coincidence)', () async {
       // A synthetic category that has a parentId WITH a resolvable config but is
       // NOT an L2 (e.g. an L1 mistakenly given a parent, or a future L3). The

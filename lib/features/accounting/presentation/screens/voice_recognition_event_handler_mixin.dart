@@ -21,8 +21,7 @@ import '../widgets/voice_error_toast.dart';
 /// The mixin writes state only through those abstract setters — it never
 /// accesses private fields of the hosting class directly (Pitfall 2
 /// single-writer rule: [isInitialized] is the one setter wrapping setState).
-mixin VoiceRecognitionEventHandlerMixin<W extends StatefulWidget>
-    on State<W> {
+mixin VoiceRecognitionEventHandlerMixin<W extends StatefulWidget> on State<W> {
   // ── Abstract contract — State class implements these ──────────────────────
 
   /// Whether the recognizer is currently in a recording session.

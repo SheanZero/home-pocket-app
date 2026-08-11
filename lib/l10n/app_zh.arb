@@ -464,7 +464,7 @@
   "backupAndRestore": "备份与恢复",
   "backupAndRestoreDescription": "加密文件",
   "backupHeroTitle": "把数据安全地保管在自己手中",
-  "backupHeroDescription": "使用密码加密记录与设置，并保存到设备或你选择的云盘位置。",
+  "backupHeroDescription": "使用密码加密账目、购物清单、类目与设置，并保存到设备或你选择的云盘位置。",
   "backupEncryptionChip": "AES-256-GCM",
   "backupCompressedChip": "已压缩",
   "backupNoUploadChip": "不会自动上传",
@@ -3017,9 +3017,9 @@
   "@shoppingSegmentPublic": {
     "description": "Shopping item form — public (shared) list option label"
   },
-  "shoppingSectionToBuy": "购买清单",
+  "shoppingSectionToBuy": "待购买",
   "@shoppingSectionToBuy": {
-    "description": "Shopping list — section heading above the active (to-buy) items list (v15)"
+    "description": "Shopping list — analytics-style section heading above pending items"
   },
   "shoppingListScreenTitle": "购物清单",
   "@shoppingListScreenTitle": {

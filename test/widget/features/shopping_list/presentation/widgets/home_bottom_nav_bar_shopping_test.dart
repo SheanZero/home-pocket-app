@@ -60,8 +60,9 @@ void main() {
       expect(find.text('Todo'), findsNothing);
     });
 
-    testWidgets('4th tab shows shopping_bag_outlined icon when inactive',
-        (tester) async {
+    testWidgets('4th tab shows shopping_bag_outlined icon when inactive', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         testLocalizedApp(
           child: Scaffold(

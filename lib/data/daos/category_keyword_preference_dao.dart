@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
-import '../../shared/constants/default_synonyms.dart' show kVoiceSynonymSeedEpoch;
+import '../../shared/constants/default_synonyms.dart'
+    show kVoiceSynonymSeedEpoch;
 import '../app_database.dart';
 
 /// Data access object for [CategoryKeywordPreferences] table.
@@ -34,9 +35,9 @@ class CategoryKeywordPreferenceDao {
   /// rows (hitCount >= 1) are intentionally excluded — those are exact-match
   /// only to bound false positives.
   Future<List<CategoryKeywordPreferenceRow>> findAllSeeds() async {
-    return (_db.select(_db.categoryKeywordPreferences)
-          ..where((t) => t.hitCount.equals(0)))
-        .get();
+    return (_db.select(
+      _db.categoryKeywordPreferences,
+    )..where((t) => t.hitCount.equals(0))).get();
   }
 
   /// Quick task 260526-pg6 (Option F — Task 3): fetch learned rows whose

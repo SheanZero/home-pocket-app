@@ -36,26 +36,26 @@ class ListEmptyState extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final (icon, message, actionLabel, onAction) = switch (variant) {
       ListEmptyVariant.noData => (
-          Icons.receipt_long_outlined,
-          S.of(context).listEmptyMonth,
-          null as String?,
-          null as VoidCallback?,
-        ),
+        Icons.receipt_long_outlined,
+        S.of(context).listEmptyMonth,
+        null as String?,
+        null as VoidCallback?,
+      ),
       ListEmptyVariant.dayEmpty => (
-          Icons.event_busy_outlined,
-          S.of(context).listEmptyDay,
-          S.of(context).listEmptyDayClear as String?,
-          // D-05 CRITICAL: selectDay(null) clears ONLY the day filter
-          (() => ref.read(listFilterProvider.notifier).selectDay(null))
-              as VoidCallback?,
-        ),
+        Icons.event_busy_outlined,
+        S.of(context).listEmptyDay,
+        S.of(context).listEmptyDayClear as String?,
+        // D-05 CRITICAL: selectDay(null) clears ONLY the day filter
+        (() => ref.read(listFilterProvider.notifier).selectDay(null))
+            as VoidCallback?,
+      ),
       ListEmptyVariant.filtered => (
-          Icons.search_off_outlined,
-          S.of(context).listEmptyFiltered,
-          S.of(context).listEmptyFilteredClear as String?,
-          (() => ref.read(listFilterProvider.notifier).clearAll())
-              as VoidCallback?,
-        ),
+        Icons.search_off_outlined,
+        S.of(context).listEmptyFiltered,
+        S.of(context).listEmptyFilteredClear as String?,
+        (() => ref.read(listFilterProvider.notifier).clearAll())
+            as VoidCallback?,
+      ),
     };
 
     final palette = context.palette;

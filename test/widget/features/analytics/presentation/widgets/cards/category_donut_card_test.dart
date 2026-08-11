@@ -474,6 +474,34 @@ void main() {
       find.descendant(of: find.byType(ListTile), matching: find.text('Shean')),
       findsOneWidget,
     );
+
+    final allMembersTile = find.ancestor(
+      of: find.text('All members'),
+      matching: find.byType(ListTile),
+    );
+    final selfTile = find.ancestor(
+      of: find.text('Shean'),
+      matching: find.byType(ListTile),
+    );
+    final allMembersTitle = find.descendant(
+      of: allMembersTile,
+      matching: find.text('All members'),
+    );
+    final selfTitle = find.descendant(
+      of: selfTile,
+      matching: find.text('Shean'),
+    );
+    expect(
+      find.descendant(
+        of: allMembersTile,
+        matching: find.byIcon(Icons.group_outlined),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      tester.getTopLeft(allMembersTitle).dx,
+      tester.getTopLeft(selfTitle).dx,
+    );
   });
 
   // ── 260622-d5i / D1: borderless drawer + divider + ♡悦び chip + count + total ─

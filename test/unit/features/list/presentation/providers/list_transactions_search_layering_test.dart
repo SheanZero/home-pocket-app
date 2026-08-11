@@ -122,9 +122,7 @@ void main() {
         container
             .read(listFilterProvider.notifier)
             .setLedgerFilter(LedgerType.joy);
-        await container.read(
-          listTransactionsProvider(bookId: 'book1').future,
-        );
+        await container.read(listTransactionsProvider(bookId: 'book1').future);
         expect(
           executeCount,
           2,

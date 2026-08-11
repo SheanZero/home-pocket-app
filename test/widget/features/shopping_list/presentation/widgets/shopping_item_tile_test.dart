@@ -181,10 +181,7 @@ void main() {
         toggle: mockToggle,
       );
 
-      expect(
-        completionBorderColor(tester, item.id),
-        AppPalette.light.daily,
-      );
+      expect(completionBorderColor(tester, item.id), AppPalette.light.daily);
       expect(find.text('Daily'), findsNothing);
       expect(
         find.byKey(ValueKey('shopping-ledger-badge-${item.id}')),
@@ -203,10 +200,7 @@ void main() {
         toggle: mockToggle,
       );
 
-      expect(
-        completionBorderColor(tester, item.id),
-        AppPalette.light.daily,
-      );
+      expect(completionBorderColor(tester, item.id), AppPalette.light.daily);
       expect(find.text('Daily'), findsNothing);
       expect(find.text('Joy'), findsNothing);
     });
@@ -222,10 +216,7 @@ void main() {
         toggle: mockToggle,
       );
 
-      expect(
-        completionBorderColor(tester, item.id),
-        AppPalette.light.joy,
-      );
+      expect(completionBorderColor(tester, item.id), AppPalette.light.joy);
       expect(find.text('Joy'), findsNothing);
       expect(
         find.byKey(ValueKey('shopping-ledger-badge-${item.id}')),
@@ -833,39 +824,38 @@ void main() {
       expect(find.byKey(const Key('shopping_action_delete')), findsNothing);
     });
 
-    testWidgets(
-      'completed tile leaves copy and glyph at full opacity',
-      (tester) async {
-        final item = _makeItem(id: 'done-style', isCompleted: true);
-        await _pumpTile(
-          tester,
-          item: item,
-          delete: mockDelete,
-          toggle: mockToggle,
-          isActive: false,
+    testWidgets('completed tile leaves copy and glyph at full opacity', (
+      tester,
+    ) async {
+      final item = _makeItem(id: 'done-style', isCompleted: true);
+      await _pumpTile(
+        tester,
+        item: item,
+        delete: mockDelete,
+        toggle: mockToggle,
+        isActive: false,
+      );
+
+      for (final key in [
+        const ValueKey('shopping-copy-done-style'),
+        const ValueKey('shopping-drag-glyph-done-style'),
+      ]) {
+        final region = find.byKey(key);
+        expect(region, findsOneWidget);
+        expect(
+          tester.widget(region),
+          isNot(isA<AnimatedOpacity>()),
+          reason: 'Completed subregions must not apply a second fade',
         );
+        expect(
+          find.ancestor(of: region, matching: find.byType(AnimatedOpacity)),
+          findsNothing,
+          reason: 'The completed card owns the single 0.58 opacity layer',
+        );
+      }
 
-        for (final key in [
-          const ValueKey('shopping-copy-done-style'),
-          const ValueKey('shopping-drag-glyph-done-style'),
-        ]) {
-          final region = find.byKey(key);
-          expect(region, findsOneWidget);
-          expect(
-            tester.widget(region),
-            isNot(isA<AnimatedOpacity>()),
-            reason: 'Completed subregions must not apply a second fade',
-          );
-          expect(
-            find.ancestor(of: region, matching: find.byType(AnimatedOpacity)),
-            findsNothing,
-            reason: 'The completed card owns the single 0.58 opacity layer',
-          );
-        }
-
-        final dragIcon = tester.widget<Icon>(find.byIcon(Icons.drag_indicator));
-        expect(dragIcon.color, AppPalette.light.textPrimary);
-      },
-    );
+      final dragIcon = tester.widget<Icon>(find.byIcon(Icons.drag_indicator));
+      expect(dragIcon.color, AppPalette.light.textPrimary);
+    });
   });
 }

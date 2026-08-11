@@ -82,83 +82,92 @@ void main() {
   final windowEnd = DateTime(2026, 5, 31, 23, 59, 59);
 
   group('GetPerDayJoyCountsUseCase', () {
-    test('per-day COUNT (笔数, not sum); a day with 3 joy entries -> count 3', () async {
-      final repo = _RecordingTransactionRepository([
-        _tx(id: 'a', timestamp: DateTime(2026, 5, 10, 9), amount: 5000),
-        _tx(id: 'b', timestamp: DateTime(2026, 5, 10, 14), amount: 7000),
-        _tx(id: 'c', timestamp: DateTime(2026, 5, 10, 20), amount: 100),
-        _tx(id: 'd', timestamp: DateTime(2026, 5, 12, 9), amount: 9999),
-      ]);
-      final useCase = GetPerDayJoyCountsUseCase(transactionRepository: repo);
+    test(
+      'per-day COUNT (笔数, not sum); a day with 3 joy entries -> count 3',
+      () async {
+        final repo = _RecordingTransactionRepository([
+          _tx(id: 'a', timestamp: DateTime(2026, 5, 10, 9), amount: 5000),
+          _tx(id: 'b', timestamp: DateTime(2026, 5, 10, 14), amount: 7000),
+          _tx(id: 'c', timestamp: DateTime(2026, 5, 10, 20), amount: 100),
+          _tx(id: 'd', timestamp: DateTime(2026, 5, 12, 9), amount: 9999),
+        ]);
+        final useCase = GetPerDayJoyCountsUseCase(transactionRepository: repo);
 
-      final result = await useCase.execute(
-        bookIds: ['book1'],
-        startDate: windowStart,
-        endDate: windowEnd,
-      );
+        final result = await useCase.execute(
+          bookIds: ['book1'],
+          startDate: windowStart,
+          endDate: windowEnd,
+        );
 
-      // Count, NOT sum of amounts (Pitfall 3).
-      expect(_countOn(result, DateTime(2026, 5, 10)), 3);
-      expect(_countOn(result, DateTime(2026, 5, 12)), 1);
-      // A day with no joy entries is absent / count 0.
-      expect(_countOn(result, DateTime(2026, 5, 11)), 0);
-    });
+        // Count, NOT sum of amounts (Pitfall 3).
+        expect(_countOn(result, DateTime(2026, 5, 10)), 3);
+        expect(_countOn(result, DateTime(2026, 5, 12)), 1);
+        // A day with no joy entries is absent / count 0.
+        expect(_countOn(result, DateTime(2026, 5, 11)), 0);
+      },
+    );
 
-    test('joy-ledger ONLY + expense-only (daily + non-expense excluded)', () async {
-      final repo = _RecordingTransactionRepository([
-        _tx(id: 'joy', timestamp: DateTime(2026, 5, 10, 9)),
-        _tx(
-          id: 'daily',
-          timestamp: DateTime(2026, 5, 10, 10),
-          ledgerType: LedgerType.daily,
-        ),
-        _tx(
-          id: 'income',
-          timestamp: DateTime(2026, 5, 10, 11),
-          type: TransactionType.income,
-        ),
-        _tx(
-          id: 'transfer',
-          timestamp: DateTime(2026, 5, 10, 12),
-          type: TransactionType.transfer,
-        ),
-      ]);
-      final useCase = GetPerDayJoyCountsUseCase(transactionRepository: repo);
+    test(
+      'joy-ledger ONLY + expense-only (daily + non-expense excluded)',
+      () async {
+        final repo = _RecordingTransactionRepository([
+          _tx(id: 'joy', timestamp: DateTime(2026, 5, 10, 9)),
+          _tx(
+            id: 'daily',
+            timestamp: DateTime(2026, 5, 10, 10),
+            ledgerType: LedgerType.daily,
+          ),
+          _tx(
+            id: 'income',
+            timestamp: DateTime(2026, 5, 10, 11),
+            type: TransactionType.income,
+          ),
+          _tx(
+            id: 'transfer',
+            timestamp: DateTime(2026, 5, 10, 12),
+            type: TransactionType.transfer,
+          ),
+        ]);
+        final useCase = GetPerDayJoyCountsUseCase(transactionRepository: repo);
 
-      final result = await useCase.execute(
-        bookIds: ['book1'],
-        startDate: windowStart,
-        endDate: windowEnd,
-      );
+        final result = await useCase.execute(
+          bookIds: ['book1'],
+          startDate: windowStart,
+          endDate: windowEnd,
+        );
 
-      // Fetch requests the joy ledger; only the one expense joy row counts.
-      expect(repo.lastLedgerType, LedgerType.joy);
-      expect(_countOn(result, DateTime(2026, 5, 10)), 1);
-    });
+        // Fetch requests the joy ledger; only the one expense joy row counts.
+        expect(repo.lastLedgerType, LedgerType.joy);
+        expect(_countOn(result, DateTime(2026, 5, 10)), 1);
+      },
+    );
 
-    test('day grouping is local-day correct (late-night entry lands on its day)', () async {
-      // Two entries late on the 10th and one just after midnight on the 11th.
-      final repo = _RecordingTransactionRepository([
-        _tx(id: 'late10', timestamp: DateTime(2026, 5, 10, 23, 50)),
-        _tx(id: 'late10b', timestamp: DateTime(2026, 5, 10, 23, 59)),
-        _tx(id: 'early11', timestamp: DateTime(2026, 5, 11, 0, 5)),
-      ]);
-      final useCase = GetPerDayJoyCountsUseCase(transactionRepository: repo);
+    test(
+      'day grouping is local-day correct (late-night entry lands on its day)',
+      () async {
+        // Two entries late on the 10th and one just after midnight on the 11th.
+        final repo = _RecordingTransactionRepository([
+          _tx(id: 'late10', timestamp: DateTime(2026, 5, 10, 23, 50)),
+          _tx(id: 'late10b', timestamp: DateTime(2026, 5, 10, 23, 59)),
+          _tx(id: 'early11', timestamp: DateTime(2026, 5, 11, 0, 5)),
+        ]);
+        final useCase = GetPerDayJoyCountsUseCase(transactionRepository: repo);
 
-      final result = await useCase.execute(
-        bookIds: ['book1'],
-        startDate: windowStart,
-        endDate: windowEnd,
-      );
+        final result = await useCase.execute(
+          bookIds: ['book1'],
+          startDate: windowStart,
+          endDate: windowEnd,
+        );
 
-      expect(_countOn(result, DateTime(2026, 5, 10)), 2);
-      expect(_countOn(result, DateTime(2026, 5, 11)), 1);
-      // Each PerDayJoyCount.date is day-anchored (midnight).
-      for (final r in result) {
-        expect(r.date.hour, 0);
-        expect(r.date.minute, 0);
-      }
-    });
+        expect(_countOn(result, DateTime(2026, 5, 10)), 2);
+        expect(_countOn(result, DateTime(2026, 5, 11)), 1);
+        // Each PerDayJoyCount.date is day-anchored (midnight).
+        for (final r in result) {
+          expect(r.date.hour, 0);
+          expect(r.date.minute, 0);
+        }
+      },
+    );
 
     test('empty month -> empty, no throw', () async {
       final repo = _RecordingTransactionRepository(const []);
@@ -173,22 +182,19 @@ void main() {
       expect(result, isEmpty);
     });
 
-    test(
-      'security: findByBookIds called with exactly the caller bookIds '
-      '(T-46-02-01 / T-44-03-03)',
-      () async {
-        final repo = _RecordingTransactionRepository(const []);
-        final useCase = GetPerDayJoyCountsUseCase(transactionRepository: repo);
+    test('security: findByBookIds called with exactly the caller bookIds '
+        '(T-46-02-01 / T-44-03-03)', () async {
+      final repo = _RecordingTransactionRepository(const []);
+      final useCase = GetPerDayJoyCountsUseCase(transactionRepository: repo);
 
-        await useCase.execute(
-          bookIds: ['book1', 'book2'],
-          startDate: windowStart,
-          endDate: windowEnd,
-        );
+      await useCase.execute(
+        bookIds: ['book1', 'book2'],
+        startDate: windowStart,
+        endDate: windowEnd,
+      );
 
-        expect(repo.lastBookIds, ['book1', 'book2']);
-        expect(repo.findByBookIdsCallCount, 1);
-      },
-    );
+      expect(repo.lastBookIds, ['book1', 'book2']);
+      expect(repo.findByBookIdsCallCount, 1);
+    });
   });
 }

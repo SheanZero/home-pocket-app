@@ -60,6 +60,15 @@ class ShoppingItemRepositoryImpl
   }
 
   @override
+  Future<List<ShoppingItem>> findAll({bool includeDeleted = false}) async {
+    final rows = await _dao.findAll(includeDeleted: includeDeleted);
+    return Future.wait(rows.map(_toModel));
+  }
+
+  @override
+  Future<void> deleteAll() => _dao.deleteAll();
+
+  @override
   Stream<List<ShoppingItem>> watchByListType(String listType) {
     return _dao
         .watchByListType(listType)

@@ -8,20 +8,27 @@ import 'package:home_pocket/application/settings/import_backup_use_case.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/data/daos/book_dao.dart';
 import 'package:home_pocket/data/daos/category_dao.dart';
+import 'package:home_pocket/data/daos/category_ledger_config_dao.dart';
 import 'package:home_pocket/data/daos/exchange_rate_dao.dart';
+import 'package:home_pocket/data/daos/shopping_item_dao.dart';
 import 'package:home_pocket/data/daos/transaction_dao.dart';
 import 'package:home_pocket/data/repositories/book_repository_impl.dart';
 import 'package:home_pocket/data/repositories/category_repository_impl.dart';
+import 'package:home_pocket/data/repositories/category_ledger_config_repository_impl.dart';
 import 'package:home_pocket/data/repositories/exchange_rate_repository_impl.dart';
 import 'package:home_pocket/data/repositories/transaction_repository_impl.dart';
+import 'package:home_pocket/data/repositories/shopping_item_repository_impl.dart';
 import 'package:home_pocket/data/repositories/unit_of_work_impl.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
+import 'package:home_pocket/features/accounting/domain/models/category_ledger_config.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:home_pocket/features/settings/domain/models/backup_data.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/unit_of_work.dart';
+import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
+import 'package:home_pocket/features/shopping_list/domain/models/shopping_unit.dart';
 import 'package:home_pocket/infrastructure/crypto/services/backup_crypto_service.dart';
 import 'package:home_pocket/infrastructure/crypto/services/field_encryption_service.dart';
 import 'package:mocktail/mocktail.dart';
@@ -186,8 +193,10 @@ void main() {
   late AppDatabase db;
   late BookRepositoryImpl bookRepo;
   late CategoryRepositoryImpl categoryRepo;
+  late CategoryLedgerConfigRepositoryImpl categoryLedgerConfigRepo;
   late TransactionRepositoryImpl transactionRepo;
   late ExchangeRateRepositoryImpl exchangeRateRepo;
+  late ShoppingItemRepositoryImpl shoppingItemRepo;
   late _MockSettingsRepository settingsRepo;
   late ImportBackupUseCase useCase;
   late Directory tempDir;
@@ -235,11 +244,18 @@ void main() {
 
     bookRepo = BookRepositoryImpl(dao: BookDao(db));
     categoryRepo = CategoryRepositoryImpl(dao: CategoryDao(db));
+    categoryLedgerConfigRepo = CategoryLedgerConfigRepositoryImpl(
+      dao: CategoryLedgerConfigDao(db),
+    );
     transactionRepo = TransactionRepositoryImpl(
       dao: TransactionDao(db),
       encryptionService: mockEncryption,
     );
     exchangeRateRepo = ExchangeRateRepositoryImpl(dao: ExchangeRateDao(db));
+    shoppingItemRepo = ShoppingItemRepositoryImpl(
+      dao: ShoppingItemDao(db),
+      encryptionService: mockEncryption,
+    );
     settingsRepo = _MockSettingsRepository();
     when(
       () => settingsRepo.getSettings(),
@@ -249,7 +265,9 @@ void main() {
     useCase = ImportBackupUseCase(
       transactionRepo: transactionRepo,
       categoryRepo: categoryRepo,
+      categoryLedgerConfigRepo: categoryLedgerConfigRepo,
       bookRepo: bookRepo,
+      shoppingItemRepo: shoppingItemRepo,
       settingsRepo: settingsRepo,
       exchangeRateRepo: exchangeRateRepo,
       unitOfWork: UnitOfWorkImpl(db: db),
@@ -341,7 +359,9 @@ void main() {
         final journalUseCase = ImportBackupUseCase(
           transactionRepo: transactionRepo,
           categoryRepo: categoryRepo,
+          categoryLedgerConfigRepo: categoryLedgerConfigRepo,
           bookRepo: bookRepo,
+          shoppingItemRepo: shoppingItemRepo,
           settingsRepo: journalSettings,
           exchangeRateRepo: exchangeRateRepo,
           unitOfWork: UnitOfWorkImpl(db: db),
@@ -374,7 +394,9 @@ void main() {
         final journalUseCase = ImportBackupUseCase(
           transactionRepo: transactionRepo,
           categoryRepo: categoryRepo,
+          categoryLedgerConfigRepo: categoryLedgerConfigRepo,
           bookRepo: bookRepo,
+          shoppingItemRepo: shoppingItemRepo,
           settingsRepo: journalSettings,
           exchangeRateRepo: exchangeRateRepo,
           unitOfWork: _CommitFailingUnitOfWork(db),
@@ -403,7 +425,9 @@ void main() {
         final journalUseCase = ImportBackupUseCase(
           transactionRepo: transactionRepo,
           categoryRepo: categoryRepo,
+          categoryLedgerConfigRepo: categoryLedgerConfigRepo,
           bookRepo: bookRepo,
+          shoppingItemRepo: shoppingItemRepo,
           settingsRepo: journalSettings,
           exchangeRateRepo: exchangeRateRepo,
           unitOfWork: UnitOfWorkImpl(db: db),
@@ -452,7 +476,9 @@ void main() {
         final journalUseCase = ImportBackupUseCase(
           transactionRepo: transactionRepo,
           categoryRepo: categoryRepo,
+          categoryLedgerConfigRepo: categoryLedgerConfigRepo,
           bookRepo: bookRepo,
+          shoppingItemRepo: shoppingItemRepo,
           settingsRepo: journalSettings,
           exchangeRateRepo: exchangeRateRepo,
           unitOfWork: UnitOfWorkImpl(db: db),
@@ -599,7 +625,7 @@ void main() {
     });
 
     test(
-      'full-application backup round trip preserves transactions for both books',
+      'full backup round trip preserves books, shopping items, and category behavior',
       () async {
         final bookA = Book(
           id: 'book_a',
@@ -639,15 +665,57 @@ void main() {
           currentHash: 'hash_b',
           createdAt: DateTime.utc(2026, 8, 3),
         );
+        final customizedCategory = Category(
+          id: 'cat_customized',
+          name: 'Hidden custom category',
+          icon: 'shopping',
+          color: '#123456',
+          level: 1,
+          isSystem: false,
+          isArchived: true,
+          sortOrder: 77,
+          createdAt: DateTime.utc(2026, 8, 1),
+        );
+        final categoryConfig = CategoryLedgerConfig(
+          categoryId: customizedCategory.id,
+          ledgerType: LedgerType.joy,
+          updatedAt: DateTime.utc(2026, 8, 2),
+        );
+        final shoppingItem = ShoppingItem(
+          id: 'shopping_archived',
+          deviceId: 'dev_001',
+          listType: 'private',
+          name: 'Archived coffee',
+          ledgerType: LedgerType.joy,
+          categoryId: customizedCategory.id,
+          tags: const ['weekly'],
+          note: 'Preserve me',
+          quantity: 2.5,
+          unit: ShoppingUnit.pack,
+          estimatedPrice: 1800,
+          completedAt: DateTime.utc(2026, 8, 3),
+          isCompleted: true,
+          sortOrder: 12,
+          isDeleted: true,
+          createdAt: DateTime.utc(2026, 8, 2),
+          updatedAt: DateTime.utc(2026, 8, 3),
+          syncRevision: 4,
+          syncOriginDeviceId: 'dev_001',
+        );
         await bookRepo.insert(bookA);
         await bookRepo.insert(bookB);
+        await categoryRepo.insert(customizedCategory);
+        await categoryLedgerConfigRepo.upsert(categoryConfig);
         await transactionRepo.insert(transactionA);
         await transactionRepo.insert(transactionB);
+        await shoppingItemRepo.upsert(shoppingItem);
 
         final exportUseCase = ExportBackupUseCase(
           transactionRepo: transactionRepo,
           categoryRepo: categoryRepo,
+          categoryLedgerConfigRepo: categoryLedgerConfigRepo,
           bookRepo: bookRepo,
+          shoppingItemRepo: shoppingItemRepo,
           settingsRepo: settingsRepo,
           exchangeRateRepo: exchangeRateRepo,
           unitOfWork: UnitOfWorkImpl(db: db),
@@ -674,6 +742,8 @@ void main() {
             currentHash: 'hash_b_after_backup',
           ),
         );
+        await shoppingItemRepo.deleteAll();
+        await categoryLedgerConfigRepo.deleteAll();
 
         final restored = await useCase.execute(
           backupFile: exported.data!,
@@ -690,6 +760,25 @@ void main() {
           ['tx_b'],
           reason: 'restoring a full archive must not empty a second book',
         );
+        final restoredCategory = await categoryRepo.findById(
+          customizedCategory.id,
+        );
+        expect(restoredCategory?.isArchived, isTrue);
+        expect(restoredCategory?.sortOrder, 77);
+        final restoredCategoryConfig = await categoryLedgerConfigRepo.findById(
+          customizedCategory.id,
+        );
+        expect(restoredCategoryConfig?.categoryId, customizedCategory.id);
+        expect(restoredCategoryConfig?.ledgerType, LedgerType.joy);
+        final restoredShoppingItems = await shoppingItemRepo.findAll(
+          includeDeleted: true,
+        );
+        expect(restoredShoppingItems, hasLength(1));
+        expect(restoredShoppingItems.single.id, shoppingItem.id);
+        expect(restoredShoppingItems.single.note, shoppingItem.note);
+        expect(restoredShoppingItems.single.isCompleted, isTrue);
+        expect(restoredShoppingItems.single.isDeleted, isTrue);
+        expect(restoredShoppingItems.single.sortOrder, 12);
       },
     );
   });

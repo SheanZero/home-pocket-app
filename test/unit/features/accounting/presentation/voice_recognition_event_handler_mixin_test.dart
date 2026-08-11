@@ -23,7 +23,8 @@ class _TestWidget extends StatefulWidget {
 /// Fake [State] that mixes in [VoiceRecognitionEventHandlerMixin] for isolation
 /// testing. Exposes mutable fields directly so individual tests can set up the
 /// guard preconditions without going through the screen.
-class _TestState extends State<_TestWidget> with VoiceRecognitionEventHandlerMixin {
+class _TestState extends State<_TestWidget>
+    with VoiceRecognitionEventHandlerMixin {
   // ── Abstract contract implementation ────────────────────────────────────────
 
   @override
@@ -78,9 +79,7 @@ class _TestState extends State<_TestWidget> with VoiceRecognitionEventHandlerMix
 Future<_TestState> _pumpTestState(WidgetTester tester) async {
   late _TestState capturedState;
   await tester.pumpWidget(
-    MaterialApp(
-      home: _TestWidget(stateRef: (s) => capturedState = s),
-    ),
+    MaterialApp(home: _TestWidget(stateRef: (s) => capturedState = s)),
   );
   await tester.pump();
   return capturedState;
@@ -103,8 +102,9 @@ void main() {
 
         state.isRecording = true;
         state.pressStart = DateTime.now();
-        state.mockLastFinal =
-            DateTime.now().subtract(const Duration(milliseconds: 100));
+        state.mockLastFinal = DateTime.now().subtract(
+          const Duration(milliseconds: 100),
+        );
 
         state.onStatus('notListening');
         await tester.pump();
@@ -132,8 +132,9 @@ void main() {
 
         state.isRecording = true;
         state.pressStart = DateTime.now();
-        state.mockLastFinal =
-            DateTime.now().subtract(const Duration(milliseconds: 2000));
+        state.mockLastFinal = DateTime.now().subtract(
+          const Duration(milliseconds: 2000),
+        );
 
         state.onStatus('notListening');
         await tester.pump();

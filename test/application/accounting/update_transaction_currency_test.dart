@@ -77,30 +77,30 @@ void main() {
   });
 
   group('currency-edit recompute (DISP-04 / ADR-021)', () {
-    test(
-      'editing appliedRate recomputes JPY amount via convertToJpy() and '
-      'persists the triple',
-      () async {
-        final seed = makeForeignSeed();
+    test('editing appliedRate recomputes JPY amount via convertToJpy() and '
+        'persists the triple', () async {
+      final seed = makeForeignSeed();
 
-        // Rate changes 148.30 → 150.00. 5000 / 100 × 150.00 = 7500 JPY.
-        final result = await useCase.execute(
-          UpdateTransactionParams(
-            seed: seed,
-            originalCurrency: 'USD',
-            originalAmount: 5000,
-            appliedRate: '150.00',
-          ),
-        );
+      // Rate changes 148.30 → 150.00. 5000 / 100 × 150.00 = 7500 JPY.
+      final result = await useCase.execute(
+        UpdateTransactionParams(
+          seed: seed,
+          originalCurrency: 'USD',
+          originalAmount: 5000,
+          appliedRate: '150.00',
+        ),
+      );
 
-        expect(result.isSuccess, isTrue, reason: result.error);
-        expect(result.data!.amount, 7500,
-            reason: 'JPY must be recomputed via convertToJpy(), not left stale');
-        expect(result.data!.appliedRate, '150.00');
-        expect(result.data!.originalCurrency, 'USD');
-        expect(result.data!.originalAmount, 5000);
-      },
-    );
+      expect(result.isSuccess, isTrue, reason: result.error);
+      expect(
+        result.data!.amount,
+        7500,
+        reason: 'JPY must be recomputed via convertToJpy(), not left stale',
+      );
+      expect(result.data!.appliedRate, '150.00');
+      expect(result.data!.originalCurrency, 'USD');
+      expect(result.data!.originalAmount, 5000);
+    });
 
     test(
       'editing originalAmount recomputes JPY amount via convertToJpy()',
@@ -144,10 +144,16 @@ void main() {
         expect(result.isSuccess, isTrue, reason: result.error);
         // ADR-021: the triple is excluded from the hash, so editing currency
         // fields must NOT mutate the chain links.
-        expect(result.data!.prevHash, 'prev-hash-abc',
-            reason: 'prevHash must stay frozen on a currency-only edit');
-        expect(result.data!.currentHash, 'current-hash-xyz',
-            reason: 'currentHash must stay frozen on a currency-only edit');
+        expect(
+          result.data!.prevHash,
+          'prev-hash-abc',
+          reason: 'prevHash must stay frozen on a currency-only edit',
+        );
+        expect(
+          result.data!.currentHash,
+          'current-hash-xyz',
+          reason: 'currentHash must stay frozen on a currency-only edit',
+        );
       },
     );
   });

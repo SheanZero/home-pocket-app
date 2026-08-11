@@ -625,11 +625,7 @@ void main() {
           db,
           "SELECT ledger_type FROM category_ledger_configs WHERE category_id = 'cat_allowance'",
         );
-        expect(
-          ledgerType,
-          'joy',
-          reason: 'cat_allowance should be joy ledger',
-        );
+        expect(ledgerType, 'joy', reason: 'cat_allowance should be joy ledger');
       },
     );
 

@@ -70,7 +70,9 @@ void main() {
       expect(dismissed, isTrue);
     });
 
-    testWidgets('shows two avatar circles + group_add CTA icon', (tester) async {
+    testWidgets('shows two avatar circles + group_add CTA icon', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 

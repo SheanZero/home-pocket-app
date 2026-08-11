@@ -272,18 +272,16 @@ class _ToBuySectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
     final l10n = S.of(context);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(21, 18, 21, 8),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Text(
-          l10n.shoppingSectionToBuy,
-          style: AppTextStyles.sectionTitle.copyWith(
-            color: palette.textPrimary,
-          ),
+        child: _ShoppingSectionTitle(
+          title: l10n.shoppingSectionToBuy,
+          titleKey: const Key('shopping-to-buy-section-title'),
+          accentKey: const Key('shopping-to-buy-section-accent'),
         ),
       ),
     );
@@ -312,11 +310,10 @@ class _CompletedSectionHeader extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(21, 18, 21, 8),
       child: Row(
         children: [
-          Text(
-            l10n.shoppingCompletedDivider,
-            style: AppTextStyles.sectionTitle.copyWith(
-              color: palette.textPrimary,
-            ),
+          _ShoppingSectionTitle(
+            title: l10n.shoppingCompletedDivider,
+            titleKey: const Key('shopping-completed-section-title'),
+            accentKey: const Key('shopping-completed-section-accent'),
           ),
           const Spacer(),
           // Clear-all-completed button (DONE-03, SC5)
@@ -358,6 +355,49 @@ class _CompletedSectionHeader extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Shopping section heading aligned with the practical section treatment used
+/// on the analytics screen: green accent, semantic section size, muted color.
+class _ShoppingSectionTitle extends StatelessWidget {
+  const _ShoppingSectionTitle({
+    required this.title,
+    required this.titleKey,
+    required this.accentKey,
+  });
+
+  final String title;
+  final Key titleKey;
+  final Key accentKey;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          key: accentKey,
+          width: 3,
+          height: AppTypography.sectionTitle,
+          decoration: BoxDecoration(
+            color: palette.accentPrimary,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          key: titleKey,
+          style: AppTextStyles.sectionTitle.copyWith(
+            color: palette.textSecondary,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 }

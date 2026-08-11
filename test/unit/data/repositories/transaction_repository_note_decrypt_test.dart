@@ -8,8 +8,7 @@ import 'package:home_pocket/infrastructure/crypto/services/field_encryption_serv
 /// shadow-book note encrypted with another device's key (SC#5).
 class _ThrowingEncryptionService implements FieldEncryptionService {
   @override
-  Future<String> encryptField(String plaintext) async =>
-      'encrypted_$plaintext';
+  Future<String> encryptField(String plaintext) async => 'encrypted_$plaintext';
 
   /// Always throws to simulate wrong-device-key scenario.
   @override

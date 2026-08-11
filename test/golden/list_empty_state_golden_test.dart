@@ -71,14 +71,11 @@ void main() {
           );
         });
 
-        testWidgets(
-            '${variant.name} — ${locale.languageCode} dark', (tester) async {
+        testWidgets('${variant.name} — ${locale.languageCode} dark', (
+          tester,
+        ) async {
           await tester.pumpWidget(
-            _wrap(
-              locale: locale,
-              variant: variant,
-              themeMode: ThemeMode.dark,
-            ),
+            _wrap(locale: locale, variant: variant, themeMode: ThemeMode.dark),
           );
           await tester.pumpAndSettle();
           await expectLater(

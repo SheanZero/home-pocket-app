@@ -9,8 +9,8 @@ class _MockSpeechToText extends Mock implements stt.SpeechToText {}
 class _FakeSpeechRecognitionResult extends Fake
     implements SpeechRecognitionResult {}
 
-class _FakeSpeechListenOptions extends Fake implements stt.SpeechListenOptions {
-}
+class _FakeSpeechListenOptions extends Fake
+    implements stt.SpeechListenOptions {}
 
 void main() {
   setUpAll(() {
@@ -83,34 +83,43 @@ void main() {
       service = SpeechRecognitionService(speech: mockSpeech);
     });
 
-    test('initialize returns true when plugin initializes successfully',
-        () async {
-      when(() => mockSpeech.initialize(
+    test(
+      'initialize returns true when plugin initializes successfully',
+      () async {
+        when(
+          () => mockSpeech.initialize(
             onStatus: any(named: 'onStatus'),
             onError: any(named: 'onError'),
             debugLogging: any(named: 'debugLogging'),
-          )).thenAnswer((_) async => true);
+          ),
+        ).thenAnswer((_) async => true);
 
-      final result = await service.initialize();
+        final result = await service.initialize();
 
-      expect(result, isTrue);
-      expect(service.isAvailable, isTrue);
-    });
+        expect(result, isTrue);
+        expect(service.isAvailable, isTrue);
+      },
+    );
 
-    test('getAvailableLocales returns empty list when not initialized',
-        () async {
-      final locales = await service.getAvailableLocales();
-      expect(locales, isEmpty);
-    });
+    test(
+      'getAvailableLocales returns empty list when not initialized',
+      () async {
+        final locales = await service.getAvailableLocales();
+        expect(locales, isEmpty);
+      },
+    );
 
     test('getAvailableLocales returns locales when initialized', () async {
-      when(() => mockSpeech.initialize(
-            onStatus: any(named: 'onStatus'),
-            onError: any(named: 'onError'),
-            debugLogging: any(named: 'debugLogging'),
-          )).thenAnswer((_) async => true);
-      when(() => mockSpeech.locales())
-          .thenAnswer((_) async => <stt.LocaleName>[]);
+      when(
+        () => mockSpeech.initialize(
+          onStatus: any(named: 'onStatus'),
+          onError: any(named: 'onError'),
+          debugLogging: any(named: 'debugLogging'),
+        ),
+      ).thenAnswer((_) async => true);
+      when(
+        () => mockSpeech.locales(),
+      ).thenAnswer((_) async => <stt.LocaleName>[]);
 
       await service.initialize();
       final locales = await service.getAvailableLocales();
@@ -135,106 +144,123 @@ void main() {
       onSoundLevelCalls = 0;
     });
 
-    test('returns false when no prior startListening and not initialized',
-        () async {
-      when(() => mockSpeech.isListening).thenReturn(false);
+    test(
+      'returns false when no prior startListening and not initialized',
+      () async {
+        when(() => mockSpeech.isListening).thenReturn(false);
 
-      expect(await service.restartListen(), isFalse);
-      verifyNever(() => mockSpeech.listen(
+        expect(await service.restartListen(), isFalse);
+        verifyNever(
+          () => mockSpeech.listen(
             onResult: any(named: 'onResult'),
             localeId: any(named: 'localeId'),
             listenFor: any(named: 'listenFor'),
             pauseFor: any(named: 'pauseFor'),
             onSoundLevelChange: any(named: 'onSoundLevelChange'),
             listenOptions: any(named: 'listenOptions'),
-          ));
-    });
+          ),
+        );
+      },
+    );
 
     test(
-        'returns false when config cached but initialize was never successful',
-        () async {
-      when(() => mockSpeech.isListening).thenReturn(false);
+      'returns false when config cached but initialize was never successful',
+      () async {
+        when(() => mockSpeech.isListening).thenReturn(false);
 
-      // startListening caches config but _isInitialized stays false
-      await service.startListening(
-        onResult: onResultStub,
-        onSoundLevel: onSoundLevelStub,
-        localeId: 'ja-JP',
-      );
+        // startListening caches config but _isInitialized stays false
+        await service.startListening(
+          onResult: onResultStub,
+          onSoundLevel: onSoundLevelStub,
+          localeId: 'ja-JP',
+        );
 
-      expect(await service.restartListen(), isFalse);
-      verifyNever(() => mockSpeech.listen(
+        expect(await service.restartListen(), isFalse);
+        verifyNever(
+          () => mockSpeech.listen(
             onResult: any(named: 'onResult'),
             localeId: any(named: 'localeId'),
             listenFor: any(named: 'listenFor'),
             pauseFor: any(named: 'pauseFor'),
             onSoundLevelChange: any(named: 'onSoundLevelChange'),
             listenOptions: any(named: 'listenOptions'),
-          ));
-    });
+          ),
+        );
+      },
+    );
 
     test(
-        'after successful initialize+startListening, restartListen reopens listen() once when idle',
-        () async {
-      when(() => mockSpeech.initialize(
+      'after successful initialize+startListening, restartListen reopens listen() once when idle',
+      () async {
+        when(
+          () => mockSpeech.initialize(
             onStatus: any(named: 'onStatus'),
             onError: any(named: 'onError'),
             debugLogging: any(named: 'debugLogging'),
-          )).thenAnswer((_) async => true);
-      when(() => mockSpeech.isListening).thenReturn(false);
-      when(() => mockSpeech.listen(
+          ),
+        ).thenAnswer((_) async => true);
+        when(() => mockSpeech.isListening).thenReturn(false);
+        when(
+          () => mockSpeech.listen(
             onResult: any(named: 'onResult'),
             localeId: any(named: 'localeId'),
             listenFor: any(named: 'listenFor'),
             pauseFor: any(named: 'pauseFor'),
             onSoundLevelChange: any(named: 'onSoundLevelChange'),
             listenOptions: any(named: 'listenOptions'),
-          )).thenAnswer((_) async {});
+          ),
+        ).thenAnswer((_) async {});
 
-      await service.initialize();
-      await service.startListening(
-        onResult: onResultStub,
-        onSoundLevel: onSoundLevelStub,
-        localeId: 'ja-JP',
-      );
+        await service.initialize();
+        await service.startListening(
+          onResult: onResultStub,
+          onSoundLevel: onSoundLevelStub,
+          localeId: 'ja-JP',
+        );
 
-      final ok = await service.restartListen();
+        final ok = await service.restartListen();
 
-      expect(ok, isTrue);
-      // listen() called twice: once in startListening, once in restartListen
-      verify(() => mockSpeech.listen(
+        expect(ok, isTrue);
+        // listen() called twice: once in startListening, once in restartListen
+        verify(
+          () => mockSpeech.listen(
             onResult: any(named: 'onResult'),
             localeId: 'ja-JP',
             listenFor: any(named: 'listenFor'),
             pauseFor: any(named: 'pauseFor'),
             onSoundLevelChange: any(named: 'onSoundLevelChange'),
             listenOptions: any(named: 'listenOptions'),
-          )).called(2);
-      // No cancel needed when idle
-      verifyNever(() => mockSpeech.cancel());
-    });
+          ),
+        ).called(2);
+        // No cancel needed when idle
+        verifyNever(() => mockSpeech.cancel());
+      },
+    );
 
-    test('Pitfall 3 mitigation: cancels first when isListening is true',
-        () async {
-      when(() => mockSpeech.initialize(
-            onStatus: any(named: 'onStatus'),
-            onError: any(named: 'onError'),
-            debugLogging: any(named: 'debugLogging'),
-          )).thenAnswer((_) async => true);
+    test('Pitfall 3 mitigation: cancels first when isListening is true', () async {
+      when(
+        () => mockSpeech.initialize(
+          onStatus: any(named: 'onStatus'),
+          onError: any(named: 'onError'),
+          debugLogging: any(named: 'debugLogging'),
+        ),
+      ).thenAnswer((_) async => true);
 
       // isListening returns true when restartListen checks it (simulating mid-session state).
       // startListening does not call isListening, so the first isListening call comes from
       // restartListen — return true to trigger the cancel-before-listen path.
       when(() => mockSpeech.isListening).thenReturn(true);
       when(() => mockSpeech.cancel()).thenAnswer((_) async {});
-      when(() => mockSpeech.listen(
-            onResult: any(named: 'onResult'),
-            localeId: any(named: 'localeId'),
-            listenFor: any(named: 'listenFor'),
-            pauseFor: any(named: 'pauseFor'),
-            onSoundLevelChange: any(named: 'onSoundLevelChange'),
-            listenOptions: any(named: 'listenOptions'),
-          )).thenAnswer((_) async {});
+      when(
+        () => mockSpeech.listen(
+          onResult: any(named: 'onResult'),
+          localeId: any(named: 'localeId'),
+          listenFor: any(named: 'listenFor'),
+          pauseFor: any(named: 'pauseFor'),
+          onSoundLevelChange: any(named: 'onSoundLevelChange'),
+          listenOptions: any(named: 'listenOptions'),
+        ),
+      ).thenAnswer((_) async {});
 
       await service.initialize();
       await service.startListening(
@@ -247,31 +273,37 @@ void main() {
 
       expect(ok, isTrue);
       verify(() => mockSpeech.cancel()).called(1);
-      verify(() => mockSpeech.listen(
-            onResult: any(named: 'onResult'),
-            localeId: any(named: 'localeId'),
-            listenFor: any(named: 'listenFor'),
-            pauseFor: any(named: 'pauseFor'),
-            onSoundLevelChange: any(named: 'onSoundLevelChange'),
-            listenOptions: any(named: 'listenOptions'),
-          )).called(greaterThanOrEqualTo(1));
+      verify(
+        () => mockSpeech.listen(
+          onResult: any(named: 'onResult'),
+          localeId: any(named: 'localeId'),
+          listenFor: any(named: 'listenFor'),
+          pauseFor: any(named: 'pauseFor'),
+          onSoundLevelChange: any(named: 'onSoundLevelChange'),
+          listenOptions: any(named: 'listenOptions'),
+        ),
+      ).called(greaterThanOrEqualTo(1));
     });
 
     test('repeated restartListen calls use same cached config', () async {
-      when(() => mockSpeech.initialize(
-            onStatus: any(named: 'onStatus'),
-            onError: any(named: 'onError'),
-            debugLogging: any(named: 'debugLogging'),
-          )).thenAnswer((_) async => true);
+      when(
+        () => mockSpeech.initialize(
+          onStatus: any(named: 'onStatus'),
+          onError: any(named: 'onError'),
+          debugLogging: any(named: 'debugLogging'),
+        ),
+      ).thenAnswer((_) async => true);
       when(() => mockSpeech.isListening).thenReturn(false);
-      when(() => mockSpeech.listen(
-            onResult: any(named: 'onResult'),
-            localeId: any(named: 'localeId'),
-            listenFor: any(named: 'listenFor'),
-            pauseFor: any(named: 'pauseFor'),
-            onSoundLevelChange: any(named: 'onSoundLevelChange'),
-            listenOptions: any(named: 'listenOptions'),
-          )).thenAnswer((_) async {});
+      when(
+        () => mockSpeech.listen(
+          onResult: any(named: 'onResult'),
+          localeId: any(named: 'localeId'),
+          listenFor: any(named: 'listenFor'),
+          pauseFor: any(named: 'pauseFor'),
+          onSoundLevelChange: any(named: 'onSoundLevelChange'),
+          listenOptions: any(named: 'listenOptions'),
+        ),
+      ).thenAnswer((_) async {});
 
       await service.initialize();
       await service.startListening(
@@ -286,14 +318,16 @@ void main() {
       expect(await service.restartListen(), isTrue);
 
       // listen() called 4 times total: 1 from startListening + 3 from restartListen
-      verify(() => mockSpeech.listen(
-            onResult: any(named: 'onResult'),
-            localeId: 'ja-JP',
-            listenFor: any(named: 'listenFor'),
-            pauseFor: any(named: 'pauseFor'),
-            onSoundLevelChange: any(named: 'onSoundLevelChange'),
-            listenOptions: any(named: 'listenOptions'),
-          )).called(4);
+      verify(
+        () => mockSpeech.listen(
+          onResult: any(named: 'onResult'),
+          localeId: 'ja-JP',
+          listenFor: any(named: 'listenFor'),
+          pauseFor: any(named: 'pauseFor'),
+          onSoundLevelChange: any(named: 'onSoundLevelChange'),
+          listenOptions: any(named: 'listenOptions'),
+        ),
+      ).called(4);
       verifyNever(() => mockSpeech.cancel());
     });
   });

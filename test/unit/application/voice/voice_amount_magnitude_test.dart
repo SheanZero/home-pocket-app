@@ -66,29 +66,26 @@ void main() {
       expect(r.amount, 5312);
     });
 
-    test(
-      'ja 5000300円 + 五千三百円 alternate → 5300 via magnitude source ③ '
-      '(zero-led tail defeats the concat detector; candidate swaps to the '
-      'original for one-tap undo)',
-      () async {
-        // Plan deviation note: the plan's 100002000円 vector exceeds the
-        // parser's <10M clamp (primary extraction yields null, so the guard
-        // precondition never holds). 5000300円 is the same ITN shape —
-        // 「五千三百」 split "5000"+"300", tail starts with 0 so
-        // detectConcatRepairCandidate returns null — inside the clamp.
-        final r = await parse(
-          '5000300円',
-          localeId: 'ja-JP',
-          alternateTexts: ['五千三百円'],
-        );
-        expect(r.amount, 5300);
-        expect(
-          r.amountRepairCandidate,
-          5000300,
-          reason: 'the original poisoned reading rides as the undo anchor',
-        );
-      },
-    );
+    test('ja 5000300円 + 五千三百円 alternate → 5300 via magnitude source ③ '
+        '(zero-led tail defeats the concat detector; candidate swaps to the '
+        'original for one-tap undo)', () async {
+      // Plan deviation note: the plan's 100002000円 vector exceeds the
+      // parser's <10M clamp (primary extraction yields null, so the guard
+      // precondition never holds). 5000300円 is the same ITN shape —
+      // 「五千三百」 split "5000"+"300", tail starts with 0 so
+      // detectConcatRepairCandidate returns null — inside the clamp.
+      final r = await parse(
+        '5000300円',
+        localeId: 'ja-JP',
+        alternateTexts: ['五千三百円'],
+      );
+      expect(r.amount, 5300);
+      expect(
+        r.amountRepairCandidate,
+        5000300,
+        reason: 'the original poisoned reading rides as the undo anchor',
+      );
+    });
 
     test(r'en $350016 + word alternate → 3516', () async {
       final r = await parse(
@@ -99,15 +96,12 @@ void main() {
       expect(r.amount, 3516);
     });
 
-    test(
-      'regression: anchor-free 250046元 without alternates stays '
-      'byte-identical to 260703 (amount kept, candidate rides)',
-      () async {
-        final r = await parse('250046元', localeId: 'zh-CN');
-        expect(r.amount, 250046);
-        expect(r.amountRepairCandidate, 2546);
-      },
-    );
+    test('regression: anchor-free 250046元 without alternates stays '
+        'byte-identical to 260703 (amount kept, candidate rides)', () async {
+      final r = await parse('250046元', localeId: 'zh-CN');
+      expect(r.amount, 250046);
+      expect(r.amountRepairCandidate, 2546);
+    });
 
     test(
       'regression: clean kanji 三千五百元 → 3500, no candidate, no arbitration',

@@ -50,26 +50,22 @@ void main() {
   /// Stubs listen() to record every invocation's options/locale/durations and
   /// throw ListenFailedException while [failWhile] returns true.
   void stubListen({required bool Function(stt.SpeechListenOptions opts) fail}) {
-    when(() => mockSpeech.listen(
-          onResult: any(named: 'onResult'),
-          localeId: any(named: 'localeId'),
-          listenFor: any(named: 'listenFor'),
-          pauseFor: any(named: 'pauseFor'),
-          onSoundLevelChange: any(named: 'onSoundLevelChange'),
-          listenOptions: any(named: 'listenOptions'),
-        )).thenAnswer((invocation) {
-      final opts = invocation.namedArguments[#listenOptions]
-          as stt.SpeechListenOptions;
+    when(
+      () => mockSpeech.listen(
+        onResult: any(named: 'onResult'),
+        localeId: any(named: 'localeId'),
+        listenFor: any(named: 'listenFor'),
+        pauseFor: any(named: 'pauseFor'),
+        onSoundLevelChange: any(named: 'onSoundLevelChange'),
+        listenOptions: any(named: 'listenOptions'),
+      ),
+    ).thenAnswer((invocation) {
+      final opts =
+          invocation.namedArguments[#listenOptions] as stt.SpeechListenOptions;
       capturedOptions.add(opts);
-      capturedLocales.add(
-        invocation.namedArguments[#localeId] as String?,
-      );
-      capturedListenFor.add(
-        invocation.namedArguments[#listenFor] as Duration?,
-      );
-      capturedPauseFor.add(
-        invocation.namedArguments[#pauseFor] as Duration?,
-      );
+      capturedLocales.add(invocation.namedArguments[#localeId] as String?);
+      capturedListenFor.add(invocation.namedArguments[#listenFor] as Duration?);
+      capturedPauseFor.add(invocation.namedArguments[#pauseFor] as Duration?);
       if (fail(opts)) {
         throw stt.ListenFailedException('on-device unavailable');
       }
@@ -78,11 +74,13 @@ void main() {
   }
 
   Future<void> initService() async {
-    when(() => mockSpeech.initialize(
-          onStatus: any(named: 'onStatus'),
-          onError: any(named: 'onError'),
-          debugLogging: any(named: 'debugLogging'),
-        )).thenAnswer((_) async => true);
+    when(
+      () => mockSpeech.initialize(
+        onStatus: any(named: 'onStatus'),
+        onError: any(named: 'onError'),
+        debugLogging: any(named: 'debugLogging'),
+      ),
+    ).thenAnswer((_) async => true);
     await service.initialize();
   }
 
@@ -108,8 +106,11 @@ void main() {
 
     expect(capturedOptions, hasLength(1));
     final opts = capturedOptions.single;
-    expect(opts.onDevice, isTrue,
-        reason: 'offline Tier 0: recognition starts on-device by default');
+    expect(
+      opts.onDevice,
+      isTrue,
+      reason: 'offline Tier 0: recognition starts on-device by default',
+    );
     expect(opts.listenMode, stt.ListenMode.dictation);
     expect(opts.autoPunctuation, isTrue);
     expect(opts.cancelOnError, isFalse);
@@ -132,18 +133,28 @@ void main() {
       completes,
     );
 
-    expect(capturedOptions, hasLength(2),
-        reason: 'exactly one on-device attempt + one fallback retry');
+    expect(
+      capturedOptions,
+      hasLength(2),
+      reason: 'exactly one on-device attempt + one fallback retry',
+    );
     expect(capturedOptions[0].onDevice, isTrue);
     expect(capturedOptions[1].onDevice, isFalse);
     // Same-args retry: locale and durations are identical on both calls.
     expect(capturedLocales, ['zh-CN', 'zh-CN']);
-    expect(capturedListenFor,
-        [const Duration(seconds: 20), const Duration(seconds: 20)]);
-    expect(capturedPauseFor,
-        [const Duration(seconds: 2), const Duration(seconds: 2)]);
-    expect(service.onDeviceFallbackActive, isTrue,
-        reason: 'the session-scoped fallback flag is set after the degrade');
+    expect(capturedListenFor, [
+      const Duration(seconds: 20),
+      const Duration(seconds: 20),
+    ]);
+    expect(capturedPauseFor, [
+      const Duration(seconds: 2),
+      const Duration(seconds: 2),
+    ]);
+    expect(
+      service.onDeviceFallbackActive,
+      isTrue,
+      reason: 'the session-scoped fallback flag is set after the degrade',
+    );
   });
 
   test('Test 3: after a fallback, the NEXT startListening goes straight to '
@@ -166,8 +177,11 @@ void main() {
       localeId: 'ja-JP',
     );
 
-    expect(capturedOptions, hasLength(3),
-        reason: 'no on-device attempt after the session degraded');
+    expect(
+      capturedOptions,
+      hasLength(3),
+      reason: 'no on-device attempt after the session degraded',
+    );
     expect(capturedOptions[2].onDevice, isFalse);
   });
 
@@ -187,10 +201,16 @@ void main() {
     final ok = await service.restartListen();
 
     expect(ok, isTrue);
-    expect(capturedOptions, hasLength(3),
-        reason: 'restartListen replays via startListening exactly once');
-    expect(capturedOptions[2].onDevice, isFalse,
-        reason: 'the cached-config replay inherits the session fallback');
+    expect(
+      capturedOptions,
+      hasLength(3),
+      reason: 'restartListen replays via startListening exactly once',
+    );
+    expect(
+      capturedOptions[2].onDevice,
+      isFalse,
+      reason: 'the cached-config replay inherits the session fallback',
+    );
     expect(capturedLocales[2], 'ja-JP');
   });
 
@@ -218,34 +238,50 @@ void main() {
       throwsA(isA<stt.ListenFailedException>()),
     );
 
-    expect(capturedOptions, hasLength(3),
-        reason: 'exactly one more listen call — no retry when the failure is '
-            'not an on-device degrade');
+    expect(
+      capturedOptions,
+      hasLength(3),
+      reason:
+          'exactly one more listen call — no retry when the failure is '
+          'not an on-device degrade',
+    );
     expect(capturedOptions[2].onDevice, isFalse);
   });
 
-  test('Test 6 (KFB C2): allowOnDeviceFallback:false rethrows the on-device '
-      'failure with NO cloud retry and leaves the session flag false', () async {
-    await initService();
-    stubListen(fail: (opts) => opts.onDevice == true);
+  test(
+    'Test 6 (KFB C2): allowOnDeviceFallback:false rethrows the on-device '
+    'failure with NO cloud retry and leaves the session flag false',
+    () async {
+      await initService();
+      stubListen(fail: (opts) => opts.onDevice == true);
 
-    await expectLater(
-      service.startListening(
-        onResult: onResultStub,
-        onSoundLevel: onSoundLevelStub,
-        localeId: 'ja-JP',
-        allowOnDeviceFallback: false,
-      ),
-      throwsA(isA<stt.ListenFailedException>()),
-    );
+      await expectLater(
+        service.startListening(
+          onResult: onResultStub,
+          onSoundLevel: onSoundLevelStub,
+          localeId: 'ja-JP',
+          allowOnDeviceFallback: false,
+        ),
+        throwsA(isA<stt.ListenFailedException>()),
+      );
 
-    expect(capturedOptions, hasLength(1),
-        reason: 'exactly ONE on-device attempt — the cloud retry is disallowed');
-    expect(capturedOptions.single.onDevice, isTrue,
-        reason: 'the on-device attempt itself is unchanged by the flag');
-    expect(service.onDeviceFallbackActive, isFalse,
-        reason: 'no degrade occurred — the session flag stays false');
-  });
+      expect(
+        capturedOptions,
+        hasLength(1),
+        reason: 'exactly ONE on-device attempt — the cloud retry is disallowed',
+      );
+      expect(
+        capturedOptions.single.onDevice,
+        isTrue,
+        reason: 'the on-device attempt itself is unchanged by the flag',
+      );
+      expect(
+        service.onDeviceFallbackActive,
+        isFalse,
+        reason: 'no degrade occurred — the session flag stays false',
+      );
+    },
+  );
 
   test('Test 7 (KFB C2): allowOnDeviceFallback:true (default) still degrades '
       'to cloud on an on-device failure', () async {

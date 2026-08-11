@@ -64,11 +64,7 @@ Future<void> _pumpTile(
                 itemBuilder: (ctx, i) => ReorderableDelayedDragStartListener(
                   key: ValueKey('swipe-tile-$i'),
                   index: i,
-                  child: ShoppingItemTile(
-                    item: item,
-                    index: i,
-                    isActive: true,
-                  ),
+                  child: ShoppingItemTile(item: item, index: i, isActive: true),
                 ),
               ),
             ],
@@ -87,10 +83,12 @@ void main() {
   setUp(() {
     mockDelete = MockDeleteShoppingItemUseCase();
     mockToggle = MockToggleItemCompletedUseCase();
-    when(() => mockDelete.execute(any()))
-        .thenAnswer((_) async => Result.success(null));
-    when(() => mockToggle.execute(any()))
-        .thenAnswer((_) async => Result.success(_makeItem()));
+    when(
+      () => mockDelete.execute(any()),
+    ).thenAnswer((_) async => Result.success(null));
+    when(
+      () => mockToggle.execute(any()),
+    ).thenAnswer((_) async => Result.success(_makeItem()));
   });
 
   setUpAll(() {
@@ -98,11 +96,14 @@ void main() {
   });
 
   group('ShoppingItemTile — MGMT-01: swipe-to-delete', () {
-    testWidgets(
-        'swipe endToStart → confirm dialog appears',
-        (tester) async {
+    testWidgets('swipe endToStart → confirm dialog appears', (tester) async {
       final item = _makeItem(id: 'item-swipe-confirm');
-      await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
+      await _pumpTile(
+        tester,
+        item: item,
+        delete: mockDelete,
+        toggle: mockToggle,
+      );
 
       // Fling to the left to trigger the Dismissible
       await tester.fling(
@@ -123,36 +124,48 @@ void main() {
     });
 
     testWidgets(
-        'confirm dialog → delete use case called with item.id (MGMT-01)',
-        (tester) async {
-      final item = _makeItem(id: 'item-delete-confirm');
-      await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
+      'confirm dialog → delete use case called with item.id (MGMT-01)',
+      (tester) async {
+        final item = _makeItem(id: 'item-delete-confirm');
+        await _pumpTile(
+          tester,
+          item: item,
+          delete: mockDelete,
+          toggle: mockToggle,
+        );
 
-      await tester.fling(
-        find.byType(ShoppingItemTile),
-        const Offset(-500, 0),
-        1000,
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
+        await tester.fling(
+          find.byType(ShoppingItemTile),
+          const Offset(-500, 0),
+          1000,
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
 
-      expect(find.byType(Dialog), findsOneWidget);
+        expect(find.byType(Dialog), findsOneWidget);
 
-      // Tap the confirm (delete) button — try 'Delete' (en), fallback to '削除' (ja)
-      final deleteLabel = find.text('Delete');
-      final confirmBtn =
-          deleteLabel.evaluate().isNotEmpty ? deleteLabel : find.text('削除');
-      await tester.tap(confirmBtn);
-      await tester.pumpAndSettle();
+        // Tap the confirm (delete) button — try 'Delete' (en), fallback to '削除' (ja)
+        final deleteLabel = find.text('Delete');
+        final confirmBtn = deleteLabel.evaluate().isNotEmpty
+            ? deleteLabel
+            : find.text('削除');
+        await tester.tap(confirmBtn);
+        await tester.pumpAndSettle();
 
-      verify(() => mockDelete.execute('item-delete-confirm')).called(1);
-    });
+        verify(() => mockDelete.execute('item-delete-confirm')).called(1);
+      },
+    );
 
-    testWidgets(
-        'cancel confirm dialog → delete use case NOT called',
-        (tester) async {
+    testWidgets('cancel confirm dialog → delete use case NOT called', (
+      tester,
+    ) async {
       final item = _makeItem(id: 'item-cancel-test');
-      await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
+      await _pumpTile(
+        tester,
+        item: item,
+        delete: mockDelete,
+        toggle: mockToggle,
+      );
 
       await tester.fling(
         find.byType(ShoppingItemTile),
@@ -166,8 +179,9 @@ void main() {
 
       // Tap cancel
       final cancelLabel = find.text('Cancel');
-      final cancelBtn =
-          cancelLabel.evaluate().isNotEmpty ? cancelLabel : find.text('キャンセル');
+      final cancelBtn = cancelLabel.evaluate().isNotEmpty
+          ? cancelLabel
+          : find.text('キャンセル');
       await tester.tap(cancelBtn);
       await tester.pumpAndSettle();
 
@@ -175,31 +189,38 @@ void main() {
     });
 
     testWidgets(
-        'on delete: feedback toast appears and use case is called (MGMT-01 ordering)',
-        (tester) async {
-      final item = _makeItem(id: 'item-order-test');
-      await _pumpTile(tester, item: item, delete: mockDelete, toggle: mockToggle);
+      'on delete: feedback toast appears and use case is called (MGMT-01 ordering)',
+      (tester) async {
+        final item = _makeItem(id: 'item-order-test');
+        await _pumpTile(
+          tester,
+          item: item,
+          delete: mockDelete,
+          toggle: mockToggle,
+        );
 
-      await tester.fling(
-        find.byType(ShoppingItemTile),
-        const Offset(-500, 0),
-        1000,
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
+        await tester.fling(
+          find.byType(ShoppingItemTile),
+          const Offset(-500, 0),
+          1000,
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
 
-      expect(find.byType(Dialog), findsOneWidget);
+        expect(find.byType(Dialog), findsOneWidget);
 
-      final deleteLabel = find.text('Delete');
-      final confirmBtn =
-          deleteLabel.evaluate().isNotEmpty ? deleteLabel : find.text('削除');
-      await tester.tap(confirmBtn);
-      await tester.pumpAndSettle();
+        final deleteLabel = find.text('Delete');
+        final confirmBtn = deleteLabel.evaluate().isNotEmpty
+            ? deleteLabel
+            : find.text('削除');
+        await tester.tap(confirmBtn);
+        await tester.pumpAndSettle();
 
-      // Both the feedback toast and delete call happen in onDismissed.
-      // Verify the use case was called (ordering is structural: feedback appears
-      // on the line before execute in shopping_item_tile.dart).
-      verify(() => mockDelete.execute('item-order-test')).called(1);
-    });
+        // Both the feedback toast and delete call happen in onDismissed.
+        // Verify the use case was called (ordering is structural: feedback appears
+        // on the line before execute in shopping_item_tile.dart).
+        verify(() => mockDelete.execute('item-order-test')).called(1);
+      },
+    );
   });
 }

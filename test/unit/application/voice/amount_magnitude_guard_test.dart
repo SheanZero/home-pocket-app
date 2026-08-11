@@ -18,10 +18,7 @@ void main() {
     });
 
     test('三千五百一十六元 → 4 (pure kanji)', () {
-      expect(
-        expectedDigitCountForAmount('三千五百一十六元', localeId: 'zh-CN'),
-        4,
-      );
+      expect(expectedDigitCountForAmount('三千五百一十六元', localeId: 'zh-CN'), 4);
     });
 
     test('三十五万 → 6 (万 anchor, end-of-string anchored)', () {
@@ -93,38 +90,23 @@ void main() {
 
   group('precision over recall — all null', () {
     test('千万别乱花钱 → null (idiom; 千 as 万-multiplier parses 1000 > 999)', () {
-      expect(
-        expectedDigitCountForAmount('千万别乱花钱', localeId: 'zh-CN'),
-        isNull,
-      );
+      expect(expectedDigitCountForAmount('千万别乱花钱', localeId: 'zh-CN'), isNull);
     });
 
     test('万一有问题 → null (idiom; zh missing multiplier)', () {
-      expect(
-        expectedDigitCountForAmount('万一有问题', localeId: 'zh-CN'),
-        isNull,
-      );
+      expect(expectedDigitCountForAmount('万一有问题', localeId: 'zh-CN'), isNull);
     });
 
     test('成千上万 → null (idiom; no numeric multiplier)', () {
-      expect(
-        expectedDigitCountForAmount('成千上万', localeId: 'zh-CN'),
-        isNull,
-      );
+      expect(expectedDigitCountForAmount('成千上万', localeId: 'zh-CN'), isNull);
     });
 
     test('走了1万步 → null (万 tail is neither numeric, currency, nor end)', () {
-      expect(
-        expectedDigitCountForAmount('走了1万步', localeId: 'zh-CN'),
-        isNull,
-      );
+      expect(expectedDigitCountForAmount('走了1万步', localeId: 'zh-CN'), isNull);
     });
 
     test('3.5千元 → null (decimal multiplier)', () {
-      expect(
-        expectedDigitCountForAmount('3.5千元', localeId: 'zh-CN'),
-        isNull,
-      );
+      expect(expectedDigitCountForAmount('3.5千元', localeId: 'zh-CN'), isNull);
     });
 
     test('zh bare 千 → null (no multiplier default outside ja)', () {
@@ -140,17 +122,11 @@ void main() {
     });
 
     test('99999元 → null (no magnitude word at all)', () {
-      expect(
-        expectedDigitCountForAmount('99999元', localeId: 'zh-CN'),
-        isNull,
-      );
+      expect(expectedDigitCountForAmount('99999元', localeId: 'zh-CN'), isNull);
     });
 
     test('conflicting anchored expressions → null (三千元和五万元)', () {
-      expect(
-        expectedDigitCountForAmount('三千元和五万元', localeId: 'zh-CN'),
-        isNull,
-      );
+      expect(expectedDigitCountForAmount('三千元和五万元', localeId: 'zh-CN'), isNull);
     });
   });
 }

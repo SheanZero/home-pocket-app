@@ -42,7 +42,10 @@ class _FakeCategoryRepository implements CategoryRepository {
 
   @override
   Future<List<Category>> findActive() async {
-    return [if (_parent != null) _parent, _category].whereType<Category>().toList();
+    return [
+      if (_parent != null) _parent,
+      _category,
+    ].whereType<Category>().toList();
   }
 
   @override
@@ -61,9 +64,7 @@ class _FakeCategoryRepository implements CategoryRepository {
 
   @override
   Future<List<Category>> findByParent(String parentId) async =>
-      (await findActive())
-          .where((c) => c.parentId == parentId)
-          .toList();
+      (await findActive()).where((c) => c.parentId == parentId).toList();
 
   @override
   Future<void> insert(Category category) async {}
@@ -189,83 +190,86 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  group('ManualOneStepScreen merchant learning hook (via TransactionDetailsForm)', () {
-    testWidgets('shows emoji picker for joy ledger transactions', (
-      tester,
-    ) async {
-      when(
-        () => mockCategoryService.resolveLedgerType(any()),
-      ).thenAnswer((_) async => LedgerType.joy);
+  group(
+    'ManualOneStepScreen merchant learning hook (via TransactionDetailsForm)',
+    () {
+      testWidgets('shows emoji picker for joy ledger transactions', (
+        tester,
+      ) async {
+        when(
+          () => mockCategoryService.resolveLedgerType(any()),
+        ).thenAnswer((_) async => LedgerType.joy);
 
-      await pumpScreen(tester);
+        await pumpScreen(tester);
 
-      expect(
-        find.byKey(const ValueKey('v16-satisfaction-card')),
-        findsOneWidget,
-      );
-    });
+        expect(
+          find.byKey(const ValueKey('v16-satisfaction-card')),
+          findsOneWidget,
+        );
+      });
 
-    testWidgets('calls recordSelection on successful save with merchant', (
-      tester,
-    ) async {
-      when(
-        () => mockCreateUseCase.execute(any()),
-      ).thenAnswer((_) async => Result.success(successTransaction));
+      testWidgets('calls recordSelection on successful save with merchant', (
+        tester,
+      ) async {
+        when(
+          () => mockCreateUseCase.execute(any()),
+        ).thenAnswer((_) async => Result.success(successTransaction));
 
-      await pumpScreen(tester);
+        await pumpScreen(tester);
 
-      await tester.enterText(find.byType(TextField).first, '  セブン  ');
-      await tester.tap(find.text('Record'));
-      await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField).first, '  セブン  ');
+        await tester.tap(find.text('Record'));
+        await tester.pumpAndSettle();
 
-      verify(
-        () => mockLearningService.recordSelection(
-          merchantRaw: 'セブン',
-          selectedCategoryId: 'cat_food_groceries',
-        ),
-      ).called(1);
-    });
+        verify(
+          () => mockLearningService.recordSelection(
+            merchantRaw: 'セブン',
+            selectedCategoryId: 'cat_food_groceries',
+          ),
+        ).called(1);
+      });
 
-    testWidgets('does not call recordSelection when merchant is blank', (
-      tester,
-    ) async {
-      when(
-        () => mockCreateUseCase.execute(any()),
-      ).thenAnswer((_) async => Result.success(successTransaction));
+      testWidgets('does not call recordSelection when merchant is blank', (
+        tester,
+      ) async {
+        when(
+          () => mockCreateUseCase.execute(any()),
+        ).thenAnswer((_) async => Result.success(successTransaction));
 
-      await pumpScreen(tester);
+        await pumpScreen(tester);
 
-      await tester.enterText(find.byType(TextField).first, '   ');
-      await tester.tap(find.text('Record'));
-      await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField).first, '   ');
+        await tester.tap(find.text('Record'));
+        await tester.pumpAndSettle();
 
-      verifyNever(
-        () => mockLearningService.recordSelection(
-          merchantRaw: any(named: 'merchantRaw'),
-          selectedCategoryId: any(named: 'selectedCategoryId'),
-        ),
-      );
-    });
+        verifyNever(
+          () => mockLearningService.recordSelection(
+            merchantRaw: any(named: 'merchantRaw'),
+            selectedCategoryId: any(named: 'selectedCategoryId'),
+          ),
+        );
+      });
 
-    testWidgets('does not call recordSelection when save fails', (
-      tester,
-    ) async {
-      when(
-        () => mockCreateUseCase.execute(any()),
-      ).thenAnswer((_) async => Result.error('save failed'));
+      testWidgets('does not call recordSelection when save fails', (
+        tester,
+      ) async {
+        when(
+          () => mockCreateUseCase.execute(any()),
+        ).thenAnswer((_) async => Result.error('save failed'));
 
-      await pumpScreen(tester);
+        await pumpScreen(tester);
 
-      await tester.enterText(find.byType(TextField).first, 'セブン');
-      await tester.tap(find.text('Record'));
-      await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField).first, 'セブン');
+        await tester.tap(find.text('Record'));
+        await tester.pumpAndSettle();
 
-      verifyNever(
-        () => mockLearningService.recordSelection(
-          merchantRaw: any(named: 'merchantRaw'),
-          selectedCategoryId: any(named: 'selectedCategoryId'),
-        ),
-      );
-    });
-  });
+        verifyNever(
+          () => mockLearningService.recordSelection(
+            merchantRaw: any(named: 'merchantRaw'),
+            selectedCategoryId: any(named: 'selectedCategoryId'),
+          ),
+        );
+      });
+    },
+  );
 }

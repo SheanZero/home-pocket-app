@@ -29,7 +29,7 @@ import 'ledger_hint_deriver.dart';
 /// Zero-knowledge discipline (V7): performs NO logging of raw merchant names.
 class SeedMerchantsUseCase {
   SeedMerchantsUseCase({required MerchantRepository merchantRepository})
-      : _merchantRepo = merchantRepository;
+    : _merchantRepo = merchantRepository;
 
   final MerchantRepository _merchantRepo;
 
@@ -69,8 +69,8 @@ class SeedMerchantsUseCase {
   }
 
   MerchantMatchKey _surface(String surface, String kind) => MerchantMatchKey(
-        surface: surface,
-        matchKey: normalizeMerchantKey(surface),
-        kind: kind,
-      );
+    surface: surface,
+    matchKey: normalizeMerchantKey(surface),
+    kind: kind,
+  );
 }

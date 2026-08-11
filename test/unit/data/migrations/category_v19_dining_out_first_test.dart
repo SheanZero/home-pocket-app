@@ -70,8 +70,7 @@ Future<void> _insertSystemCategory(
   required int sortOrder,
 }) async {
   final now = DateTime(2026, 1, 1).millisecondsSinceEpoch;
-  await db.customStatement(
-    '''
+  await db.customStatement('''
     INSERT INTO categories (
       id, name, icon, color, parent_id, level,
       is_system, is_archived, sort_order, created_at
@@ -79,8 +78,7 @@ Future<void> _insertSystemCategory(
       '$id', '$id', 'help_outline', '#FF5722', '$parentId', 2,
       1, 0, $sortOrder, $now
     )
-    ''',
-  );
+    ''');
 }
 
 /// Insert a minimal user-created category row with a given sort_order.
@@ -91,8 +89,7 @@ Future<void> _insertUserCategory(
   required int sortOrder,
 }) async {
   final now = DateTime(2026, 1, 1).millisecondsSinceEpoch;
-  await db.customStatement(
-    '''
+  await db.customStatement('''
     INSERT INTO categories (
       id, name, icon, color, parent_id, level,
       is_system, is_archived, sort_order, created_at
@@ -100,8 +97,7 @@ Future<void> _insertUserCategory(
       '$id', '$id', 'help_outline', '#FF5722', '$parentId', 2,
       0, 0, $sortOrder, $now
     )
-    ''',
-  );
+    ''');
 }
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
@@ -130,8 +126,7 @@ void main() {
       expect(
         groceries.sortOrder,
         2,
-        reason:
-            'cat_food_groceries must be second in cat_food (sortOrder = 2)',
+        reason: 'cat_food_groceries must be second in cat_food (sortOrder = 2)',
       );
     });
 
@@ -149,16 +144,35 @@ void main() {
       );
     });
 
-    test('other cat_food sub-categories are unchanged (cafe=3, other=4, delivery=5, drinks=6)', () {
-      final foodSubs = DefaultCategories.all
-          .where((c) => c.parentId == 'cat_food')
-          .toList();
-      final byId = {for (final c in foodSubs) c.id: c.sortOrder};
-      expect(byId['cat_food_cafe'], 3, reason: 'cafe sortOrder must remain 3');
-      expect(byId['cat_food_other'], 4, reason: 'other sortOrder must remain 4');
-      expect(byId['cat_food_delivery'], 5, reason: 'delivery sortOrder must remain 5');
-      expect(byId['cat_food_drinks'], 6, reason: 'drinks sortOrder must remain 6');
-    });
+    test(
+      'other cat_food sub-categories are unchanged (cafe=3, other=4, delivery=5, drinks=6)',
+      () {
+        final foodSubs = DefaultCategories.all
+            .where((c) => c.parentId == 'cat_food')
+            .toList();
+        final byId = {for (final c in foodSubs) c.id: c.sortOrder};
+        expect(
+          byId['cat_food_cafe'],
+          3,
+          reason: 'cafe sortOrder must remain 3',
+        );
+        expect(
+          byId['cat_food_other'],
+          4,
+          reason: 'other sortOrder must remain 4',
+        );
+        expect(
+          byId['cat_food_delivery'],
+          5,
+          reason: 'delivery sortOrder must remain 5',
+        );
+        expect(
+          byId['cat_food_drinks'],
+          6,
+          reason: 'drinks sortOrder must remain 6',
+        );
+      },
+    );
   });
 
   // ─── Test B: v19 migration assertion ──────────────────────────────────────
@@ -176,159 +190,136 @@ void main() {
 
     // Guard: skip migration tests until schemaVersion reaches 19.
     // This test is RED until Task 2 bumps schemaVersion.
-    test(
-      'AppDatabase schemaVersion includes v19 migration',
-      () {
-        expect(
-          db.schemaVersion,
-          greaterThanOrEqualTo(_minimumSchemaVersionWithV19Migration),
-          reason:
-              'schemaVersion must be at least 19 (set in app_database.dart)',
-        );
-      },
-    );
+    test('AppDatabase schemaVersion includes v19 migration', () {
+      expect(
+        db.schemaVersion,
+        greaterThanOrEqualTo(_minimumSchemaVersionWithV19Migration),
+        reason: 'schemaVersion must be at least 19 (set in app_database.dart)',
+      );
+    });
 
-    test(
-      'v19 migration sets cat_food_dining_out sort_order to 1',
-      () async {
-        // Seed the L1 parent first (needed for FK-like coherence in tests)
-        final now = DateTime(2026, 1, 1).millisecondsSinceEpoch;
-        await db.customStatement(
-          '''
+    test('v19 migration sets cat_food_dining_out sort_order to 1', () async {
+      // Seed the L1 parent first (needed for FK-like coherence in tests)
+      final now = DateTime(2026, 1, 1).millisecondsSinceEpoch;
+      await db.customStatement('''
           INSERT INTO categories (
             id, name, icon, color, parent_id, level,
             is_system, is_archived, sort_order, created_at
           ) VALUES ('cat_food', 'cat_food', 'restaurant', '#FF5722', NULL, 1, 1, 0, 1, $now)
-          ''',
-        );
+          ''');
 
-        // Seed v18-era rows with OLD sort_order values
-        await _insertSystemCategory(
-          db,
-          id: 'cat_food_dining_out',
-          parentId: 'cat_food',
-          sortOrder: 2, // old value
-        );
-        await _insertSystemCategory(
-          db,
-          id: 'cat_food_groceries',
-          parentId: 'cat_food',
-          sortOrder: 1, // old value
-        );
+      // Seed v18-era rows with OLD sort_order values
+      await _insertSystemCategory(
+        db,
+        id: 'cat_food_dining_out',
+        parentId: 'cat_food',
+        sortOrder: 2, // old value
+      );
+      await _insertSystemCategory(
+        db,
+        id: 'cat_food_groceries',
+        parentId: 'cat_food',
+        sortOrder: 1, // old value
+      );
 
-        // Run v19 migration SQL
-        await _runV19MigrationSteps(db);
+      // Run v19 migration SQL
+      await _runV19MigrationSteps(db);
 
-        final sortOrder = await _queryInt(
-          db,
-          "SELECT sort_order FROM categories WHERE id = 'cat_food_dining_out'",
-        );
-        expect(
-          sortOrder,
-          1,
-          reason:
-              'After v19 migration cat_food_dining_out.sort_order must be 1',
-        );
-      },
-    );
+      final sortOrder = await _queryInt(
+        db,
+        "SELECT sort_order FROM categories WHERE id = 'cat_food_dining_out'",
+      );
+      expect(
+        sortOrder,
+        1,
+        reason: 'After v19 migration cat_food_dining_out.sort_order must be 1',
+      );
+    });
 
-    test(
-      'v19 migration sets cat_food_groceries sort_order to 2',
-      () async {
-        final now = DateTime(2026, 1, 1).millisecondsSinceEpoch;
-        await db.customStatement(
-          '''
+    test('v19 migration sets cat_food_groceries sort_order to 2', () async {
+      final now = DateTime(2026, 1, 1).millisecondsSinceEpoch;
+      await db.customStatement('''
           INSERT INTO categories (
             id, name, icon, color, parent_id, level,
             is_system, is_archived, sort_order, created_at
           ) VALUES ('cat_food', 'cat_food', 'restaurant', '#FF5722', NULL, 1, 1, 0, 1, $now)
-          ''',
-        );
+          ''');
 
-        await _insertSystemCategory(
-          db,
-          id: 'cat_food_dining_out',
-          parentId: 'cat_food',
-          sortOrder: 2,
-        );
-        await _insertSystemCategory(
-          db,
-          id: 'cat_food_groceries',
-          parentId: 'cat_food',
-          sortOrder: 1,
-        );
+      await _insertSystemCategory(
+        db,
+        id: 'cat_food_dining_out',
+        parentId: 'cat_food',
+        sortOrder: 2,
+      );
+      await _insertSystemCategory(
+        db,
+        id: 'cat_food_groceries',
+        parentId: 'cat_food',
+        sortOrder: 1,
+      );
 
-        await _runV19MigrationSteps(db);
+      await _runV19MigrationSteps(db);
 
-        final sortOrder = await _queryInt(
-          db,
-          "SELECT sort_order FROM categories WHERE id = 'cat_food_groceries'",
-        );
-        expect(
-          sortOrder,
-          2,
-          reason:
-              'After v19 migration cat_food_groceries.sort_order must be 2',
-        );
-      },
-    );
+      final sortOrder = await _queryInt(
+        db,
+        "SELECT sort_order FROM categories WHERE id = 'cat_food_groceries'",
+      );
+      expect(
+        sortOrder,
+        2,
+        reason: 'After v19 migration cat_food_groceries.sort_order must be 2',
+      );
+    });
 
-    test(
-      'v19 migration does not affect user-created categories',
-      () async {
-        final now = DateTime(2026, 1, 1).millisecondsSinceEpoch;
-        await db.customStatement(
-          '''
+    test('v19 migration does not affect user-created categories', () async {
+      final now = DateTime(2026, 1, 1).millisecondsSinceEpoch;
+      await db.customStatement('''
           INSERT INTO categories (
             id, name, icon, color, parent_id, level,
             is_system, is_archived, sort_order, created_at
           ) VALUES ('cat_food', 'cat_food', 'restaurant', '#FF5722', NULL, 1, 1, 0, 1, $now)
-          ''',
-        );
+          ''');
 
-        // User-created category that happens to have the same ID-like name
-        // but is_system=0 — the migration must not touch it.
-        await _insertUserCategory(
-          db,
-          id: 'user_dining_custom',
-          parentId: 'cat_food',
-          sortOrder: 99,
-        );
+      // User-created category that happens to have the same ID-like name
+      // but is_system=0 — the migration must not touch it.
+      await _insertUserCategory(
+        db,
+        id: 'user_dining_custom',
+        parentId: 'cat_food',
+        sortOrder: 99,
+      );
 
-        // Also insert the system categories being migrated
-        await _insertSystemCategory(
-          db,
-          id: 'cat_food_dining_out',
-          parentId: 'cat_food',
-          sortOrder: 2,
-        );
+      // Also insert the system categories being migrated
+      await _insertSystemCategory(
+        db,
+        id: 'cat_food_dining_out',
+        parentId: 'cat_food',
+        sortOrder: 2,
+      );
 
-        await _runV19MigrationSteps(db);
+      await _runV19MigrationSteps(db);
 
-        final userSortOrder = await _queryInt(
-          db,
-          "SELECT sort_order FROM categories WHERE id = 'user_dining_custom'",
-        );
-        expect(
-          userSortOrder,
-          99,
-          reason: 'User-created categories must not be touched by v19 migration',
-        );
-      },
-    );
+      final userSortOrder = await _queryInt(
+        db,
+        "SELECT sort_order FROM categories WHERE id = 'user_dining_custom'",
+      );
+      expect(
+        userSortOrder,
+        99,
+        reason: 'User-created categories must not be touched by v19 migration',
+      );
+    });
 
     test(
       'v19 migration is idempotent (running twice yields same result)',
       () async {
         final now = DateTime(2026, 1, 1).millisecondsSinceEpoch;
-        await db.customStatement(
-          '''
+        await db.customStatement('''
           INSERT INTO categories (
             id, name, icon, color, parent_id, level,
             is_system, is_archived, sort_order, created_at
           ) VALUES ('cat_food', 'cat_food', 'restaurant', '#FF5722', NULL, 1, 1, 0, 1, $now)
-          ''',
-        );
+          ''');
 
         await _insertSystemCategory(
           db,
@@ -355,8 +346,16 @@ void main() {
           db,
           "SELECT sort_order FROM categories WHERE id = 'cat_food_groceries'",
         );
-        expect(diningOut, 1, reason: 'dining_out sort_order must be 1 after idempotent re-run');
-        expect(groceries, 2, reason: 'groceries sort_order must be 2 after idempotent re-run');
+        expect(
+          diningOut,
+          1,
+          reason: 'dining_out sort_order must be 1 after idempotent re-run',
+        );
+        expect(
+          groceries,
+          2,
+          reason: 'groceries sort_order must be 2 after idempotent re-run',
+        );
       },
     );
   });

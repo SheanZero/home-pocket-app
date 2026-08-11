@@ -65,35 +65,33 @@ void main() {
       expect(outcome.keywordMerchantConflict, isFalse);
     });
 
-    test('strong × merchant=weak -> KW.l2, band=strong, alts=[merchant.l2]', () {
-      final outcome = reconciler.reconcile(
-        _strongKw(kShopping),
-        [_merchant(kCafe, score: 0.60)],
-      );
-
-      expect(outcome.selectedCategoryId, kShopping);
-      expect(outcome.band, ConfidenceBand.strong);
-      expect(outcome.alternates.map((a) => a.categoryId), [kCafe]);
-      // Merchant is weak (below floor) -> not a "strong merchant override",
-      // so no conflict flag.
-      expect(outcome.keywordMerchantConflict, isFalse);
-    });
-
     test(
-      'strong × merchant=strong (differ) -> KW wins, merchant->alt, '
-      'conflict=true, band=strong',
+      'strong × merchant=weak -> KW.l2, band=strong, alts=[merchant.l2]',
       () {
-        final outcome = reconciler.reconcile(
-          _strongKw(kShopping),
-          [_merchant(kCafe, score: 1.0)],
-        );
+        final outcome = reconciler.reconcile(_strongKw(kShopping), [
+          _merchant(kCafe, score: 0.60),
+        ]);
 
         expect(outcome.selectedCategoryId, kShopping);
         expect(outcome.band, ConfidenceBand.strong);
         expect(outcome.alternates.map((a) => a.categoryId), [kCafe]);
-        expect(outcome.keywordMerchantConflict, isTrue);
+        // Merchant is weak (below floor) -> not a "strong merchant override",
+        // so no conflict flag.
+        expect(outcome.keywordMerchantConflict, isFalse);
       },
     );
+
+    test('strong × merchant=strong (differ) -> KW wins, merchant->alt, '
+        'conflict=true, band=strong', () {
+      final outcome = reconciler.reconcile(_strongKw(kShopping), [
+        _merchant(kCafe, score: 1.0),
+      ]);
+
+      expect(outcome.selectedCategoryId, kShopping);
+      expect(outcome.band, ConfidenceBand.strong);
+      expect(outcome.alternates.map((a) => a.categoryId), [kCafe]);
+      expect(outcome.keywordMerchantConflict, isTrue);
+    });
   });
 
   group('3×3 truth table — keyword=weak (seed)', () {
@@ -106,37 +104,29 @@ void main() {
       expect(outcome.keywordMerchantConflict, isFalse);
     });
 
-    test(
-      'weak × merchant=weak -> KW wins (not vetoed), band=medium, '
-      'alts=[merchant.l2]',
-      () {
-        final outcome = reconciler.reconcile(
-          _weakKw(kShopping),
-          [_merchant(kCafe, score: 0.60)],
-        );
+    test('weak × merchant=weak -> KW wins (not vetoed), band=medium, '
+        'alts=[merchant.l2]', () {
+      final outcome = reconciler.reconcile(_weakKw(kShopping), [
+        _merchant(kCafe, score: 0.60),
+      ]);
 
-        expect(outcome.selectedCategoryId, kShopping);
-        expect(outcome.band, ConfidenceBand.medium);
-        expect(outcome.alternates.map((a) => a.categoryId), [kCafe]);
-        expect(outcome.keywordMerchantConflict, isFalse);
-      },
-    );
+      expect(outcome.selectedCategoryId, kShopping);
+      expect(outcome.band, ConfidenceBand.medium);
+      expect(outcome.alternates.map((a) => a.categoryId), [kCafe]);
+      expect(outcome.keywordMerchantConflict, isFalse);
+    });
 
-    test(
-      'weak × merchant=strong (differ) -> KW wins, band=medium, '
-      'conflict=true, alts=[merchant.l2]',
-      () {
-        final outcome = reconciler.reconcile(
-          _weakKw(kShopping),
-          [_merchant(kCafe, score: 0.90)],
-        );
+    test('weak × merchant=strong (differ) -> KW wins, band=medium, '
+        'conflict=true, alts=[merchant.l2]', () {
+      final outcome = reconciler.reconcile(_weakKw(kShopping), [
+        _merchant(kCafe, score: 0.90),
+      ]);
 
-        expect(outcome.selectedCategoryId, kShopping);
-        expect(outcome.band, ConfidenceBand.medium);
-        expect(outcome.alternates.map((a) => a.categoryId), [kCafe]);
-        expect(outcome.keywordMerchantConflict, isTrue);
-      },
-    );
+      expect(outcome.selectedCategoryId, kShopping);
+      expect(outcome.band, ConfidenceBand.medium);
+      expect(outcome.alternates.map((a) => a.categoryId), [kCafe]);
+      expect(outcome.keywordMerchantConflict, isTrue);
+    });
   });
 
   group('3×3 truth table — keyword=none', () {
@@ -149,21 +139,18 @@ void main() {
       expect(outcome.keywordMerchantConflict, isFalse);
     });
 
-    test(
-      'none × merchant=weak -> best-guess selected=merchant.l2, band=weak '
-      '(D-05), alts=ranked merchants',
-      () {
-        final outcome = reconciler.reconcile(null, [
-          _merchant(kCafe, score: 0.60, merchantId: 'mer_a'),
-          _merchant(kShopping, score: 0.55, merchantId: 'mer_b'),
-        ]);
+    test('none × merchant=weak -> best-guess selected=merchant.l2, band=weak '
+        '(D-05), alts=ranked merchants', () {
+      final outcome = reconciler.reconcile(null, [
+        _merchant(kCafe, score: 0.60, merchantId: 'mer_a'),
+        _merchant(kShopping, score: 0.55, merchantId: 'mer_b'),
+      ]);
 
-        expect(outcome.selectedCategoryId, kCafe);
-        expect(outcome.band, ConfidenceBand.weak);
-        expect(outcome.alternates.map((a) => a.categoryId), [kCafe, kShopping]);
-        expect(outcome.keywordMerchantConflict, isFalse);
-      },
-    );
+      expect(outcome.selectedCategoryId, kCafe);
+      expect(outcome.band, ConfidenceBand.weak);
+      expect(outcome.alternates.map((a) => a.categoryId), [kCafe, kShopping]);
+      expect(outcome.keywordMerchantConflict, isFalse);
+    });
 
     test(
       'none × merchant=strong -> auto-fill selected=merchant.l2, band=medium, '
@@ -186,10 +173,9 @@ void main() {
     test('strong-kw + strong-merchant SAME L2 -> band=strong (boosted), '
         'no conflict', () {
       // Same L2 id on both engines; merchant >= 0.85.
-      final outcome = reconciler.reconcile(
-        _strongKw(kCafe),
-        [_merchant(kCafe, score: 0.90)],
-      );
+      final outcome = reconciler.reconcile(_strongKw(kCafe), [
+        _merchant(kCafe, score: 0.90),
+      ]);
 
       expect(outcome.selectedCategoryId, kCafe);
       expect(outcome.band, ConfidenceBand.strong);
@@ -201,10 +187,9 @@ void main() {
 
     test('weak-kw + strong-merchant SAME L2 -> band=strong (boosted), '
         'no conflict', () {
-      final outcome = reconciler.reconcile(
-        _weakKw(kCafe),
-        [_merchant(kCafe, score: 0.90)],
-      );
+      final outcome = reconciler.reconcile(_weakKw(kCafe), [
+        _merchant(kCafe, score: 0.90),
+      ]);
 
       expect(outcome.selectedCategoryId, kCafe);
       // Weak keyword agreeing with a strong merchant on the EXACT L2 -> boost.
@@ -216,10 +201,9 @@ void main() {
     test('counter-case: strong-merchant DIFFERENT L2 -> NO boost', () {
       // weak keyword, strong merchant, but DIFFERENT L2 -> stays at keyword's
       // own band (medium), not boosted to strong.
-      final outcome = reconciler.reconcile(
-        _weakKw(kShopping),
-        [_merchant(kCafe, score: 0.90)],
-      );
+      final outcome = reconciler.reconcile(_weakKw(kShopping), [
+        _merchant(kCafe, score: 0.90),
+      ]);
 
       expect(outcome.selectedCategoryId, kShopping);
       expect(outcome.band, ConfidenceBand.medium);
@@ -228,10 +212,9 @@ void main() {
     test('counter-case: agreeing merchant BELOW floor -> NO boost', () {
       // Same L2 but merchant < 0.85 -> not a strong merchant -> weak keyword
       // stays medium (the boost requires score >= 0.85).
-      final outcome = reconciler.reconcile(
-        _weakKw(kCafe),
-        [_merchant(kCafe, score: 0.60)],
-      );
+      final outcome = reconciler.reconcile(_weakKw(kCafe), [
+        _merchant(kCafe, score: 0.60),
+      ]);
 
       expect(outcome.selectedCategoryId, kCafe);
       expect(outcome.band, ConfidenceBand.medium);
@@ -241,10 +224,9 @@ void main() {
   group('deterministic tie-break + alternates', () {
     test('keyword always wins ties vs merchant', () {
       // Equal-ish signals: keyword wins regardless of merchant strength.
-      final outcome = reconciler.reconcile(
-        _strongKw(kShopping),
-        [_merchant(kCafe, score: 1.0)],
-      );
+      final outcome = reconciler.reconcile(_strongKw(kShopping), [
+        _merchant(kCafe, score: 1.0),
+      ]);
       expect(outcome.selectedCategoryId, kShopping);
     });
 
@@ -270,10 +252,7 @@ void main() {
         _merchant(kCafe, score: 0.60, merchantId: 'mer_b'),
       ]);
       expect(outcome.selectedCategoryId, kShopping);
-      expect(
-        outcome.alternates.where((a) => a.categoryId == kCafe).length,
-        1,
-      );
+      expect(outcome.alternates.where((a) => a.categoryId == kCafe).length, 1);
     });
   });
 
@@ -297,11 +276,9 @@ void main() {
     test('「在星巴克买杯子」-> 购物 (KW wins, スタバ cafe demoted to alt, '
         'conflict=true)', () {
       // keyword 买/杯子 -> shopping; merchant スタバ -> cafe at >=0.85.
-      final outcome = reconciler.reconcile(
-        _strongKw(kShopping),
-        [_merchant(kCafe, score: 1.0, displayName: 'スターバックス')],
-        resolvedKeyword: '买杯子',
-      );
+      final outcome = reconciler.reconcile(_strongKw(kShopping), [
+        _merchant(kCafe, score: 1.0, displayName: 'スターバックス'),
+      ], resolvedKeyword: '买杯子');
 
       expect(outcome.selectedCategoryId, kShopping);
       expect(outcome.alternates.map((a) => a.categoryId), [kCafe]);
@@ -309,12 +286,10 @@ void main() {
       expect(outcome.band, ConfidenceBand.strong);
     });
 
-    test('bare 「スタバ」-> 咖啡 (keyword null, merchant auto-fill, band=medium)',
-        () {
-      final outcome = reconciler.reconcile(
-        null,
-        [_merchant(kCafe, score: 1.0, displayName: 'スターバックス')],
-      );
+    test('bare 「スタバ」-> 咖啡 (keyword null, merchant auto-fill, band=medium)', () {
+      final outcome = reconciler.reconcile(null, [
+        _merchant(kCafe, score: 1.0, displayName: 'スターバックス'),
+      ]);
 
       expect(outcome.selectedCategoryId, kCafe);
       expect(outcome.band, ConfidenceBand.medium);
@@ -335,10 +310,9 @@ void main() {
 
     test('both-weak -> best-guess filled + band=weak (D-05)', () {
       // keyword none + below-floor merchant -> best-guess fill, weak band.
-      final outcome = reconciler.reconcile(
-        null,
-        [_merchant(kCafe, score: 0.60)],
-      );
+      final outcome = reconciler.reconcile(null, [
+        _merchant(kCafe, score: 0.60),
+      ]);
 
       expect(outcome.selectedCategoryId, kCafe);
       expect(outcome.band, ConfidenceBand.weak);

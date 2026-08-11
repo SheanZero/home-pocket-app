@@ -99,24 +99,31 @@ void main() {
 
     // The form always supplies a non-null ledgerType (daily by default), so
     // resolveLedgerType is not exercised here; stub for construction safety.
-    when(() => ledgerConfigRepository.findById(any()))
-        .thenAnswer((_) async => null);
+    when(
+      () => ledgerConfigRepository.findById(any()),
+    ).thenAnswer((_) async => null);
 
     // Category repo: return the test category by id
-    when(() => categoryRepository.findById(_category.id))
-        .thenAnswer((_) async => _category);
-    when(() => categoryRepository.findById(_parentCategory.id))
-        .thenAnswer((_) async => _parentCategory);
-    when(() => categoryRepository.findById(any()))
-        .thenAnswer((_) async => _category);
-    when(() => categoryRepository.findActive())
-        .thenAnswer((_) async => [_parentCategory, _category]);
-    when(() => categoryRepository.findAll())
-        .thenAnswer((_) async => [_parentCategory, _category]);
+    when(
+      () => categoryRepository.findById(_category.id),
+    ).thenAnswer((_) async => _category);
+    when(
+      () => categoryRepository.findById(_parentCategory.id),
+    ).thenAnswer((_) async => _parentCategory);
+    when(
+      () => categoryRepository.findById(any()),
+    ).thenAnswer((_) async => _category);
+    when(
+      () => categoryRepository.findActive(),
+    ).thenAnswer((_) async => [_parentCategory, _category]);
+    when(
+      () => categoryRepository.findAll(),
+    ).thenAnswer((_) async => [_parentCategory, _category]);
 
     // Device identity
-    when(() => deviceIdentityRepository.getDeviceId())
-        .thenAnswer((_) async => 'device-local');
+    when(
+      () => deviceIdentityRepository.getDeviceId(),
+    ).thenAnswer((_) async => 'device-local');
 
     // Encryption: pass-through (no real crypto in test)
     when(() => encryptionService.encryptField(any())).thenAnswer(
@@ -200,8 +207,11 @@ void main() {
       of: keyboardFinder,
       matching: find.text('5'),
     );
-    expect(fiveFinder, findsOneWidget,
-        reason: 'SmartKeyboard digit "5" must be visible');
+    expect(
+      fiveFinder,
+      findsOneWidget,
+      reason: 'SmartKeyboard digit "5" must be visible',
+    );
     await tester.tap(fiveFinder);
     await tester.pump();
 
@@ -211,8 +221,11 @@ void main() {
       matching: find.text('0'),
     );
     for (var i = 0; i < 2; i++) {
-      expect(zeroFinder, findsOneWidget,
-          reason: 'SmartKeyboard digit "0" must be visible');
+      expect(
+        zeroFinder,
+        findsOneWidget,
+        reason: 'SmartKeyboard digit "0" must be visible',
+      );
       await tester.tap(zeroFinder);
       await tester.pump();
     }
@@ -222,35 +235,49 @@ void main() {
       of: keyboardFinder,
       matching: find.text('Record'),
     );
-    expect(recordFinder, findsOneWidget,
-        reason: 'SmartKeyboard Record button must be visible');
+    expect(
+      recordFinder,
+      findsOneWidget,
+      reason: 'SmartKeyboard Record button must be visible',
+    );
     await tester.tap(recordFinder);
     await tester.pumpAndSettle();
   }
 
-  testWidgets('SC-4: ManualOneStepScreen save stamps entry_source=manual in DB',
-      (tester) async {
-    await pumpAndSave(tester, entrySource: EntrySource.manual);
+  testWidgets(
+    'SC-4: ManualOneStepScreen save stamps entry_source=manual in DB',
+    (tester) async {
+      await pumpAndSave(tester, entrySource: EntrySource.manual);
 
-    // Query DB directly — bypass repo to confirm the schema CHECK constraint
-    // actually accepted the literal 'manual'.
-    final rows = await transactionDao.findByBookId('book-1');
-    expect(rows.length, 1,
-        reason: 'Exactly one transaction should be saved');
-    expect(rows.first.entrySource, 'manual',
-        reason: 'entry_source must equal the literal string "manual"');
-    expect(rows.first.amount, 500,
-        reason: 'Amount should be 500 (5 → 0 → 0 key taps)');
-  });
+      // Query DB directly — bypass repo to confirm the schema CHECK constraint
+      // actually accepted the literal 'manual'.
+      final rows = await transactionDao.findByBookId('book-1');
+      expect(rows.length, 1, reason: 'Exactly one transaction should be saved');
+      expect(
+        rows.first.entrySource,
+        'manual',
+        reason: 'entry_source must equal the literal string "manual"',
+      );
+      expect(
+        rows.first.amount,
+        500,
+        reason: 'Amount should be 500 (5 → 0 → 0 key taps)',
+      );
+    },
+  );
 
   testWidgets(
-      'SC-4 idempotency: entrySource=voice constructor arg stamps entry_source=voice',
-      (tester) async {
-    await pumpAndSave(tester, entrySource: EntrySource.voice);
+    'SC-4 idempotency: entrySource=voice constructor arg stamps entry_source=voice',
+    (tester) async {
+      await pumpAndSave(tester, entrySource: EntrySource.voice);
 
-    final rows = await transactionDao.findByBookId('book-1');
-    expect(rows.length, 1);
-    expect(rows.first.entrySource, 'voice',
-        reason: 'Screen constructed with EntrySource.voice must stamp "voice"');
-  });
+      final rows = await transactionDao.findByBookId('book-1');
+      expect(rows.length, 1);
+      expect(
+        rows.first.entrySource,
+        'voice',
+        reason: 'Screen constructed with EntrySource.voice must stamp "voice"',
+      );
+    },
+  );
 }

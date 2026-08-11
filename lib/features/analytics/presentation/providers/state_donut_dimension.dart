@@ -36,8 +36,8 @@ class DonutDimensionView {
   });
 
   const DonutDimensionView.initial()
-      : dimension = DonutDimension.category,
-        memberFilterDeviceId = null;
+    : dimension = DonutDimension.category,
+      memberFilterDeviceId = null;
 
   final DonutDimension dimension;
 

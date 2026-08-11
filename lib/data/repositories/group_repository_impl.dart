@@ -16,10 +16,7 @@ class GroupRepositoryImpl
         RevisionedGroupRepository,
         MembershipRotationIntentStore,
         VersionedGroupMemberRepository {
-  GroupRepositoryImpl({
-    required this._groupDao,
-    required this._memberDao,
-  });
+  GroupRepositoryImpl({required this._groupDao, required this._memberDao});
 
   final GroupDao _groupDao;
   final GroupMemberDao _memberDao;

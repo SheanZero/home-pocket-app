@@ -11,6 +11,8 @@ abstract class ShoppingItemRepository {
   Future<void> softDelete(String id);
   Future<void> softDeleteAllCompleted(String listType);
   Future<ShoppingItem?> findById(String id);
+  Future<List<ShoppingItem>> findAll({bool includeDeleted = false});
+  Future<void> deleteAll();
   Stream<List<ShoppingItem>> watchByListType(String listType);
 
   /// Reactive stream of ALL non-deleted items regardless of list type

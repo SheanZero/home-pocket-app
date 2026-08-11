@@ -374,7 +374,7 @@ class SZh extends S {
   String get backupHeroTitle => '把数据安全地保管在自己手中';
 
   @override
-  String get backupHeroDescription => '使用密码加密记录与设置，并保存到设备或你选择的云盘位置。';
+  String get backupHeroDescription => '使用密码加密账目、购物清单、类目与设置，并保存到设备或你选择的云盘位置。';
 
   @override
   String get backupEncryptionChip => 'AES-256-GCM';
@@ -2509,7 +2509,7 @@ class SZh extends S {
   String get shoppingSegmentPublic => '公共';
 
   @override
-  String get shoppingSectionToBuy => '购买清单';
+  String get shoppingSectionToBuy => '待购买';
 
   @override
   String get shoppingListScreenTitle => '购物清单';

@@ -169,6 +169,7 @@ class _StubLedgerConfigRepository implements CategoryLedgerConfigRepository {
     }
     return null;
   }
+
   @override
   Future<List<CategoryLedgerConfig>> findAll() async => [];
   @override
@@ -252,8 +253,7 @@ List<Override> _baseOverrides({
     ),
     categoryServiceProvider.overrideWith(
       (_) => CategoryService(
-        categoryRepository:
-            categoryServiceRepo ?? _NullCategoryRepository(),
+        categoryRepository: categoryServiceRepo ?? _NullCategoryRepository(),
         ledgerConfigRepository:
             categoryServiceLedgerRepo ?? _NullLedgerConfigRepository(),
       ),
@@ -309,7 +309,9 @@ void main() {
   group('TransactionDetailsForm', () {
     // ── SC-1: both modes render correctly ────────────────────────────────────
 
-    testWidgets('renders in .new mode with no initial values (SC-1)', (tester) async {
+    testWidgets('renders in .new mode with no initial values (SC-1)', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(402, 874);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
@@ -353,10 +355,16 @@ void main() {
         expect(find.byType(TransactionDetailsForm), findsOneWidget);
 
         // Merchant and note are pre-populated from seed
-        expect(find.text('Café'), findsOneWidget,
-            reason: 'seed.merchant should appear in merchant TextField');
-        expect(find.text('Test note'), findsOneWidget,
-            reason: 'seed.note should appear in note TextField');
+        expect(
+          find.text('Café'),
+          findsOneWidget,
+          reason: 'seed.merchant should appear in merchant TextField',
+        );
+        expect(
+          find.text('Test note'),
+          findsOneWidget,
+          reason: 'seed.note should appear in note TextField',
+        );
       },
     );
 
@@ -404,9 +412,9 @@ void main() {
 
         // Return a joy transaction on create
         final savedSoulTx = _makeSoulSeedTx();
-        when(() => mockCreate.execute(any())).thenAnswer(
-          (_) async => Result.success(savedSoulTx),
-        );
+        when(
+          () => mockCreate.execute(any()),
+        ).thenAnswer((_) async => Result.success(savedSoulTx));
 
         await tester.pumpWidget(
           buildForm(
@@ -452,9 +460,9 @@ void main() {
         final seed = _makeSoulSeedTx();
         final formKey = GlobalKey<TransactionDetailsFormState>();
 
-        when(() => mockUpdate.execute(any())).thenAnswer(
-          (_) async => Result.success(seed),
-        );
+        when(
+          () => mockUpdate.execute(any()),
+        ).thenAnswer((_) async => Result.success(seed));
 
         await tester.pumpWidget(
           buildForm(
@@ -535,8 +543,11 @@ void main() {
           validationError: (_) => true,
           orElse: () => false,
         );
-        expect(isValidationError, isTrue,
-            reason: 'submit with no category must return validationError (D-02)');
+        expect(
+          isValidationError,
+          isTrue,
+          reason: 'submit with no category must return validationError (D-02)',
+        );
       },
     );
 
@@ -560,8 +571,11 @@ void main() {
         await tester.pumpAndSettle();
 
         // GlobalKey must resolve to a non-null state
-        expect(formKey.currentState, isNotNull,
-            reason: 'GlobalKey<TransactionDetailsFormState> must resolve (D-02)');
+        expect(
+          formKey.currentState,
+          isNotNull,
+          reason: 'GlobalKey<TransactionDetailsFormState> must resolve (D-02)',
+        );
 
         // submit() must be callable and return a TransactionDetailsFormResult
         final result = await formKey.currentState!.submit();
@@ -690,13 +704,20 @@ void main() {
 
           final result = await formKey.currentState!.submit();
 
-          final captured =
-              verify(() => mockCreate.execute(captureAny())).captured;
-          expect(captured.length, 1,
-              reason: 'create use case should be invoked exactly once');
+          final captured = verify(
+            () => mockCreate.execute(captureAny()),
+          ).captured;
+          expect(
+            captured.length,
+            1,
+            reason: 'create use case should be invoked exactly once',
+          );
           final params = captured.first as CreateTransactionParams;
-          expect(params.categoryId, catFoodL2Cafe.id,
-              reason: 'submit() must use the category pushed via updateCategory');
+          expect(
+            params.categoryId,
+            catFoodL2Cafe.id,
+            reason: 'submit() must use the category pushed via updateCategory',
+          );
 
           final isSuccess = result.maybeWhen(
             success: (_) => true,
@@ -743,13 +764,20 @@ void main() {
 
           final result = await formKey.currentState!.submit();
 
-          final captured =
-              verify(() => mockCreate.execute(captureAny())).captured;
-          expect(captured.length, 1,
-              reason: 'execute should be called exactly once');
+          final captured = verify(
+            () => mockCreate.execute(captureAny()),
+          ).captured;
+          expect(
+            captured.length,
+            1,
+            reason: 'execute should be called exactly once',
+          );
           final params = captured.first as CreateTransactionParams;
-          expect(params.categoryId, catFoodL2Cafe.id,
-              reason: 'state must remain coherent after idempotent re-call');
+          expect(
+            params.categoryId,
+            catFoodL2Cafe.id,
+            reason: 'state must remain coherent after idempotent re-call',
+          );
 
           final isSuccess = result.maybeWhen(
             success: (_) => true,
@@ -809,12 +837,16 @@ void main() {
 
           final result = await formKey.currentState!.submit();
 
-          final captured =
-              verify(() => mockCreate.execute(captureAny())).captured;
+          final captured = verify(
+            () => mockCreate.execute(captureAny()),
+          ).captured;
           expect(captured.length, 1);
           final params = captured.first as CreateTransactionParams;
-          expect(params.ledgerType, LedgerType.joy,
-              reason: 'updateCategory must trigger ledger resolution → joy');
+          expect(
+            params.ledgerType,
+            LedgerType.joy,
+            reason: 'updateCategory must trigger ledger resolution → joy',
+          );
 
           final isSuccess = result.maybeWhen(
             success: (_) => true,
@@ -826,56 +858,56 @@ void main() {
     });
 
     group('updateMerchant', () {
-      testWidgets(
-        'Test 4: updateMerchant("Starbucks") + submit produces '
-        'CreateTransactionParams.merchant == "Starbucks"',
-        (tester) async {
-          tester.view.physicalSize = const Size(402, 874);
-          tester.view.devicePixelRatio = 1;
-          addTearDown(tester.view.resetPhysicalSize);
-          addTearDown(tester.view.resetDevicePixelRatio);
+      testWidgets('Test 4: updateMerchant("Starbucks") + submit produces '
+          'CreateTransactionParams.merchant == "Starbucks"', (tester) async {
+        tester.view.physicalSize = const Size(402, 874);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
 
-          final formKey = GlobalKey<TransactionDetailsFormState>();
-          final mockCreate = _MockCreateTransactionUseCase();
-          when(() => mockCreate.execute(any())).thenAnswer(
-            (_) async => Result.success(
-              fakeTx(amount: 800, merchant: 'Starbucks'),
+        final formKey = GlobalKey<TransactionDetailsFormState>();
+        final mockCreate = _MockCreateTransactionUseCase();
+        when(() => mockCreate.execute(any())).thenAnswer(
+          (_) async =>
+              Result.success(fakeTx(amount: 800, merchant: 'Starbucks')),
+        );
+
+        await tester.pumpWidget(
+          buildForm(
+            TransactionDetailsFormConfig.$new(
+              bookId: 'b1',
+              entrySource: EntrySource.manual,
+              initialCategory: _dailyCategory,
             ),
-          );
-
-          await tester.pumpWidget(
-            buildForm(
-              TransactionDetailsFormConfig.$new(
-                bookId: 'b1',
-                entrySource: EntrySource.manual,
-                initialCategory: _dailyCategory,
-              ),
-              overrides: _baseOverrides(
-                categoryRepo: _StubCategoryRepository(_dailyCategory),
-                createUseCase: mockCreate,
-              ),
-              formKey: formKey,
+            overrides: _baseOverrides(
+              categoryRepo: _StubCategoryRepository(_dailyCategory),
+              createUseCase: mockCreate,
             ),
-          );
-          await tester.pumpAndSettle();
+            formKey: formKey,
+          ),
+        );
+        await tester.pumpAndSettle();
 
-          formKey.currentState!.updateMerchant('Starbucks');
-          formKey.currentState!.updateAmount(800);
-          await tester.pump();
+        formKey.currentState!.updateMerchant('Starbucks');
+        formKey.currentState!.updateAmount(800);
+        await tester.pump();
 
-          // TextField shows the new merchant text
-          expect(find.text('Starbucks'), findsOneWidget,
-              reason: 'merchant TextField must display the pushed value');
+        // TextField shows the new merchant text
+        expect(
+          find.text('Starbucks'),
+          findsOneWidget,
+          reason: 'merchant TextField must display the pushed value',
+        );
 
-          await formKey.currentState!.submit();
+        await formKey.currentState!.submit();
 
-          final captured =
-              verify(() => mockCreate.execute(captureAny())).captured;
-          expect(captured.length, 1);
-          final params = captured.first as CreateTransactionParams;
-          expect(params.merchant, 'Starbucks');
-        },
-      );
+        final captured = verify(
+          () => mockCreate.execute(captureAny()),
+        ).captured;
+        expect(captured.length, 1);
+        final params = captured.first as CreateTransactionParams;
+        expect(params.merchant, 'Starbucks');
+      });
 
       testWidgets(
         'Test 5: updateMerchant idempotency — same string does not fire '
@@ -917,15 +949,21 @@ void main() {
           // First call sets the text → fires 1 notification.
           formKey.currentState!.updateMerchant('Starbucks');
           await tester.pump();
-          expect(notifications, 1,
-              reason: 'first updateMerchant must mutate controller');
+          expect(
+            notifications,
+            1,
+            reason: 'first updateMerchant must mutate controller',
+          );
 
           // Second call with same value must short-circuit → still 1.
           formKey.currentState!.updateMerchant('Starbucks');
           await tester.pump();
-          expect(notifications, 1,
-              reason:
-                  'updateMerchant with unchanged value must NOT re-fire listener (Pitfall 3 cursor preservation)');
+          expect(
+            notifications,
+            1,
+            reason:
+                'updateMerchant with unchanged value must NOT re-fire listener (Pitfall 3 cursor preservation)',
+          );
         },
       );
 
@@ -963,9 +1001,12 @@ void main() {
             validationError: (_) => true,
             orElse: () => false,
           );
-          expect(isValidationError, isTrue,
-              reason:
-                  'category null guard must fire before any use-case invocation');
+          expect(
+            isValidationError,
+            isTrue,
+            reason:
+                'category null guard must fire before any use-case invocation',
+          );
 
           // Use case must not be called when category is null.
           verifyNever(() => mockCreate.execute(any()));
@@ -974,145 +1015,152 @@ void main() {
     });
 
     group('updateNote', () {
-      testWidgets(
-        'Test 7: updateNote("lunch with mom") + submit produces '
-        'CreateTransactionParams.note == "lunch with mom"',
-        (tester) async {
-          tester.view.physicalSize = const Size(402, 874);
-          tester.view.devicePixelRatio = 1;
-          addTearDown(tester.view.resetPhysicalSize);
-          addTearDown(tester.view.resetDevicePixelRatio);
+      testWidgets('Test 7: updateNote("lunch with mom") + submit produces '
+          'CreateTransactionParams.note == "lunch with mom"', (tester) async {
+        tester.view.physicalSize = const Size(402, 874);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
 
-          final formKey = GlobalKey<TransactionDetailsFormState>();
-          final mockCreate = _MockCreateTransactionUseCase();
-          when(() => mockCreate.execute(any())).thenAnswer(
-            (_) async => Result.success(
-              fakeTx(amount: 1200, note: 'lunch with mom'),
+        final formKey = GlobalKey<TransactionDetailsFormState>();
+        final mockCreate = _MockCreateTransactionUseCase();
+        when(() => mockCreate.execute(any())).thenAnswer(
+          (_) async =>
+              Result.success(fakeTx(amount: 1200, note: 'lunch with mom')),
+        );
+
+        await tester.pumpWidget(
+          buildForm(
+            TransactionDetailsFormConfig.$new(
+              bookId: 'b1',
+              entrySource: EntrySource.manual,
+              initialCategory: _dailyCategory,
             ),
-          );
-
-          await tester.pumpWidget(
-            buildForm(
-              TransactionDetailsFormConfig.$new(
-                bookId: 'b1',
-                entrySource: EntrySource.manual,
-                initialCategory: _dailyCategory,
-              ),
-              overrides: _baseOverrides(
-                categoryRepo: _StubCategoryRepository(_dailyCategory),
-                createUseCase: mockCreate,
-              ),
-              formKey: formKey,
+            overrides: _baseOverrides(
+              categoryRepo: _StubCategoryRepository(_dailyCategory),
+              createUseCase: mockCreate,
             ),
-          );
-          await tester.pumpAndSettle();
+            formKey: formKey,
+          ),
+        );
+        await tester.pumpAndSettle();
 
-          formKey.currentState!.updateNote('lunch with mom');
-          formKey.currentState!.updateAmount(1200);
-          await tester.pump();
+        formKey.currentState!.updateNote('lunch with mom');
+        formKey.currentState!.updateAmount(1200);
+        await tester.pump();
 
-          // TextField shows the new note text
-          expect(find.text('lunch with mom'), findsOneWidget,
-              reason: 'note TextField must display the pushed value');
+        // TextField shows the new note text
+        expect(
+          find.text('lunch with mom'),
+          findsOneWidget,
+          reason: 'note TextField must display the pushed value',
+        );
 
-          await formKey.currentState!.submit();
+        await formKey.currentState!.submit();
 
-          final captured =
-              verify(() => mockCreate.execute(captureAny())).captured;
-          expect(captured.length, 1);
-          final params = captured.first as CreateTransactionParams;
-          expect(params.note, 'lunch with mom');
-        },
-      );
+        final captured = verify(
+          () => mockCreate.execute(captureAny()),
+        ).captured;
+        expect(captured.length, 1);
+        final params = captured.first as CreateTransactionParams;
+        expect(params.note, 'lunch with mom');
+      });
 
-      testWidgets(
-        'Test 8: updateNote idempotency — same string does not fire '
-        'controller listener a second time',
-        (tester) async {
-          tester.view.physicalSize = const Size(402, 874);
-          tester.view.devicePixelRatio = 1;
-          addTearDown(tester.view.resetPhysicalSize);
-          addTearDown(tester.view.resetDevicePixelRatio);
+      testWidgets('Test 8: updateNote idempotency — same string does not fire '
+          'controller listener a second time', (tester) async {
+        tester.view.physicalSize = const Size(402, 874);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
 
-          final formKey = GlobalKey<TransactionDetailsFormState>();
+        final formKey = GlobalKey<TransactionDetailsFormState>();
 
-          await tester.pumpWidget(
-            buildForm(
-              TransactionDetailsFormConfig.$new(
-                bookId: 'b1',
-                entrySource: EntrySource.manual,
-                initialCategory: _dailyCategory,
-              ),
-              overrides: _baseOverrides(
-                categoryRepo: _StubCategoryRepository(_dailyCategory),
-              ),
-              formKey: formKey,
+        await tester.pumpWidget(
+          buildForm(
+            TransactionDetailsFormConfig.$new(
+              bookId: 'b1',
+              entrySource: EntrySource.manual,
+              initialCategory: _dailyCategory,
             ),
-          );
-          await tester.pumpAndSettle();
-
-          final noteField = tester.widget<TextField>(
-            find.byKey(const ValueKey('note-textfield')),
-          );
-          final controller = noteField.controller!;
-
-          var notifications = 0;
-          controller.addListener(() => notifications++);
-          addTearDown(() => controller.removeListener(() => notifications++));
-
-          formKey.currentState!.updateNote('hello');
-          await tester.pump();
-          expect(notifications, 1,
-              reason: 'first updateNote must mutate controller');
-
-          formKey.currentState!.updateNote('hello');
-          await tester.pump();
-          expect(notifications, 1,
-              reason:
-                  'updateNote with unchanged value must NOT re-fire listener');
-        },
-      );
-
-      testWidgets(
-        'Test 9: updateNote("") clears prior memo content',
-        (tester) async {
-          tester.view.physicalSize = const Size(402, 874);
-          tester.view.devicePixelRatio = 1;
-          addTearDown(tester.view.resetPhysicalSize);
-          addTearDown(tester.view.resetDevicePixelRatio);
-
-          final formKey = GlobalKey<TransactionDetailsFormState>();
-
-          await tester.pumpWidget(
-            buildForm(
-              TransactionDetailsFormConfig.$new(
-                bookId: 'b1',
-                entrySource: EntrySource.manual,
-                initialCategory: _dailyCategory,
-              ),
-              overrides: _baseOverrides(
-                categoryRepo: _StubCategoryRepository(_dailyCategory),
-              ),
-              formKey: formKey,
+            overrides: _baseOverrides(
+              categoryRepo: _StubCategoryRepository(_dailyCategory),
             ),
-          );
-          await tester.pumpAndSettle();
+            formKey: formKey,
+          ),
+        );
+        await tester.pumpAndSettle();
 
-          formKey.currentState!.updateNote('initial');
-          await tester.pump();
-          expect(find.text('initial'), findsOneWidget,
-              reason: 'updateNote("initial") must populate the note field');
+        final noteField = tester.widget<TextField>(
+          find.byKey(const ValueKey('note-textfield')),
+        );
+        final controller = noteField.controller!;
 
-          formKey.currentState!.updateNote('');
-          await tester.pump();
+        var notifications = 0;
+        controller.addListener(() => notifications++);
+        addTearDown(() => controller.removeListener(() => notifications++));
 
-          final noteField = tester.widget<TextField>(
-            find.byKey(const ValueKey('note-textfield')),
-          );
-          expect(noteField.controller!.text, '',
-              reason: 'updateNote("") must clear the controller text');
-        },
-      );
+        formKey.currentState!.updateNote('hello');
+        await tester.pump();
+        expect(
+          notifications,
+          1,
+          reason: 'first updateNote must mutate controller',
+        );
+
+        formKey.currentState!.updateNote('hello');
+        await tester.pump();
+        expect(
+          notifications,
+          1,
+          reason: 'updateNote with unchanged value must NOT re-fire listener',
+        );
+      });
+
+      testWidgets('Test 9: updateNote("") clears prior memo content', (
+        tester,
+      ) async {
+        tester.view.physicalSize = const Size(402, 874);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        final formKey = GlobalKey<TransactionDetailsFormState>();
+
+        await tester.pumpWidget(
+          buildForm(
+            TransactionDetailsFormConfig.$new(
+              bookId: 'b1',
+              entrySource: EntrySource.manual,
+              initialCategory: _dailyCategory,
+            ),
+            overrides: _baseOverrides(
+              categoryRepo: _StubCategoryRepository(_dailyCategory),
+            ),
+            formKey: formKey,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        formKey.currentState!.updateNote('initial');
+        await tester.pump();
+        expect(
+          find.text('initial'),
+          findsOneWidget,
+          reason: 'updateNote("initial") must populate the note field',
+        );
+
+        formKey.currentState!.updateNote('');
+        await tester.pump();
+
+        final noteField = tester.widget<TextField>(
+          find.byKey(const ValueKey('note-textfield')),
+        );
+        expect(
+          noteField.controller!.text,
+          '',
+          reason: 'updateNote("") must clear the controller text',
+        );
+      });
     });
 
     group('updateSatisfaction', () {
@@ -1164,8 +1212,11 @@ void main() {
           await tester.pumpAndSettle();
 
           // Picker must be visible because ledger flipped to joy.
-          expect(find.byType(SatisfactionEmojiPicker), findsOneWidget,
-              reason: 'joy ledger must render SatisfactionEmojiPicker');
+          expect(
+            find.byType(SatisfactionEmojiPicker),
+            findsOneWidget,
+            reason: 'joy ledger must render SatisfactionEmojiPicker',
+          );
 
           // (a) Push satisfaction = 5 via the new D-07 setter.
           formKey.currentState!.updateSatisfaction(5);
@@ -1175,9 +1226,12 @@ void main() {
           final pickerAfter = tester.widget<SatisfactionEmojiPicker>(
             find.byType(SatisfactionEmojiPicker),
           );
-          expect(pickerAfter.value, 5,
-              reason:
-                  'SatisfactionEmojiPicker.value must reflect updateSatisfaction(5)');
+          expect(
+            pickerAfter.value,
+            5,
+            reason:
+                'SatisfactionEmojiPicker.value must reflect updateSatisfaction(5)',
+          );
 
           // (c) Idempotency — second call with same value must short-circuit;
           // picker's identity / value remains at 5 (no extra rebuild required
@@ -1187,25 +1241,35 @@ void main() {
           final pickerSecond = tester.widget<SatisfactionEmojiPicker>(
             find.byType(SatisfactionEmojiPicker),
           );
-          expect(pickerSecond.value, 5,
-              reason:
-                  'idempotent updateSatisfaction(5) must keep picker value at 5');
+          expect(
+            pickerSecond.value,
+            5,
+            reason:
+                'idempotent updateSatisfaction(5) must keep picker value at 5',
+          );
 
           // (d) Submit round-trip — use case receives joyFullness == 5.
           formKey.currentState!.updateAmount(2500);
           await tester.pump();
           await formKey.currentState!.submit();
 
-          final captured =
-              verify(() => mockCreate.execute(captureAny())).captured;
+          final captured = verify(
+            () => mockCreate.execute(captureAny()),
+          ).captured;
           expect(captured.length, 1);
           final params = captured.first as CreateTransactionParams;
-          expect(params.joyFullness, 5,
-              reason:
-                  'submit() must propagate updateSatisfaction(5) to CreateTransactionParams (Open Q2 resolution)');
-          expect(params.ledgerType, LedgerType.joy,
-              reason:
-                  'joy-ledger satisfaction wiring intact after Phase 22 rewrite');
+          expect(
+            params.joyFullness,
+            5,
+            reason:
+                'submit() must propagate updateSatisfaction(5) to CreateTransactionParams (Open Q2 resolution)',
+          );
+          expect(
+            params.ledgerType,
+            LedgerType.joy,
+            reason:
+                'joy-ledger satisfaction wiring intact after Phase 22 rewrite',
+          );
         },
       );
     });

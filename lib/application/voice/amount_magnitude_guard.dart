@@ -36,8 +36,13 @@ final JapaneseNumeralStateMachine _jaMachine = JapaneseNumeralStateMachine();
 /// Magnitude anchor tokens → power (10^power). Highest anchor within one
 /// expression wins (千 inside a 万 expression is residue, not an anchor).
 const Map<String, int> _magnitudeTokens = {
-  '万': 4, '萬': 4, 'まん': 4,
-  '千': 3, '仟': 3, 'せん': 3, 'ぜん': 3,
+  '万': 4,
+  '萬': 4,
+  'まん': 4,
+  '千': 3,
+  '仟': 3,
+  'せん': 3,
+  'ぜん': 3,
 };
 
 /// Characters allowed in a kanji/arabic multiplier run or low-order residue.
@@ -49,15 +54,32 @@ const String _cjkDigitChars = '0123456789〇零一壱壹二两弐贰三参叁四
 /// substring is numeric ONLY if every char belongs to a known numeral token
 /// (prevents swallowing prose like ごはん).
 const List<String> _kanaDigitKeys = [
-  'いち', 'ひと', 'に', 'ふた', 'さん', 'よん', 'し', 'ご', 'ろく', 'なな',
-  'しち', 'はち', 'きゅう', 'く', 'ゼロ', 'れい', 'まる',
+  'いち',
+  'ひと',
+  'に',
+  'ふた',
+  'さん',
+  'よん',
+  'し',
+  'ご',
+  'ろく',
+  'なな',
+  'しち',
+  'はち',
+  'きゅう',
+  'く',
+  'ゼロ',
+  'れい',
+  'まる',
 ];
 const List<String> _kanaSubThousandUnitKeys = [
-  'じゅう', 'ひゃく', 'さんびゃく', 'ろっぴゃく', 'はっぴゃく',
+  'じゅう',
+  'ひゃく',
+  'さんびゃく',
+  'ろっぴゃく',
+  'はっぴゃく',
 ];
-const List<String> _kanaThousandKeys = [
-  'せん', 'ぜん', 'いっせん', 'さんぜん', 'はっせん',
-];
+const List<String> _kanaThousandKeys = ['せん', 'ぜん', 'いっせん', 'さんぜん', 'はっせん'];
 
 final List<String> _kanaKeysBelowSen = [
   ..._kanaDigitKeys,
@@ -81,11 +103,37 @@ final RegExp _currencyPrefixPattern = RegExp(
 /// Local mirror of the english_number_words.dart lexicon (its maps are
 /// library-private); 'thousand' itself is excluded — it is the anchor.
 const Set<String> _enNumberWords = {
-  'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
-  'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen',
-  'sixteen', 'seventeen', 'eighteen', 'nineteen', 'a', 'an',
-  'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty',
-  'ninety', 'hundred',
+  'zero',
+  'one',
+  'two',
+  'three',
+  'four',
+  'five',
+  'six',
+  'seven',
+  'eight',
+  'nine',
+  'ten',
+  'eleven',
+  'twelve',
+  'thirteen',
+  'fourteen',
+  'fifteen',
+  'sixteen',
+  'seventeen',
+  'eighteen',
+  'nineteen',
+  'a',
+  'an',
+  'twenty',
+  'thirty',
+  'forty',
+  'fifty',
+  'sixty',
+  'seventy',
+  'eighty',
+  'ninety',
+  'hundred',
 };
 
 /// Returns the digit count the utterance's magnitude word implies for its

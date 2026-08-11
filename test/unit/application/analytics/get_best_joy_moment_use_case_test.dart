@@ -33,8 +33,7 @@ void main() {
             entrySourceFilter: null,
           ),
         ).thenAnswer(
-          (_) async =>
-              const JoyFullnessOverview(avgSatisfaction: 0, count: 0),
+          (_) async => const JoyFullnessOverview(avgSatisfaction: 0, count: 0),
         );
 
         final result = await useCase.execute(
@@ -106,8 +105,7 @@ void main() {
           entrySourceFilter: null,
         ),
       ).thenAnswer(
-        (_) async =>
-            const JoyFullnessOverview(avgSatisfaction: 7.2, count: 5),
+        (_) async => const JoyFullnessOverview(avgSatisfaction: 7.2, count: 5),
       );
       when(
         () => repo.getBestJoyMoment(
@@ -149,8 +147,7 @@ void main() {
           entrySourceFilter: null,
         ),
       ).thenAnswer(
-        (_) async =>
-            const JoyFullnessOverview(avgSatisfaction: 6.4, count: 11),
+        (_) async => const JoyFullnessOverview(avgSatisfaction: 6.4, count: 11),
       );
       when(
         () => repo.getBestJoyMoment(

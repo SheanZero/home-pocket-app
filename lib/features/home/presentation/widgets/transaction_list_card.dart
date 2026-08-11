@@ -31,7 +31,9 @@ class TransactionListCard extends StatelessWidget {
     for (var i = 0; i < items.length; i++) {
       result.add(items[i]);
       if (i < items.length - 1) {
-        result.add(Container(height: 1, color: context.palette.backgroundDivider));
+        result.add(
+          Container(height: 1, color: context.palette.backgroundDivider),
+        );
       }
     }
     return result;

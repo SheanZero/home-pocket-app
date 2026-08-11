@@ -13,8 +13,7 @@ void main() {
   final arbiter = AmountArbiter();
 
   group('resolveParsedAmount — 260703 1a concat repair', () {
-    test('poisoned 250046 without alternates → kept, candidate 2546 rides',
-        () {
+    test('poisoned 250046 without alternates → kept, candidate 2546 rides', () {
       final r = arbiter.resolveParsedAmount(
         parsed: 250046,
         recognizedText: '250046元',
@@ -60,8 +59,7 @@ void main() {
       expect(r.repairCandidate, isNull);
     });
 
-    test('53102 + kanji alternate → 5312 via 1a exact path (silent adopt)',
-        () {
+    test('53102 + kanji alternate → 5312 via 1a exact path (silent adopt)', () {
       final r = arbiter.resolveParsedAmount(
         parsed: 53102,
         recognizedText: '53102元',
@@ -74,20 +72,17 @@ void main() {
   });
 
   group('resolveParsedAmount — 260706-kzr magnitude arbitration', () {
-    test(
-      'ja 5000300 + 五千三百円 alternate → 5300 adopted, original swaps into '
-      'the candidate (one-tap undo)',
-      () {
-        final r = arbiter.resolveParsedAmount(
-          parsed: 5000300,
-          recognizedText: '5000300円',
-          alternateTexts: const ['五千三百円'],
-          localeId: 'ja-JP',
-        );
-        expect(r.amount, 5300);
-        expect(r.repairCandidate, 5000300);
-      },
-    );
+    test('ja 5000300 + 五千三百円 alternate → 5300 adopted, original swaps into '
+        'the candidate (one-tap undo)', () {
+      final r = arbiter.resolveParsedAmount(
+        parsed: 5000300,
+        recognizedText: '5000300円',
+        alternateTexts: const ['五千三百円'],
+        localeId: 'ja-JP',
+      );
+      expect(r.amount, 5300);
+      expect(r.repairCandidate, 5000300);
+    });
 
     test(r'en $350016 + word alternate → 3516', () {
       final r = arbiter.resolveParsedAmount(
@@ -155,8 +150,7 @@ void main() {
   });
 
   group('resolveDisplayAmount — concat exception (260703)', () {
-    test('merged 250046 vs parsed 2546 → parsed wins (poisoning detected)',
-        () {
+    test('merged 250046 vs parsed 2546 → parsed wins (poisoning detected)', () {
       final amount = arbiter.resolveDisplayAmount(
         parsed: 2546,
         merged: 250046,
@@ -166,8 +160,7 @@ void main() {
       expect(amount, 2546);
     });
 
-    test('merged 53102 vs parsed 5312 → parsed wins (kzr vector A shape)',
-        () {
+    test('merged 53102 vs parsed 5312 → parsed wins (kzr vector A shape)', () {
       final amount = arbiter.resolveDisplayAmount(
         parsed: 5312,
         merged: 53102,

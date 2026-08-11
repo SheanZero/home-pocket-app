@@ -26,9 +26,7 @@ Future<ProviderContainer> _pumpSegments(WidgetTester tester) async {
             localizationsDelegates: S.localizationsDelegates,
             supportedLocales: S.supportedLocales,
             locale: const Locale('ja'),
-            home: const Scaffold(
-              body: ListLedgerSegments(),
-            ),
+            home: const Scaffold(body: ListLedgerSegments()),
           );
         },
       ),
@@ -40,8 +38,7 @@ Future<ProviderContainer> _pumpSegments(WidgetTester tester) async {
 
 void main() {
   group('ListLedgerSegments', () {
-    testWidgets('renders three segments (すべて / 日常 / ときめき)',
-        (tester) async {
+    testWidgets('renders three segments (すべて / 日常 / ときめき)', (tester) async {
       await _pumpSegments(tester);
 
       expect(find.text('すべて'), findsOneWidget);

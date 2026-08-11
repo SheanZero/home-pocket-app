@@ -15,19 +15,22 @@ void main() {
       expect(settings.biometricUnlockEnabled, false);
     });
 
-    test('appLockEnabled and biometricUnlockEnabled round-trip via copyWith', () {
-      const original = AppSettings();
-      final updated = original.copyWith(
-        appLockEnabled: true,
-        biometricUnlockEnabled: true,
-      );
+    test(
+      'appLockEnabled and biometricUnlockEnabled round-trip via copyWith',
+      () {
+        const original = AppSettings();
+        final updated = original.copyWith(
+          appLockEnabled: true,
+          biometricUnlockEnabled: true,
+        );
 
-      expect(updated.appLockEnabled, true);
-      expect(updated.biometricUnlockEnabled, true);
-      // Original is unchanged (immutability).
-      expect(original.appLockEnabled, false);
-      expect(original.biometricUnlockEnabled, false);
-    });
+        expect(updated.appLockEnabled, true);
+        expect(updated.biometricUnlockEnabled, true);
+        // Original is unchanged (immutability).
+        expect(original.appLockEnabled, false);
+        expect(original.biometricUnlockEnabled, false);
+      },
+    );
 
     test('creates with custom values', () {
       const settings = AppSettings(

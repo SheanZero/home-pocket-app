@@ -6,9 +6,7 @@ import '../../features/family_sync/domain/repositories/sync_repository.dart';
 /// Matching both entity id and revision prevents a delayed queue ACK from
 /// settling a newer private/public transition.
 class TransactionWithdrawalAcknowledger {
-  TransactionWithdrawalAcknowledger({
-    required this._transactionRepository,
-  });
+  TransactionWithdrawalAcknowledger({required this._transactionRepository});
 
   final TransactionRepository _transactionRepository;
 

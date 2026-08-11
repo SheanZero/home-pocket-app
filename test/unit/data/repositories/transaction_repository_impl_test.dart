@@ -258,23 +258,23 @@ void main() {
       appliedRate: appliedRate,
     );
 
-    test('insert persists and findById reads back the full foreign triple',
-        () async {
-      await repo.insert(foreignTx());
+    test(
+      'insert persists and findById reads back the full foreign triple',
+      () async {
+        await repo.insert(foreignTx());
 
-      final loaded = await repo.findById('tx_fx');
-      expect(loaded, isNotNull);
-      expect(loaded!.originalCurrency, 'USD');
-      expect(loaded.originalAmount, 5000);
-      expect(loaded.appliedRate, '148.30');
-      expect(loaded.amount, 7415); // derived JPY unchanged
-    });
+        final loaded = await repo.findById('tx_fx');
+        expect(loaded, isNotNull);
+        expect(loaded!.originalCurrency, 'USD');
+        expect(loaded.originalAmount, 5000);
+        expect(loaded.appliedRate, '148.30');
+        expect(loaded.amount, 7415); // derived JPY unchanged
+      },
+    );
 
     test('update persists edited triple (changed rate)', () async {
       await repo.insert(foreignTx());
-      await repo.update(
-        foreignTx(appliedRate: '150.00', amount: 7500),
-      );
+      await repo.update(foreignTx(appliedRate: '150.00', amount: 7500));
 
       final loaded = await repo.findById('tx_fx');
       expect(loaded!.appliedRate, '150.00');
@@ -282,23 +282,25 @@ void main() {
       expect(loaded.amount, 7500);
     });
 
-    test('JPY-native row round-trips with a null triple (CURR-04 regression)',
-        () async {
-      await repo.insert(
-        foreignTx(
-          id: 'tx_jpy',
-          originalCurrency: null,
-          originalAmount: null,
-          appliedRate: null,
-          amount: 1200,
-        ),
-      );
+    test(
+      'JPY-native row round-trips with a null triple (CURR-04 regression)',
+      () async {
+        await repo.insert(
+          foreignTx(
+            id: 'tx_jpy',
+            originalCurrency: null,
+            originalAmount: null,
+            appliedRate: null,
+            amount: 1200,
+          ),
+        );
 
-      final loaded = await repo.findById('tx_jpy');
-      expect(loaded!.originalCurrency, isNull);
-      expect(loaded.originalAmount, isNull);
-      expect(loaded.appliedRate, isNull);
-      expect(loaded.amount, 1200);
-    });
+        final loaded = await repo.findById('tx_jpy');
+        expect(loaded!.originalCurrency, isNull);
+        expect(loaded.originalAmount, isNull);
+        expect(loaded.appliedRate, isNull);
+        expect(loaded.amount, 1200);
+      },
+    );
   });
 }

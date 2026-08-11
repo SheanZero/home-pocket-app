@@ -1149,57 +1149,59 @@ void main() {
       },
     );
 
-    test('a stale signer failure cannot disconnect a replacement connection',
-        () async {
-      final delayedSignature = Completer<String>();
-      final sinks = <MockWebSocketSink>[];
-      final controllers = <StreamController<dynamic>>[];
-      final replacementService = WebSocketService(
-        baseUrl: 'wss://sync.happypocket.app',
-        channelFactory: ({required String url}) {
-          final controller = StreamController<dynamic>.broadcast();
-          final localSink = MockWebSocketSink();
-          when(() => localSink.close(any(), any())).thenAnswer((_) async {});
-          when(() => localSink.add(any())).thenReturn(null);
-          final channel = MockWebSocketChannel();
-          when(() => channel.stream).thenAnswer((_) => controller.stream);
-          when(() => channel.sink).thenReturn(localSink);
-          controllers.add(controller);
-          sinks.add(localSink);
-          return channel;
-        },
-      );
-      addTearDown(() async {
-        replacementService.dispose();
-        for (final controller in controllers) {
-          await controller.close();
-        }
-      });
+    test(
+      'a stale signer failure cannot disconnect a replacement connection',
+      () async {
+        final delayedSignature = Completer<String>();
+        final sinks = <MockWebSocketSink>[];
+        final controllers = <StreamController<dynamic>>[];
+        final replacementService = WebSocketService(
+          baseUrl: 'wss://sync.happypocket.app',
+          channelFactory: ({required String url}) {
+            final controller = StreamController<dynamic>.broadcast();
+            final localSink = MockWebSocketSink();
+            when(() => localSink.close(any(), any())).thenAnswer((_) async {});
+            when(() => localSink.add(any())).thenReturn(null);
+            final channel = MockWebSocketChannel();
+            when(() => channel.stream).thenAnswer((_) => controller.stream);
+            when(() => channel.sink).thenReturn(localSink);
+            controllers.add(controller);
+            sinks.add(localSink);
+            return channel;
+          },
+        );
+        addTearDown(() async {
+          replacementService.dispose();
+          for (final controller in controllers) {
+            await controller.close();
+          }
+        });
 
-      replacementService.connect(
-        groupId: 'group-a',
-        deviceId: 'device-a',
-        signMessage: (_) => delayedSignature.future,
-      );
-      replacementService.connect(
-        groupId: 'group-b',
-        deviceId: 'device-b',
-        signMessage: (_) async => 'signature-b',
-      );
-      controllers[1].add(
-        jsonEncode({'type': 'auth_success', 'groupId': 'group-b'}),
-      );
-      await Future<void>.delayed(Duration.zero);
+        replacementService.connect(
+          groupId: 'group-a',
+          deviceId: 'device-a',
+          signMessage: (_) => delayedSignature.future,
+        );
+        replacementService.connect(
+          groupId: 'group-b',
+          deviceId: 'device-b',
+          signMessage: (_) async => 'signature-b',
+        );
+        controllers[1].add(
+          jsonEncode({'type': 'auth_success', 'groupId': 'group-b'}),
+        );
+        await Future<void>.delayed(Duration.zero);
 
-      delayedSignature.completeError(StateError('old sign failed'));
-      await Future<void>.delayed(Duration.zero);
+        delayedSignature.completeError(StateError('old sign failed'));
+        await Future<void>.delayed(Duration.zero);
 
-      expect(
-        replacementService.connectionState,
-        WebSocketConnectionState.connected,
-      );
-      verifyNever(() => sinks[1].close(any(), any()));
-    });
+        expect(
+          replacementService.connectionState,
+          WebSocketConnectionState.connected,
+        );
+        verifyNever(() => sinks[1].close(any(), any()));
+      },
+    );
 
     test(
       'a stale auth_success cannot authenticate a replacement generation',

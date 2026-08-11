@@ -41,44 +41,49 @@ void main() {
     );
   });
 
-  test('removed local device clears queue, shadow data, and group key', () async {
-    when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'local-device');
-    when(() => groupRepository.getActiveGroup()).thenAnswer(
-      (_) async => GroupInfo(
+  test(
+    'removed local device clears queue, shadow data, and group key',
+    () async {
+      when(
+        () => keyManager.getDeviceId(),
+      ).thenAnswer((_) async => 'local-device');
+      when(() => groupRepository.getActiveGroup()).thenAnswer(
+        (_) async => GroupInfo(
+          groupId: 'group-1',
+          status: GroupStatus.active,
+          groupName: 'Family',
+          role: 'member',
+          groupKey: 'secret-key',
+          keyEpoch: 2,
+          members: const [],
+          createdAt: DateTime(2026),
+        ),
+      );
+      when(() => queueManager.clearQueue()).thenAnswer((_) async {});
+      when(
+        () => shadowBookService.cleanSyncData('group-1'),
+      ).thenAnswer((_) async {});
+      when(
+        () => groupRepository.deactivateGroup('group-1'),
+      ).thenAnswer((_) async {});
+
+      await useCase.execute(
         groupId: 'group-1',
-        status: GroupStatus.active,
-        groupName: 'Family',
-        role: 'member',
-        groupKey: 'secret-key',
-        keyEpoch: 2,
-        members: const [],
-        createdAt: DateTime(2026),
-      ),
-    );
-    when(() => queueManager.clearQueue()).thenAnswer((_) async {});
-    when(
-      () => shadowBookService.cleanSyncData('group-1'),
-    ).thenAnswer((_) async {});
-    when(
-      () => groupRepository.deactivateGroup('group-1'),
-    ).thenAnswer((_) async {});
+        deviceId: 'local-device',
+        reason: 'removed',
+        keyEpoch: 3,
+      );
 
-    await useCase.execute(
-      groupId: 'group-1',
-      deviceId: 'local-device',
-      reason: 'removed',
-      keyEpoch: 3,
-    );
-
-    verify(() => queueManager.clearQueue()).called(1);
-    verify(() => shadowBookService.cleanSyncData('group-1')).called(1);
-    verify(() => groupRepository.deactivateGroup('group-1')).called(1);
-    verifyNever(
-      () => rotateGroupKey.execute(
-        groupId: any(named: 'groupId'),
-        authoritativeEpoch: any(named: 'authoritativeEpoch'),
-        removedDeviceId: any(named: 'removedDeviceId'),
-      ),
-    );
-  });
+      verify(() => queueManager.clearQueue()).called(1);
+      verify(() => shadowBookService.cleanSyncData('group-1')).called(1);
+      verify(() => groupRepository.deactivateGroup('group-1')).called(1);
+      verifyNever(
+        () => rotateGroupKey.execute(
+          groupId: any(named: 'groupId'),
+          authoritativeEpoch: any(named: 'authoritativeEpoch'),
+          removedDeviceId: any(named: 'removedDeviceId'),
+        ),
+      );
+    },
+  );
 }

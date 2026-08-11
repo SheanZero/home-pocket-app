@@ -83,11 +83,7 @@ void main() {
         // Light mode
         testWidgets('$variantName — ${locale.languageCode}', (tester) async {
           await tester.pumpWidget(
-            _wrap(
-              locale: locale,
-              listType: listType,
-              isGroupMode: isGroupMode,
-            ),
+            _wrap(locale: locale, listType: listType, isGroupMode: isGroupMode),
           );
           await tester.pumpAndSettle();
           await expectLater(
@@ -99,7 +95,9 @@ void main() {
         });
 
         // Dark mode
-        testWidgets('$variantName — ${locale.languageCode} dark', (tester) async {
+        testWidgets('$variantName — ${locale.languageCode} dark', (
+          tester,
+        ) async {
           await tester.pumpWidget(
             _wrap(
               locale: locale,

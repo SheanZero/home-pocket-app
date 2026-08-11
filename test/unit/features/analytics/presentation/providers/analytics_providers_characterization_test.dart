@@ -55,14 +55,11 @@ void main() {
         expect(uc, isA<GetBudgetProgressUseCase>());
       });
 
-      test(
-        'getWithinMonthCumulativeUseCaseProvider constructs without error '
-        '(within-month cumulative trend path, D-E1)',
-        () {
-          final uc = container.read(getWithinMonthCumulativeUseCaseProvider);
-          expect(uc, isA<GetWithinMonthCumulativeUseCase>());
-        },
-      );
+      test('getWithinMonthCumulativeUseCaseProvider constructs without error '
+          '(within-month cumulative trend path, D-E1)', () {
+        final uc = container.read(getWithinMonthCumulativeUseCaseProvider);
+        expect(uc, isA<GetWithinMonthCumulativeUseCase>());
+      });
     },
   );
 }

@@ -49,15 +49,16 @@ class MerchantDao {
 
   /// Return the match-key rows for [merchantId].
   Future<List<MerchantMatchKeyRow>> findMatchKeysFor(String merchantId) async {
-    return (_db.select(_db.merchantMatchKeys)
-          ..where((t) => t.merchantId.equals(merchantId)))
-        .get();
+    return (_db.select(
+      _db.merchantMatchKeys,
+    )..where((t) => t.merchantId.equals(merchantId))).get();
   }
 
   /// Return the merchant row with [id], or null if not found.
   Future<MerchantRow?> findById(String id) async {
-    return (_db.select(_db.merchants)..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    return (_db.select(
+      _db.merchants,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
   /// Insert all [merchants] and [keys] in ONE transaction with

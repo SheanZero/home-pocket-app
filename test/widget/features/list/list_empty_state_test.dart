@@ -31,9 +31,7 @@ Future<void> _pumpEmptyState(
         localizationsDelegates: S.localizationsDelegates,
         supportedLocales: S.supportedLocales,
         home: Scaffold(
-          body: Center(
-            child: ListEmptyState(variant: variant),
-          ),
+          body: Center(child: ListEmptyState(variant: variant)),
         ),
       ),
     ),
@@ -43,31 +41,45 @@ Future<void> _pumpEmptyState(
 
 void main() {
   group('ListEmptyState', () {
-    testWidgets(
-        'noData — receipt_long_outlined icon, no action button',
-        (tester) async {
+    testWidgets('noData — receipt_long_outlined icon, no action button', (
+      tester,
+    ) async {
       final container = ProviderContainer.test();
-      await _pumpEmptyState(tester, container, variant: ListEmptyVariant.noData);
+      await _pumpEmptyState(
+        tester,
+        container,
+        variant: ListEmptyVariant.noData,
+      );
       expect(find.byIcon(Icons.receipt_long_outlined), findsOneWidget);
       expect(find.byType(TextButton), findsNothing);
     });
 
     testWidgets(
-        'dayEmpty — event_busy_outlined icon + "show full month" TextButton',
-        (tester) async {
-      final container = ProviderContainer.test();
-      await _pumpEmptyState(tester, container, variant: ListEmptyVariant.dayEmpty);
-      expect(find.byIcon(Icons.event_busy_outlined), findsOneWidget);
-      expect(find.byType(TextButton), findsOneWidget);
-    });
+      'dayEmpty — event_busy_outlined icon + "show full month" TextButton',
+      (tester) async {
+        final container = ProviderContainer.test();
+        await _pumpEmptyState(
+          tester,
+          container,
+          variant: ListEmptyVariant.dayEmpty,
+        );
+        expect(find.byIcon(Icons.event_busy_outlined), findsOneWidget);
+        expect(find.byType(TextButton), findsOneWidget);
+      },
+    );
 
     testWidgets(
-        'filtered — search_off_outlined icon + "clear filters" TextButton',
-        (tester) async {
-      final container = ProviderContainer.test();
-      await _pumpEmptyState(tester, container, variant: ListEmptyVariant.filtered);
-      expect(find.byIcon(Icons.search_off_outlined), findsOneWidget);
-      expect(find.byType(TextButton), findsOneWidget);
-    });
+      'filtered — search_off_outlined icon + "clear filters" TextButton',
+      (tester) async {
+        final container = ProviderContainer.test();
+        await _pumpEmptyState(
+          tester,
+          container,
+          variant: ListEmptyVariant.filtered,
+        );
+        expect(find.byIcon(Icons.search_off_outlined), findsOneWidget);
+        expect(find.byType(TextButton), findsOneWidget);
+      },
+    );
   });
 }

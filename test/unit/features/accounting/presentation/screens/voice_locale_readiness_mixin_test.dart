@@ -55,10 +55,8 @@ class _ReadinessHostState extends ConsumerState<_ReadinessHost>
   }
 
   @override
-  Widget build(BuildContext context) => Text(
-        isLocaleReady ? 'ready' : 'gated',
-        textDirection: TextDirection.ltr,
-      );
+  Widget build(BuildContext context) =>
+      Text(isLocaleReady ? 'ready' : 'gated', textDirection: TextDirection.ltr);
 }
 
 void main() {
@@ -77,10 +75,16 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('gated'), findsOneWidget,
-        reason: 'D-07: the mic must stay gated while the locale is pending');
-    expect(resolved, isEmpty,
-        reason: 'no mirror update before the provider resolves');
+    expect(
+      find.text('gated'),
+      findsOneWidget,
+      reason: 'D-07: the mic must stay gated while the locale is pending',
+    );
+    expect(
+      resolved,
+      isEmpty,
+      reason: 'no mirror update before the provider resolves',
+    );
 
     // Resolution flips the gate and fires the mirror exactly once.
     completer.complete('ja-JP');
@@ -91,15 +95,14 @@ void main() {
     expect(resolved, ['ja-JP']);
   });
 
-  testWidgets('warm resolve (AsyncData) unlocks and mirrors the locale',
-      (tester) async {
+  testWidgets('warm resolve (AsyncData) unlocks and mirrors the locale', (
+    tester,
+  ) async {
     final resolved = <String>[];
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          voiceLocaleIdProvider.overrideWith((ref) async => 'zh-CN'),
-        ],
+        overrides: [voiceLocaleIdProvider.overrideWith((ref) async => 'zh-CN')],
         child: _ReadinessHost(resolvedLocales: resolved),
       ),
     );
@@ -107,8 +110,9 @@ void main() {
     await tester.pump();
 
     expect(find.text('ready'), findsOneWidget);
-    expect(resolved, ['zh-CN'],
-        reason: 'onVoiceLocaleResolved fires exactly once with the value');
+    expect(resolved, [
+      'zh-CN',
+    ], reason: 'onVoiceLocaleResolved fires exactly once with the value');
   });
 
   testWidgets('AsyncError degrades gracefully: mic unlocked, mirror NOT '
@@ -128,11 +132,18 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(find.text('ready'), findsOneWidget,
-        reason: 'RESEARCH Pitfall 3: an error must not soft-lock the mic');
-    expect(resolved, isEmpty,
-        reason: 'AsyncError never calls onVoiceLocaleResolved — the host '
-            'keeps its default locale fallback');
+    expect(
+      find.text('ready'),
+      findsOneWidget,
+      reason: 'RESEARCH Pitfall 3: an error must not soft-lock the mic',
+    );
+    expect(
+      resolved,
+      isEmpty,
+      reason:
+          'AsyncError never calls onVoiceLocaleResolved — the host '
+          'keeps its default locale fallback',
+    );
   });
 
   testWidgets('locale switch fires the mirror again with the new value; '
@@ -162,12 +173,18 @@ void main() {
     // First pump: provider rebuild passes through AsyncLoading — the gate must
     // NOT regress to gated (single-direction door).
     await tester.pump();
-    expect(find.text('ready'), findsOneWidget,
-        reason: 'readiness is a one-way gate — a reload never re-locks');
+    expect(
+      find.text('ready'),
+      findsOneWidget,
+      reason: 'readiness is a one-way gate — a reload never re-locks',
+    );
     await tester.pump();
 
-    expect(resolved, ['zh-CN', 'ja-JP'],
-        reason: 'the mirror re-fires so the host locale string stays current');
+    expect(
+      resolved,
+      ['zh-CN', 'ja-JP'],
+      reason: 'the mirror re-fires so the host locale string stays current',
+    );
     expect(find.text('ready'), findsOneWidget);
   });
 
@@ -206,9 +223,13 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(resolved, ['zh-CN'],
-        reason: 'no onVoiceLocaleResolved after dispose — the listenManual '
-            'subscription was closed without leaking');
+    expect(
+      resolved,
+      ['zh-CN'],
+      reason:
+          'no onVoiceLocaleResolved after dispose — the listenManual '
+          'subscription was closed without leaking',
+    );
     expect(tester.takeException(), isNull);
   });
 }

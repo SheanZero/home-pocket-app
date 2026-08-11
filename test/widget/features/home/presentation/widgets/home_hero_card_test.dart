@@ -111,6 +111,7 @@ Widget _buildSubject({
   Locale locale = const Locale('ja'),
   bool isGroupMode = false,
   String currencyCode = 'JPY',
+  String? bestJoyCategoryName,
   int activeMonthlyJoyTarget = 50,
   int? recommendedMonthlyJoyTarget = 50,
   bool isMonthlyJoyTargetConfigured = false,
@@ -126,6 +127,7 @@ Widget _buildSubject({
           report: snapshot.monthlyReport,
           happiness: snapshot.happiness,
           bestJoy: snapshot.bestJoy,
+          bestJoyCategoryName: bestJoyCategoryName,
           family: snapshot.family,
           shadowBooks: snapshot.shadowBooks,
           shadowAggregate: snapshot.shadowAggregate,
@@ -241,6 +243,33 @@ void main() {
       // 小確幸 (12) highlights count legend
       expect(find.textContaining('小確幸'), findsWidgets);
     });
+
+    testWidgets(
+      'uses recent-item typography for the favorite category and larger metric labels',
+      (tester) async {
+        await tester.pumpWidget(
+          _buildSubject(
+            locale: const Locale('zh'),
+            snapshot: _singleRich(),
+            bestJoyCategoryName: '休闲运动',
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          tester.widget<Text>(find.text('休闲运动')).style?.fontSize,
+          AppTypography.itemTitle,
+        );
+        expect(
+          tester.widget<Text>(find.text('满足度均值')).style?.fontSize,
+          AppTypography.label,
+        );
+        expect(
+          tester.widget<Text>(find.text('小确幸')).style?.fontSize,
+          AppTypography.label,
+        );
+      },
+    );
 
     testWidgets('centers each support metric within its own vertical slot', (
       tester,
@@ -644,26 +673,27 @@ void main() {
       },
     );
 
-    testWidgets('parent is the sole card surface and retains one outer shadow', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        _buildSubject(snapshot: _singleNoJoyWithDailySpend()),
-      );
-      await tester.pumpAndSettle();
+    testWidgets(
+      'parent is the sole card surface and retains one outer shadow',
+      (tester) async {
+        await tester.pumpWidget(
+          _buildSubject(snapshot: _singleNoJoyWithDailySpend()),
+        );
+        await tester.pumpAndSettle();
 
-      final parent = tester.widget<Container>(
-        find.byKey(const Key('home-hero-main-surface')),
-      );
-      final child = tester.widget<Container>(
-        find.byKey(const Key('home-joy-empty-state')),
-      );
+        final parent = tester.widget<Container>(
+          find.byKey(const Key('home-hero-main-surface')),
+        );
+        final child = tester.widget<Container>(
+          find.byKey(const Key('home-joy-empty-state')),
+        );
 
-      final parentDecoration = parent.decoration! as BoxDecoration;
-      expect(parentDecoration.boxShadow, hasLength(1));
-      expect(child.color, isNull);
-      expect(child.decoration, isNull);
-    });
+        final parentDecoration = parent.decoration! as BoxDecoration;
+        expect(parentDecoration.boxShadow, hasLength(1));
+        expect(child.color, isNull);
+        expect(child.decoration, isNull);
+      },
+    );
 
     testWidgets('C2 prompts forward the selected Joy-entry intent', (
       tester,

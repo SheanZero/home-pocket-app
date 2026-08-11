@@ -66,8 +66,8 @@ class MerchantRecognizer {
     if (nq.isEmpty) return const <MerchantCandidate>[];
 
     // WR-02: share one in-flight load across concurrent first-callers.
-    final entries = await (_cacheFuture ??=
-        _merchantRepository.loadAllForMatching());
+    final entries = await (_cacheFuture ??= _merchantRepository
+        .loadAllForMatching());
     // WR-01: do not latch an empty seed — clear the cached future so a later
     // call re-loads once seeding has populated the table.
     if (entries.isEmpty) _cacheFuture = null;

@@ -35,8 +35,10 @@ void main() {
   group('setCategories mutator', () {
     test('setCategories stores the provided Set', () {
       final container = ProviderContainer.test();
-      container.read(listFilterProvider.notifier)
-          .setCategories({'cat_food', 'cat_transport'});
+      container.read(listFilterProvider.notifier).setCategories({
+        'cat_food',
+        'cat_transport',
+      });
       expect(
         container.read(listFilterProvider).categoryIds,
         equals({'cat_food', 'cat_transport'}),

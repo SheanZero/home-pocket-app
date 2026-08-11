@@ -29,8 +29,9 @@ void main() {
     await container.read(seedVoiceSynonymsUseCaseProvider).execute();
     resolver = CategoryRecognizer(
       categoryRepository: container.read(categoryRepositoryProvider),
-      preferenceRepository:
-          container.read(categoryKeywordPreferenceRepositoryProvider),
+      preferenceRepository: container.read(
+        categoryKeywordPreferenceRepositoryProvider,
+      ),
       categoryService: container.read(categoryServiceProvider),
     );
   });
@@ -45,9 +46,13 @@ void main() {
   group('en hedge corpus (Phase 23 D-15 / IN-06)', () {
     test('"other" -> cat_other_other (en voice hedge)', () async {
       final result = await resolver.resolve('other');
-      expect(result, isNotNull,
-          reason: 'Phase 23 D-15: "other" must seed-route through '
-              'cat_other_expense override to cat_other_other');
+      expect(
+        result,
+        isNotNull,
+        reason:
+            'Phase 23 D-15: "other" must seed-route through '
+            'cat_other_expense override to cat_other_other',
+      );
       expect(result!.categoryId, 'cat_other_other');
     });
   });

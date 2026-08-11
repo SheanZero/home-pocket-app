@@ -246,52 +246,66 @@ void main() {
   // scorer; the normalizer lowercases Latin). These are VERIFICATION
   // assertions — the recognizer is unchanged. ───────────────────────────────
   group('VEN-01 English / romaji merchant recognition (verify, Pitfall 5)', () {
-    test('English/romaji query resolves the JA merchant via its nameEn surface',
-        () async {
-      // "Starbucks" is the seeded English (nameEn / romaji alias) surface for
-      // the スターバックス merchant. A lowercase or capitalized English
-      // utterance both resolve because normalizeMerchantKey lowercases Latin.
-      final r = _recognizer(_fixtureEntries());
+    test(
+      'English/romaji query resolves the JA merchant via its nameEn surface',
+      () async {
+        // "Starbucks" is the seeded English (nameEn / romaji alias) surface for
+        // the スターバックス merchant. A lowercase or capitalized English
+        // utterance both resolve because normalizeMerchantKey lowercases Latin.
+        final r = _recognizer(_fixtureEntries());
 
-      final exact = await r.recognize('Starbucks');
-      expect(_bestScoreFor(exact, 'mer_starbucks'), 1.00,
-          reason: 'romaji/nameEn surface resolves the JA merchant');
+        final exact = await r.recognize('Starbucks');
+        expect(
+          _bestScoreFor(exact, 'mer_starbucks'),
+          1.00,
+          reason: 'romaji/nameEn surface resolves the JA merchant',
+        );
 
-      // Case-insensitivity: lowercase + uppercase normalize to the same key.
-      expect(normalizeMerchantKey('starbucks'),
-          normalizeMerchantKey('STARBUCKS'));
-      final lower = await r.recognize('starbucks');
-      expect(_bestScoreFor(lower, 'mer_starbucks'), 1.00,
-          reason: 'Latin case folds in the shared normalizer');
-    });
+        // Case-insensitivity: lowercase + uppercase normalize to the same key.
+        expect(
+          normalizeMerchantKey('starbucks'),
+          normalizeMerchantKey('STARBUCKS'),
+        );
+        final lower = await r.recognize('starbucks');
+        expect(
+          _bestScoreFor(lower, 'mer_starbucks'),
+          1.00,
+          reason: 'Latin case folds in the shared normalizer',
+        );
+      },
+    );
 
-    test('English merchant query carries the JA merchant categoryId/ledgerHint',
-        () async {
-      final r = _recognizer(_fixtureEntries());
-      final cands = await r.recognize('Starbucks');
-      final star = cands.firstWhere((c) => c.merchantId == 'mer_starbucks');
-      expect(star.categoryId, 'cat_food_cafe');
-      expect(star.displayName, 'スターバックス');
-    });
+    test(
+      'English merchant query carries the JA merchant categoryId/ledgerHint',
+      () async {
+        final r = _recognizer(_fixtureEntries());
+        final cands = await r.recognize('Starbucks');
+        final star = cands.firstWhere((c) => c.merchantId == 'mer_starbucks');
+        expect(star.categoryId, 'cat_food_cafe');
+        expect(star.displayName, 'スターバックス');
+      },
+    );
   });
 
   // ── D-13: English currency words are ALREADY covered by VoiceCurrencySuffixes
   // (quick task 260614-goh). VERIFY the reused path — do NOT fork a new one.
   group('VEN-01 / D-13 English currency-word detection (reuse, no fork)', () {
-    test('English currency words map to their ISO via VoiceCurrencySuffixes',
-        () {
-      // dollar/dollars/USD-family resolve to USD; the en tokens are stored
-      // lowercase and the detection path is case-insensitive (260614-goh).
-      expect(VoiceCurrencySuffixes.tokenToIso['dollar'], 'USD');
-      expect(VoiceCurrencySuffixes.tokenToIso['dollars'], 'USD');
-      expect(VoiceCurrencySuffixes.tokenToIso['us dollar'], 'USD');
-      expect(VoiceCurrencySuffixes.tokenToIso['euro'], 'EUR');
-      expect(VoiceCurrencySuffixes.tokenToIso['pound'], 'GBP');
-      // English currency words are present in the canonical `all` token list
-      // (the single source the regex/extractor consume — no forked path).
-      expect(VoiceCurrencySuffixes.all, contains('dollar'));
-      expect(VoiceCurrencySuffixes.all, contains('yen'));
-    });
+    test(
+      'English currency words map to their ISO via VoiceCurrencySuffixes',
+      () {
+        // dollar/dollars/USD-family resolve to USD; the en tokens are stored
+        // lowercase and the detection path is case-insensitive (260614-goh).
+        expect(VoiceCurrencySuffixes.tokenToIso['dollar'], 'USD');
+        expect(VoiceCurrencySuffixes.tokenToIso['dollars'], 'USD');
+        expect(VoiceCurrencySuffixes.tokenToIso['us dollar'], 'USD');
+        expect(VoiceCurrencySuffixes.tokenToIso['euro'], 'EUR');
+        expect(VoiceCurrencySuffixes.tokenToIso['pound'], 'GBP');
+        // English currency words are present in the canonical `all` token list
+        // (the single source the regex/extractor consume — no forked path).
+        expect(VoiceCurrencySuffixes.all, contains('dollar'));
+        expect(VoiceCurrencySuffixes.all, contains('yen'));
+      },
+    );
   });
 
   group('ranking and dedupe', () {
@@ -357,9 +371,7 @@ void main() {
           call++;
           // First load returns empty (seeding not yet done); later loads are
           // populated. The empty result must NOT latch.
-          return call == 1
-              ? const <MerchantMatchEntry>[]
-              : _fixtureEntries();
+          return call == 1 ? const <MerchantMatchEntry>[] : _fixtureEntries();
         });
         final r = MerchantRecognizer(merchantRepository: repo);
 
@@ -387,23 +399,20 @@ void main() {
       expect(call, 1, reason: 'a populated seed is loaded exactly once');
     });
 
-    test(
-      'WR-02: concurrent first-calls share ONE in-flight load',
-      () async {
-        final repo = _MockMerchantRepository();
-        var call = 0;
-        when(repo.loadAllForMatching).thenAnswer((_) async {
-          call++;
-          // Yield so both racing callers observe the null cache before either
-          // assigns — without the shared-future guard this double-loads.
-          await Future<void>.delayed(Duration.zero);
-          return _fixtureEntries();
-        });
-        final r = MerchantRecognizer(merchantRepository: repo);
+    test('WR-02: concurrent first-calls share ONE in-flight load', () async {
+      final repo = _MockMerchantRepository();
+      var call = 0;
+      when(repo.loadAllForMatching).thenAnswer((_) async {
+        call++;
+        // Yield so both racing callers observe the null cache before either
+        // assigns — without the shared-future guard this double-loads.
+        await Future<void>.delayed(Duration.zero);
+        return _fixtureEntries();
+      });
+      final r = MerchantRecognizer(merchantRepository: repo);
 
-        await Future.wait([r.recognize('スタバ'), r.recognize('マクド')]);
-        expect(call, 1, reason: 'concurrent first-calls share one load (WR-02)');
-      },
-    );
+      await Future.wait([r.recognize('スタバ'), r.recognize('マクド')]);
+      expect(call, 1, reason: 'concurrent first-calls share one load (WR-02)');
+    });
   });
 }

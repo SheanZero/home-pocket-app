@@ -135,38 +135,33 @@ void main() {
       },
     );
 
-    test(
-      'findTopLearned excludes seeds (hitCount=0) and orders by hitCount '
-      'DESC then lastUsed DESC; honors limit',
-      () async {
-        // Insert a seed-style row via insertSeedBatch (the API used by
-        // production code to create hitCount=0 rows).
-        await dao.insertSeedBatch([
-          (keyword: 'seed', categoryId: 'cat_seed'),
-        ]);
-        await dao.upsert(keyword: 'a', categoryId: 'cat_a'); // hitCount=1
-        await dao.upsert(keyword: 'b', categoryId: 'cat_b');
-        await dao.upsert(keyword: 'b', categoryId: 'cat_b'); // hitCount=2
-        await dao.upsert(keyword: 'c', categoryId: 'cat_c');
-        await dao.upsert(keyword: 'c', categoryId: 'cat_c');
-        await dao.upsert(keyword: 'c', categoryId: 'cat_c'); // hitCount=3
+    test('findTopLearned excludes seeds (hitCount=0) and orders by hitCount '
+        'DESC then lastUsed DESC; honors limit', () async {
+      // Insert a seed-style row via insertSeedBatch (the API used by
+      // production code to create hitCount=0 rows).
+      await dao.insertSeedBatch([(keyword: 'seed', categoryId: 'cat_seed')]);
+      await dao.upsert(keyword: 'a', categoryId: 'cat_a'); // hitCount=1
+      await dao.upsert(keyword: 'b', categoryId: 'cat_b');
+      await dao.upsert(keyword: 'b', categoryId: 'cat_b'); // hitCount=2
+      await dao.upsert(keyword: 'c', categoryId: 'cat_c');
+      await dao.upsert(keyword: 'c', categoryId: 'cat_c');
+      await dao.upsert(keyword: 'c', categoryId: 'cat_c'); // hitCount=3
 
-        // Default limit = 20 — returns all 3 learned rows.
-        final all = await dao.findTopLearned();
-        expect(all, hasLength(3));
-        // Seed excluded.
-        expect(all.any((r) => r.keyword == 'seed'), isFalse);
-        // Ordered hitCount DESC.
-        expect(all[0].keyword, equals('c'));
-        expect(all[1].keyword, equals('b'));
-        expect(all[2].keyword, equals('a'));
+      // Default limit = 20 — returns all 3 learned rows.
+      final all = await dao.findTopLearned();
+      expect(all, hasLength(3));
+      // Seed excluded.
+      expect(all.any((r) => r.keyword == 'seed'), isFalse);
+      // Ordered hitCount DESC.
+      expect(all[0].keyword, equals('c'));
+      expect(all[1].keyword, equals('b'));
+      expect(all[2].keyword, equals('a'));
 
-        // Limit honored.
-        final top2 = await dao.findTopLearned(limit: 2);
-        expect(top2, hasLength(2));
-        expect(top2[0].keyword, equals('c'));
-        expect(top2[1].keyword, equals('b'));
-      },
-    );
+      // Limit honored.
+      final top2 = await dao.findTopLearned(limit: 2);
+      expect(top2, hasLength(2));
+      expect(top2[0].keyword, equals('c'));
+      expect(top2[1].keyword, equals('b'));
+    });
   });
 }

@@ -23,6 +23,16 @@ _BackupData _$BackupDataFromJson(Map<String, dynamic> json) => _BackupData(
           ?.map((e) => e as Map<String, dynamic>)
           .toList() ??
       const <Map<String, dynamic>>[],
+  shoppingItems:
+      (json['shoppingItems'] as List<dynamic>?)
+          ?.map((e) => e as Map<String, dynamic>)
+          .toList() ??
+      const <Map<String, dynamic>>[],
+  categoryLedgerConfigs:
+      (json['categoryLedgerConfigs'] as List<dynamic>?)
+          ?.map((e) => e as Map<String, dynamic>)
+          .toList() ??
+      const <Map<String, dynamic>>[],
 );
 
 Map<String, dynamic> _$BackupDataToJson(_BackupData instance) =>
@@ -33,6 +43,8 @@ Map<String, dynamic> _$BackupDataToJson(_BackupData instance) =>
       'books': instance.books,
       'settings': instance.settings,
       'exchangeRates': instance.exchangeRates,
+      'shoppingItems': instance.shoppingItems,
+      'categoryLedgerConfigs': instance.categoryLedgerConfigs,
     };
 
 _BackupMetadata _$BackupMetadataFromJson(Map<String, dynamic> json) =>

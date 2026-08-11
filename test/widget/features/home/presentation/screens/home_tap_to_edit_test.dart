@@ -121,9 +121,9 @@ void main() {
 
       // The mock update use case is defensive — never called in this test
       // (no submit happens), but the form resolves the provider on build.
-      when(() => mockUpdate.execute(any())).thenAnswer(
-        (_) async => Result.success(seedTx),
-      );
+      when(
+        () => mockUpdate.execute(any()),
+      ).thenAnswer((_) async => Result.success(seedTx));
 
       // Build the test host: a Scaffold wrapping a single HomeTransactionTile
       // whose onTap replicates the home_screen.dart Plan 07 wiring.
@@ -175,9 +175,7 @@ void main() {
             // updateTransactionUseCaseProvider: defensive mock — never called
             // during this test (no save is triggered), but the form widget
             // may resolve the provider during init.
-            updateTransactionUseCaseProvider.overrideWith(
-              (_) => mockUpdate,
-            ),
+            updateTransactionUseCaseProvider.overrideWith((_) => mockUpdate),
           ],
         ),
       );
@@ -201,7 +199,8 @@ void main() {
       expect(
         find.byType(TransactionDetailsForm),
         findsOneWidget,
-        reason: 'TransactionDetailsForm must be visible inside TransactionEditScreen',
+        reason:
+            'TransactionDetailsForm must be visible inside TransactionEditScreen',
       );
 
       // Seed merchant is visible — confirms .edit init populates fields

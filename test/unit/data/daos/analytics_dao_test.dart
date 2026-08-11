@@ -58,21 +58,9 @@ void main() {
 
   group('entrySourceFilter on best joy moment', () {
     test('null filter keeps all entry sources in ordering', () async {
-      await seedTx(
-        id: 'voice_best',
-        joyFullness: 10,
-        entrySource: 'voice',
-      );
-      await seedTx(
-        id: 'manual_second',
-        joyFullness: 9,
-        entrySource: 'manual',
-      );
-      await seedTx(
-        id: 'manual_third',
-        joyFullness: 7,
-        entrySource: 'manual',
-      );
+      await seedTx(id: 'voice_best', joyFullness: 10, entrySource: 'voice');
+      await seedTx(id: 'manual_second', joyFullness: 9, entrySource: 'manual');
+      await seedTx(id: 'manual_third', joyFullness: 7, entrySource: 'manual');
 
       final best = await dao.getBestJoyMoment(
         bookId: 'book_joy',
@@ -87,21 +75,9 @@ void main() {
     });
 
     test('manual filter excludes voice rows from ordering', () async {
-      await seedTx(
-        id: 'voice_best',
-        joyFullness: 10,
-        entrySource: 'voice',
-      );
-      await seedTx(
-        id: 'manual_second',
-        joyFullness: 9,
-        entrySource: 'manual',
-      );
-      await seedTx(
-        id: 'manual_third',
-        joyFullness: 7,
-        entrySource: 'manual',
-      );
+      await seedTx(id: 'voice_best', joyFullness: 10, entrySource: 'voice');
+      await seedTx(id: 'manual_second', joyFullness: 9, entrySource: 'manual');
+      await seedTx(id: 'manual_third', joyFullness: 7, entrySource: 'manual');
 
       final best = await dao.getBestJoyMoment(
         bookId: 'book_joy',

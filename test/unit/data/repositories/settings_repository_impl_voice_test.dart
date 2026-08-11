@@ -40,25 +40,32 @@ void main() {
       repo = SettingsRepositoryImpl(prefs: prefs);
     });
 
-    test('getSettings returns default voiceAllowOnDeviceFallback true', () async {
-      final settings = await repo.getSettings();
-      expect(settings.voiceAllowOnDeviceFallback, true);
-    });
+    test(
+      'getSettings returns default voiceAllowOnDeviceFallback true',
+      () async {
+        final settings = await repo.getSettings();
+        expect(settings.voiceAllowOnDeviceFallback, true);
+      },
+    );
 
-    test('setVoiceAllowOnDeviceFallback(false) round-trips via getSettings',
-        () async {
-      await repo.setVoiceAllowOnDeviceFallback(false);
-      final settings = await repo.getSettings();
-      expect(settings.voiceAllowOnDeviceFallback, false);
-    });
+    test(
+      'setVoiceAllowOnDeviceFallback(false) round-trips via getSettings',
+      () async {
+        await repo.setVoiceAllowOnDeviceFallback(false);
+        final settings = await repo.getSettings();
+        expect(settings.voiceAllowOnDeviceFallback, false);
+      },
+    );
 
-    test('setVoiceAllowOnDeviceFallback(true) round-trips via getSettings',
-        () async {
-      await repo.setVoiceAllowOnDeviceFallback(false);
-      await repo.setVoiceAllowOnDeviceFallback(true);
-      final settings = await repo.getSettings();
-      expect(settings.voiceAllowOnDeviceFallback, true);
-    });
+    test(
+      'setVoiceAllowOnDeviceFallback(true) round-trips via getSettings',
+      () async {
+        await repo.setVoiceAllowOnDeviceFallback(false);
+        await repo.setVoiceAllowOnDeviceFallback(true);
+        final settings = await repo.getSettings();
+        expect(settings.voiceAllowOnDeviceFallback, true);
+      },
+    );
 
     test('updateSettings persists voiceAllowOnDeviceFallback', () async {
       await repo.updateSettings(

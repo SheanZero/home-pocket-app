@@ -105,14 +105,12 @@ void main() {
 
   // ── CR-02: AmountEditBottomSheet dark-mode color regression ───────────────
 
-  testWidgets('CR-02: AmountEditBottomSheet uses dark card color in dark mode',
-      (tester) async {
+  testWidgets('CR-02: AmountEditBottomSheet uses dark card color in dark mode', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       buildLocalizedDark(
-        AmountEditBottomSheet(
-          initialAmount: 1000,
-          onConfirm: (_) {},
-        ),
+        AmountEditBottomSheet(initialAmount: 1000, onConfirm: (_) {}),
       ),
     );
     await tester.pump();
@@ -127,7 +125,8 @@ void main() {
           (c.decoration! as BoxDecoration).borderRadius ==
               const BorderRadius.vertical(top: Radius.circular(20)),
       orElse: () => throw TestFailure(
-          'Could not find AmountEditBottomSheet root Container'),
+        'Could not find AmountEditBottomSheet root Container',
+      ),
     );
     final decoration = sheetContainer.decoration! as BoxDecoration;
     expect(
@@ -138,33 +137,33 @@ void main() {
     );
   });
 
-  testWidgets('CR-02: AmountEditBottomSheet uses light card color in light mode',
-      (tester) async {
-    await tester.pumpWidget(
-      buildLocalizedLight(
-        AmountEditBottomSheet(
-          initialAmount: 1000,
-          onConfirm: (_) {},
+  testWidgets(
+    'CR-02: AmountEditBottomSheet uses light card color in light mode',
+    (tester) async {
+      await tester.pumpWidget(
+        buildLocalizedLight(
+          AmountEditBottomSheet(initialAmount: 1000, onConfirm: (_) {}),
         ),
-      ),
-    );
-    await tester.pump();
+      );
+      await tester.pump();
 
-    final containers = tester.widgetList<Container>(find.byType(Container));
-    final sheetContainer = containers.firstWhere(
-      (c) =>
-          c.decoration is BoxDecoration &&
-          (c.decoration! as BoxDecoration).borderRadius ==
-              const BorderRadius.vertical(top: Radius.circular(20)),
-      orElse: () => throw TestFailure(
-          'Could not find AmountEditBottomSheet root Container'),
-    );
-    final decoration = sheetContainer.decoration! as BoxDecoration;
-    expect(
-      decoration.color,
-      AppPalette.light.card,
-      reason:
-          'AmountEditBottomSheet background must use AppPalette.light.card in light mode (CR-02)',
-    );
-  });
+      final containers = tester.widgetList<Container>(find.byType(Container));
+      final sheetContainer = containers.firstWhere(
+        (c) =>
+            c.decoration is BoxDecoration &&
+            (c.decoration! as BoxDecoration).borderRadius ==
+                const BorderRadius.vertical(top: Radius.circular(20)),
+        orElse: () => throw TestFailure(
+          'Could not find AmountEditBottomSheet root Container',
+        ),
+      );
+      final decoration = sheetContainer.decoration! as BoxDecoration;
+      expect(
+        decoration.color,
+        AppPalette.light.card,
+        reason:
+            'AmountEditBottomSheet background must use AppPalette.light.card in light mode (CR-02)',
+      );
+    },
+  );
 }

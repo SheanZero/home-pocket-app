@@ -206,10 +206,7 @@ void main() {
 
   Future<void> tapDigit(WidgetTester tester, String d) async {
     await tester.tap(
-      find.descendant(
-        of: find.byType(SmartKeyboard),
-        matching: find.text(d),
-      ),
+      find.descendant(of: find.byType(SmartKeyboard), matching: find.text(d)),
     );
     await tester.pump();
   }

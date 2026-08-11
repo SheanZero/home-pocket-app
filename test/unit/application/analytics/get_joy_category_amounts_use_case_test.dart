@@ -67,11 +67,7 @@ class _FakeCategoryRepository implements CategoryRepository {
       throw UnimplementedError('${invocation.memberName} not stubbed');
 }
 
-Category _cat({
-  required String id,
-  required int level,
-  String? parentId,
-}) {
+Category _cat({required String id, required int level, String? parentId}) {
   return Category(
     id: id,
     name: id,
@@ -165,78 +161,84 @@ void main() {
       },
     );
 
-    test('joy-ledger ONLY — daily-ledger rows in the window are excluded', () async {
-      final repo = _RecordingTransactionRepository([
-        _tx(
-          id: 'joy1',
-          amount: 40000,
-          categoryId: 'l1_hobby',
-          timestamp: DateTime(2026, 5, 10),
-          ledgerType: LedgerType.joy,
-        ),
-        _tx(
-          id: 'daily1',
-          amount: 99999,
-          categoryId: 'l1_hobby',
-          timestamp: DateTime(2026, 5, 11),
-          ledgerType: LedgerType.daily,
-        ),
-      ]);
-      final useCase = GetJoyCategoryAmountsUseCase(
-        transactionRepository: repo,
-        categoryRepository: _FakeCategoryRepository(categories),
-      );
+    test(
+      'joy-ledger ONLY — daily-ledger rows in the window are excluded',
+      () async {
+        final repo = _RecordingTransactionRepository([
+          _tx(
+            id: 'joy1',
+            amount: 40000,
+            categoryId: 'l1_hobby',
+            timestamp: DateTime(2026, 5, 10),
+            ledgerType: LedgerType.joy,
+          ),
+          _tx(
+            id: 'daily1',
+            amount: 99999,
+            categoryId: 'l1_hobby',
+            timestamp: DateTime(2026, 5, 11),
+            ledgerType: LedgerType.daily,
+          ),
+        ]);
+        final useCase = GetJoyCategoryAmountsUseCase(
+          transactionRepository: repo,
+          categoryRepository: _FakeCategoryRepository(categories),
+        );
 
-      final result = await useCase.execute(
-        bookIds: ['book1'],
-        startDate: windowStart,
-        endDate: windowEnd,
-      );
+        final result = await useCase.execute(
+          bookIds: ['book1'],
+          startDate: windowStart,
+          endDate: windowEnd,
+        );
 
-      // Fetch must request the joy ledger.
-      expect(repo.lastLedgerType, LedgerType.joy);
-      expect(result.length, 1);
-      expect(result.single.categoryId, 'l1_hobby');
-      expect(result.single.amount, 40000); // daily 99999 excluded
-    });
+        // Fetch must request the joy ledger.
+        expect(repo.lastLedgerType, LedgerType.joy);
+        expect(result.length, 1);
+        expect(result.single.categoryId, 'l1_hobby');
+        expect(result.single.amount, 40000); // daily 99999 excluded
+      },
+    );
 
-    test('expense-only — non-expense joy rows excluded (mirror drill CR-01)', () async {
-      final repo = _RecordingTransactionRepository([
-        _tx(
-          id: 'exp',
-          amount: 50000,
-          categoryId: 'l1_hobby',
-          timestamp: DateTime(2026, 5, 10),
-        ),
-        _tx(
-          id: 'inc',
-          amount: 20000,
-          categoryId: 'l1_hobby',
-          timestamp: DateTime(2026, 5, 11),
-          type: TransactionType.income,
-        ),
-        _tx(
-          id: 'xfer',
-          amount: 13000,
-          categoryId: 'l2_books',
-          timestamp: DateTime(2026, 5, 12),
-          type: TransactionType.transfer,
-        ),
-      ]);
-      final useCase = GetJoyCategoryAmountsUseCase(
-        transactionRepository: repo,
-        categoryRepository: _FakeCategoryRepository(categories),
-      );
+    test(
+      'expense-only — non-expense joy rows excluded (mirror drill CR-01)',
+      () async {
+        final repo = _RecordingTransactionRepository([
+          _tx(
+            id: 'exp',
+            amount: 50000,
+            categoryId: 'l1_hobby',
+            timestamp: DateTime(2026, 5, 10),
+          ),
+          _tx(
+            id: 'inc',
+            amount: 20000,
+            categoryId: 'l1_hobby',
+            timestamp: DateTime(2026, 5, 11),
+            type: TransactionType.income,
+          ),
+          _tx(
+            id: 'xfer',
+            amount: 13000,
+            categoryId: 'l2_books',
+            timestamp: DateTime(2026, 5, 12),
+            type: TransactionType.transfer,
+          ),
+        ]);
+        final useCase = GetJoyCategoryAmountsUseCase(
+          transactionRepository: repo,
+          categoryRepository: _FakeCategoryRepository(categories),
+        );
 
-      final result = await useCase.execute(
-        bookIds: ['book1'],
-        startDate: windowStart,
-        endDate: windowEnd,
-      );
+        final result = await useCase.execute(
+          bookIds: ['book1'],
+          startDate: windowStart,
+          endDate: windowEnd,
+        );
 
-      expect(result.length, 1);
-      expect(result.single.amount, 50000); // income + transfer excluded
-    });
+        expect(result.length, 1);
+        expect(result.single.amount, 50000); // income + transfer excluded
+      },
+    );
 
     test(
       'subset invariant — joy L1 amount <= that L1 total over the same window '
@@ -349,25 +351,22 @@ void main() {
       },
     );
 
-    test(
-      'security: findByBookIds called with exactly the caller bookIds '
-      '(T-46-02-01 / T-44-03-03)',
-      () async {
-        final repo = _RecordingTransactionRepository(const []);
-        final useCase = GetJoyCategoryAmountsUseCase(
-          transactionRepository: repo,
-          categoryRepository: _FakeCategoryRepository(categories),
-        );
+    test('security: findByBookIds called with exactly the caller bookIds '
+        '(T-46-02-01 / T-44-03-03)', () async {
+      final repo = _RecordingTransactionRepository(const []);
+      final useCase = GetJoyCategoryAmountsUseCase(
+        transactionRepository: repo,
+        categoryRepository: _FakeCategoryRepository(categories),
+      );
 
-        await useCase.execute(
-          bookIds: ['book1', 'book2'],
-          startDate: windowStart,
-          endDate: windowEnd,
-        );
+      await useCase.execute(
+        bookIds: ['book1', 'book2'],
+        startDate: windowStart,
+        endDate: windowEnd,
+      );
 
-        expect(repo.lastBookIds, ['book1', 'book2']);
-        expect(repo.findByBookIdsCallCount, 1); // exactly one fetch
-      },
-    );
+      expect(repo.lastBookIds, ['book1', 'book2']);
+      expect(repo.findByBookIdsCallCount, 1); // exactly one fetch
+    });
   });
 }

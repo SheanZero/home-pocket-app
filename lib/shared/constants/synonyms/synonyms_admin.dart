@@ -30,43 +30,70 @@ final List<CategoryKeywordPreference> _taxAndInsurance = [
   seed('ねんきん', 'cat_tax_pension'), // ja — pension (hiragana reading; 年金 is Han)
   seed('医保', 'cat_tax_health_insurance'), // zh — health insurance (national)
   seed('健康保险费', 'cat_tax_health_insurance'), // zh — health insurance premium
-  seed('けんこうほけん', 'cat_tax_health_insurance'), // ja — health insurance (hiragana)
+  seed(
+    'けんこうほけん',
+    'cat_tax_health_insurance',
+  ), // ja — health insurance (hiragana)
   seed('故乡税', 'cat_tax_furusato'), // zh — hometown tax (furusato)
   seed('家乡税', 'cat_tax_furusato'), // zh — furusato nozei
   seed('ふるさと納税', 'cat_tax_furusato'), // ja — furusato nozei (hiragana ふるさと)
   seed('消费税', 'cat_tax_consumption'), // zh — consumption tax
   seed('消費税', 'cat_tax_consumption'), // ja — consumption tax (Han)
-  seed('しょうひぜい', 'cat_tax_consumption'), // ja — consumption tax (hiragana reading)
+  seed(
+    'しょうひぜい',
+    'cat_tax_consumption',
+  ), // ja — consumption tax (hiragana reading)
   seed('护理保险费', 'cat_tax_nursing_insurance'), // zh — nursing-care insurance
   seed('介护保险', 'cat_tax_nursing_insurance'), // zh — long-term care insurance
-  seed('かいごほけん', 'cat_tax_nursing_insurance'), // ja — care insurance (hiragana reading)
+  seed(
+    'かいごほけん',
+    'cat_tax_nursing_insurance',
+  ), // ja — care insurance (hiragana reading)
   seed('其他税费', 'cat_tax_other'), // zh — other taxes
   seed('その他税金', 'cat_tax_other'), // ja — other taxes (kana その他)
   // ===== Insurance L1 family =====
   seed('寿险', 'cat_insurance_life'), // zh — life insurance
   seed('人寿保险', 'cat_insurance_life'), // zh — life insurance
-  seed('せいめいほけん', 'cat_insurance_life'), // ja — life insurance (hiragana reading; 生命保険 is Han)
+  seed(
+    'せいめいほけん',
+    'cat_insurance_life',
+  ), // ja — life insurance (hiragana reading; 生命保険 is Han)
   seed('医疗保险', 'cat_insurance_medical'), // zh — medical insurance
-  seed('いりょうほけん', 'cat_insurance_medical'), // ja — medical insurance (hiragana reading)
+  seed(
+    'いりょうほけん',
+    'cat_insurance_medical',
+  ), // ja — medical insurance (hiragana reading)
   seed('癌症保险', 'cat_insurance_cancer'), // zh — cancer insurance
   seed('防癌险', 'cat_insurance_cancer'), // zh — cancer cover
   seed('がん保険', 'cat_insurance_cancer'), // ja — cancer insurance (hiragana がん)
   seed('收入保障保险', 'cat_insurance_income'), // zh — income-protection insurance
-  seed('しょとくほしょうほけん', 'cat_insurance_income'), // ja — income-protection insurance (hiragana reading)
+  seed(
+    'しょとくほしょうほけん',
+    'cat_insurance_income',
+  ), // ja — income-protection insurance (hiragana reading)
   seed('其他保险', 'cat_insurance_other'), // zh — other insurance
   seed('その他保険', 'cat_insurance_other'), // ja — other insurance (kana その他)
   // ===== Tax & social security / Insurance (en) — VEN-01 / D-12 seeds =====
   seed('income tax', 'cat_tax_income'), // en — income tax
   seed('pension', 'cat_tax_pension'), // en — pension contribution
-  seed('national health insurance', 'cat_tax_health_insurance'), // en — health insurance (national)
+  seed(
+    'national health insurance',
+    'cat_tax_health_insurance',
+  ), // en — health insurance (national)
   seed('hometown tax', 'cat_tax_furusato'), // en — furusato nozei
   seed('consumption tax', 'cat_tax_consumption'), // en — consumption tax
-  seed('nursing insurance', 'cat_tax_nursing_insurance'), // en — long-term care insurance
+  seed(
+    'nursing insurance',
+    'cat_tax_nursing_insurance',
+  ), // en — long-term care insurance
   seed('other taxes', 'cat_tax_other'), // en — other taxes
   seed('life insurance', 'cat_insurance_life'), // en — life insurance
   seed('medical insurance', 'cat_insurance_medical'), // en — medical insurance
   seed('cancer insurance', 'cat_insurance_cancer'), // en — cancer insurance
-  seed('income protection', 'cat_insurance_income'), // en — income-protection insurance
+  seed(
+    'income protection',
+    'cat_insurance_income',
+  ), // en — income-protection insurance
   seed('other insurance', 'cat_insurance_other'), // en — other insurance
 ];
 
@@ -77,13 +104,22 @@ final List<CategoryKeywordPreference> _specialAndAsset = [
   seed('ウェディング', 'cat_special_wedding'), // ja — wedding (katakana)
   seed('不孕治疗', 'cat_special_fertility'), // zh — fertility treatment
   seed('试管婴儿', 'cat_special_fertility'), // zh — IVF
-  seed('ふにんちりょう', 'cat_special_fertility'), // ja — fertility treatment (hiragana reading)
+  seed(
+    'ふにんちりょう',
+    'cat_special_fertility',
+  ), // ja — fertility treatment (hiragana reading)
   seed('看护', 'cat_special_nursing'), // zh — nursing care
   seed('护理', 'cat_special_nursing'), // zh — care
-  seed('かいご', 'cat_special_nursing'), // ja — nursing care (hiragana reading; 介護 is Han)
+  seed(
+    'かいご',
+    'cat_special_nursing',
+  ), // ja — nursing care (hiragana reading; 介護 is Han)
   seed('葬礼', 'cat_special_funeral'), // zh — funeral
   seed('丧事', 'cat_special_funeral'), // zh — funeral affairs
-  seed('そうしき', 'cat_special_funeral'), // ja — funeral (hiragana reading; 葬式 is Han)
+  seed(
+    'そうしき',
+    'cat_special_funeral',
+  ), // ja — funeral (hiragana reading; 葬式 is Han)
   seed('人生大事', 'cat_special_life_event'), // zh — major life event
   seed('纪念日', 'cat_special_life_event'), // zh — anniversary / milestone
   seed('ライフイベント', 'cat_special_life_event'), // ja — life event (katakana)
@@ -107,7 +143,10 @@ final List<CategoryKeywordPreference> _specialAndAsset = [
   seed('つみたて', 'cat_asset_tsumitate'), // ja — accumulation (hiragana)
   seed('存款', 'cat_asset_savings'), // zh — deposit / savings
   seed('储蓄', 'cat_asset_savings'), // zh — savings
-  seed('ちょきん', 'cat_asset_savings'), // ja — savings (hiragana reading; 貯金 is Han)
+  seed(
+    'ちょきん',
+    'cat_asset_savings',
+  ), // ja — savings (hiragana reading; 貯金 is Han)
   seed('股票', 'cat_asset_stock'), // zh — stocks
   seed('炒股', 'cat_asset_stock'), // zh — stock trading
   seed('かぶ', 'cat_asset_stock'), // ja — stock (hiragana reading; 株 is Han)
@@ -116,12 +155,18 @@ final List<CategoryKeywordPreference> _specialAndAsset = [
   seed('エフエックス', 'cat_asset_fx'), // ja — FX (katakana)
   seed('房产投资', 'cat_asset_realestate'), // zh — real-estate investment
   seed('不动产', 'cat_asset_realestate'), // zh — real estate
-  seed('ふどうさん', 'cat_asset_realestate'), // ja — real estate (hiragana reading; 不動産 is Han)
+  seed(
+    'ふどうさん',
+    'cat_asset_realestate',
+  ), // ja — real estate (hiragana reading; 不動産 is Han)
   seed('其他资产', 'cat_asset_other'), // zh — other asset
   seed('その他資産', 'cat_asset_other'), // ja — other asset (kana その他)
   // ===== Special life-events / Asset (en) — VEN-01 / D-12 seeds =====
   seed('wedding', 'cat_special_wedding'), // en — wedding
-  seed('fertility treatment', 'cat_special_fertility'), // en — fertility treatment
+  seed(
+    'fertility treatment',
+    'cat_special_fertility',
+  ), // en — fertility treatment
   seed('nursing care', 'cat_special_nursing'), // en — nursing care
   seed('funeral', 'cat_special_funeral'), // en — funeral
   seed('life event', 'cat_special_life_event'), // en — major life event
@@ -145,7 +190,10 @@ final List<CategoryKeywordPreference> _allowanceAndOther = [
   seed('お小遣い', 'cat_allowance_self'), // ja — pocket money (mixed)
   seed('こづかい', 'cat_allowance_self'), // ja — allowance (hiragana)
   seed('配偶零花钱', 'cat_allowance_spouse'), // zh — spouse allowance (neutral)
-  seed('伴侣零花钱', 'cat_allowance_spouse'), // zh — partner allowance (neutral, D2 refinement)
+  seed(
+    '伴侣零花钱',
+    'cat_allowance_spouse',
+  ), // zh — partner allowance (neutral, D2 refinement)
   seed('配偶のお小遣い', 'cat_allowance_spouse'), // ja — spouse allowance (mixed)
   seed('つまのこづかい', 'cat_allowance_spouse'), // ja — spouse's allowance (hiragana)
   seed('孩子零花钱', 'cat_allowance_kids'), // zh — kids allowance

@@ -518,11 +518,9 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
   }) {
     final palette = context.palette;
     final reenterLoading =
-        _pendingUnableToJoinAction ==
-        _UnableToJoinActionTarget.reenterInvite;
+        _pendingUnableToJoinAction == _UnableToJoinActionTarget.reenterInvite;
     final chooseLoading =
-        _pendingUnableToJoinAction ==
-        _UnableToJoinActionTarget.chooseAnother;
+        _pendingUnableToJoinAction == _UnableToJoinActionTarget.chooseAnother;
 
     Future<void> continueWith(_UnableToJoinActionTarget target) =>
         requiresMembershipExit
@@ -612,9 +610,8 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                 color: palette.accentPrimary,
                 isLoading: reenterLoading,
                 onPressed: _pendingUnableToJoinAction == null
-                    ? () => continueWith(
-                        _UnableToJoinActionTarget.reenterInvite,
-                      )
+                    ? () =>
+                          continueWith(_UnableToJoinActionTarget.reenterInvite)
                     : null,
               ),
               const SizedBox(height: 12),
@@ -625,9 +622,8 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                 color: palette.joyText,
                 isLoading: chooseLoading,
                 onPressed: _pendingUnableToJoinAction == null
-                    ? () => continueWith(
-                        _UnableToJoinActionTarget.chooseAnother,
-                      )
+                    ? () =>
+                          continueWith(_UnableToJoinActionTarget.chooseAnother)
                     : null,
               ),
             ],
@@ -650,19 +646,11 @@ class _UnableToJoinIllustration extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Icon(
-            LucideIcons.house,
-            size: 120,
-            color: palette.textSecondary,
-          ),
+          Icon(LucideIcons.house, size: 120, color: palette.textSecondary),
           Positioned(
             right: 4,
             bottom: 12,
-            child: Icon(
-              LucideIcons.circleX,
-              size: 42,
-              color: palette.joyText,
-            ),
+            child: Icon(LucideIcons.circleX, size: 42, color: palette.joyText),
           ),
         ],
       ),

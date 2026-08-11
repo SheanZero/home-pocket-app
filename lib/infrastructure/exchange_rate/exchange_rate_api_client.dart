@@ -61,11 +61,7 @@ class ExchangeRateApiClient {
     // 2. fawazahmed0 jsDelivr.
     final jsDelivrUrl =
         '$_fawazahmedJsDelivr@$dateStr/v1/currencies/jpy.min.json';
-    final jsDelivr = await _tryFawazahmed(
-      jsDelivrUrl,
-      lower,
-      _primaryTimeout,
-    );
+    final jsDelivr = await _tryFawazahmed(jsDelivrUrl, lower, _primaryTimeout);
     if (jsDelivr != null) return jsDelivr;
 
     // 3. fawazahmed0 Cloudflare fallback.
@@ -154,8 +150,7 @@ class ExchangeRateApiClient {
   ///
   /// 7 significant figures gives enough precision for JPY conversion without
   /// float bloat (RESEARCH.md).
-  String _invert(double rawRate) =>
-      (1.0 / rawRate).toStringAsPrecision(7);
+  String _invert(double rawRate) => (1.0 / rawRate).toStringAsPrecision(7);
 
   /// Parse a bare `YYYY-MM-DD` API date string into a UTC-midnight [DateTime]
   /// of those exact Y/M/D digits.

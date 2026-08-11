@@ -68,7 +68,9 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
                   onPressed: () => setState(() => _displayYear--),
                 ),
                 Text(
-                  l10n.analyticsTimeWindowChipLabelYear(_displayYear.toString()),
+                  l10n.analyticsTimeWindowChipLabelYear(
+                    _displayYear.toString(),
+                  ),
                   style: AppTextStyles.titleMedium.copyWith(
                     color: palette.accentPrimary,
                   ),
@@ -103,8 +105,7 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
                     isSelected:
                         _displayYear == widget.selectedYear &&
                         month == widget.selectedMonth,
-                    isDisabled:
-                        _displayYear == now.year && month > now.month,
+                    isDisabled: _displayYear == now.year && month > now.month,
                     onTap: () => Navigator.of(
                       context,
                     ).pop((year: _displayYear, month: month)),

@@ -63,7 +63,8 @@ class GetMemberSpendBreakdownUseCase {
     final amountByDevice = <String, int>{};
     final countByDevice = <String, int>{};
     for (final tx in expenseTxns) {
-      amountByDevice[tx.deviceId] = (amountByDevice[tx.deviceId] ?? 0) + tx.amount;
+      amountByDevice[tx.deviceId] =
+          (amountByDevice[tx.deviceId] ?? 0) + tx.amount;
       countByDevice[tx.deviceId] = (countByDevice[tx.deviceId] ?? 0) + 1;
     }
 

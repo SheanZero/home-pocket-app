@@ -86,13 +86,25 @@ void main() {
       () async {
         final repo = _RecordingTransactionRepository([
           // dev-a: 30000 + 20000 = 50000, 2 tx.
-          _tx(id: 'a1', amount: 30000, deviceId: 'dev-a',
-              timestamp: DateTime(2026, 5, 10)),
-          _tx(id: 'a2', amount: 20000, deviceId: 'dev-a',
-              timestamp: DateTime(2026, 5, 11)),
+          _tx(
+            id: 'a1',
+            amount: 30000,
+            deviceId: 'dev-a',
+            timestamp: DateTime(2026, 5, 10),
+          ),
+          _tx(
+            id: 'a2',
+            amount: 20000,
+            deviceId: 'dev-a',
+            timestamp: DateTime(2026, 5, 11),
+          ),
           // dev-b: 80000, 1 tx (largest).
-          _tx(id: 'b1', amount: 80000, deviceId: 'dev-b',
-              timestamp: DateTime(2026, 5, 12)),
+          _tx(
+            id: 'b1',
+            amount: 80000,
+            deviceId: 'dev-b',
+            timestamp: DateTime(2026, 5, 12),
+          ),
         ]);
         final useCase = GetMemberSpendBreakdownUseCase(
           transactionRepository: repo,
@@ -114,12 +126,26 @@ void main() {
 
     test('Test 2: expense-only — income/transfer rows excluded', () async {
       final repo = _RecordingTransactionRepository([
-        _tx(id: 'exp', amount: 50000, deviceId: 'dev-a',
-            timestamp: DateTime(2026, 5, 10)),
-        _tx(id: 'inc', amount: 20000, deviceId: 'dev-a',
-            timestamp: DateTime(2026, 5, 11), type: TransactionType.income),
-        _tx(id: 'xfer', amount: 13000, deviceId: 'dev-a',
-            timestamp: DateTime(2026, 5, 12), type: TransactionType.transfer),
+        _tx(
+          id: 'exp',
+          amount: 50000,
+          deviceId: 'dev-a',
+          timestamp: DateTime(2026, 5, 10),
+        ),
+        _tx(
+          id: 'inc',
+          amount: 20000,
+          deviceId: 'dev-a',
+          timestamp: DateTime(2026, 5, 11),
+          type: TransactionType.income,
+        ),
+        _tx(
+          id: 'xfer',
+          amount: 13000,
+          deviceId: 'dev-a',
+          timestamp: DateTime(2026, 5, 12),
+          type: TransactionType.transfer,
+        ),
       ]);
       final useCase = GetMemberSpendBreakdownUseCase(
         transactionRepository: repo,
@@ -136,60 +162,70 @@ void main() {
       expect(result.single.transactionCount, 1);
     });
 
-    test(
-      'Test 3: entrySourceFilter==manual counts only manual rows',
-      () async {
-        final repo = _RecordingTransactionRepository([
-          _tx(id: 'm1', amount: 40000, deviceId: 'dev-a',
-              timestamp: DateTime(2026, 5, 10),
-              entrySource: EntrySource.manual),
-          _tx(id: 'v1', amount: 99999, deviceId: 'dev-a',
-              timestamp: DateTime(2026, 5, 11),
-              entrySource: EntrySource.voice),
-        ]);
-        final useCase = GetMemberSpendBreakdownUseCase(
-          transactionRepository: repo,
-        );
+    test('Test 3: entrySourceFilter==manual counts only manual rows', () async {
+      final repo = _RecordingTransactionRepository([
+        _tx(
+          id: 'm1',
+          amount: 40000,
+          deviceId: 'dev-a',
+          timestamp: DateTime(2026, 5, 10),
+          entrySource: EntrySource.manual,
+        ),
+        _tx(
+          id: 'v1',
+          amount: 99999,
+          deviceId: 'dev-a',
+          timestamp: DateTime(2026, 5, 11),
+          entrySource: EntrySource.voice,
+        ),
+      ]);
+      final useCase = GetMemberSpendBreakdownUseCase(
+        transactionRepository: repo,
+      );
 
-        final result = await useCase.execute(
-          bookIds: ['book1'],
-          startDate: windowStart,
-          endDate: windowEnd,
-          entrySourceFilter: EntrySource.manual,
-        );
+      final result = await useCase.execute(
+        bookIds: ['book1'],
+        startDate: windowStart,
+        endDate: windowEnd,
+        entrySourceFilter: EntrySource.manual,
+      );
 
-        expect(result.length, 1);
-        expect(result.single.amount, 40000); // voice 99999 excluded
-        expect(result.single.transactionCount, 1);
-      },
-    );
+      expect(result.length, 1);
+      expect(result.single.amount, 40000); // voice 99999 excluded
+      expect(result.single.transactionCount, 1);
+    });
 
-    test(
-      'Test 4: single device → exactly 1 MemberSpendBreakdown (graceful '
-      'degradation, no throw, non-empty when there is spend)',
-      () async {
-        final repo = _RecordingTransactionRepository([
-          _tx(id: 's1', amount: 10000, deviceId: 'dev-solo',
-              timestamp: DateTime(2026, 5, 10)),
-          _tx(id: 's2', amount: 5000, deviceId: 'dev-solo',
-              timestamp: DateTime(2026, 5, 11)),
-        ]);
-        final useCase = GetMemberSpendBreakdownUseCase(
-          transactionRepository: repo,
-        );
+    test('Test 4: single device → exactly 1 MemberSpendBreakdown (graceful '
+        'degradation, no throw, non-empty when there is spend)', () async {
+      final repo = _RecordingTransactionRepository([
+        _tx(
+          id: 's1',
+          amount: 10000,
+          deviceId: 'dev-solo',
+          timestamp: DateTime(2026, 5, 10),
+        ),
+        _tx(
+          id: 's2',
+          amount: 5000,
+          deviceId: 'dev-solo',
+          timestamp: DateTime(2026, 5, 11),
+        ),
+      ]);
+      final useCase = GetMemberSpendBreakdownUseCase(
+        transactionRepository: repo,
+      );
 
-        final result = await useCase.execute(
-          bookIds: ['book1'],
-          startDate: windowStart,
-          endDate: windowEnd,
-        );
+      final result = await useCase.execute(
+        bookIds: ['book1'],
+        startDate: windowStart,
+        endDate: windowEnd,
+      );
 
-        expect(result.length, 1);
-        expect(result.single.deviceId, 'dev-solo');
-        expect(result.single.amount, 15000);
-        expect(result.single.transactionCount, 2);
-      },
-    );
+      expect(result.length, 1);
+      expect(result.single.deviceId, 'dev-solo');
+      expect(result.single.amount, 15000);
+      expect(result.single.transactionCount, 2);
+    });
 
     test('Test 5: empty window → empty list, no throw', () async {
       final repo = _RecordingTransactionRepository(const []);
@@ -206,33 +242,40 @@ void main() {
       expect(result, isEmpty);
     });
 
-    test(
-      'Test 7 (260622-d5i / D3): default ledgerType forwards null '
-      '(cross-ledger, byte-unchanged)',
-      () async {
-        final repo = _RecordingTransactionRepository([
-          _tx(id: 'd1', amount: 10000, deviceId: 'dev-a',
-              timestamp: DateTime(2026, 5, 10), ledgerType: LedgerType.daily),
-          _tx(id: 'j1', amount: 5000, deviceId: 'dev-a',
-              timestamp: DateTime(2026, 5, 11), ledgerType: LedgerType.joy),
-        ]);
-        final useCase = GetMemberSpendBreakdownUseCase(
-          transactionRepository: repo,
-        );
+    test('Test 7 (260622-d5i / D3): default ledgerType forwards null '
+        '(cross-ledger, byte-unchanged)', () async {
+      final repo = _RecordingTransactionRepository([
+        _tx(
+          id: 'd1',
+          amount: 10000,
+          deviceId: 'dev-a',
+          timestamp: DateTime(2026, 5, 10),
+          ledgerType: LedgerType.daily,
+        ),
+        _tx(
+          id: 'j1',
+          amount: 5000,
+          deviceId: 'dev-a',
+          timestamp: DateTime(2026, 5, 11),
+          ledgerType: LedgerType.joy,
+        ),
+      ]);
+      final useCase = GetMemberSpendBreakdownUseCase(
+        transactionRepository: repo,
+      );
 
-        final result = await useCase.execute(
-          bookIds: ['book1'],
-          startDate: windowStart,
-          endDate: windowEnd,
-        );
+      final result = await useCase.execute(
+        bookIds: ['book1'],
+        startDate: windowStart,
+        endDate: windowEnd,
+      );
 
-        // Cross-ledger: both daily and joy spend counted.
-        expect(repo.lastLedgerType, isNull);
-        expect(result.single.deviceId, 'dev-a');
-        expect(result.single.amount, 15000);
-        expect(result.single.transactionCount, 2);
-      },
-    );
+      // Cross-ledger: both daily and joy spend counted.
+      expect(repo.lastLedgerType, isNull);
+      expect(result.single.deviceId, 'dev-a');
+      expect(result.single.amount, 15000);
+      expect(result.single.transactionCount, 2);
+    });
 
     test(
       'Test 8 (260622-d5i / D3): ledgerType: joy forwarded to findByBookIds; '
@@ -240,10 +283,20 @@ void main() {
       () async {
         final repo = _RecordingTransactionRepository([
           // dev-joy has joy spend; dev-daily has only daily spend.
-          _tx(id: 'j1', amount: 8000, deviceId: 'dev-joy',
-              timestamp: DateTime(2026, 5, 10), ledgerType: LedgerType.joy),
-          _tx(id: 'd1', amount: 99999, deviceId: 'dev-daily',
-              timestamp: DateTime(2026, 5, 11), ledgerType: LedgerType.daily),
+          _tx(
+            id: 'j1',
+            amount: 8000,
+            deviceId: 'dev-joy',
+            timestamp: DateTime(2026, 5, 10),
+            ledgerType: LedgerType.joy,
+          ),
+          _tx(
+            id: 'd1',
+            amount: 99999,
+            deviceId: 'dev-daily',
+            timestamp: DateTime(2026, 5, 11),
+            ledgerType: LedgerType.daily,
+          ),
         ]);
         final useCase = GetMemberSpendBreakdownUseCase(
           transactionRepository: repo,
@@ -268,10 +321,18 @@ void main() {
       'Test 6: amount==0 groups not produced; bookIds NOT widened',
       () async {
         final repo = _RecordingTransactionRepository([
-          _tx(id: 'z', amount: 0, deviceId: 'dev-zero',
-              timestamp: DateTime(2026, 5, 10)),
-          _tx(id: 'p', amount: 7000, deviceId: 'dev-pos',
-              timestamp: DateTime(2026, 5, 11)),
+          _tx(
+            id: 'z',
+            amount: 0,
+            deviceId: 'dev-zero',
+            timestamp: DateTime(2026, 5, 10),
+          ),
+          _tx(
+            id: 'p',
+            amount: 7000,
+            deviceId: 'dev-pos',
+            timestamp: DateTime(2026, 5, 11),
+          ),
         ]);
         final useCase = GetMemberSpendBreakdownUseCase(
           transactionRepository: repo,

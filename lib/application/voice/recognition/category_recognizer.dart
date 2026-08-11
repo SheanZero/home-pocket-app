@@ -122,12 +122,14 @@ class CategoryRecognizer {
       ..._seedCache!,
       ...learned,
     ];
-    final candidates = allCandidates
-        .where(
-          (s) => s.keyword.length >= 2 && extractedKeyword.contains(s.keyword),
-        )
-        .toList()
-      ..sort((a, b) => b.keyword.length.compareTo(a.keyword.length));
+    final candidates =
+        allCandidates
+            .where(
+              (s) =>
+                  s.keyword.length >= 2 && extractedKeyword.contains(s.keyword),
+            )
+            .toList()
+          ..sort((a, b) => b.keyword.length.compareTo(a.keyword.length));
     if (candidates.isNotEmpty) {
       final winner = candidates.first;
       final l2 = await _ensureL2(winner.categoryId);

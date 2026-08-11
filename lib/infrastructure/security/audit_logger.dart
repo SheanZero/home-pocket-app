@@ -14,10 +14,7 @@ import 'secure_storage_service.dart';
 /// - ALLOWED: algorithm names, transaction IDs, counts, error types
 /// - FORBIDDEN: encryption keys, plaintext amounts, PINs, mnemonics
 class AuditLogger {
-  AuditLogger({
-    required this._database,
-    required this._storageService,
-  });
+  AuditLogger({required this._database, required this._storageService});
 
   final AppDatabase _database;
   final SecureStorageService _storageService;

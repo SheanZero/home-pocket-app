@@ -13,8 +13,9 @@ void main() {
 
   // ─── Anchor cases — strict, individual test() blocks ───
   group('ja anchor cases (VOICE-01 / VOICE-02 / VOICE-03)', () {
-    final anchors =
-        voiceCorpusJa.where((c) => c.note?.startsWith('anchor:') ?? false).toList();
+    final anchors = voiceCorpusJa
+        .where((c) => c.note?.startsWith('anchor:') ?? false)
+        .toList();
 
     // Sanity: ensure all 5 expected anchors are present in the fixture.
     setUpAll(() {
@@ -47,10 +48,9 @@ void main() {
 
   // ─── Statistical bucket — non-anchor cases ───
   group('ja statistical corpus (≥95% accuracy gate)', () {
-    final nonAnchors =
-        voiceCorpusJa
-            .where((c) => !(c.note?.startsWith('anchor:') ?? false))
-            .toList();
+    final nonAnchors = voiceCorpusJa
+        .where((c) => !(c.note?.startsWith('anchor:') ?? false))
+        .toList();
 
     for (final c in nonAnchors) {
       test(c.input, () {
@@ -82,8 +82,7 @@ void main() {
     expect(
       totalCount == 0 ? 0.0 : passCount / totalCount,
       greaterThanOrEqualTo(0.95),
-      reason:
-          'VOICE-03: ja corpus accuracy ${pct.toStringAsFixed(1)}% < 95%',
+      reason: 'VOICE-03: ja corpus accuracy ${pct.toStringAsFixed(1)}% < 95%',
     );
   });
 }

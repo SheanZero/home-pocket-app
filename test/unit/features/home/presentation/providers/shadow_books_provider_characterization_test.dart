@@ -55,7 +55,10 @@ void main() {
       test(
         'shadowBooksProvider resolves to empty list when no active group',
         () async {
-          final result = await waitForFirstValue(container, shadowBooksProvider);
+          final result = await waitForFirstValue(
+            container,
+            shadowBooksProvider,
+          );
 
           expect(
             result.requireValue,

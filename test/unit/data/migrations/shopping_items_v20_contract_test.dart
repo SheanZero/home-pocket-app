@@ -84,8 +84,14 @@ void main() {
     });
 
     test("list_type accepts 'public' and 'private'", () {
-      expect(() => _insertRow(rawDb, id: 'item_pub', listType: 'public'), returnsNormally);
-      expect(() => _insertRow(rawDb, id: 'item_prv', listType: 'private'), returnsNormally);
+      expect(
+        () => _insertRow(rawDb, id: 'item_pub', listType: 'public'),
+        returnsNormally,
+      );
+      expect(
+        () => _insertRow(rawDb, id: 'item_prv', listType: 'private'),
+        returnsNormally,
+      );
     });
 
     test('completed_at column accepts NULL', () {

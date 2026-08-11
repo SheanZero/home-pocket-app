@@ -39,8 +39,7 @@ class PinDots extends StatefulWidget {
   State<PinDots> createState() => _PinDotsState();
 }
 
-class _PinDotsState extends State<PinDots>
-    with SingleTickerProviderStateMixin {
+class _PinDotsState extends State<PinDots> with SingleTickerProviderStateMixin {
   late final AnimationController _shake = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 450),
@@ -92,9 +91,7 @@ class _PinDotsState extends State<PinDots>
 
   Widget _dot(AppPalette palette, {required bool filled, required int index}) {
     return Container(
-      key: ValueKey(
-        filled ? 'pin-dot-filled-$index' : 'pin-dot-empty-$index',
-      ),
+      key: ValueKey(filled ? 'pin-dot-filled-$index' : 'pin-dot-empty-$index'),
       width: 14,
       height: 14,
       decoration: BoxDecoration(

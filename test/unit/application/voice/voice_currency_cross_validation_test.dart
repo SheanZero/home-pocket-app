@@ -69,7 +69,8 @@ void main() {
       expect(
         result.data!.detectedCurrency,
         isNull,
-        reason: 'primary 美元→USD contradicted by alternate 人民币→CNY '
+        reason:
+            'primary 美元→USD contradicted by alternate 人民币→CNY '
             '→ conversion must be suppressed',
       );
     });
@@ -85,7 +86,8 @@ void main() {
       expect(
         result.data!.detectedCurrency,
         isNull,
-        reason: 'primary ドル→USD contradicted by alternate 人民元→CNY '
+        reason:
+            'primary ドル→USD contradicted by alternate 人民元→CNY '
             '→ conversion must be suppressed',
       );
     });
@@ -156,7 +158,8 @@ void main() {
         expect(
           result.data!.detectedCurrency,
           isNull,
-          reason: 'suppression is one-sided/conservative: alternates can '
+          reason:
+              'suppression is one-sided/conservative: alternates can '
               'only VETO a foreign detection, never introduce one',
         );
       },

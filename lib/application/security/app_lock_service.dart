@@ -20,8 +20,8 @@ class AppLockService {
     required SettingsRepository settingsRepository,
     required this._secureStorage,
     required BiometricService biometricService,
-  })  : _settings = settingsRepository,
-        _biometric = biometricService;
+  }) : _settings = settingsRepository,
+       _biometric = biometricService;
 
   final SettingsRepository _settings;
   final SecureStorageService _secureStorage;

@@ -70,8 +70,11 @@ void main() {
       observer.endAuth();
       feed(AppLifecycleState.resumed);
 
-      expect(relockCount, 0,
-          reason: 'pause seen only during auth must not arm relock');
+      expect(
+        relockCount,
+        0,
+        reason: 'pause seen only during auth must not arm relock',
+      );
     });
 
     test('after endAuth a real background round-trip relocks', () {

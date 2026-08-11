@@ -13,9 +13,10 @@ void main() {
   group('ListFilter D-01 mutators — setCategories / toggleCategory', () {
     test('setCategories stores the provided Set', () {
       final container = ProviderContainer.test();
-      container
-          .read(listFilterProvider.notifier)
-          .setCategories({'cat_food', 'cat_transport'});
+      container.read(listFilterProvider.notifier).setCategories({
+        'cat_food',
+        'cat_transport',
+      });
       expect(
         container.read(listFilterProvider).categoryIds,
         equals({'cat_food', 'cat_transport'}),
@@ -36,10 +37,7 @@ void main() {
       container.read(listFilterProvider.notifier)
         ..setCategories({'cat_food'})
         ..toggleCategory('cat_food');
-      expect(
-        container.read(listFilterProvider).categoryIds,
-        isEmpty,
-      );
+      expect(container.read(listFilterProvider).categoryIds, isEmpty);
     });
 
     test('clearAll resets categoryIds to empty Set', () {
@@ -47,18 +45,13 @@ void main() {
       container.read(listFilterProvider.notifier)
         ..setCategories({'cat_food'})
         ..clearAll();
-      expect(
-        container.read(listFilterProvider).categoryIds,
-        isEmpty,
-      );
+      expect(container.read(listFilterProvider).categoryIds, isEmpty);
     });
 
     test('setCategories produces new state via copyWith (immutability)', () {
       final container = ProviderContainer.test();
       final before = container.read(listFilterProvider);
-      container
-          .read(listFilterProvider.notifier)
-          .setCategories({'cat_food'});
+      container.read(listFilterProvider.notifier).setCategories({'cat_food'});
       final after = container.read(listFilterProvider);
       expect(identical(before, after), isFalse);
       expect(before.categoryIds, isEmpty);

@@ -238,54 +238,60 @@ void main() {
       },
     );
 
-    test('empty window returns empty transactions, zero subtotal/count', () async {
-      // Seed a Food txn OUTSIDE the queried window only.
-      await seedTx(
-        id: 'tx_out_of_window',
-        amount: 12345,
-        categoryId: 'l1_food',
-        timestamp: outOfWindow,
-      );
+    test(
+      'empty window returns empty transactions, zero subtotal/count',
+      () async {
+        // Seed a Food txn OUTSIDE the queried window only.
+        await seedTx(
+          id: 'tx_out_of_window',
+          amount: 12345,
+          categoryId: 'l1_food',
+          timestamp: outOfWindow,
+        );
 
-      final result = await useCase.execute(
-        bookIds: ['book1'],
-        startDate: windowStart,
-        endDate: windowEnd,
-        l1CategoryId: 'l1_food',
-      );
+        final result = await useCase.execute(
+          bookIds: ['book1'],
+          startDate: windowStart,
+          endDate: windowEnd,
+          l1CategoryId: 'l1_food',
+        );
 
-      expect(result.transactions, isEmpty);
-      expect(result.subtotal, 0);
-      expect(result.count, 0);
-    });
+        expect(result.transactions, isEmpty);
+        expect(result.subtotal, 0);
+        expect(result.count, 0);
+      },
+    );
 
-    test('avgPerDay is a plain descriptive average over the window days', () async {
-      // 90000 over the 31 days of May => floor(90000 / 31) == 2903.
-      await seedTx(
-        id: 'tx_a',
-        amount: 60000,
-        categoryId: 'l1_food',
-        timestamp: DateTime(2026, 5, 5),
-      );
-      await seedTx(
-        id: 'tx_b',
-        amount: 30000,
-        categoryId: 'l2_dining',
-        timestamp: DateTime(2026, 5, 25),
-        prevHash: 'hash_tx_a',
-      );
+    test(
+      'avgPerDay is a plain descriptive average over the window days',
+      () async {
+        // 90000 over the 31 days of May => floor(90000 / 31) == 2903.
+        await seedTx(
+          id: 'tx_a',
+          amount: 60000,
+          categoryId: 'l1_food',
+          timestamp: DateTime(2026, 5, 5),
+        );
+        await seedTx(
+          id: 'tx_b',
+          amount: 30000,
+          categoryId: 'l2_dining',
+          timestamp: DateTime(2026, 5, 25),
+          prevHash: 'hash_tx_a',
+        );
 
-      final result = await useCase.execute(
-        bookIds: ['book1'],
-        startDate: windowStart,
-        endDate: windowEnd,
-        l1CategoryId: 'l1_food',
-      );
+        final result = await useCase.execute(
+          bookIds: ['book1'],
+          startDate: windowStart,
+          endDate: windowEnd,
+          l1CategoryId: 'l1_food',
+        );
 
-      expect(result.subtotal, 90000);
-      // Descriptive average only — never a target/goal.
-      expect(result.avgPerDay, 90000 ~/ 31);
-    });
+        expect(result.subtotal, 90000);
+        // Descriptive average only — never a target/goal.
+        expect(result.avgPerDay, 90000 ~/ 31);
+      },
+    );
 
     test(
       'excludes non-expense (income/transfer) txns filed under the L1 so the '

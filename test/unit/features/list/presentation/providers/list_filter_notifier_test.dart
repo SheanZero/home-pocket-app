@@ -210,16 +210,18 @@ void main() {
         expect(state, equals(ListFilterState.initial()));
       });
 
-      test('clearAll resets searchQuery to empty string (FILTER-04 explicit)',
-          () {
-        final container = ProviderContainer.test();
-        final notifier = container.read(listFilterProvider.notifier);
+      test(
+        'clearAll resets searchQuery to empty string (FILTER-04 explicit)',
+        () {
+          final container = ProviderContainer.test();
+          final notifier = container.read(listFilterProvider.notifier);
 
-        notifier.setSearch('食費');
-        notifier.clearAll();
+          notifier.setSearch('食費');
+          notifier.clearAll();
 
-        expect(container.read(listFilterProvider).searchQuery, equals(''));
-      });
+          expect(container.read(listFilterProvider).searchQuery, equals(''));
+        },
+      );
 
       test('clearAll resets ledgerType to null (FILTER-04 explicit)', () {
         final container = ProviderContainer.test();

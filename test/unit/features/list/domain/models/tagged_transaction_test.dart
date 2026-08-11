@@ -4,17 +4,17 @@ import 'package:home_pocket/features/list/domain/models/tagged_transaction.dart'
 
 // Helper: a minimal Transaction with all required fields.
 Transaction _makeTransaction({String id = 'tx-1'}) => Transaction(
-      id: id,
-      bookId: 'book-1',
-      deviceId: 'device-1',
-      amount: 1000,
-      type: TransactionType.expense,
-      categoryId: 'food',
-      ledgerType: LedgerType.daily,
-      timestamp: DateTime(2026, 5, 1),
-      currentHash: 'hash-abc',
-      createdAt: DateTime(2026, 5, 1),
-    );
+  id: id,
+  bookId: 'book-1',
+  deviceId: 'device-1',
+  amount: 1000,
+  type: TransactionType.expense,
+  categoryId: 'food',
+  ledgerType: LedgerType.daily,
+  timestamp: DateTime(2026, 5, 1),
+  currentHash: 'hash-abc',
+  createdAt: DateTime(2026, 5, 1),
+);
 
 void main() {
   group('MemberTag (Freezed value semantics)', () {
@@ -57,17 +57,23 @@ void main() {
       // Original is unchanged
       expect(original.memberTag, isNull);
       // Copied has the new memberTag
-      expect(tagged.memberTag, equals(const MemberTag(emoji: '🐱', name: 'Alice')));
+      expect(
+        tagged.memberTag,
+        equals(const MemberTag(emoji: '🐱', name: 'Alice')),
+      );
     });
 
-    test('two TaggedTransactions with same transaction and null memberTag are equal', () {
-      final tx = _makeTransaction();
-      final a = TaggedTransaction(transaction: tx);
-      final b = TaggedTransaction(transaction: tx);
+    test(
+      'two TaggedTransactions with same transaction and null memberTag are equal',
+      () {
+        final tx = _makeTransaction();
+        final a = TaggedTransaction(transaction: tx);
+        final b = TaggedTransaction(transaction: tx);
 
-      expect(a, equals(b));
-      expect(a.hashCode, equals(b.hashCode));
-    });
+        expect(a, equals(b));
+        expect(a.hashCode, equals(b.hashCode));
+      },
+    );
 
     test('two TaggedTransactions with different memberTags are not equal', () {
       final tx = _makeTransaction();
@@ -91,13 +97,16 @@ void main() {
       expect(tagged.transaction.id, equals('tx-1'));
     });
 
-    test('TaggedTransactions wrapping different Transaction instances are not equal', () {
-      final tx1 = _makeTransaction(id: 'tx-1');
-      final tx2 = _makeTransaction(id: 'tx-2');
-      final a = TaggedTransaction(transaction: tx1);
-      final b = TaggedTransaction(transaction: tx2);
+    test(
+      'TaggedTransactions wrapping different Transaction instances are not equal',
+      () {
+        final tx1 = _makeTransaction(id: 'tx-1');
+        final tx2 = _makeTransaction(id: 'tx-2');
+        final a = TaggedTransaction(transaction: tx1);
+        final b = TaggedTransaction(transaction: tx2);
 
-      expect(a, isNot(equals(b)));
-    });
+        expect(a, isNot(equals(b)));
+      },
+    );
   });
 }

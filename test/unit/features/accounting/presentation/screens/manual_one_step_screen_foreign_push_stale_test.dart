@@ -56,19 +56,23 @@ void main() {
     );
   });
 
-  test('WR-01: stale when DATE changed mid-fetch (the regressed dimension)', () {
-    expect(
-      foreignPushIsStale(
-        capturedCurrency: 'USD',
-        currentCurrency: 'USD',
-        capturedMinorUnits: 5000,
-        currentMinorUnits: 5000,
-        capturedDate: d1,
-        currentDate: d2,
-      ),
-      isTrue,
-      reason: 'an OLD-date rate must never be pushed against a NEW-date '
-          'timestamp (ADR-021 — triple excluded from hash chain)',
-    );
-  });
+  test(
+    'WR-01: stale when DATE changed mid-fetch (the regressed dimension)',
+    () {
+      expect(
+        foreignPushIsStale(
+          capturedCurrency: 'USD',
+          currentCurrency: 'USD',
+          capturedMinorUnits: 5000,
+          currentMinorUnits: 5000,
+          capturedDate: d1,
+          currentDate: d2,
+        ),
+        isTrue,
+        reason:
+            'an OLD-date rate must never be pushed against a NEW-date '
+            'timestamp (ADR-021 — triple excluded from hash chain)',
+      );
+    },
+  );
 }

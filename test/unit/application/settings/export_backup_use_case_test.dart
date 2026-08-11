@@ -6,17 +6,22 @@ import 'package:home_pocket/application/settings/export_backup_use_case.dart';
 import 'package:home_pocket/infrastructure/crypto/services/backup_crypto_service.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
+import 'package:home_pocket/features/accounting/domain/models/category_ledger_config.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
 import 'package:home_pocket/features/settings/domain/models/app_settings.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:home_pocket/features/accounting/domain/repositories/book_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/category_repository.dart';
+import 'package:home_pocket/features/accounting/domain/repositories/category_ledger_config_repository.dart';
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/currency/domain/models/exchange_rate.dart';
 import 'package:home_pocket/features/currency/domain/repositories/exchange_rate_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/settings_repository.dart';
 import 'package:home_pocket/features/settings/domain/repositories/unit_of_work.dart';
+import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
+import 'package:home_pocket/features/shopping_list/domain/models/shopping_unit.dart';
+import 'package:home_pocket/features/shopping_list/domain/repositories/shopping_item_repository.dart';
 
 class _FakeUnitOfWork implements UnitOfWork {
   @override
@@ -27,6 +32,9 @@ class MockTransactionRepository extends Mock implements TransactionRepository {}
 
 class MockCategoryRepository extends Mock implements CategoryRepository {}
 
+class MockCategoryLedgerConfigRepository extends Mock
+    implements CategoryLedgerConfigRepository {}
+
 class MockBookRepository extends Mock implements BookRepository {}
 
 class MockSettingsRepository extends Mock implements SettingsRepository {}
@@ -34,26 +42,41 @@ class MockSettingsRepository extends Mock implements SettingsRepository {}
 class MockExchangeRateRepository extends Mock
     implements ExchangeRateRepository {}
 
+class MockShoppingItemRepository extends Mock
+    implements ShoppingItemRepository {}
+
 void main() {
   final backupCrypto = BackupCryptoService();
   late ExportBackupUseCase useCase;
   late MockTransactionRepository mockTransactionRepo;
   late MockCategoryRepository mockCategoryRepo;
+  late MockCategoryLedgerConfigRepository mockCategoryLedgerConfigRepo;
   late MockBookRepository mockBookRepo;
   late MockSettingsRepository mockSettingsRepo;
   late MockExchangeRateRepository mockExchangeRateRepo;
+  late MockShoppingItemRepository mockShoppingItemRepo;
   late Directory tempDir;
 
   setUp(() async {
     mockTransactionRepo = MockTransactionRepository();
     mockCategoryRepo = MockCategoryRepository();
+    mockCategoryLedgerConfigRepo = MockCategoryLedgerConfigRepository();
     mockBookRepo = MockBookRepository();
     mockSettingsRepo = MockSettingsRepository();
     mockExchangeRateRepo = MockExchangeRateRepository();
+    mockShoppingItemRepo = MockShoppingItemRepository();
+    when(
+      () => mockCategoryLedgerConfigRepo.findAll(),
+    ).thenAnswer((_) async => []);
+    when(
+      () => mockShoppingItemRepo.findAll(includeDeleted: true),
+    ).thenAnswer((_) async => []);
     useCase = ExportBackupUseCase(
       transactionRepo: mockTransactionRepo,
       categoryRepo: mockCategoryRepo,
+      categoryLedgerConfigRepo: mockCategoryLedgerConfigRepo,
       bookRepo: mockBookRepo,
+      shoppingItemRepo: mockShoppingItemRepo,
       settingsRepo: mockSettingsRepo,
       exchangeRateRepo: mockExchangeRateRepo,
       unitOfWork: _FakeUnitOfWork(),
@@ -103,6 +126,36 @@ void main() {
           icon: 'food',
           color: '#FF0000',
           level: 1,
+          isArchived: true,
+          sortOrder: 9,
+          createdAt: now,
+        ),
+      ],
+    );
+    when(() => mockCategoryLedgerConfigRepo.findAll()).thenAnswer(
+      (_) async => [
+        CategoryLedgerConfig(
+          categoryId: 'cat-1',
+          ledgerType: LedgerType.joy,
+          updatedAt: now,
+        ),
+      ],
+    );
+    when(() => mockShoppingItemRepo.findAll(includeDeleted: true)).thenAnswer(
+      (_) async => [
+        ShoppingItem(
+          id: 'shopping-1',
+          deviceId: 'dev',
+          listType: 'private',
+          name: 'Coffee',
+          categoryId: 'cat-1',
+          tags: const ['weekly'],
+          note: 'Medium roast',
+          quantity: 2,
+          unit: ShoppingUnit.pack,
+          estimatedPrice: 1200,
+          sortOrder: 4,
+          isDeleted: true,
           createdAt: now,
         ),
       ],
@@ -159,6 +212,19 @@ void main() {
     expect((json['transactions'] as List).length, 1);
     expect((json['categories'] as List).length, 1);
     expect((json['books'] as List).length, 1);
+    final category =
+        (json['categories'] as List).single as Map<String, dynamic>;
+    expect(category['isArchived'], isTrue);
+    expect(category['sortOrder'], 9);
+    final config =
+        (json['categoryLedgerConfigs'] as List).single as Map<String, dynamic>;
+    expect(config['ledgerType'], 'joy');
+    final shoppingItem =
+        (json['shoppingItems'] as List).single as Map<String, dynamic>;
+    expect(shoppingItem['name'], 'Coffee');
+    expect(shoppingItem['note'], 'Medium roast');
+    expect(shoppingItem['sortOrder'], 4);
+    expect(shoppingItem['isDeleted'], isTrue);
 
     // Cleanup
     await file.delete();
@@ -251,7 +317,9 @@ void main() {
       useCase = ExportBackupUseCase(
         transactionRepo: mockTransactionRepo,
         categoryRepo: mockCategoryRepo,
+        categoryLedgerConfigRepo: mockCategoryLedgerConfigRepo,
         bookRepo: mockBookRepo,
+        shoppingItemRepo: mockShoppingItemRepo,
         settingsRepo: mockSettingsRepo,
         exchangeRateRepo: mockExchangeRateRepo,
         unitOfWork: _FakeUnitOfWork(),

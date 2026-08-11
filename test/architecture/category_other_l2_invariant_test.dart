@@ -58,7 +58,8 @@ void main() {
 
         final missing = <String>[];
         for (final l1Id in l1Ids) {
-          final expectedOtherId = kCategoryOtherIdOverrides[l1Id] ?? '${l1Id}_other';
+          final expectedOtherId =
+              kCategoryOtherIdOverrides[l1Id] ?? '${l1Id}_other';
           final otherL2 = l2ById[expectedOtherId];
           if (otherL2 == null) {
             missing.add(l1Id);

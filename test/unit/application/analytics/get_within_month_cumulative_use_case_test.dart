@@ -338,27 +338,24 @@ void main() {
       },
     );
 
-    test(
-      'entrySourceFilter is threaded through to support the manualOnly joy '
-      'variant (compiles + executes)',
-      () async {
-        final repo = _RecordingTransactionRepository([
-          _tx(id: 'a', amount: 1000, timestamp: DateTime(2026, 6, 2, 9)),
-        ]);
-        final useCase = GetWithinMonthCumulativeUseCase(
-          transactionRepository: repo,
-        );
+    test('entrySourceFilter is threaded through to support the manualOnly joy '
+        'variant (compiles + executes)', () async {
+      final repo = _RecordingTransactionRepository([
+        _tx(id: 'a', amount: 1000, timestamp: DateTime(2026, 6, 2, 9)),
+      ]);
+      final useCase = GetWithinMonthCumulativeUseCase(
+        transactionRepository: repo,
+      );
 
-        final result = await useCase.execute(
-          bookIds: ['book1'],
-          monthAnchor: monthAnchor,
-          now: nowLive,
-          entrySourceFilter: EntrySource.manual,
-        );
+      final result = await useCase.execute(
+        bookIds: ['book1'],
+        monthAnchor: monthAnchor,
+        now: nowLive,
+        entrySourceFilter: EntrySource.manual,
+      );
 
-        expect(result.currentMonthTotal, isNotEmpty);
-      },
-    );
+      expect(result.currentMonthTotal, isNotEmpty);
+    });
 
     // ---- Round-2 carry-forward + now-injection contract (kll) ----
 
@@ -387,31 +384,28 @@ void main() {
       },
     );
 
-    test(
-      'Test 8 (live current month): the current-month series is EXTENDED to '
-      'now.day carrying forward the running cumulative even on a no-spend now '
-      'day (D-5)',
-      () async {
-        final repo = _RecordingTransactionRepository([
-          _tx(id: 'a', amount: 8000, timestamp: DateTime(2026, 6, 5, 9)),
-          // Last spend on day 12 — well before now.day (20).
-          _tx(id: 'b', amount: 4000, timestamp: DateTime(2026, 6, 12, 9)),
-        ]);
-        final useCase = GetWithinMonthCumulativeUseCase(
-          transactionRepository: repo,
-        );
+    test('Test 8 (live current month): the current-month series is EXTENDED to '
+        'now.day carrying forward the running cumulative even on a no-spend now '
+        'day (D-5)', () async {
+      final repo = _RecordingTransactionRepository([
+        _tx(id: 'a', amount: 8000, timestamp: DateTime(2026, 6, 5, 9)),
+        // Last spend on day 12 — well before now.day (20).
+        _tx(id: 'b', amount: 4000, timestamp: DateTime(2026, 6, 12, 9)),
+      ]);
+      final useCase = GetWithinMonthCumulativeUseCase(
+        transactionRepository: repo,
+      );
 
-        final result = await useCase.execute(
-          bookIds: ['book1'],
-          monthAnchor: monthAnchor,
-          now: nowLive, // 2026-06-20
-        );
+      final result = await useCase.execute(
+        bookIds: ['book1'],
+        monthAnchor: monthAnchor,
+        now: nowLive, // 2026-06-20
+      );
 
-        // Right edge: extends to now.day (20), carrying the final running total.
-        expect(result.currentMonthTotal.last.day, 20);
-        expect(result.currentMonthTotal.last.cumulativeAmount, 12000);
-      },
-    );
+      // Right edge: extends to now.day (20), carrying the final running total.
+      expect(result.currentMonthTotal.last.day, 20);
+      expect(result.currentMonthTotal.last.cumulativeAmount, 12000);
+    });
 
     test(
       'Test 9 (past month): when now is AFTER the displayed month, the '
@@ -528,8 +522,9 @@ void main() {
         );
 
         // Exactly one day-1 point with the day-1 cumulative (3000).
-        final dayOnePoints =
-            result.currentMonthTotal.where((p) => p.day == 1).toList();
+        final dayOnePoints = result.currentMonthTotal
+            .where((p) => p.day == 1)
+            .toList();
         expect(dayOnePoints.length, 1);
         expect(dayOnePoints.first.cumulativeAmount, 3000);
       },

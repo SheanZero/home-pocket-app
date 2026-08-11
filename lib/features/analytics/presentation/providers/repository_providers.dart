@@ -198,8 +198,9 @@ GetDailyVsJoySnapshotUseCase getDailyVsJoySnapshotUseCase(Ref ref) {
 
 /// STATSUI-V2-01 / D-18, D-20: family-aggregate Daily-vs-Joy snapshot use case provider.
 @riverpod
-GetDailyVsJoySnapshotAcrossBooksUseCase
-getDailyVsJoySnapshotAcrossBooksUseCase(Ref ref) {
+GetDailyVsJoySnapshotAcrossBooksUseCase getDailyVsJoySnapshotAcrossBooksUseCase(
+  Ref ref,
+) {
   return GetDailyVsJoySnapshotAcrossBooksUseCase(
     analyticsRepository: ref.watch(analyticsRepositoryProvider),
   );

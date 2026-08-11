@@ -30,11 +30,7 @@ class PrivacyMask extends StatelessWidget {
           borderRadius: BorderRadius.circular(28),
           border: Border.all(color: palette.borderDefault),
         ),
-        child: Icon(
-          Icons.lock_rounded,
-          size: 44,
-          color: palette.accentPrimary,
-        ),
+        child: Icon(Icons.lock_rounded, size: 44, color: palette.accentPrimary),
       ),
     );
   }

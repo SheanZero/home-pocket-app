@@ -416,7 +416,7 @@ void main() {
             .whereType<File>()
             .where(
               (file) => file.readAsStringSync().contains(
-                  'package:flutter_secure_storage/flutter_secure_storage.dart',
+                'package:flutter_secure_storage/flutter_secure_storage.dart',
               ),
             )
             .map((file) => file.path)

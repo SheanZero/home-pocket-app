@@ -56,9 +56,24 @@ void main() {
 
     test('returns rows from multiple books in a single call', () async {
       final ts = DateTime(2026, 3, 1);
-      await insertTx(id: 'tx_b1', bookId: 'book_001', amount: 1000, timestamp: ts);
-      await insertTx(id: 'tx_b2', bookId: 'book_002', amount: 2000, timestamp: ts);
-      await insertTx(id: 'tx_b3', bookId: 'book_003', amount: 3000, timestamp: ts);
+      await insertTx(
+        id: 'tx_b1',
+        bookId: 'book_001',
+        amount: 1000,
+        timestamp: ts,
+      );
+      await insertTx(
+        id: 'tx_b2',
+        bookId: 'book_002',
+        amount: 2000,
+        timestamp: ts,
+      );
+      await insertTx(
+        id: 'tx_b3',
+        bookId: 'book_003',
+        amount: 3000,
+        timestamp: ts,
+      );
 
       final results = await dao.findByBookIds(
         ['book_001', 'book_002'],
@@ -73,8 +88,18 @@ void main() {
 
     test('excludes rows where is_deleted = true', () async {
       final ts = DateTime(2026, 3, 1);
-      await insertTx(id: 'tx_active', bookId: 'book_001', amount: 500, timestamp: ts);
-      await insertTx(id: 'tx_deleted', bookId: 'book_001', amount: 999, timestamp: ts);
+      await insertTx(
+        id: 'tx_active',
+        bookId: 'book_001',
+        amount: 500,
+        timestamp: ts,
+      );
+      await insertTx(
+        id: 'tx_deleted',
+        bookId: 'book_001',
+        amount: 999,
+        timestamp: ts,
+      );
       await dao.softDelete('tx_deleted');
 
       final results = await dao.findByBookIds(
@@ -146,23 +171,41 @@ void main() {
       expect(ids, isNot(contains('tx_transport')));
     });
 
-    test('sortField=amount with sortDirection=asc orders by amount ascending', () async {
-      final ts = DateTime(2026, 3, 1);
-      await insertTx(id: 'tx_medium', bookId: 'book_001', amount: 500, timestamp: ts);
-      await insertTx(id: 'tx_large', bookId: 'book_001', amount: 1000, timestamp: ts);
-      await insertTx(id: 'tx_small', bookId: 'book_001', amount: 100, timestamp: ts);
+    test(
+      'sortField=amount with sortDirection=asc orders by amount ascending',
+      () async {
+        final ts = DateTime(2026, 3, 1);
+        await insertTx(
+          id: 'tx_medium',
+          bookId: 'book_001',
+          amount: 500,
+          timestamp: ts,
+        );
+        await insertTx(
+          id: 'tx_large',
+          bookId: 'book_001',
+          amount: 1000,
+          timestamp: ts,
+        );
+        await insertTx(
+          id: 'tx_small',
+          bookId: 'book_001',
+          amount: 100,
+          timestamp: ts,
+        );
 
-      final results = await dao.findByBookIds(
-        ['book_001'],
-        startDate: start,
-        endDate: end,
-        sortField: SortField.amount,
-        sortDirection: SortDirection.asc,
-      );
+        final results = await dao.findByBookIds(
+          ['book_001'],
+          startDate: start,
+          endDate: end,
+          sortField: SortField.amount,
+          sortDirection: SortDirection.asc,
+        );
 
-      final amounts = results.map((r) => r.amount).toList();
-      expect(amounts, equals([100, 500, 1000]));
-    });
+        final amounts = results.map((r) => r.amount).toList();
+        expect(amounts, equals([100, 500, 1000]));
+      },
+    );
 
     // Note: SortField.updatedAt was removed in quick task 260531-oqn.
     // This test was verifying updatedAt sort order; updated to use timestamp sort.
@@ -170,9 +213,24 @@ void main() {
       final t1 = DateTime(2026, 1, 10);
       final t2 = DateTime(2026, 2, 10);
       final t3 = DateTime(2026, 3, 10);
-      await insertTx(id: 'tx_c', bookId: 'book_001', amount: 300, timestamp: t3);
-      await insertTx(id: 'tx_a', bookId: 'book_001', amount: 100, timestamp: t1);
-      await insertTx(id: 'tx_b', bookId: 'book_001', amount: 200, timestamp: t2);
+      await insertTx(
+        id: 'tx_c',
+        bookId: 'book_001',
+        amount: 300,
+        timestamp: t3,
+      );
+      await insertTx(
+        id: 'tx_a',
+        bookId: 'book_001',
+        amount: 100,
+        timestamp: t1,
+      );
+      await insertTx(
+        id: 'tx_b',
+        bookId: 'book_001',
+        amount: 200,
+        timestamp: t2,
+      );
 
       // With timestamp sort desc, newest timestamp comes first.
       final results = await dao.findByBookIds(
@@ -221,18 +279,26 @@ void main() {
       },
     );
 
-    test('bookIds=[] short-circuits and returns empty list immediately', () async {
-      final ts = DateTime(2026, 3, 1);
-      await insertTx(id: 'tx_any', bookId: 'book_001', amount: 100, timestamp: ts);
+    test(
+      'bookIds=[] short-circuits and returns empty list immediately',
+      () async {
+        final ts = DateTime(2026, 3, 1);
+        await insertTx(
+          id: 'tx_any',
+          bookId: 'book_001',
+          amount: 100,
+          timestamp: ts,
+        );
 
-      final results = await dao.findByBookIds(
-        [],
-        startDate: start,
-        endDate: end,
-      );
+        final results = await dao.findByBookIds(
+          [],
+          startDate: start,
+          endDate: end,
+        );
 
-      expect(results, isEmpty);
-    });
+        expect(results, isEmpty);
+      },
+    );
   });
 
   // ─── SC#2: watchByBookIds ────────────────────────────────────────────────
@@ -255,7 +321,12 @@ void main() {
 
       // Insert a transaction.
       final ts = DateTime(2026, 3, 15);
-      await insertTx(id: 'tx_w1', bookId: 'book_001', amount: 500, timestamp: ts);
+      await insertTx(
+        id: 'tx_w1',
+        bookId: 'book_001',
+        amount: 500,
+        timestamp: ts,
+      );
 
       // New subscription on same params — Drift watch will have emitted the row.
       final stream2 = dao.watchByBookIds(
@@ -268,31 +339,39 @@ void main() {
       expect(second.first.id, 'tx_w1');
     });
 
-    test('stream emits [] after soft-delete (row excluded by is_deleted filter)', () async {
-      final ts = DateTime(2026, 3, 15);
-      await insertTx(id: 'tx_w2', bookId: 'book_001', amount: 300, timestamp: ts);
+    test(
+      'stream emits [] after soft-delete (row excluded by is_deleted filter)',
+      () async {
+        final ts = DateTime(2026, 3, 15);
+        await insertTx(
+          id: 'tx_w2',
+          bookId: 'book_001',
+          amount: 300,
+          timestamp: ts,
+        );
 
-      // Should have one row initially.
-      final streamBefore = dao.watchByBookIds(
-        ['book_001'],
-        startDate: start,
-        endDate: end,
-      );
-      final before = await streamBefore.first;
-      expect(before.length, 1);
+        // Should have one row initially.
+        final streamBefore = dao.watchByBookIds(
+          ['book_001'],
+          startDate: start,
+          endDate: end,
+        );
+        final before = await streamBefore.first;
+        expect(before.length, 1);
 
-      // Soft-delete.
-      await dao.softDelete('tx_w2');
+        // Soft-delete.
+        await dao.softDelete('tx_w2');
 
-      // New subscription — row should be excluded.
-      final streamAfter = dao.watchByBookIds(
-        ['book_001'],
-        startDate: start,
-        endDate: end,
-      );
-      final after = await streamAfter.first;
-      expect(after, isEmpty);
-    });
+        // New subscription — row should be excluded.
+        final streamAfter = dao.watchByBookIds(
+          ['book_001'],
+          startDate: start,
+          endDate: end,
+        );
+        final after = await streamAfter.first;
+        expect(after, isEmpty);
+      },
+    );
 
     test('stream emits updated list after sync-applied UPDATE', () async {
       final ts = DateTime(2026, 3, 15);
@@ -401,26 +480,35 @@ void main() {
 
         // Fetch all 3 rows (including soft-deleted) for chain verification.
         // We must fetch including deleted rows, so use raw DB select.
-        final allRows = await (db.select(db.transactions)
-              ..where((t) => t.bookId.equals('book_chain'))
-              ..orderBy([(t) => OrderingTerm.asc(t.timestamp)]))
-            .get();
+        final allRows =
+            await (db.select(db.transactions)
+                  ..where((t) => t.bookId.equals('book_chain'))
+                  ..orderBy([(t) => OrderingTerm.asc(t.timestamp)]))
+                .get();
 
         expect(allRows.length, 3);
 
         // Build the map format required by verifyChain.
-        final chainMaps = allRows.map((row) => {
-              'transactionId': row.id,
-              'amount': row.amount.toDouble(),
-              'timestamp': row.timestamp.millisecondsSinceEpoch,
-              'previousHash': row.prevHash ?? 'genesis',
-              'currentHash': row.currentHash,
-            }).toList();
+        final chainMaps = allRows
+            .map(
+              (row) => {
+                'transactionId': row.id,
+                'amount': row.amount.toDouble(),
+                'timestamp': row.timestamp.millisecondsSinceEpoch,
+                'previousHash': row.prevHash ?? 'genesis',
+                'currentHash': row.currentHash,
+              },
+            )
+            .toList();
 
         final result = hashService.verifyChain(chainMaps);
-        expect(result.isValid, isTrue,
-            reason: 'Hash chain must remain valid after soft-delete '
-                '(soft-delete must not mutate currentHash or prevHash)');
+        expect(
+          result.isValid,
+          isTrue,
+          reason:
+              'Hash chain must remain valid after soft-delete '
+              '(soft-delete must not mutate currentHash or prevHash)',
+        );
       },
     );
   });

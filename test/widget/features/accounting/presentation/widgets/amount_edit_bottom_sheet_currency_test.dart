@@ -54,31 +54,30 @@ void main() {
   }
 
   group('AmountEditBottomSheet — currency-aware (foreign) mode', () {
-    testWidgets(
-      'USD 11290 minor seeds the major-unit string "112.90"',
-      (tester) async {
-        await pumpSheet(
-          tester,
-          initialAmount: 11290,
-          currency: 'USD',
-          onConfirm: (_) {},
-        );
+    testWidgets('USD 11290 minor seeds the major-unit string "112.90"', (
+      tester,
+    ) async {
+      await pumpSheet(
+        tester,
+        initialAmount: 11290,
+        currency: 'USD',
+        onConfirm: (_) {},
+      );
 
-        expect(displayText(tester), '112.90');
-        // Badge shows the supplied symbol + label. The label also appears in
-        // the SmartKeyboard currency cell, so assert presence (findsWidgets).
-        expect(find.text(r'$'), findsWidgets);
-        expect(find.text('USD'), findsWidgets);
-        // Scoped check: the AmountDisplay badge carries the USD label.
-        expect(
-          find.descendant(
-            of: find.byKey(const ValueKey('amount_currency_badge')),
-            matching: find.text('USD'),
-          ),
-          findsOneWidget,
-        );
-      },
-    );
+      expect(displayText(tester), '112.90');
+      // Badge shows the supplied symbol + label. The label also appears in
+      // the SmartKeyboard currency cell, so assert presence (findsWidgets).
+      expect(find.text(r'$'), findsWidgets);
+      expect(find.text('USD'), findsWidgets);
+      // Scoped check: the AmountDisplay badge carries the USD label.
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('amount_currency_badge')),
+          matching: find.text('USD'),
+        ),
+        findsOneWidget,
+      );
+    });
 
     testWidgets(
       'confirming the unchanged seed round-trips back to MINOR units (11290)',
@@ -141,26 +140,25 @@ void main() {
       },
     );
 
-    testWidgets(
-      'KRW (0-decimal) disables the dot key in foreign mode',
-      (tester) async {
-        await pumpSheet(
-          tester,
-          initialAmount: 5000,
-          currency: 'KRW',
-          currencySymbol: '₩',
-          currencyLabel: 'KRW',
-          onConfirm: (_) {},
-        );
+    testWidgets('KRW (0-decimal) disables the dot key in foreign mode', (
+      tester,
+    ) async {
+      await pumpSheet(
+        tester,
+        initialAmount: 5000,
+        currency: 'KRW',
+        currencySymbol: '₩',
+        currencyLabel: 'KRW',
+        onConfirm: (_) {},
+      );
 
-        // The disabled dot tile is rendered (no '.' digit key).
-        expect(
-          find.byKey(const ValueKey('smart_keyboard_dot_disabled')),
-          findsOneWidget,
-        );
-        expect(find.widgetWithText(InkWell, '.'), findsNothing);
-      },
-    );
+      // The disabled dot tile is rendered (no '.' digit key).
+      expect(
+        find.byKey(const ValueKey('smart_keyboard_dot_disabled')),
+        findsOneWidget,
+      );
+      expect(find.widgetWithText(InkWell, '.'), findsNothing);
+    });
   });
 
   group('AmountEditBottomSheet — JPY default mode is unchanged', () {

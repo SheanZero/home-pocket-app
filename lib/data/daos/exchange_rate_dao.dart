@@ -23,11 +23,9 @@ class ExchangeRateDao {
   /// rateDate uses a TypeConverter (UtcEpochDateTimeConverter) and the plain
   /// [equals] method takes the SQL int type, not DateTime.
   Future<ExchangeRateRow?> findByDate(String currency, DateTime date) async {
-    return (_db.select(_db.exchangeRates)
-          ..where(
-            (t) =>
-                t.currency.equals(currency) & t.rateDate.equalsValue(date),
-          ))
+    return (_db.select(_db.exchangeRates)..where(
+          (t) => t.currency.equals(currency) & t.rateDate.equalsValue(date),
+        ))
         .getSingleOrNull();
   }
 
@@ -58,8 +56,7 @@ class ExchangeRateDao {
   Future<ExchangeRateRow?> findLatestNonManual(String currency) async {
     return (_db.select(_db.exchangeRates)
           ..where(
-            (t) =>
-                t.currency.equals(currency) & t.source.isNotValue('manual'),
+            (t) => t.currency.equals(currency) & t.source.isNotValue('manual'),
           )
           ..orderBy([(t) => OrderingTerm.desc(t.rateDate)])
           ..limit(1))
@@ -90,9 +87,9 @@ class ExchangeRateDao {
   Future<void> deleteOlderThan(DateTime cutoff) async {
     const converter = UtcEpochDateTimeConverter();
     final cutoffEpoch = converter.toSql(cutoff);
-    await (_db.delete(_db.exchangeRates)
-          ..where((t) => t.rateDate.isSmallerThanValue(cutoffEpoch)))
-        .go();
+    await (_db.delete(
+      _db.exchangeRates,
+    )..where((t) => t.rateDate.isSmallerThanValue(cutoffEpoch))).go();
   }
 
   /// Return all rows, unfiltered.

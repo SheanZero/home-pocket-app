@@ -24,8 +24,11 @@ void main() {
       'normalize(1千8百) yields [Digit(1), Unit(1000), Digit(8), Unit(100)]',
       () {
         final tokens = zh.normalize('1千8百');
-        expect(tokens.length, 4,
-            reason: 'Mixed arabic+kanji must produce 4 tokens');
+        expect(
+          tokens.length,
+          4,
+          reason: 'Mixed arabic+kanji must produce 4 tokens',
+        );
         expect(tokens[0], isA<Digit>());
         expect(tokens[1], isA<Unit>());
         expect(tokens[2], isA<Digit>());
@@ -37,35 +40,33 @@ void main() {
       },
     );
 
-    test(
-      'normalize(4十元) first token is Digit(4), length 2 (元 dropped)',
-      () {
-        final tokens = zh.normalize('4十元');
-        expect(tokens, hasLength(2));
-        expect(tokens.first, isA<Digit>());
-        expect((tokens.first as Digit).value, 4);
-        expect(tokens[1], isA<Unit>());
-        expect((tokens[1] as Unit).power, 10);
-      },
-    );
+    test('normalize(4十元) first token is Digit(4), length 2 (元 dropped)', () {
+      final tokens = zh.normalize('4十元');
+      expect(tokens, hasLength(2));
+      expect(tokens.first, isA<Digit>());
+      expect((tokens.first as Digit).value, 4);
+      expect(tokens[1], isA<Unit>());
+      expect((tokens[1] as Unit).power, 10);
+    });
 
     test(
       'normalize(现金) yields [] (no recognized chars → empty, merger lexical gate rejects)',
       () {
         final tokens = zh.normalize('现金');
-        expect(tokens, isEmpty,
-            reason: '现金 has no digits or units; merger gate must reject as non-numeric leader');
+        expect(
+          tokens,
+          isEmpty,
+          reason:
+              '现金 has no digits or units; merger gate must reject as non-numeric leader',
+        );
       },
     );
 
-    test(
-      'normalize(零) yields [ZeroPlaceholder] (single-token check)',
-      () {
-        final tokens = zh.normalize('零');
-        expect(tokens, hasLength(1));
-        expect(tokens.first, isA<ZeroPlaceholder>());
-      },
-    );
+    test('normalize(零) yields [ZeroPlaceholder] (single-token check)', () {
+      final tokens = zh.normalize('零');
+      expect(tokens, hasLength(1));
+      expect(tokens.first, isA<ZeroPlaceholder>());
+    });
   });
 
   group('JapaneseNumeralStateMachine.normalize', () {
@@ -79,28 +80,37 @@ void main() {
       'normalize はっぴゃく yields tokens that scan to 800 (longest-match anti-pattern guard)',
       () {
         final tokens = ja.normalize('はっぴゃく');
-        expect(tokens, isNotEmpty,
-            reason: 'longest-match MUST find はっぴゃく; empty list = single-char split bug');
+        expect(
+          tokens,
+          isNotEmpty,
+          reason:
+              'longest-match MUST find はっぴゃく; empty list = single-char split bug',
+        );
         // Round-trip through scan to verify token semantics
         expect(ja.parse('はっぴゃく'), 800);
       },
     );
 
-    test(
-      'normalize(現金) yields [] (all chars unrecognised → Skip → dropped)',
-      () {
-        final tokens = ja.normalize('現金');
-        expect(tokens, isEmpty,
-            reason: '現金 chars not in dictionary or kanji digit/unit tables; merger gate must reject');
-      },
-    );
+    test('normalize(現金) yields [] (all chars unrecognised → Skip → dropped)', () {
+      final tokens = ja.normalize('現金');
+      expect(
+        tokens,
+        isEmpty,
+        reason:
+            '現金 chars not in dictionary or kanji digit/unit tables; merger gate must reject',
+      );
+    });
 
     test(
       'normalize(1千8百) yields [Digit(1), Unit(1000), Digit(8), Unit(100)] — same shape as zh for merger gate',
       () {
         final tokens = ja.normalize('1千8百');
-        expect(tokens.length, 4,
-            reason: 'Arabic+kanji fallback path must produce same 4-token shape as zh');
+        expect(
+          tokens.length,
+          4,
+          reason:
+              'Arabic+kanji fallback path must produce same 4-token shape as zh',
+        );
         expect(tokens[0], isA<Digit>());
         expect(tokens[1], isA<Unit>());
         expect(tokens[2], isA<Digit>());

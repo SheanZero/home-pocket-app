@@ -49,9 +49,21 @@ const List<VoiceCorpusCase> voiceCorpusZh = [
   // ---------------------------------------------------------------------------
   (input: '2千2百零4元', expected: 2204, note: 'anchor: 零-placeholder VOICE-01'),
   (input: '1千8百4十元', expected: 1840, note: 'anchor: single-pass complete'),
-  (input: '1千8百4十', expected: 1840, note: 'anchor: bare-tail (no currency suffix)'),
-  (input: '一千二百', expected: 1200, note: 'anchor: legacy regression from voice_text_parser_test'),
-  (input: '六百八十块', expected: 680, note: 'anchor: legacy regression — 块 currency'),
+  (
+    input: '1千8百4十',
+    expected: 1840,
+    note: 'anchor: bare-tail (no currency suffix)',
+  ),
+  (
+    input: '一千二百',
+    expected: 1200,
+    note: 'anchor: legacy regression from voice_text_parser_test',
+  ),
+  (
+    input: '六百八十块',
+    expected: 680,
+    note: 'anchor: legacy regression — 块 currency',
+  ),
 
   // ---------------------------------------------------------------------------
   // Baseline digit ranges (~15)
@@ -94,13 +106,33 @@ const List<VoiceCorpusCase> voiceCorpusZh = [
   // ---------------------------------------------------------------------------
   // Adversarial / recognizer noise (~10)
   // ---------------------------------------------------------------------------
-  (input: '  680元  ', expected: 680, note: 'trailing whitespace — trim before parse'),
-  (input: '2千304元', expected: 2304, note: 'mixed arabic+kanji — arabic digit as Digit token'),
-  (input: '呃 1千8百元', expected: 1800, note: 'spoken hesitation 呃 → Skip; 1千8百 parsed normally'),
+  (
+    input: '  680元  ',
+    expected: 680,
+    note: 'trailing whitespace — trim before parse',
+  ),
+  (
+    input: '2千304元',
+    expected: 2304,
+    note: 'mixed arabic+kanji — arabic digit as Digit token',
+  ),
+  (
+    input: '呃 1千8百元',
+    expected: 1800,
+    note: 'spoken hesitation 呃 → Skip; 1千8百 parsed normally',
+  ),
   (input: '那个 3百元', expected: 300, note: 'filler words 那个 → Skip'),
-  (input: '就是 2千5', expected: 2500, note: 'filler 就是 → Skip; bare digit tail flush'),
+  (
+    input: '就是 2千5',
+    expected: 2500,
+    note: 'filler 就是 → Skip; bare digit tail flush',
+  ),
   (input: '零五十', expected: 50, note: 'leading 零 before 五十'),
-  (input: '一百零零五', expected: 105, note: 'double 零 placeholder — only final digit matters'),
+  (
+    input: '一百零零五',
+    expected: 105,
+    note: 'double 零 placeholder — only final digit matters',
+  ),
   (input: '2千2百零04元', expected: 2204, note: 'arabic zero after 零 placeholder'),
   (input: '五百00元', expected: 500, note: 'arabic 00 suffix — tail digit 0'),
   (input: '8百零3块', expected: 803, note: 'mixed single-digit arabic after 零'),
@@ -117,11 +149,27 @@ const List<VoiceCorpusCase> voiceCorpusZh = [
   // ---------------------------------------------------------------------------
   // Quick task 260526-l0o (Issue 1) — comma-separated amounts + 日元 suffix
   // ---------------------------------------------------------------------------
-  (input: '12,450日元', expected: 12450, note: 'l0o Issue 1 repro: half-width comma + 日元'),
+  (
+    input: '12,450日元',
+    expected: 12450,
+    note: 'l0o Issue 1 repro: half-width comma + 日元',
+  ),
   (input: '10,000日元', expected: 10000, note: 'l0o Issue 1: 5-digit half-width'),
-  (input: '1,234,567日元', expected: 1234567, note: 'l0o Issue 1: million separator'),
-  (input: '12，450日元', expected: 12450, note: 'l0o Issue 1: full-width comma 日元'),
-  (input: '1,500元', expected: 1500, note: 'l0o Issue 1 regression: existing 元 + comma'),
+  (
+    input: '1,234,567日元',
+    expected: 1234567,
+    note: 'l0o Issue 1: million separator',
+  ),
+  (
+    input: '12，450日元',
+    expected: 12450,
+    note: 'l0o Issue 1: full-width comma 日元',
+  ),
+  (
+    input: '1,500元',
+    expected: 1500,
+    note: 'l0o Issue 1 regression: existing 元 + comma',
+  ),
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -160,7 +208,8 @@ const List<VoiceKnownGapCase> voiceCorpusZhKnownGaps = [
   (
     input: '两千五',
     expected: 2500,
-    reason: '口语「整千+裸尾数」缩放语义缺失；与零省略位值直读 anchor（2千2百零4=2204）冲突，'
+    reason:
+        '口语「整千+裸尾数」缩放语义缺失；与零省略位值直读 anchor（2千2百零4=2204）冲突，'
         '非浅修（现返回 2005）',
   ),
   (
@@ -173,36 +222,26 @@ const List<VoiceKnownGapCase> voiceCorpusZhKnownGaps = [
     expected: 3200,
     reason: '混写「整千+裸尾数」缩放语义缺失，同 两千五 gap 类（现返回 3002）',
   ),
-  (
-    input: '俩块钱',
-    expected: 2,
-    reason: '状态机缺「俩」口语数词 token（现返回 null）',
-  ),
+  (input: '俩块钱', expected: 2, reason: '状态机缺「俩」口语数词 token（现返回 null）'),
   (
     input: '仨百',
     expected: 300,
     reason: '状态机缺「仨」口语数词 token（现返回 100 —— 百 implicit-1 误触发）',
   ),
-  (
-    input: '廿五',
-    expected: 25,
-    reason: '状态机缺「廿」古体十位 token（现返回 5）',
-  ),
-  (
-    input: '卅六',
-    expected: 36,
-    reason: '状态机缺「卅」古体十位 token（现返回 6）',
-  ),
+  (input: '廿五', expected: 25, reason: '状态机缺「廿」古体十位 token（现返回 5）'),
+  (input: '卅六', expected: 36, reason: '状态机缺「卅」古体十位 token（现返回 6）'),
   (
     input: '三块五',
     expected: 4,
-    reason: '小数口形 3.5 超出 int parser 语义；expected 按 Arabic 小数路径的 '
+    reason:
+        '小数口形 3.5 超出 int parser 语义；expected 按 Arabic 小数路径的 '
         'round() 折算（3.5→4）（现返回 5 —— last-wins digit）',
   ),
   (
     input: '十块五毛',
     expected: 11,
-    reason: '小数口形 10.5 超出 int parser 语义；expected 按 round() 折算'
+    reason:
+        '小数口形 10.5 超出 int parser 语义；expected 按 round() 折算'
         '（10.5→11）（现返回 15 —— 五 被并入整数位）',
   ),
 ];

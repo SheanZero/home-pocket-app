@@ -67,10 +67,11 @@ class GetPerDayJoyCountsUseCase {
       perDay[day] = (perDay[day] ?? 0) + 1;
     }
 
-    final result = perDay.entries
-        .map((e) => PerDayJoyCount(date: e.key, count: e.value))
-        .toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+    final result =
+        perDay.entries
+            .map((e) => PerDayJoyCount(date: e.key, count: e.value))
+            .toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
     return result;
   }
 }

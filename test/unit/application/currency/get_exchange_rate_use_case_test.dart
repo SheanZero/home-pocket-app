@@ -43,48 +43,49 @@ void main() {
     when(() => repo.upsert(any())).thenAnswer((_) async {});
   });
 
-  RateCached cached(String rate, {String source = 'frankfurter'}) => RateCached(
-        rate: rate,
-        currency: 'USD',
-        cachedDate: date,
-        source: source,
-      );
+  RateCached cached(String rate, {String source = 'frankfurter'}) =>
+      RateCached(rate: rate, currency: 'USD', cachedDate: date, source: source);
 
   group('RATE-03: use case never throws', () {
-    test('cache service raises → returns RateUnavailable, never throws',
-        () async {
-      when(() => cacheService.getRate(any(), any()))
-          .thenThrow(Exception('DB crash'));
+    test(
+      'cache service raises → returns RateUnavailable, never throws',
+      () async {
+        when(
+          () => cacheService.getRate(any(), any()),
+        ).thenThrow(Exception('DB crash'));
 
-      final result = await useCase.execute(
-        GetExchangeRateParams(currency: 'USD', date: date),
-      );
+        final result = await useCase.execute(
+          GetExchangeRateParams(currency: 'USD', date: date),
+        );
 
-      expect(result.result, isA<RateUnavailable>());
-      expect(result.signal, isNull);
-    });
+        expect(result.result, isA<RateUnavailable>());
+        expect(result.signal, isNull);
+      },
+    );
   });
 
   group('RATE-04: manual override', () {
-    test("manual override → upserted via repository with source='manual'",
-        () async {
-      final result = await useCase.execute(
-        GetExchangeRateParams(
-          currency: 'USD',
-          date: date,
-          manualOverrideRate: '150.5',
-        ),
-      );
+    test(
+      "manual override → upserted via repository with source='manual'",
+      () async {
+        final result = await useCase.execute(
+          GetExchangeRateParams(
+            currency: 'USD',
+            date: date,
+            manualOverrideRate: '150.5',
+          ),
+        );
 
-      final captured =
-          verify(() => repo.upsert(captureAny())).captured.single
-              as ExchangeRate;
-      expect(captured.source, 'manual');
-      expect(captured.rate, '150.5');
-      expect(result.result, isA<RateCached>());
-      expect((result.result as RateCached).isManualOverride, true);
-      verifyNever(() => cacheService.getRate(any(), any()));
-    });
+        final captured =
+            verify(() => repo.upsert(captureAny())).captured.single
+                as ExchangeRate;
+        expect(captured.source, 'manual');
+        expect(captured.rate, '150.5');
+        expect(result.result, isA<RateCached>());
+        expect((result.result as RateCached).isManualOverride, true);
+        verifyNever(() => cacheService.getRate(any(), any()));
+      },
+    );
 
     test('invalid manual override → RateUnavailable, no upsert', () async {
       final result = await useCase.execute(
@@ -99,35 +100,35 @@ void main() {
       verifyNever(() => repo.upsert(any()));
     });
 
-    test('D-07: manual fallback priority is delegated to the cache service',
-        () async {
-      // The use case does not re-implement D-07 priority — it trusts the cache
-      // service to return RateFallback (API-cached) over RateManual. Here we
-      // assert the use case forwards the cache result unchanged when no signal
-      // logic applies.
-      when(() => cacheService.getRate('USD', date)).thenAnswer(
-        (_) async => RateFallback(
-          rate: '149.0',
-          currency: 'USD',
-          cachedDate: date,
-        ),
-      );
+    test(
+      'D-07: manual fallback priority is delegated to the cache service',
+      () async {
+        // The use case does not re-implement D-07 priority — it trusts the cache
+        // service to return RateFallback (API-cached) over RateManual. Here we
+        // assert the use case forwards the cache result unchanged when no signal
+        // logic applies.
+        when(() => cacheService.getRate('USD', date)).thenAnswer(
+          (_) async =>
+              RateFallback(rate: '149.0', currency: 'USD', cachedDate: date),
+        );
 
-      final result = await useCase.execute(
-        GetExchangeRateParams(currency: 'USD', date: date),
-      );
+        final result = await useCase.execute(
+          GetExchangeRateParams(currency: 'USD', date: date),
+        );
 
-      expect(result.result, isA<RateFallback>());
-      expect(result.signal, isNull);
-    });
+        expect(result.result, isA<RateFallback>());
+        expect(result.signal, isNull);
+      },
+    );
   });
 
   group('RATE-06: ADR-022 date-change signals', () {
     test(
       'wasManualOverride=true AND previousRate present → emits dialog signal (D-02)',
       () async {
-        when(() => cacheService.getRate('USD', date))
-            .thenAnswer((_) async => cached('160.0'));
+        when(
+          () => cacheService.getRate('USD', date),
+        ).thenAnswer((_) async => cached('160.0'));
 
         final result = await useCase.execute(
           GetExchangeRateParams(
@@ -148,8 +149,9 @@ void main() {
     test(
       'wasManualOverride=false, >1% delta → emits toast signal (D-03)',
       () async {
-        when(() => cacheService.getRate('USD', date))
-            .thenAnswer((_) async => cached('160.0'));
+        when(
+          () => cacheService.getRate('USD', date),
+        ).thenAnswer((_) async => cached('160.0'));
 
         final result = await useCase.execute(
           GetExchangeRateParams(
@@ -169,31 +171,30 @@ void main() {
       },
     );
 
-    test(
-      'WR-01: sub-1 rates produce a meaningful toast (not 0 → 0)',
-      () async {
-        // Foreign currency stronger than JPY: rate ≈ 0.0062, +~3.2%.
-        when(() => cacheService.getRate('USD', date))
-            .thenAnswer((_) async => cached('0.0064'));
+    test('WR-01: sub-1 rates produce a meaningful toast (not 0 → 0)', () async {
+      // Foreign currency stronger than JPY: rate ≈ 0.0062, +~3.2%.
+      when(
+        () => cacheService.getRate('USD', date),
+      ).thenAnswer((_) async => cached('0.0064'));
 
-        final result = await useCase.execute(
-          GetExchangeRateParams(
-            currency: 'USD',
-            date: date,
-            previousRate: '0.0062',
-          ),
-        );
+      final result = await useCase.execute(
+        GetExchangeRateParams(
+          currency: 'USD',
+          date: date,
+          previousRate: '0.0062',
+        ),
+      );
 
-        final toast = result.signal as RateSignalToast;
-        expect(toast.oldRate, '0.0062');
-        expect(toast.newRate, '0.0064');
-        expect(toast.changeFraction, greaterThan(0.01));
-      },
-    );
+      final toast = result.signal as RateSignalToast;
+      expect(toast.oldRate, '0.0062');
+      expect(toast.newRate, '0.0064');
+      expect(toast.changeFraction, greaterThan(0.01));
+    });
 
     test('wasManualOverride=false, <=1% delta → no signal', () async {
-      when(() => cacheService.getRate('USD', date))
-          .thenAnswer((_) async => cached('150.5'));
+      when(
+        () => cacheService.getRate('USD', date),
+      ).thenAnswer((_) async => cached('150.5'));
 
       final result = await useCase.execute(
         GetExchangeRateParams(
@@ -207,8 +208,9 @@ void main() {
     });
 
     test('no previousRate → no signal', () async {
-      when(() => cacheService.getRate('USD', date))
-          .thenAnswer((_) async => cached('150.0'));
+      when(
+        () => cacheService.getRate('USD', date),
+      ).thenAnswer((_) async => cached('150.0'));
 
       final result = await useCase.execute(
         GetExchangeRateParams(currency: 'USD', date: date),

@@ -84,9 +84,7 @@ void main() {
     when(
       () => transactionRepository.getLatestHash(any()),
     ).thenAnswer((_) async => null);
-    when(
-      () => transactionRepository.insert(any()),
-    ).thenAnswer((_) async {});
+    when(() => transactionRepository.insert(any())).thenAnswer((_) async {});
 
     categoryService = CategoryService(
       categoryRepository: categoryRepository,
@@ -101,51 +99,48 @@ void main() {
     );
   });
 
-  test(
-    'merchant ledgerHint contradicting the category is ignored — ledger '
-    'follows the category, never the hint (D-21)',
-    () async {
-      // A merchant candidate whose stored ledgerHint says JOY, while its
-      // category (cat_food) authoritatively resolves to DAILY.
-      const candidate = MerchantCandidate(
-        merchantId: 'm-izakaya',
-        displayName: 'Izakaya',
-        score: 0.9,
-        categoryId: _dailyCatId,
-        ledgerHint: 'joy', // contradicts the category-derived daily ledger
-      );
+  test('merchant ledgerHint contradicting the category is ignored — ledger '
+      'follows the category, never the hint (D-21)', () async {
+    // A merchant candidate whose stored ledgerHint says JOY, while its
+    // category (cat_food) authoritatively resolves to DAILY.
+    const candidate = MerchantCandidate(
+      merchantId: 'm-izakaya',
+      displayName: 'Izakaya',
+      score: 0.9,
+      categoryId: _dailyCatId,
+      ledgerHint: 'joy', // contradicts the category-derived daily ledger
+    );
 
-      // Sanity: the category genuinely resolves to daily, opposite the hint.
-      final resolved = await categoryService.resolveLedgerType(
-        candidate.categoryId,
-      );
-      expect(resolved, LedgerType.daily);
-      expect(candidate.ledgerHint, 'joy');
+    // Sanity: the category genuinely resolves to daily, opposite the hint.
+    final resolved = await categoryService.resolveLedgerType(
+      candidate.categoryId,
+    );
+    expect(resolved, LedgerType.daily);
+    expect(candidate.ledgerHint, 'joy');
 
-      // Drive a create using ONLY the candidate's categoryId (the
-      // post-reconciliation selected category). ledgerType is null so the use
-      // case derives it — and it must derive solely from the category.
-      final result = await useCase.execute(
-        CreateTransactionParams(
-          bookId: 'book-main',
-          amount: 1000,
-          type: TransactionType.expense,
-          categoryId: candidate.categoryId,
-          entrySource: EntrySource.voice,
-        ),
-      );
+    // Drive a create using ONLY the candidate's categoryId (the
+    // post-reconciliation selected category). ledgerType is null so the use
+    // case derives it — and it must derive solely from the category.
+    final result = await useCase.execute(
+      CreateTransactionParams(
+        bookId: 'book-main',
+        amount: 1000,
+        type: TransactionType.expense,
+        categoryId: candidate.categoryId,
+        entrySource: EntrySource.voice,
+      ),
+    );
 
-      expect(result.isSuccess, isTrue, reason: result.error);
-      final tx = result.data!;
-      // The persisted ledger follows the category (daily), NOT the joy hint.
-      expect(
-        tx.ledgerType,
-        LedgerType.daily,
-        reason:
-            'transaction ledger must derive from resolveLedgerType(categoryId) '
-            '(daily), never from merchant.ledgerHint (joy) — D-21',
-      );
-      expect(tx.ledgerType, resolved);
-    },
-  );
+    expect(result.isSuccess, isTrue, reason: result.error);
+    final tx = result.data!;
+    // The persisted ledger follows the category (daily), NOT the joy hint.
+    expect(
+      tx.ledgerType,
+      LedgerType.daily,
+      reason:
+          'transaction ledger must derive from resolveLedgerType(categoryId) '
+          '(daily), never from merchant.ledgerHint (joy) — D-21',
+    );
+    expect(tx.ledgerType, resolved);
+  });
 }

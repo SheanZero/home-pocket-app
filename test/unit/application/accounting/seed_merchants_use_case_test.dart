@@ -46,41 +46,45 @@ void main() {
       (await db.select(db.merchantMatchKeys).get()).length;
 
   group('SeedMerchantsUseCase', () {
-    test('seeds merchant rows + expanded match-key rows when db is empty',
-        () async {
-      final result = await useCase.execute();
-      expect(result.isSuccess, isTrue);
+    test(
+      'seeds merchant rows + expanded match-key rows when db is empty',
+      () async {
+        final result = await useCase.execute();
+        expect(result.isSuccess, isTrue);
 
-      // (1) merchant count == DefaultMerchants.all.length
-      expect(await merchantRowCount(), DefaultMerchants.all.length);
+        // (1) merchant count == DefaultMerchants.all.length
+        expect(await merchantRowCount(), DefaultMerchants.all.length);
 
-      // match-key count == total distinct expanded surfaces (> merchant count)
-      final expectedKeyCount = DefaultMerchants.all
-          .map((m) => _expectedMatchKeysFor(m).length)
-          .fold<int>(0, (a, b) => a + b);
-      expect(await matchKeyRowCount(), expectedKeyCount);
-      expect(
-        expectedKeyCount,
-        greaterThan(DefaultMerchants.all.length),
-        reason: 'every merchant has at least one name surface plus extras',
-      );
-    });
-
-    test('every seeded merchant ledger_hint == deriveLedgerHint(categoryId)',
-        () async {
-      await useCase.execute();
-
-      final rows = await db.select(db.merchants).get();
-      final byId = {for (final m in DefaultMerchants.all) m.id: m};
-      for (final row in rows) {
-        final source = byId[row.id]!;
+        // match-key count == total distinct expanded surfaces (> merchant count)
+        final expectedKeyCount = DefaultMerchants.all
+            .map((m) => _expectedMatchKeysFor(m).length)
+            .fold<int>(0, (a, b) => a + b);
+        expect(await matchKeyRowCount(), expectedKeyCount);
         expect(
-          row.ledgerHint,
-          deriveLedgerHint(source.categoryId).name,
-          reason: 'ledger_hint must be derived, never hand-authored',
+          expectedKeyCount,
+          greaterThan(DefaultMerchants.all.length),
+          reason: 'every merchant has at least one name surface plus extras',
         );
-      }
-    });
+      },
+    );
+
+    test(
+      'every seeded merchant ledger_hint == deriveLedgerHint(categoryId)',
+      () async {
+        await useCase.execute();
+
+        final rows = await db.select(db.merchants).get();
+        final byId = {for (final m in DefaultMerchants.all) m.id: m};
+        for (final row in rows) {
+          final source = byId[row.id]!;
+          expect(
+            row.ledgerHint,
+            deriveLedgerHint(source.categoryId).name,
+            reason: 'ledger_hint must be derived, never hand-authored',
+          );
+        }
+      },
+    );
 
     test('every match_key row == normalizeMerchantKey(surface)', () async {
       await useCase.execute();

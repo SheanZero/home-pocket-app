@@ -360,7 +360,7 @@ class HomeMetricsRegion extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.compact.copyWith(
+                style: AppTextStyles.label.copyWith(
                   fontWeight: FontWeight.w700,
                   color: palette.textPrimary,
                 ),
@@ -416,7 +416,7 @@ class HomeMetricsRegion extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.compact.copyWith(
+            style: AppTextStyles.label.copyWith(
               fontWeight: FontWeight.w700,
               color: palette.textPrimary,
             ),

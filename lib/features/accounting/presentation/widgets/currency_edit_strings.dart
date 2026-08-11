@@ -37,7 +37,8 @@ class CurrencyEditStrings {
   String get rateDateLabel => _s?.currencyRateDateLabel ?? 'Rate date';
   String get rateRequired => _s?.editRateRequired ?? 'Please enter a rate';
   String get rateInvalid => _s?.editRateInvalid ?? 'Enter a positive number';
-  String get amountRequired => _s?.editAmountRequired ?? 'Please enter an amount';
+  String get amountRequired =>
+      _s?.editAmountRequired ?? 'Please enter an amount';
   String get amountInvalid =>
       _s?.editAmountInvalid ?? 'Enter a positive number';
 

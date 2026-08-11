@@ -172,6 +172,7 @@ class DonutDimensionMemberControls extends ConsumerWidget {
                 _MemberOptionTile(
                   selected: selected == null,
                   emoji: null,
+                  icon: Icons.group_outlined,
                   title: l10n.analyticsDonutMemberFilterAll,
                   onTap: () {
                     ref
@@ -184,6 +185,7 @@ class DonutDimensionMemberControls extends ConsumerWidget {
                   _MemberOptionTile(
                     selected: selected == m.deviceId,
                     emoji: m.avatarEmoji,
+                    icon: null,
                     title: _displayName(m),
                     onTap: () {
                       ref
@@ -256,12 +258,14 @@ class _MemberOptionTile extends StatelessWidget {
   const _MemberOptionTile({
     required this.selected,
     required this.emoji,
+    required this.icon,
     required this.title,
     required this.onTap,
   });
 
   final bool selected;
   final String? emoji;
+  final IconData? icon;
   final String title;
   final VoidCallback onTap;
 
@@ -271,7 +275,13 @@ class _MemberOptionTile extends StatelessWidget {
     return ListTile(
       selected: selected,
       selectedColor: palette.accentPrimary,
-      leading: (emoji != null && emoji!.isNotEmpty)
+      leading: icon != null
+          ? Icon(
+              icon,
+              size: 20,
+              color: selected ? palette.accentPrimary : palette.textSecondary,
+            )
+          : (emoji != null && emoji!.isNotEmpty)
           ? isAvatarIconId(emoji!)
                 ? AvatarGlyph(
                     value: emoji!,
@@ -279,7 +289,7 @@ class _MemberOptionTile extends StatelessWidget {
                     color: palette.accentPrimary,
                   )
                 : Text(emoji!, style: const TextStyle(fontSize: 20))
-          : null,
+          : Icon(Icons.person_outline, size: 20, color: palette.textSecondary),
       title: Text(
         title,
         style: AppTextStyles.body.copyWith(

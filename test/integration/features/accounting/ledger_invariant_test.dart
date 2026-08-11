@@ -171,15 +171,18 @@ void main() {
   }
 
   group('D-20 ledger invariant: ledgerType == resolveLedgerType(categoryId)', () {
-    test('create (manual) on a daily category → ledger derives to daily', () async {
-      final tx = await createDerived(
-        categoryId: _dailyCatId,
-        entrySource: EntrySource.manual,
-      );
-      final resolved = await categoryService.resolveLedgerType(tx.categoryId);
-      expect(tx.ledgerType, LedgerType.daily);
-      expect(tx.ledgerType, resolved);
-    });
+    test(
+      'create (manual) on a daily category → ledger derives to daily',
+      () async {
+        final tx = await createDerived(
+          categoryId: _dailyCatId,
+          entrySource: EntrySource.manual,
+        );
+        final resolved = await categoryService.resolveLedgerType(tx.categoryId);
+        expect(tx.ledgerType, LedgerType.daily);
+        expect(tx.ledgerType, resolved);
+      },
+    );
 
     test('create (voice) on a joy category → ledger derives to joy', () async {
       final tx = await createDerived(
@@ -208,31 +211,26 @@ void main() {
       },
     );
 
-    test(
-      'change-category re-derives the ledger from the NEW category '
-      '(daily → joy)',
-      () async {
-        // Simulate the form's change-category re-derive: the entry started on a
-        // daily category, then the user switches to a joy category. The ledger
-        // contract is that the NEW category governs — re-resolving on the new id
-        // yields the new ledger, matching what a re-created transaction stamps.
-        final beforeChange = await categoryService.resolveLedgerType(
-          _dailyCatId,
-        );
-        expect(beforeChange, LedgerType.daily);
+    test('change-category re-derives the ledger from the NEW category '
+        '(daily → joy)', () async {
+      // Simulate the form's change-category re-derive: the entry started on a
+      // daily category, then the user switches to a joy category. The ledger
+      // contract is that the NEW category governs — re-resolving on the new id
+      // yields the new ledger, matching what a re-created transaction stamps.
+      final beforeChange = await categoryService.resolveLedgerType(_dailyCatId);
+      expect(beforeChange, LedgerType.daily);
 
-        final afterChange = await categoryService.resolveLedgerType(_joyCatId);
-        expect(afterChange, LedgerType.joy);
+      final afterChange = await categoryService.resolveLedgerType(_joyCatId);
+      expect(afterChange, LedgerType.joy);
 
-        // A transaction persisted under the NEW category must carry the NEW
-        // category's resolved ledger (the change-category invariant).
-        final tx = await createDerived(
-          categoryId: _joyCatId,
-          entrySource: EntrySource.manual,
-        );
-        expect(tx.ledgerType, afterChange);
-      },
-    );
+      // A transaction persisted under the NEW category must carry the NEW
+      // category's resolved ledger (the change-category invariant).
+      final tx = await createDerived(
+        categoryId: _joyCatId,
+        entrySource: EntrySource.manual,
+      );
+      expect(tx.ledgerType, afterChange);
+    });
 
     // NEGATIVE SCOPE (W3 / D-23): edit-LOAD WITHOUT a category change preserves
     // the STORED ledger even if it diverges from the category's current config.

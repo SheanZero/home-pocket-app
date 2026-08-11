@@ -91,47 +91,40 @@ void main() {
     });
 
     group('privacy gate (D37-06 second safety net)', () {
-      test(
-        'trackCreate ignores non-public listType (SC-3, SYNC-02)',
-        () {
-          tracker.trackCreate({
-            'op': 'create',
-            'entityType': 'shopping_item',
-            'entityId': 'item-1',
-            'data': {'listType': 'private', 'name': 'Secret'},
-          });
-          // private → NOT enqueued (second safety net, D37-06)
-          expect(tracker.pendingCount, 0);
-        },
-      );
-
-      test(
-        'trackCreate accepts public listType (SC-3, SYNC-01)',
-        () {
-          tracker.trackCreate({
-            'op': 'create',
-            'entityType': 'shopping_item',
-            'entityId': 'item-2',
-            'data': {'listType': 'public', 'name': 'Milk'},
-          });
-          // public → enqueued
-          expect(tracker.pendingCount, 1);
-        },
-      );
-
-      test('trackUpdate ignores non-public listType', () {
-        tracker.trackUpdate({'data': {'listType': 'private'}});
+      test('trackCreate ignores non-public listType (SC-3, SYNC-02)', () {
+        tracker.trackCreate({
+          'op': 'create',
+          'entityType': 'shopping_item',
+          'entityId': 'item-1',
+          'data': {'listType': 'private', 'name': 'Secret'},
+        });
+        // private → NOT enqueued (second safety net, D37-06)
         expect(tracker.pendingCount, 0);
       });
 
-      test(
-        'trackDelete always enqueues (caller is responsible for gate)',
-        () {
-          // Delete ops have no listType in data; use-case gate is primary (D37-06)
-          tracker.trackDelete(itemId: 'item-3');
-          expect(tracker.pendingCount, 1);
-        },
-      );
+      test('trackCreate accepts public listType (SC-3, SYNC-01)', () {
+        tracker.trackCreate({
+          'op': 'create',
+          'entityType': 'shopping_item',
+          'entityId': 'item-2',
+          'data': {'listType': 'public', 'name': 'Milk'},
+        });
+        // public → enqueued
+        expect(tracker.pendingCount, 1);
+      });
+
+      test('trackUpdate ignores non-public listType', () {
+        tracker.trackUpdate({
+          'data': {'listType': 'private'},
+        });
+        expect(tracker.pendingCount, 0);
+      });
+
+      test('trackDelete always enqueues (caller is responsible for gate)', () {
+        // Delete ops have no listType in data; use-case gate is primary (D37-06)
+        tracker.trackDelete(itemId: 'item-3');
+        expect(tracker.pendingCount, 1);
+      });
     });
   });
 }

@@ -126,81 +126,68 @@ void main() {
       expect(rows.first.totalCount, 1);
     });
 
-    test('respects window boundaries (timestamp >= start AND <= end)', () async {
-      // Inside window — included
-      await seedTx(
-        id: 'inside_start',
-        categoryId: 'cat_a',
-        timestamp: windowStart,
-        joyFullness: 5,
-      );
-      await seedTx(
-        id: 'inside_end',
-        categoryId: 'cat_a',
-        timestamp: windowEnd,
-        joyFullness: 5,
-      );
-      // Outside window — excluded
-      await seedTx(
-        id: 'before_start',
-        categoryId: 'cat_a',
-        timestamp: DateTime(2026, 4, 30, 23, 59, 59),
-        joyFullness: 10,
-      );
-      await seedTx(
-        id: 'after_end',
-        categoryId: 'cat_a',
-        timestamp: DateTime(2026, 6, 1),
-        joyFullness: 10,
-      );
+    test(
+      'respects window boundaries (timestamp >= start AND <= end)',
+      () async {
+        // Inside window — included
+        await seedTx(
+          id: 'inside_start',
+          categoryId: 'cat_a',
+          timestamp: windowStart,
+          joyFullness: 5,
+        );
+        await seedTx(
+          id: 'inside_end',
+          categoryId: 'cat_a',
+          timestamp: windowEnd,
+          joyFullness: 5,
+        );
+        // Outside window — excluded
+        await seedTx(
+          id: 'before_start',
+          categoryId: 'cat_a',
+          timestamp: DateTime(2026, 4, 30, 23, 59, 59),
+          joyFullness: 10,
+        );
+        await seedTx(
+          id: 'after_end',
+          categoryId: 'cat_a',
+          timestamp: DateTime(2026, 6, 1),
+          joyFullness: 10,
+        );
 
-      final rows = await dao.getPerCategoryJoyBreakdown(
-        bookId: 'book_joy',
-        startDate: windowStart,
-        endDate: windowEnd,
-      );
+        final rows = await dao.getPerCategoryJoyBreakdown(
+          bookId: 'book_joy',
+          startDate: windowStart,
+          endDate: windowEnd,
+        );
 
-      expect(rows, hasLength(1));
-      expect(rows.first.totalCount, 2);
-      expect(rows.first.avgSatisfaction, 5.0);
-    });
+        expect(rows, hasLength(1));
+        expect(rows.first.totalCount, 2);
+        expect(rows.first.avgSatisfaction, 5.0);
+      },
+    );
 
     test(
       'sort: AVG DESC, COUNT DESC, categoryId ASC — and NO HAVING (low-N included)',
       () async {
         // cat_a: avgSat=8.0, count=3
         for (var i = 0; i < 3; i += 1) {
-          await seedTx(
-            id: 'cat_a_$i',
-            categoryId: 'cat_a',
-            joyFullness: 8,
-          );
+          await seedTx(id: 'cat_a_$i', categoryId: 'cat_a', joyFullness: 8);
         }
         // cat_b: avgSat=6.0, count=2
         for (var i = 0; i < 2; i += 1) {
-          await seedTx(
-            id: 'cat_b_$i',
-            categoryId: 'cat_b',
-            joyFullness: 6,
-          );
+          await seedTx(id: 'cat_b_$i', categoryId: 'cat_b', joyFullness: 6);
         }
         // cat_c: avgSat=9.5, count=1 (low-N — MUST still appear; no HAVING)
         await seedTx(id: 'cat_c_0', categoryId: 'cat_c', joyFullness: 9);
         // Need avgSat=9.5 → two rows of 9 + 10
         await db.delete(db.transactions).go();
         for (var i = 0; i < 3; i += 1) {
-          await seedTx(
-            id: 'a_$i',
-            categoryId: 'cat_a',
-            joyFullness: 8,
-          );
+          await seedTx(id: 'a_$i', categoryId: 'cat_a', joyFullness: 8);
         }
         for (var i = 0; i < 2; i += 1) {
-          await seedTx(
-            id: 'b_$i',
-            categoryId: 'cat_b',
-            joyFullness: 6,
-          );
+          await seedTx(id: 'b_$i', categoryId: 'cat_b', joyFullness: 6);
         }
         await seedTx(id: 'c_only', categoryId: 'cat_c', joyFullness: 9);
 

@@ -119,9 +119,7 @@ Future<MetricResult<DailyVsJoySnapshot>> dailyVsJoySnapshotFamily(
   final groupBookIds = shadowBooks.map((shadow) => shadow.book.id).toList();
   if (groupBookIds.length < 2) return const Empty(); // D-20 gate
 
-  final useCase = ref.watch(
-    getDailyVsJoySnapshotAcrossBooksUseCaseProvider,
-  );
+  final useCase = ref.watch(getDailyVsJoySnapshotAcrossBooksUseCaseProvider);
   // D-15: manualOnly variant filters all AnalyticsScreen cards; HomeHero providers do NOT read this provider.
   final entrySourceFilter = joyMetricVariant == JoyMetricVariant.manualOnly
       ? EntrySource.manual
