@@ -164,6 +164,25 @@ void main() {
     expect(find.text('共通のお気に入り品目はまだ集計できません — もう少し記録してみよう'), findsOneWidget);
   });
 
+  testWidgets(
+    'renders the empty sentence only once when all insights are empty',
+    (tester) async {
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const FamilyInsightCard(
+            family: _emptyFamily,
+            isGroupMode: true,
+            shadowBooks: [_shadowBook],
+            locale: locale,
+          ),
+          locale: locale,
+        ),
+      );
+
+      expect(find.text('共通のお気に入り品目はまだ集計できません — もう少し記録してみよう'), findsOneWidget);
+    },
+  );
+
   test('does not reference per-member identifiers', () {
     final source = File(
       'lib/features/analytics/presentation/widgets/family_insight_card.dart',
@@ -210,4 +229,13 @@ const _familyWithoutSharedJoy = FamilyHappiness(
   familyHighlightsSum: Value<int>(23, 30),
   sharedJoyInsight: Empty<SharedJoyInsight>(),
   medianSatisfaction: Value<double>(8, 30),
+);
+
+const _emptyFamily = FamilyHappiness(
+  year: 2026,
+  month: 5,
+  totalGroupJoyTx: 0,
+  familyHighlightsSum: Empty<int>(),
+  sharedJoyInsight: Empty<SharedJoyInsight>(),
+  medianSatisfaction: Empty<double>(),
 );

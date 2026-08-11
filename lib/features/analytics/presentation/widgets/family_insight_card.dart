@@ -31,6 +31,7 @@ class FamilyInsightCard extends StatelessWidget {
     if (!showFamily) return const SizedBox.shrink();
 
     final l10n = S.of(context);
+    final highlightsText = _highlightsText(l10n);
     return Card(
       color: context.palette.success.withValues(alpha: 0.10),
       shape: RoundedRectangleBorder(
@@ -51,13 +52,15 @@ class FamilyInsightCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              _highlightsText(l10n),
-              style: AppTextStyles.body.copyWith(
-                color: context.palette.textPrimary,
+            if (highlightsText != null) ...[
+              Text(
+                highlightsText,
+                style: AppTextStyles.body.copyWith(
+                  color: context.palette.textPrimary,
+                ),
               ),
-            ),
-            const SizedBox(height: 6),
+              const SizedBox(height: 6),
+            ],
             Text(
               _sharedJoyText(l10n),
               style: AppTextStyles.body.copyWith(
@@ -70,9 +73,9 @@ class FamilyInsightCard extends StatelessWidget {
     );
   }
 
-  String _highlightsText(S l10n) {
+  String? _highlightsText(S l10n) {
     return switch (family?.familyHighlightsSum) {
-      null || Empty<int>() => l10n.analyticsFamilyEmpty,
+      null || Empty<int>() => null,
       Value<int>(:final data) => l10n.analyticsFamilyHighlightsSentence(data),
     };
   }
