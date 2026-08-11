@@ -14,7 +14,7 @@ class _MockShadowBookService extends Mock implements ShadowBookService {}
 
 void main() {
   test(
-    'clears queue and shadow data before deactivating the local group',
+    'clears queue and shadow data before deleting the local group',
     () async {
       final groupRepository = _MockGroupRepository();
       final queueManager = _MockSyncQueueManager();
@@ -41,17 +41,50 @@ void main() {
       when(
         () => shadowBookService.cleanSyncData(any()),
       ).thenAnswer((_) async {});
-      when(
-        () => groupRepository.deactivateGroup(any()),
-      ).thenAnswer((_) async {});
+      when(() => groupRepository.deleteGroup(any())).thenAnswer((_) async {});
 
       await useCase.execute(groupId: 'group-1');
 
       verifyInOrder([
         () => queueManager.clearQueue(),
         () => shadowBookService.cleanSyncData('group-1'),
-        () => groupRepository.deactivateGroup('group-1'),
+        () => groupRepository.deleteGroup('group-1'),
       ]);
     },
   );
+
+  test('deactivates membership loss without deleting the group row', () async {
+    final groupRepository = _MockGroupRepository();
+    final queueManager = _MockSyncQueueManager();
+    final shadowBookService = _MockShadowBookService();
+    final useCase = HandleGroupDissolvedUseCase(
+      groupRepo: groupRepository,
+      queueManager: queueManager,
+      shadowBookService: shadowBookService,
+    );
+    final activeGroup = GroupInfo(
+      groupId: 'group-1',
+      status: GroupStatus.active,
+      groupName: 'Family',
+      role: 'member',
+      groupKey: 'secret-group-key',
+      members: const [],
+      createdAt: DateTime(2026),
+    );
+
+    when(
+      () => groupRepository.getActiveGroup(),
+    ).thenAnswer((_) async => activeGroup);
+    when(() => queueManager.clearQueue()).thenAnswer((_) async {});
+    when(() => shadowBookService.cleanSyncData(any())).thenAnswer((_) async {});
+    when(() => groupRepository.deactivateGroup(any())).thenAnswer((_) async {});
+
+    await useCase.execute(
+      groupId: 'group-1',
+      mode: LocalGroupCleanupMode.deactivate,
+    );
+
+    verify(() => groupRepository.deactivateGroup('group-1')).called(1);
+    verifyNever(() => groupRepository.deleteGroup(any()));
+  });
 }

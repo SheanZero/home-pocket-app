@@ -354,17 +354,29 @@ class GroupRepositoryImpl
   @override
   Future<void> deactivateGroup(String groupId) async {
     await _groupDao.attachedDatabase.transaction(() async {
-      await _groupDao.attachedDatabase.customStatement(
-        'DELETE FROM family_sync_outbox WHERE group_id = ?',
-        [groupId],
-      );
-      await _groupDao.attachedDatabase.customStatement(
-        'DELETE FROM inbound_sync_operations WHERE group_id = ?',
-        [groupId],
-      );
-      await _memberDao.deleteByGroupId(groupId);
+      await _deleteGroupScopedData(groupId);
       await _groupDao.deactivateAndClearSecrets(groupId);
     });
+  }
+
+  @override
+  Future<void> deleteGroup(String groupId) async {
+    await _groupDao.attachedDatabase.transaction(() async {
+      await _deleteGroupScopedData(groupId);
+      await _groupDao.deleteByGroupId(groupId);
+    });
+  }
+
+  Future<void> _deleteGroupScopedData(String groupId) async {
+    await _groupDao.attachedDatabase.customStatement(
+      'DELETE FROM family_sync_outbox WHERE group_id = ?',
+      [groupId],
+    );
+    await _groupDao.attachedDatabase.customStatement(
+      'DELETE FROM inbound_sync_operations WHERE group_id = ?',
+      [groupId],
+    );
+    await _memberDao.deleteByGroupId(groupId);
   }
 
   @override

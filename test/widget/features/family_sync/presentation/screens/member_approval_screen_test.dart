@@ -12,6 +12,7 @@ import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
+import 'package:home_pocket/features/family_sync/presentation/screens/group_management_screen.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/member_approval_screen.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
 import 'package:home_pocket/shared/widgets/soft_toast.dart';
@@ -169,6 +170,12 @@ void main() {
         deviceId: 'member-1',
       ),
     ).called(1);
+
+    await tester.pumpAndSettle();
+    final managementScreen = tester.widget<GroupManagementScreen>(
+      find.byType(GroupManagementScreen),
+    );
+    expect(managementScreen.approvedMemberDeviceId, 'member-1');
   });
 
   testWidgets('rejects a pending join request without removing a member', (

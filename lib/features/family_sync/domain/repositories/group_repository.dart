@@ -78,6 +78,9 @@ abstract class GroupRepository {
 
   Future<void> deactivateGroup(String groupId);
 
+  /// Permanently removes a dissolved family and all group-scoped local state.
+  Future<void> deleteGroup(String groupId);
+
   Future<void> updateGroupName(String groupId, String groupName);
 
   /// Updates a name only while [groupId] is still the locally active group.

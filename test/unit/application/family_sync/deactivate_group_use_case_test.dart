@@ -35,20 +35,17 @@ void main() {
 
     when(() => apiClient.deactivateGroup(any())).thenAnswer((_) async {});
     when(() => queueManager.clearQueue()).thenAnswer((_) async {});
-    when(() => groupRepository.deactivateGroup(any())).thenAnswer((_) async {});
+    when(() => groupRepository.deleteGroup(any())).thenAnswer((_) async {});
     when(() => shadowBookService.cleanSyncData(any())).thenAnswer((_) async {});
   });
 
-  test(
-    'deactivates the group, clears queue, and deactivates locally',
-    () async {
-      final result = await useCase.execute('group-1');
+  test('dissolves the group, clears queue, and deletes it locally', () async {
+    final result = await useCase.execute('group-1');
 
-      expect(result, isA<DeactivateGroupSuccess>());
-      verify(() => apiClient.deactivateGroup('group-1')).called(1);
-      verify(() => queueManager.clearQueue()).called(1);
-      verify(() => shadowBookService.cleanSyncData('group-1')).called(1);
-      verify(() => groupRepository.deactivateGroup('group-1')).called(1);
-    },
-  );
+    expect(result, isA<DeactivateGroupSuccess>());
+    verify(() => apiClient.deactivateGroup('group-1')).called(1);
+    verify(() => queueManager.clearQueue()).called(1);
+    verify(() => shadowBookService.cleanSyncData('group-1')).called(1);
+    verify(() => groupRepository.deleteGroup('group-1')).called(1);
+  });
 }

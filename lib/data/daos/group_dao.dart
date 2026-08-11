@@ -97,6 +97,9 @@ class GroupDao extends DatabaseAccessor<AppDatabase> with _$GroupDaoMixin {
         ),
       );
 
+  Future<void> deleteByGroupId(String groupId) =>
+      (delete(groups)..where((table) => table.groupId.equals(groupId))).go();
+
   Future<void> updateGroupKey(String groupId, String groupKey) =>
       (update(groups)..where((table) => table.groupId.equals(groupId))).write(
         GroupsCompanion(groupKey: Value(groupKey)),

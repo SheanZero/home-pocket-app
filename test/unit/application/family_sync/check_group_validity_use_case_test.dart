@@ -29,6 +29,10 @@ void main() {
     createdAt: DateTime(2026),
   );
 
+  setUpAll(() {
+    registerFallbackValue(LocalGroupCleanupMode.deactivate);
+  });
+
   setUp(() {
     groupRepository = _MockGroupRepository();
     apiClient = _MockRelayApiClient();
@@ -43,7 +47,10 @@ void main() {
       () => groupRepository.getActiveGroup(),
     ).thenAnswer((_) async => activeGroup);
     when(
-      () => invalidationCleanup.execute(groupId: any(named: 'groupId')),
+      () => invalidationCleanup.execute(
+        groupId: any(named: 'groupId'),
+        mode: any(named: 'mode'),
+      ),
     ).thenAnswer((_) async {});
   });
 
@@ -57,7 +64,12 @@ void main() {
       final result = await useCase.execute(forceCheck: true);
 
       expect(result, isA<GroupInvalid>());
-      verify(() => invalidationCleanup.execute(groupId: 'group-1')).called(1);
+      verify(
+        () => invalidationCleanup.execute(
+          groupId: 'group-1',
+          mode: LocalGroupCleanupMode.deactivate,
+        ),
+      ).called(1);
     },
   );
 
@@ -90,7 +102,12 @@ void main() {
       final result = await useCase.execute(forceCheck: true);
 
       expect(result, isA<GroupInvalid>());
-      verify(() => invalidationCleanup.execute(groupId: 'group-1')).called(1);
+      verify(
+        () => invalidationCleanup.execute(
+          groupId: 'group-1',
+          mode: LocalGroupCleanupMode.deactivate,
+        ),
+      ).called(1);
       verifyNever(() => invalidationCleanup.execute(groupId: 'group-2'));
     },
   );
@@ -136,10 +153,31 @@ void main() {
           );
 
       expect(result, isA<GroupInvalid>());
-      verify(() => invalidationCleanup.execute(groupId: 'group-1')).called(1);
+      verify(
+        () => invalidationCleanup.execute(
+          groupId: 'group-1',
+          mode: LocalGroupCleanupMode.deactivate,
+        ),
+      ).called(1);
       verifyNever(() => apiClient.checkGroup());
     },
   );
+
+  test('authenticated 404 permanently deletes the dissolved group', () async {
+    final result = await useCase.invalidateAfterAuthenticatedMembershipFailure(
+      groupId: 'group-1',
+      statusCode: 404,
+      reason: 'Group dissolved',
+    );
+
+    expect(result, isA<GroupInvalid>());
+    verify(
+      () => invalidationCleanup.execute(
+        groupId: 'group-1',
+        mode: LocalGroupCleanupMode.delete,
+      ),
+    ).called(1);
+  });
 
   test('confirming or awaiting-key local snapshots are not removed', () async {
     when(() => groupRepository.getActiveGroup()).thenAnswer((_) async => null);

@@ -1629,6 +1629,15 @@ class SZh extends S {
   String get familyFlowViewRequests => '查看申请';
 
   @override
+  String familyFlowApprovedJoiningTitle(String name) {
+    return '已批准 $name 加入';
+  }
+
+  @override
+  String get familyFlowApprovedJoiningDescription =>
+      '对方正在安全地完成设置，完成后会自动出现在成员列表中，无需再次批准。';
+
+  @override
   String get familyFlowSyncSettings => '同步设置';
 
   @override

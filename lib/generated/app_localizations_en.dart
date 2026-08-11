@@ -1673,6 +1673,15 @@ class SEn extends S {
   String get familyFlowViewRequests => 'Review requests';
 
   @override
+  String familyFlowApprovedJoiningTitle(String name) {
+    return '$name is approved';
+  }
+
+  @override
+  String get familyFlowApprovedJoiningDescription =>
+      'They are securely finishing setup and will appear in the member list automatically. No need to approve again.';
+
+  @override
   String get familyFlowSyncSettings => 'Sync settings';
 
   @override

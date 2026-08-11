@@ -186,6 +186,92 @@ void main() {
     expect(find.text('Manually sync data'), findsOneWidget);
   });
 
+  testWidgets(
+    'shows an approved member as joining instead of a new request while the snapshot catches up',
+    (tester) async {
+      final controller = StreamController<GroupInfo?>();
+      addTearDown(controller.close);
+      final group = GroupInfo(
+        groupId: 'group-1',
+        groupName: 'Test Family',
+        status: GroupStatus.active,
+        role: 'owner',
+        groupKey: 'group-key',
+        members: const [
+          GroupMember(
+            deviceId: 'owner-1',
+            publicKey: 'pk-owner',
+            deviceName: 'Owner phone',
+            displayName: 'Owner',
+            avatarEmoji: '🏠',
+            role: 'owner',
+            status: 'active',
+          ),
+          GroupMember(
+            deviceId: 'member-1',
+            publicKey: 'pk-member',
+            deviceName: 'Kitchen tablet',
+            displayName: 'Alex',
+            avatarEmoji: '🌿',
+            role: 'member',
+            status: 'pending',
+          ),
+        ],
+        createdAt: DateTime(2026, 3, 1),
+      );
+      when(
+        () => groupRepository.getGroupById('group-1'),
+      ).thenAnswer((_) async => group);
+      when(
+        () => groupRepository.watchActiveGroup(),
+      ).thenAnswer((_) => controller.stream);
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const GroupManagementScreen(
+            groupId: 'group-1',
+            approvedMemberDeviceId: 'member-1',
+          ),
+          overrides: [
+            groupRepositoryProvider.overrideWithValue(groupRepository),
+            leaveGroupUseCaseProvider.overrideWithValue(leaveGroupUseCase),
+            deactivateGroupUseCaseProvider.overrideWithValue(
+              deactivateGroupUseCase,
+            ),
+            removeMemberUseCaseProvider.overrideWithValue(removeMemberUseCase),
+            manageGroupInviteUseCaseProvider.overrideWithValue(
+              manageGroupInviteUseCase,
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Alex is approved'), findsOneWidget);
+      expect(
+        find.text(
+          'They are securely finishing setup and will appear in the member list automatically. No need to approve again.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('New join requests · 1'), findsNothing);
+      expect(find.text('Review requests'), findsNothing);
+
+      controller.add(
+        group.copyWith(
+          members: [
+            group.members.first,
+            group.members.last.copyWith(status: 'active'),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('approved-member-joining')), findsNothing);
+      expect(find.text('Alex'), findsOneWidget);
+    },
+  );
+
   testWidgets('empty owner-only family can open the join-another flow', (
     tester,
   ) async {

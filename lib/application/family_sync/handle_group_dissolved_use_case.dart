@@ -2,9 +2,11 @@ import '../../features/family_sync/domain/repositories/group_repository.dart';
 import '../../infrastructure/sync/sync_queue_manager.dart';
 import 'shadow_book_service.dart';
 
+enum LocalGroupCleanupMode { deactivate, delete }
+
 /// Handles group_dissolved push notification.
 ///
-/// Cleans local sync data and deactivates the group.
+/// Cleans local sync data and permanently removes the dissolved group.
 class HandleGroupDissolvedUseCase {
   HandleGroupDissolvedUseCase({
     required this._groupRepo,
@@ -16,12 +18,20 @@ class HandleGroupDissolvedUseCase {
   final SyncQueueManager _queueManager;
   final ShadowBookService _shadowBookService;
 
-  Future<void> execute({required String groupId}) async {
+  Future<void> execute({
+    required String groupId,
+    LocalGroupCleanupMode mode = LocalGroupCleanupMode.delete,
+  }) async {
     final activeGroup = await _groupRepo.getActiveGroup();
     if (activeGroup == null || activeGroup.groupId != groupId) return;
 
     await _queueManager.clearQueue();
     await _shadowBookService.cleanSyncData(groupId);
-    await _groupRepo.deactivateGroup(groupId);
+    switch (mode) {
+      case LocalGroupCleanupMode.deactivate:
+        await _groupRepo.deactivateGroup(groupId);
+      case LocalGroupCleanupMode.delete:
+        await _groupRepo.deleteGroup(groupId);
+    }
   }
 }

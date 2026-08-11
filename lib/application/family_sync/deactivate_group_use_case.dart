@@ -49,7 +49,7 @@ class DeactivateGroupUseCase {
       await _apiClient.deactivateGroup(groupId);
       await _queueManager.clearQueue();
       await _shadowBookService?.cleanSyncData(groupId);
-      await _groupRepository.deactivateGroup(groupId);
+      await _groupRepository.deleteGroup(groupId);
       return const DeactivateGroupResult.success();
     } catch (error) {
       final failure = groupOperationFailureFrom(

@@ -48,7 +48,7 @@ void main() {
         () => fakeShadowBookService.cleanSyncData(any()),
       ).thenAnswer((_) async {});
       when(
-        () => fakeGroupRepository.deactivateGroup(any()),
+        () => fakeGroupRepository.deleteGroup(any()),
       ).thenAnswer((_) async {});
 
       useCase = DeactivateGroupUseCase(
@@ -73,7 +73,7 @@ void main() {
         verify(() => fakeApiClient.deactivateGroup('group-1')).called(1);
         verify(() => fakeSyncQueueManager.clearQueue()).called(1);
         verify(() => fakeShadowBookService.cleanSyncData('group-1')).called(1);
-        verify(() => fakeGroupRepository.deactivateGroup('group-1')).called(1);
+        verify(() => fakeGroupRepository.deleteGroup('group-1')).called(1);
       },
     );
 
@@ -105,9 +105,9 @@ void main() {
       expect(error.message, isNot(contains('queue broken')));
     });
 
-    test('returns error when groupRepository.deactivateGroup throws', () async {
+    test('returns error when groupRepository.deleteGroup throws', () async {
       when(
-        () => fakeGroupRepository.deactivateGroup(any()),
+        () => fakeGroupRepository.deleteGroup(any()),
       ).thenThrow(Exception('db write failed'));
 
       final result = await useCase.execute('group-1');

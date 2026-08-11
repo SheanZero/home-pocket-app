@@ -3135,6 +3135,18 @@ abstract class S {
   /// **'Review requests'**
   String get familyFlowViewRequests;
 
+  /// No description provided for @familyFlowApprovedJoiningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is approved'**
+  String familyFlowApprovedJoiningTitle(String name);
+
+  /// No description provided for @familyFlowApprovedJoiningDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'They are securely finishing setup and will appear in the member list automatically. No need to approve again.'**
+  String get familyFlowApprovedJoiningDescription;
+
   /// No description provided for @familyFlowSyncSettings.
   ///
   /// In en, this message translates to:

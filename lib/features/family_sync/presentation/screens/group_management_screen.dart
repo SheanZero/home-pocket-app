@@ -37,11 +37,13 @@ class GroupManagementScreen extends ConsumerStatefulWidget {
   const GroupManagementScreen({
     super.key,
     this.groupId,
+    this.approvedMemberDeviceId,
     this.shareInvite,
     this.copyInvite,
   });
 
   final String? groupId;
+  final String? approvedMemberDeviceId;
   final Future<void> Function(String text)? shareInvite;
   final Future<void> Function(String code)? copyInvite;
 
@@ -514,6 +516,7 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
     return _GroupManagementContent(
       syncState: syncState,
       group: group,
+      approvedMemberDeviceId: widget.approvedMemberDeviceId,
       isInviteLoading: _isInviteLoading,
       isTransferLoading: _isTransferLoading,
       managementSummary: _managementSummary,
@@ -614,6 +617,7 @@ class _GroupManagementContent extends StatelessWidget {
   const _GroupManagementContent({
     required this.syncState,
     required this.group,
+    required this.approvedMemberDeviceId,
     required this.isInviteLoading,
     required this.isTransferLoading,
     required this.managementSummary,
@@ -632,6 +636,7 @@ class _GroupManagementContent extends StatelessWidget {
 
   final SyncState syncState;
   final GroupInfo group;
+  final String? approvedMemberDeviceId;
   final bool isInviteLoading;
   final bool isTransferLoading;
   final String Function(GroupInfo group, List<GroupMember> activeMembers)
@@ -654,7 +659,10 @@ class _GroupManagementContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = _GroupManagementViewData.fromGroup(group);
+    final data = _GroupManagementViewData.fromGroup(
+      group,
+      approvedMemberDeviceId: approvedMemberDeviceId,
+    );
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(
         horizontal: familyFlowHorizontalPadding,
@@ -670,6 +678,8 @@ class _GroupManagementContent extends StatelessWidget {
             onRename: onRename,
             syncState: syncState,
           ),
+          if (data.approvedMember case final member?)
+            _ApprovedMemberJoining(member: member),
           if (data.isOwner && data.pendingMemberCount > 0)
             _PendingMemberRequests(
               groupId: group.groupId,
@@ -721,25 +731,41 @@ class _GroupManagementViewData {
     required this.isOwner,
     required this.canManageInvites,
     required this.pendingMemberCount,
+    required this.approvedMember,
     required this.activeMembers,
     required this.terminalMembers,
     required this.canJoinAnotherFamily,
   });
 
-  factory _GroupManagementViewData.fromGroup(GroupInfo group) {
+  factory _GroupManagementViewData.fromGroup(
+    GroupInfo group, {
+    String? approvedMemberDeviceId,
+  }) {
     final isOwner = group.role == 'owner';
     final activeMembers = group.members
         .where((member) => member.status == 'active')
         .toList();
+    final pendingMembers = group.members
+        .where((member) => member.status == 'pending')
+        .toList();
+    GroupMember? approvedMember;
+    if (isOwner && approvedMemberDeviceId != null) {
+      for (final member in pendingMembers) {
+        if (member.deviceId == approvedMemberDeviceId) {
+          approvedMember = member;
+          break;
+        }
+      }
+    }
     return _GroupManagementViewData(
       isOwner: isOwner,
       canManageInvites:
           isOwner &&
           group.groupKey?.isNotEmpty == true &&
           group.status == GroupStatus.active,
-      pendingMemberCount: group.members
-          .where((member) => member.status == 'pending')
-          .length,
+      pendingMemberCount:
+          pendingMembers.length - (approvedMember == null ? 0 : 1),
+      approvedMember: approvedMember,
       activeMembers: activeMembers,
       terminalMembers: isOwner
           ? group.members
@@ -762,12 +788,76 @@ class _GroupManagementViewData {
   final bool isOwner;
   final bool canManageInvites;
   final int pendingMemberCount;
+  final GroupMember? approvedMember;
   final List<GroupMember> activeMembers;
   final List<GroupMember> terminalMembers;
   final bool canJoinAnotherFamily;
 
   bool get hasTransferCandidate =>
       activeMembers.any((member) => member.role == 'member');
+}
+
+class _ApprovedMemberJoining extends StatelessWidget {
+  const _ApprovedMemberJoining({required this.member});
+
+  final GroupMember member;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    final palette = context.palette;
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      child: Container(
+        key: const Key('approved-member-joining'),
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        decoration: BoxDecoration(
+          color: palette.successLight,
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(color: palette.accentPrimaryBorder),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 1),
+              child: Icon(
+                LucideIcons.circleCheck,
+                size: 20,
+                color: palette.success,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.familyFlowApprovedJoiningTitle(member.displayName),
+                    style: AppTextStyles.label.copyWith(
+                      color: palette.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    l10n.familyFlowApprovedJoiningDescription,
+                    style: AppTextStyles.supporting.copyWith(
+                      color: palette.textSecondary,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _GroupManagementHeader extends StatelessWidget {

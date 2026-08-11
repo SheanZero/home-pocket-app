@@ -249,6 +249,33 @@ void main() {
     expect(inactive?.members, isEmpty);
   });
 
+  test('deleteGroup atomically removes the group and its members', () async {
+    const groupId = 'group-to-delete';
+    const member = GroupMember(
+      deviceId: 'member-device',
+      publicKey: 'member-public-key',
+      deviceName: 'Member phone',
+      role: 'member',
+      status: 'active',
+      displayName: 'Member',
+      avatarEmoji: '🏠',
+    );
+    await repository.restoreActiveGroup(
+      groupId: groupId,
+      role: 'owner',
+      groupKey: 'secret-group-key',
+      members: const [member],
+    );
+
+    await repository.deleteGroup(groupId);
+
+    expect(await repository.getGroupById(groupId), isNull);
+    final members = await database.managers.groupMembers
+        .filter((row) => row.groupId.equals(groupId))
+        .get();
+    expect(members, isEmpty);
+  });
+
   test('updateActiveGroupName cannot mutate a non-active group', () async {
     await repository.saveConfirmingGroup(
       groupId: 'confirming-group',

@@ -27,7 +27,7 @@ class GroupInvalid extends GroupValidityResult {
 /// Validates group membership before sync push.
 ///
 /// Uses a 5-minute cache to avoid hammering the server on every transaction.
-/// On invalid: cleans shadow books + deactivates group locally.
+/// On invalid: cleans shadow books and removes local membership data.
 /// Offline-tolerant: returns valid on network errors.
 class CheckGroupValidityUseCase {
   CheckGroupValidityUseCase({
@@ -64,6 +64,7 @@ class CheckGroupValidityUseCase {
         return _invalidateLocalGroup(
           group.groupId,
           'Device is no longer an active group member',
+          cleanupMode: LocalGroupCleanupMode.deactivate,
         );
       }
 
@@ -81,6 +82,7 @@ class CheckGroupValidityUseCase {
         return _invalidateLocalGroup(
           group.groupId,
           'Server membership points to a different group',
+          cleanupMode: LocalGroupCleanupMode.deactivate,
         );
       }
 
@@ -90,6 +92,9 @@ class CheckGroupValidityUseCase {
         return _invalidateLocalGroup(
           group.groupId,
           e.statusCode == 404 ? 'Group dissolved' : 'Removed from group',
+          cleanupMode: e.statusCode == 404
+              ? LocalGroupCleanupMode.delete
+              : LocalGroupCleanupMode.deactivate,
         );
       }
       // Other API errors → offline tolerance
@@ -120,14 +125,21 @@ class CheckGroupValidityUseCase {
       _invalidate();
       return const GroupValidityResult.noGroup();
     }
-    return _invalidateLocalGroup(groupId, reason);
+    return _invalidateLocalGroup(
+      groupId,
+      reason,
+      cleanupMode: statusCode == 404
+          ? LocalGroupCleanupMode.delete
+          : LocalGroupCleanupMode.deactivate,
+    );
   }
 
   Future<GroupValidityResult> _invalidateLocalGroup(
     String groupId,
-    String reason,
-  ) async {
-    await _invalidationCleanup.execute(groupId: groupId);
+    String reason, {
+    required LocalGroupCleanupMode cleanupMode,
+  }) async {
+    await _invalidationCleanup.execute(groupId: groupId, mode: cleanupMode);
     _invalidate();
     return GroupValidityResult.invalid(reason);
   }

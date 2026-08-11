@@ -103,7 +103,10 @@ class _MemberApprovalScreenState extends ConsumerState<MemberApprovalScreen> {
     if (result is ConfirmMemberSuccess) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(
-          builder: (_) => GroupManagementScreen(groupId: group.groupId),
+          builder: (_) => GroupManagementScreen(
+            groupId: group.groupId,
+            approvedMemberDeviceId: member.deviceId,
+          ),
         ),
       );
       return;

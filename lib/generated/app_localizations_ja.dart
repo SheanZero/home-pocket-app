@@ -1638,6 +1638,15 @@ class SJa extends S {
   String get familyFlowViewRequests => '申請を見る';
 
   @override
+  String familyFlowApprovedJoiningTitle(String name) {
+    return '$nameさんを承認しました';
+  }
+
+  @override
+  String get familyFlowApprovedJoiningDescription =>
+      '安全な初期設定を完了中です。完了後、メンバー一覧に自動で表示されます。再度承認する必要はありません。';
+
+  @override
   String get familyFlowSyncSettings => '同期設定';
 
   @override
