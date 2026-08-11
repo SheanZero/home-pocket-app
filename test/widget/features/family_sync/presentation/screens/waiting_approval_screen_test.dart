@@ -272,6 +272,96 @@ void main() {
   });
 
   testWidgets(
+    'approved membership stays in recovery progress until activation is ready',
+    (tester) async {
+      final recovery = MockGroupKeyRecoveryCoordinator();
+      final recoveryEvents =
+          StreamController<GroupKeyRecoveryStatus>.broadcast();
+      when(
+        () => recovery.currentStatus,
+      ).thenReturn(const GroupKeyRecoveryStatus());
+      when(
+        () => recovery.statusStream,
+      ).thenAnswer((_) => recoveryEvents.stream);
+      when(
+        () => groupRepository.getGroupById('group-1'),
+      ).thenAnswer((_) async => buildConfirmingGroup());
+      when(
+        () => groupRepository.getActiveGroup(),
+      ).thenAnswer((_) async => buildActiveGroup());
+      when(
+        () => getJoinRequestStatusUseCase.execute(groupId: 'group-1'),
+      ).thenAnswer(
+        (_) async =>
+            const JoinRequestLifecycleSuccess(JoinRequestStatus.approved),
+      );
+      var activationAttempts = 0;
+      when(
+        () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+      ).thenAnswer((_) async {
+        activationAttempts++;
+        return activationAttempts == 1
+            ? const MemberActivationAwaitingKey(groupId: 'group-1')
+            : const MemberActivationReady(groupId: 'group-1');
+      });
+
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const WaitingApprovalScreen(
+            groupId: 'group-1',
+            groupName: 'Test Family',
+            ownerDisplayName: 'Owner phone',
+          ),
+          overrides: [
+            groupRepositoryProvider.overrideWithValue(groupRepository),
+            completeMemberActivationUseCaseProvider.overrideWithValue(
+              memberActivationUseCase,
+            ),
+            syncEngineProvider.overrideWithValue(syncEngine),
+            webSocketServiceProvider.overrideWithValue(webSocketService),
+            keyManagerProvider.overrideWithValue(keyManager),
+            getJoinRequestStatusUseCaseProvider.overrideWithValue(
+              getJoinRequestStatusUseCase,
+            ),
+            cancelJoinRequestUseCaseProvider.overrideWithValue(
+              cancelJoinRequestUseCase,
+            ),
+            pushNotificationServiceProvider.overrideWithValue(
+              pushNotificationService,
+            ),
+            groupKeyRecoveryCoordinatorProvider.overrideWithValue(recovery),
+          ],
+        ),
+      );
+
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pump();
+
+      expect(find.text('Restoring the family key'), findsOneWidget);
+      expect(find.text('Unable to join this family right now'), findsNothing);
+      expect(find.text('Cancel join request'), findsNothing);
+      verify(
+        () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+      ).called(1);
+
+      recoveryEvents.add(
+        const GroupKeyRecoveryStatus(
+          phase: GroupKeyRecoveryPhase.recovered,
+          groupId: 'group-1',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(WaitingApprovalScreen), findsNothing);
+      expect(find.text('Test Family'), findsOneWidget);
+      verify(
+        () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+      ).called(1);
+      await recoveryEvents.close();
+    },
+  );
+
+  testWidgets(
     'shows the unified unable-to-join recovery layout without technical copy',
     (tester) async {
       final recovery = MockGroupKeyRecoveryCoordinator();
@@ -416,13 +506,15 @@ void main() {
         ),
       );
       await tester.tap(find.text('Open family'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
 
-      expect(find.text('Unable to join this family right now'), findsOneWidget);
+      expect(find.text('Restoring the family key'), findsOneWidget);
+      expect(find.text('Unable to join this family right now'), findsNothing);
       expect(find.text('Waiting for owner approval'), findsNothing);
       expect(find.text('Cancel join request'), findsNothing);
-      expect(find.text('Enter invite code again'), findsOneWidget);
-      expect(find.text('Leave and choose another family'), findsOneWidget);
+      expect(find.text('Enter invite code again'), findsNothing);
+      expect(find.text('Leave and choose another family'), findsNothing);
       verify(() => checkGroupUseCase.execute()).called(1);
       await recoveryEvents.close();
     },
@@ -432,9 +524,12 @@ void main() {
     'active member can leave during key recovery and choose another family',
     (tester) async {
       final recovery = MockGroupKeyRecoveryCoordinator();
-      when(
-        () => recovery.currentStatus,
-      ).thenReturn(const GroupKeyRecoveryStatus());
+      when(() => recovery.currentStatus).thenReturn(
+        const GroupKeyRecoveryStatus(
+          phase: GroupKeyRecoveryPhase.unrecoverable,
+          groupId: 'group-1',
+        ),
+      );
       when(() => recovery.statusStream).thenAnswer((_) => const Stream.empty());
       when(
         () => groupRepository.getGroupById('group-1'),
@@ -487,9 +582,12 @@ void main() {
     'active member can leave during key recovery and enter another invite',
     (tester) async {
       final recovery = MockGroupKeyRecoveryCoordinator();
-      when(
-        () => recovery.currentStatus,
-      ).thenReturn(const GroupKeyRecoveryStatus());
+      when(() => recovery.currentStatus).thenReturn(
+        const GroupKeyRecoveryStatus(
+          phase: GroupKeyRecoveryPhase.unrecoverable,
+          groupId: 'group-1',
+        ),
+      );
       when(() => recovery.statusStream).thenAnswer((_) => const Stream.empty());
       when(
         () => groupRepository.getGroupById('group-1'),
@@ -542,9 +640,12 @@ void main() {
     'active owner can dissolve during key recovery and choose another family',
     (tester) async {
       final recovery = MockGroupKeyRecoveryCoordinator();
-      when(
-        () => recovery.currentStatus,
-      ).thenReturn(const GroupKeyRecoveryStatus());
+      when(() => recovery.currentStatus).thenReturn(
+        const GroupKeyRecoveryStatus(
+          phase: GroupKeyRecoveryPhase.unrecoverable,
+          groupId: 'group-1',
+        ),
+      );
       when(() => recovery.statusStream).thenAnswer((_) => const Stream.empty());
       when(
         () => groupRepository.getGroupById('group-1'),

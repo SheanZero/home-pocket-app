@@ -205,6 +205,9 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
           final status = JoinRequestStatusX.parse(event['status']);
           if (status != null) {
             _applyJoinRequestStatus(status);
+            if (status == JoinRequestStatus.approved) {
+              unawaited(_verifyGroupAndNavigate());
+            }
           } else {
             unawaited(_refreshJoinRequestStatus());
           }
@@ -356,7 +359,9 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
       case MemberActivationPendingApproval():
         break;
       case MemberActivationAwaitingKey():
-        break;
+        if (_requestStatus != JoinRequestStatus.approved) {
+          setState(() => _requestStatus = JoinRequestStatus.approved);
+        }
       case MemberActivationError():
         break;
     }
@@ -376,21 +381,20 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
     final l10n = S.of(context);
 
     final palette = context.palette;
-    if (_requestStatus.isTerminal) {
+    final keyRecoveryUnrecoverable =
+        _keyRecoveryStatus.groupId == widget.groupId &&
+        _keyRecoveryStatus.phase == GroupKeyRecoveryPhase.unrecoverable;
+    if (_requestStatus.isTerminal || keyRecoveryUnrecoverable) {
       return _buildUnableToJoinState(
         context,
         l10n,
-        requiresMembershipExit: false,
+        requiresMembershipExit:
+            !_requestStatus.isTerminal && keyRecoveryUnrecoverable,
       );
     }
-    if (_requestStatus == JoinRequestStatus.approved ||
-        _keyRecoveryStatus.groupId == widget.groupId) {
-      return _buildUnableToJoinState(
-        context,
-        l10n,
-        requiresMembershipExit: true,
-      );
-    }
+    final isRecoveringKey =
+        _requestStatus == JoinRequestStatus.approved ||
+        _keyRecoveryStatus.groupId == widget.groupId;
     return Scaffold(
       backgroundColor: palette.background,
       body: SafeArea(
@@ -440,7 +444,9 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                               ),
                               const SizedBox(height: 27),
                               Text(
-                                l10n.groupWaitingApproval,
+                                isRecoveringKey
+                                    ? l10n.groupKeyRecoveryTitle
+                                    : l10n.groupWaitingApproval,
                                 textAlign: TextAlign.center,
                                 style: AppTextStyles.pageTitle.copyWith(
                                   fontSize: 21,
@@ -449,20 +455,26 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                               ),
                               const SizedBox(height: 7),
                               Text(
-                                l10n.groupWaitingDesc(widget.ownerDisplayName),
+                                isRecoveringKey
+                                    ? l10n.groupKeyRecoveryWaiting
+                                    : l10n.groupWaitingDesc(
+                                        widget.ownerDisplayName,
+                                      ),
                                 textAlign: TextAlign.center,
                                 style: AppTextStyles.body.copyWith(
                                   color: palette.textSecondary,
                                 ),
                               ),
-                              const SizedBox(height: 24),
-                              Text(
-                                '${l10n.groupWaitingHint1}\n${l10n.groupWaitingHint2}',
-                                textAlign: TextAlign.center,
-                                style: AppTextStyles.body.copyWith(
-                                  color: palette.textSecondary,
+                              if (!isRecoveringKey) ...[
+                                const SizedBox(height: 24),
+                                Text(
+                                  '${l10n.groupWaitingHint1}\n${l10n.groupWaitingHint2}',
+                                  textAlign: TextAlign.center,
+                                  style: AppTextStyles.body.copyWith(
+                                    color: palette.textSecondary,
+                                  ),
                                 ),
-                              ),
+                              ],
                             ],
                           ),
                         ),
@@ -475,39 +487,43 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: ColoredBox(
-        color: palette.background,
-        child: SafeArea(
-          top: false,
-          minimum: const EdgeInsets.fromLTRB(
-            familyFlowHorizontalPadding,
-            10,
-            familyFlowHorizontalPadding,
-            14,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (_lifecycleError case final error?) ...[
-                Text(
-                  error,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.label.copyWith(color: palette.error),
+      bottomNavigationBar: isRecoveringKey
+          ? null
+          : ColoredBox(
+              color: palette.background,
+              child: SafeArea(
+                top: false,
+                minimum: const EdgeInsets.fromLTRB(
+                  familyFlowHorizontalPadding,
+                  10,
+                  familyFlowHorizontalPadding,
+                  14,
                 ),
-                const SizedBox(height: 10),
-              ],
-              FamilySecondaryButton(
-                controlKey: const Key('cancel-join-request-button'),
-                onPressed: _isCancelling ? null : _cancelJoinRequest,
-                label: l10n.groupCancelRequest,
-                icon: LucideIcons.undo,
-                isLoading: _isCancelling,
-                prominent: true,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_lifecycleError case final error?) ...[
+                      Text(
+                        error,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.label.copyWith(
+                          color: palette.error,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                    FamilySecondaryButton(
+                      controlKey: const Key('cancel-join-request-button'),
+                      onPressed: _isCancelling ? null : _cancelJoinRequest,
+                      label: l10n.groupCancelRequest,
+                      icon: LucideIcons.undo,
+                      isLoading: _isCancelling,
+                      prominent: true,
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
