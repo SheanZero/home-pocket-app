@@ -59,16 +59,16 @@ void main() {
     expect(tappedIndex, 1);
   });
 
-  testWidgets('active tab icon uses primary text color', (tester) async {
+  testWidgets('active tab icon uses action foreground color', (tester) async {
     await tester.pumpWidget(
       buildTestWidget(
         HomeBottomNavBar(currentIndex: 2, onTap: (_) {}, onFabTap: () {}),
       ),
     );
     await tester.pumpAndSettle();
-    // The active tab mirrors Mockup V16's `--hp-primary-text` role.
+    // The filled active indicator uses a high-contrast foreground icon.
     final barChartIcon = tester.widget<Icon>(find.byIcon(Icons.bar_chart));
-    expect(barChartIcon.color, AppPalette.light.accentPrimaryText);
+    expect(barChartIcon.color, AppPalette.light.primaryActionForeground);
   });
 
   testWidgets('inactive tab icon uses tertiary color', (tester) async {

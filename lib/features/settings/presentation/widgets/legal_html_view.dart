@@ -221,7 +221,6 @@ class _LegalHtmlViewState extends State<LegalHtmlView> {
       'strong' || 'b' => const TextStyle(fontWeight: FontWeight.w700),
       'em' || 'i' => const TextStyle(fontStyle: FontStyle.italic),
       'code' => TextStyle(
-        fontFamily: 'monospace',
         color: palette.accentPrimaryText,
         backgroundColor: palette.backgroundMuted,
       ),
