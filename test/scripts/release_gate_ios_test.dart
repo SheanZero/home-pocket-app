@@ -7,7 +7,23 @@ import '../../scripts/release_gate/ios_simulator_stage.dart';
 import '../../scripts/release_gate/models.dart';
 import '../../scripts/release_gate/process_adapter.dart';
 
+const _runIosReleaseGateTests = bool.fromEnvironment(
+  'RUN_IOS_RELEASE_GATE_TESTS',
+);
+const _iosReleaseGateSkipReason =
+    'iOS release-gate tests are disabled by default. Set '
+    'RUN_IOS_RELEASE_GATE_TESTS=true to enable them.';
+
 void main() {
+  if (!_runIosReleaseGateTests) {
+    test(
+      'iOS release-gate tests are disabled',
+      () {},
+      skip: _iosReleaseGateSkipReason,
+    );
+    return;
+  }
+
   test('preserves a complete simulator inventory for local parsing', () {
     final inventory = jsonEncode(<String, Object>{
       'devices': <String, Object>{

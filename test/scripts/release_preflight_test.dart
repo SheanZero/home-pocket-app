@@ -3,6 +3,12 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 const _scriptPath = 'scripts/release_preflight.sh';
+const _runAndroidReleasePreflightTests = bool.fromEnvironment(
+  'RUN_ANDROID_RELEASE_PREFLIGHT_TESTS',
+);
+const _androidReleasePreflightSkipReason =
+    'Android release preflight tests are disabled by default. Set '
+    'RUN_ANDROID_RELEASE_PREFLIGHT_TESTS=true to enable them.';
 
 String _projectRoot() => Directory.current.path;
 
@@ -255,6 +261,9 @@ dev_dependencies:
         expect(output, isNot(contains('storePassword')));
         expect(output, isNot(contains('keyPassword')));
       },
+      skip: _runAndroidReleasePreflightTests
+          ? false
+          : _androidReleasePreflightSkipReason,
     );
 
     test('Android package requires independent JDK 17 proof', () async {

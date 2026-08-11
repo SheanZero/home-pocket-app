@@ -1,6 +1,7 @@
 import 'package:speech_to_text/speech_recognition_result.dart';
 
 import '../../infrastructure/speech/speech_recognition_service.dart';
+import '../../shared/constants/voice_tuning.dart';
 
 /// Application-layer use case wrapping [SpeechRecognitionService] for screens
 /// that need speech recognition without importing infrastructure/ directly.
@@ -31,8 +32,8 @@ class StartSpeechRecognitionUseCase {
     required void Function(SpeechRecognitionResult result) onResult,
     required void Function(double normalizedLevel) onSoundLevel,
     required String localeId,
-    Duration listenFor = const Duration(seconds: 30),
-    Duration pauseFor = const Duration(seconds: 3),
+    Duration listenFor = VoiceTuning.listenFor,
+    Duration pauseFor = VoiceTuning.pauseFor,
     bool allowOnDeviceFallback = true,
   }) => _service.startListening(
     onResult: onResult,

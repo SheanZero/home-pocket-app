@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/voice/start_speech_recognition_use_case.dart';
 import 'package:home_pocket/infrastructure/speech/speech_recognition_service.dart';
+import 'package:home_pocket/shared/constants/voice_tuning.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockSpeechRecognitionService extends Mock
@@ -54,6 +55,9 @@ void main() {
           onResult: any(named: 'onResult'),
           onSoundLevel: any(named: 'onSoundLevel'),
           localeId: any(named: 'localeId'),
+          listenFor: VoiceTuning.listenFor,
+          pauseFor: VoiceTuning.pauseFor,
+          allowOnDeviceFallback: true,
         ),
       ).thenAnswer((_) async {});
 
@@ -68,6 +72,9 @@ void main() {
           onResult: any(named: 'onResult'),
           onSoundLevel: any(named: 'onSoundLevel'),
           localeId: 'ja-JP',
+          listenFor: VoiceTuning.listenFor,
+          pauseFor: VoiceTuning.pauseFor,
+          allowOnDeviceFallback: true,
         ),
       ).called(1);
     });
