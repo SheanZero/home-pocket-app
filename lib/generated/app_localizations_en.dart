@@ -3133,7 +3133,7 @@ class SEn extends S {
   String get onboardingWelcomeBadge => 'Budgeting that keeps you smiling';
 
   @override
-  String get onboardingWelcomeBrand => 'HAPPY POCKET';
+  String get onboardingWelcomeBrand => 'Family Budget';
 
   @override
   String get onboardingWelcomeTagline =>

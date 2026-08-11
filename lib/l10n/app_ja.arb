@@ -3638,9 +3638,9 @@
   "@onboardingWelcomeBadge": {
     "description": "Welcome A intro page 1: joy pill badge text"
   },
-  "onboardingWelcomeBrand": "HAPPY POCKET",
+  "onboardingWelcomeBrand": "ハピポケ家族家計簿",
   "@onboardingWelcomeBrand": {
-    "description": "Welcome A intro page 1: letterspaced Latin brand line (same value in all locales)"
+    "description": "Welcome A intro page 1: localized brand subtitle matching the website"
   },
   "onboardingWelcomeTagline": "記録するたびに、ちょっと、しあわせ。\nお金とのつきあいを、もっと前向きに。",
   "@onboardingWelcomeTagline": {

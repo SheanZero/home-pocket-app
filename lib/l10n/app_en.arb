@@ -3624,9 +3624,9 @@
   "@onboardingWelcomeBadge": {
     "description": "Welcome A intro page 1: joy pill badge text"
   },
-  "onboardingWelcomeBrand": "HAPPY POCKET",
+  "onboardingWelcomeBrand": "Family Budget",
   "@onboardingWelcomeBrand": {
-    "description": "Welcome A intro page 1: letterspaced Latin brand line (same value in all locales)"
+    "description": "Welcome A intro page 1: localized brand subtitle matching the website"
   },
   "onboardingWelcomeTagline": "Every entry brings a little joy.\nBuild a brighter relationship with money.",
   "@onboardingWelcomeTagline": {

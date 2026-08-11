@@ -502,16 +502,10 @@ class _WelcomePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 23),
-            Row(
-              children: [
-                Expanded(child: _ValuePill(label: l10n.dailyLedger)),
-                const SizedBox(width: 7),
-                Expanded(
-                  child: _ValuePill(label: l10n.joyLedger, highlighted: true),
-                ),
-                const SizedBox(width: 7),
-                Expanded(child: _ValuePill(label: l10n.satisfactionLevel)),
-              ],
+            _WarmValueCluster(
+              dailyLabel: l10n.dailyLedger,
+              joyLabel: l10n.joyLedger,
+              satisfactionLabel: l10n.satisfactionLevel,
             ),
           ],
         ),
@@ -520,40 +514,258 @@ class _WelcomePage extends StatelessWidget {
   }
 }
 
-class _ValuePill extends StatelessWidget {
-  const _ValuePill({required this.label, this.highlighted = false});
+enum _ValueCapsuleTone { daily, joy, satisfaction }
 
-  final String label;
-  final bool highlighted;
+class _WarmValueCluster extends StatelessWidget {
+  const _WarmValueCluster({
+    required this.dailyLabel,
+    required this.joyLabel,
+    required this.satisfactionLabel,
+  });
+
+  final String dailyLabel;
+  final String joyLabel;
+  final String satisfactionLabel;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return Container(
-      constraints: const BoxConstraints(minHeight: 38),
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-      decoration: BoxDecoration(
-        color: highlighted ? palette.joyLight : palette.card,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: highlighted
-              ? palette.joyFullnessBorder
-              : palette.borderDefault,
-        ),
+    return SizedBox(
+      height: 82,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned.fill(
+            top: 13,
+            bottom: 8,
+            child: CustomPaint(
+              painter: _ValueClusterBackdropPainter(
+                washColor: palette.accentPrimary.withValues(alpha: 0.1),
+                threadColor: palette.accentPrimary.withValues(alpha: 0.34),
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Transform.translate(
+                  offset: const Offset(0, 2),
+                  child: _ValueCapsule(
+                    key: const ValueKey('onboarding-value-daily'),
+                    label: dailyLabel,
+                    tone: _ValueCapsuleTone.daily,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: _ValueCapsule(
+                  key: const ValueKey('onboarding-value-joy'),
+                  label: joyLabel,
+                  tone: _ValueCapsuleTone.joy,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Transform.translate(
+                  offset: const Offset(0, 3),
+                  child: _ValueCapsule(
+                    key: const ValueKey('onboarding-value-satisfaction'),
+                    label: satisfactionLabel,
+                    tone: _ValueCapsuleTone.satisfaction,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
-      alignment: Alignment.center,
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: highlighted ? palette.joyText : palette.textSecondary,
+    );
+  }
+}
+
+class _ValueCapsule extends StatelessWidget {
+  const _ValueCapsule({super.key, required this.label, required this.tone});
+
+  final String label;
+  final _ValueCapsuleTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final (fill, border, foreground) = switch (tone) {
+      _ValueCapsuleTone.daily => (
+        Color.alphaBlend(
+          palette.accentPrimary.withValues(alpha: 0.18),
+          palette.backgroundMuted,
+        ),
+        palette.accentPrimary.withValues(alpha: 0.7),
+        palette.accentPrimary,
+      ),
+      _ValueCapsuleTone.joy => (
+        Color.alphaBlend(
+          palette.joy.withValues(alpha: 0.28),
+          palette.backgroundMuted,
+        ),
+        palette.joy.withValues(alpha: 0.78),
+        palette.joyText,
+      ),
+      _ValueCapsuleTone.satisfaction => (
+        Color.alphaBlend(
+          palette.warning.withValues(alpha: 0.34),
+          palette.backgroundMuted,
+        ),
+        palette.warning.withValues(alpha: 0.7),
+        palette.warning,
+      ),
+    };
+
+    return Semantics(
+      label: label,
+      child: SizedBox(
+        height: 78,
+        child: DecoratedBox(
+          decoration: ShapeDecoration(
+            color: fill,
+            shape: RoundedRectangleBorder(
+              borderRadius: _capsuleRadius,
+              side: BorderSide(color: border),
+            ),
+          ),
+          child: ExcludeSemantics(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(4, 9, 4, 8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 28,
+                    height: 25,
+                    child: Center(child: _capsuleIcon(foreground)),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 11,
+                      height: 1.15,
+                      fontWeight: FontWeight.w700,
+                      color: foreground,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
+  }
+
+  BorderRadius get _capsuleRadius {
+    return switch (tone) {
+      _ValueCapsuleTone.daily => const BorderRadius.only(
+        topLeft: Radius.circular(38),
+        topRight: Radius.circular(31),
+        bottomLeft: Radius.circular(29),
+        bottomRight: Radius.circular(37),
+      ),
+      _ValueCapsuleTone.joy => const BorderRadius.only(
+        topLeft: Radius.circular(32),
+        topRight: Radius.circular(38),
+        bottomLeft: Radius.circular(39),
+        bottomRight: Radius.circular(31),
+      ),
+      _ValueCapsuleTone.satisfaction => const BorderRadius.only(
+        topLeft: Radius.circular(38),
+        topRight: Radius.circular(33),
+        bottomLeft: Radius.circular(30),
+        bottomRight: Radius.circular(40),
+      ),
+    };
+  }
+
+  Widget _capsuleIcon(Color color) {
+    return switch (tone) {
+      _ValueCapsuleTone.daily => Icon(
+        Icons.spa_outlined,
+        size: 23,
+        color: color,
+      ),
+      _ValueCapsuleTone.joy => Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          Icon(Icons.favorite_border_rounded, size: 23, color: color),
+          Positioned(
+            top: -2,
+            right: -2,
+            child: Icon(Icons.auto_awesome_rounded, size: 9, color: color),
+          ),
+        ],
+      ),
+      _ValueCapsuleTone.satisfaction => SatisfactionFaceIcon(
+        value: 5,
+        size: 24,
+        color: color,
+      ),
+    };
+  }
+}
+
+class _ValueClusterBackdropPainter extends CustomPainter {
+  const _ValueClusterBackdropPainter({
+    required this.washColor,
+    required this.threadColor,
+  });
+
+  final Color washColor;
+  final Color threadColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final washPaint = Paint()
+      ..color = washColor
+      ..style = PaintingStyle.fill;
+    final washRect = Rect.fromLTWH(0, 4, size.width, size.height - 8);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(washRect, const Radius.circular(32)),
+      washPaint,
+    );
+
+    final threadPaint = Paint()
+      ..color = threadColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.1
+      ..strokeCap = StrokeCap.round;
+    final thread = Path()
+      ..moveTo(4, size.height * 0.56)
+      ..cubicTo(
+        size.width * 0.22,
+        size.height * 0.34,
+        size.width * 0.32,
+        size.height * 0.72,
+        size.width * 0.5,
+        size.height * 0.5,
+      )
+      ..cubicTo(
+        size.width * 0.68,
+        size.height * 0.28,
+        size.width * 0.78,
+        size.height * 0.7,
+        size.width - 4,
+        size.height * 0.46,
+      );
+    canvas.drawPath(thread, threadPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _ValueClusterBackdropPainter oldDelegate) {
+    return washColor != oldDelegate.washColor ||
+        threadColor != oldDelegate.threadColor;
   }
 }
 

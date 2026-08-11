@@ -5699,10 +5699,10 @@ abstract class S {
   /// **'Budgeting that keeps you smiling'**
   String get onboardingWelcomeBadge;
 
-  /// Welcome A intro page 1: letterspaced Latin brand line (same value in all locales)
+  /// Welcome A intro page 1: localized brand subtitle matching the website
   ///
   /// In en, this message translates to:
-  /// **'HAPPY POCKET'**
+  /// **'Family Budget'**
   String get onboardingWelcomeBrand;
 
   /// Welcome A intro page 1: two-line tagline

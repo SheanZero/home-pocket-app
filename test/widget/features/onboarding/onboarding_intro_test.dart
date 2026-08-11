@@ -4,9 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_intro_screen.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
-Widget _host({required VoidCallback onContinue}) {
+Widget _host({
+  required VoidCallback onContinue,
+  Locale locale = const Locale('ja'),
+}) {
   return MaterialApp(
-    locale: const Locale('ja'),
+    locale: locale,
     localizationsDelegates: const [
       S.delegate,
       GlobalMaterialLocalizations.delegate,
@@ -32,7 +35,7 @@ void main() {
 
       expect(find.text('たのしく、つづく家計簿'), findsOneWidget); // joy pill badge
       expect(find.text('Happy Pocket'), findsOneWidget); // title
-      expect(find.text('HAPPY POCKET'), findsOneWidget); // brand line
+      expect(find.text('ハピポケ家族家計簿'), findsOneWidget); // brand subtitle
       expect(
         find.text('記録するたびに、ちょっと、しあわせ。\nお金とのつきあいを、もっと前向きに。'),
         findsOneWidget,
@@ -45,6 +48,74 @@ void main() {
       // はじめる only appears on page 2.
       expect(find.text('はじめる'), findsNothing);
       expect(find.byType(PageView), findsOneWidget);
+    });
+
+    testWidgets('brand subtitle matches the website in every locale', (
+      tester,
+    ) async {
+      const subtitles = <(Locale, String)>[
+        (Locale('ja'), 'ハピポケ家族家計簿'),
+        (Locale('zh'), '家庭账本'),
+        (Locale('en'), 'Family Budget'),
+      ];
+
+      for (final (locale, subtitle) in subtitles) {
+        await tester.pumpWidget(_host(onContinue: () {}, locale: locale));
+        await tester.pumpAndSettle();
+
+        expect(find.text(subtitle), findsOneWidget);
+      }
+    });
+
+    testWidgets('value area uses the warm three-capsule treatment', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_host(onContinue: () {}));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const ValueKey('onboarding-value-daily')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('onboarding-value-joy')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('onboarding-value-satisfaction')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('onboarding-value-daily')),
+          matching: find.byIcon(Icons.spa_outlined),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('onboarding-value-joy')),
+          matching: find.byIcon(Icons.favorite_border_rounded),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('warm value capsules fit a compact phone width', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(320, 568);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(_host(onContinue: () {}));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('日々の帳'), findsOneWidget);
+      expect(find.text('ときめき帳'), findsOneWidget);
+      expect(find.text('満足度'), findsOneWidget);
     });
 
     testWidgets('prebuilds page 2 before the first transition', (tester) async {
@@ -130,7 +201,7 @@ void main() {
       await tester.pumpWidget(_host(onContinue: () {}));
       await tester.pumpAndSettle();
 
-      await tester.drag(find.byType(PageView), const Offset(-400, 0));
+      await tester.drag(find.byType(PageView), const Offset(-600, 0));
       await tester.pumpAndSettle();
 
       expect(find.text('データは、\nあなたの手の中に。'), findsOneWidget);

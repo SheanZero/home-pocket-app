@@ -1,3 +1,54 @@
+# Design QA — Onboarding Warm Value Capsules
+
+## Evidence
+
+- Source visual truth: `/Users/xinz/.codex/generated_images/019fef99-2364-7c42-a4ee-0e342e30820c/exec-6f5dc40f-040e-40ec-a082-c63c8d3ca6f1.png`
+- Rendered implementation: `/Users/xinz/Development/home-pocket-app/test/golden/goldens/onboarding_value_capsules_dark_zh.png`
+- Full-view comparison: `/private/tmp/onboarding-full-compare.png` (source left, implementation right)
+- Focused value-region comparison: `/private/tmp/onboarding-value-compare.png` (source left, implementation right)
+- State: onboarding welcome page, dark theme, Chinese locale, animations disabled for deterministic capture
+- Implementation viewport: 393 × 852 logical and physical pixels, device pixel ratio 1, iOS safe area top 47 / bottom 34
+- Source pixels: 852 × 1846. Full-view evidence normalizes the source to 393 × 852; the near-identical aspect ratio requires no crop.
+- Focused normalization: source crop 852 × 321 at y=865 scaled to 393 × 148; implementation crop 393 × 148 at y=440.
+- The source includes generated OS status content while the headless implementation capture preserves only its safe-area space. Device chrome is outside the app-owned comparison scope.
+
+## Findings
+
+No actionable P0, P1, or P2 differences remain in the redesigned value region.
+
+- Fonts and typography: the implementation capture loads Hiragino Sans GB and the Material Icons font. Labels remain readable at 11 px, use the existing bold UI weight, and do not wrap or truncate in Chinese. Japanese, Chinese, and English copy are covered separately by widget tests.
+- Spacing and layout rhythm: three approximately 100 × 78 px capsules use 6 px gaps, gentle 0/2/3 px vertical offsets, asymmetric radii, and the same compact footprint as the selected visual. The shared low-contrast wash and curved thread restore continuity without crowding the tagline or primary action.
+- Colors and visual tokens: daily uses muted leaf/sage, Joy uses sakura rose, and satisfaction uses warm gold. All colors derive from `AppPalette`; contrast remains clear in the captured dark theme and no raw feature-level color literals were introduced.
+- Image and icon fidelity: the screen keeps the original hero art unchanged. The new value icons use the closest production Material icons plus the existing vector `SatisfactionFaceIcon`, so they remain crisp at all densities and do not require raster assets.
+- Copy and content: the exact localized concepts remain 日常 / 悦己 / 满足度 in Chinese, with existing Japanese and English localizations preserved.
+
+## Comparison History
+
+1. Initial implementation replaced the rigid pills but remained too rectangular, too saturated, and visually disconnected from the selected soft-organic target (P2).
+   - Fix: introduced asymmetric capsule radii, softer palette blending, semantic line icons, and a shared curved background treatment.
+2. The first refinement made the capsules touch, reducing the breathing room visible in the selected result (P2).
+   - Fix: restored 6 px separation, retained the organic silhouettes, increased capsule height to 78 px, and strengthened the subtle background wash/thread.
+3. Final full-view and focused comparisons show matching hierarchy, semantic color order, capsule scale, vertical rhythm, and icon-over-label structure. No further P0/P1/P2 fixes were identified.
+
+## Follow-up Polish
+
+- P3: the generated concept uses a custom smiling sun with rays for 满足度, while production intentionally reuses the app's established satisfaction-face icon for visual-system consistency.
+- P3: the generated concept extends tiny botanical accents a few pixels farther beyond the capsule group; production keeps them inside the existing onboarding content bounds for narrow-screen safety.
+
+## Implementation Checklist
+
+- [x] Replace rigid outlined pills with warm semantic capsules.
+- [x] Preserve the three localized concepts and accessibility semantics.
+- [x] Verify 320 px compact width without overflow.
+- [x] Capture dark Chinese golden evidence with real CJK and Material icon fonts.
+- [x] Pass onboarding, golden, localization, hardcoded-CJK, color-token, and static-analysis gates.
+
+final result: passed
+
+---
+
+# Previous Design QA Archive
+
 # Shopping Quantity & Unit — Flutter Implementation (2026-08-04)
 
 ## Scope and evidence

@@ -3037,7 +3037,7 @@ class SZh extends S {
   String get onboardingWelcomeBadge => '快乐记账，轻松坚持';
 
   @override
-  String get onboardingWelcomeBrand => 'HAPPY POCKET';
+  String get onboardingWelcomeBrand => '家庭账本';
 
   @override
   String get onboardingWelcomeTagline => '每一次记录，都有一点小幸福。\n让你与金钱的关系，更加积极。';

@@ -3054,7 +3054,7 @@ class SJa extends S {
   String get onboardingWelcomeBadge => 'たのしく、つづく家計簿';
 
   @override
-  String get onboardingWelcomeBrand => 'HAPPY POCKET';
+  String get onboardingWelcomeBrand => 'ハピポケ家族家計簿';
 
   @override
   String get onboardingWelcomeTagline =>

@@ -3638,9 +3638,9 @@
   "@onboardingWelcomeBadge": {
     "description": "Welcome A intro page 1: joy pill badge text"
   },
-  "onboardingWelcomeBrand": "HAPPY POCKET",
+  "onboardingWelcomeBrand": "家庭账本",
   "@onboardingWelcomeBrand": {
-    "description": "Welcome A intro page 1: letterspaced Latin brand line (same value in all locales)"
+    "description": "Welcome A intro page 1: localized brand subtitle matching the website"
   },
   "onboardingWelcomeTagline": "每一次记录，都有一点小幸福。\n让你与金钱的关系，更加积极。",
   "@onboardingWelcomeTagline": {
