@@ -32,7 +32,7 @@ class HomeTransactionTile extends StatelessWidget {
     this.satisfactionValue,
     this.foreignAnnotation,
     this.payerName,
-    this.payerTone = FamilyPayerTone.primary,
+    this.payerTone = FamilyPayerTone.self,
     this.payerAvatarEmoji,
     this.payerAvatarImagePath,
     this.onTap,

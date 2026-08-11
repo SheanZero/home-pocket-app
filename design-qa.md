@@ -1,3 +1,58 @@
+# Eight-slot family payer identity palette design QA
+
+## Evidence
+
+- Source visual truth: `/Users/xinz/.codex/generated_images/019feff2-a0e5-78d0-84b9-72ddc7f9a0cd/exec-fc8e2254-3de2-48d4-8f14-8a19f50ef366.png`
+- Light implementation screenshot: `/Users/xinz/Development/home-pocket-app/test/golden/goldens/family_transaction_attribution_v16_zh.png`
+- Dark implementation screenshot: `/Users/xinz/Development/home-pocket-app/test/golden/goldens/family_transaction_attribution_v16_dark_zh.png`
+- Combined comparison input: `/private/tmp/family_payer_design_qa_comparison.png`
+- Source pixels: `1536 × 1024`; implementation pixels: `390 × 390` per theme.
+- Implementation viewport: `390 × 390` logical pixels at device pixel ratio `1`.
+- Normalization: source scaled to `768 × 512`; light and dark implementation captures each scaled to `256 × 256` and placed beside the source in a `1280 × 512` comparison canvas.
+- State: family transaction attribution, Chinese locale, light and dark themes.
+- Scope extension: the selected source visual defines the first three tones;
+  five additional production tones extend the same low-saturation identity
+  system for families of up to eight people.
+
+## Findings
+
+- No actionable P0, P1, or P2 differences.
+- Fonts and typography: production labels retain `AppTextStyles.compact`, weight 700, single-line ellipsis, and the existing localized font stack. The larger labels in the source board are presentation-only; production sizing intentionally remains the established compact chip contract.
+- Spacing and layout rhythm: the production chip keeps the existing 72 px maximum width, 7 px horizontal padding, 2 px vertical padding, and 5 px radius. No surrounding row layout changed.
+- Colors and visual tokens: the implementation uses the selected light and dark hex pairs exactly, extended with cyan, copper, indigo, mocha, and slate. All 16 foreground/background pairs meet WCAG AA for compact text; measured contrast ranges from `5.19:1` to `5.75:1` in light mode and `7.30:1` to `7.97:1` in dark mode. All eight identity colors remain separate from Joy pink and Daily green.
+- Image quality and asset fidelity: no raster or icon assets were replaced or regenerated. Existing avatars and category badges remain unchanged and sharp in both golden captures.
+- Copy and content: payer names remain runtime content, including localized self labels. Existing truncation behavior is preserved.
+
+## Open Questions
+
+- None.
+
+## Implementation Checklist
+
+- [x] Assign self and the first seven members eight unique identity tones.
+- [x] Cycle the same eight tones beginning with the ninth person.
+- [x] Keep member identity stable between Home and List.
+- [x] Add brightness-aware light and dark token pairs.
+- [x] Verify semantic separation and contrast in automated tests.
+- [x] Update light golden evidence and add dark golden evidence.
+
+## Comparison History
+
+- Initial comparison: no P0/P1/P2 findings. No visual fixes were required after the implementation capture.
+- Eight-person extension: the first three visual tokens remain unchanged; five
+  added tones and the post-eight cycling order are covered by exact-value,
+  uniqueness, semantic-separation, and contrast tests.
+
+## Follow-up Polish
+
+- None required for this scoped color change.
+
+final result: passed
+
+---
+
+# Previous design QA history
+
 # Design QA — Onboarding Warm Value Capsules
 
 ## Evidence
@@ -971,7 +1026,6 @@ final result: passed
 final result: passed
 
 ---
-
 # V16 Settings First-Level Information Architecture — Design QA (2026-08-01)
 
 ## Scope and evidence

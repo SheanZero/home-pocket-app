@@ -51,7 +51,7 @@ class ListTransactionTile extends ConsumerWidget {
     this.foreignAnnotation,
     this.readOnly = false,
     this.familyPayerLabel,
-    this.familyPayerTone = FamilyPayerTone.shared,
+    this.familyPayerTone = FamilyPayerTone.memberA,
     this.familyPayerAvatarEmoji,
     this.familyPayerAvatarImagePath,
   });

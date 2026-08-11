@@ -2,21 +2,18 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_palette.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/family_payer_palette.dart';
 import '../../features/profile/presentation/widgets/avatar_display.dart';
 
-/// Stable family-member color roles shared by Home and transaction detail rows.
-///
-/// The current device owner always uses [primary]. Other members receive
-/// [joy], [shared], then cycle through the same semantic palette. This keeps a
-/// member visually consistent across Home and List without introducing a
-/// second family-only color system.
-enum FamilyPayerTone { primary, joy, shared }
+export '../../core/theme/family_payer_palette.dart' show FamilyPayerTone;
 
-FamilyPayerTone familyPayerToneForShadowIndex(int index) => switch (index % 3) {
-  0 => FamilyPayerTone.joy,
-  1 => FamilyPayerTone.shared,
-  _ => FamilyPayerTone.primary,
-};
+/// Maps shadow books across the eight identity colors.
+///
+/// The same shadow-book order is shared by Home and List, keeping a member's
+/// label stable across both surfaces. The device owner plus the first seven
+/// shadow books use all eight colors once; later members cycle the same set.
+FamilyPayerTone familyPayerToneForShadowIndex(int index) =>
+    FamilyPayerTone.values[(index + 1) % FamilyPayerTone.values.length];
 
 /// Compact identity-first payer label used in family transaction rows.
 class FamilyPayerChip extends StatelessWidget {
@@ -27,21 +24,16 @@ class FamilyPayerChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
-    final (background, foreground) = switch (tone) {
-      FamilyPayerTone.primary => (
-        palette.accentPrimaryLight,
-        palette.accentPrimary,
-      ),
-      FamilyPayerTone.joy => (palette.joyLight, palette.joyText),
-      FamilyPayerTone.shared => (palette.sharedLight, palette.sharedText),
-    };
+    final colors = FamilyPayerPalette.resolve(
+      Theme.of(context).brightness,
+      tone,
+    );
 
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 72),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: background,
+          color: colors.background,
           borderRadius: BorderRadius.circular(5),
         ),
         child: Padding(
@@ -49,7 +41,7 @@ class FamilyPayerChip extends StatelessWidget {
           child: Text(
             label,
             style: AppTextStyles.compact.copyWith(
-              color: foreground,
+              color: colors.foreground,
               fontWeight: FontWeight.w700,
             ),
             maxLines: 1,

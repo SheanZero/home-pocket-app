@@ -250,7 +250,7 @@ Widget _transaction(
     merchant: family ? merchant : payer,
     satisfactionValue: joy ? 8 : null,
     payerName: family ? (isSelf ? '自分' : payer) : null,
-    payerTone: isSelf ? FamilyPayerTone.primary : FamilyPayerTone.joy,
+    payerTone: isSelf ? FamilyPayerTone.self : FamilyPayerTone.memberA,
     payerAvatarEmoji: family ? '' : null,
     payerAvatarImagePath: family ? _asset(avatar) : null,
   );

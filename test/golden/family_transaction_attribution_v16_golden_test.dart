@@ -42,8 +42,10 @@ TaggedTransaction _transaction(String id, LedgerType ledgerType) {
   );
 }
 
-Widget _preview() {
-  final palette = AppPalette.light;
+Widget _preview(Brightness brightness) {
+  final isDark = brightness == Brightness.dark;
+  final palette = isDark ? AppPalette.dark : AppPalette.light;
+  final baseTheme = isDark ? AppTheme.dark : AppTheme.light;
   return ProviderScope(
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -55,9 +57,9 @@ Widget _preview() {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: S.supportedLocales,
-      theme: AppTheme.light.copyWith(
-        textTheme: AppTheme.light.textTheme.apply(fontFamily: 'NotoSansCJK'),
-        primaryTextTheme: AppTheme.light.primaryTextTheme.apply(
+      theme: baseTheme.copyWith(
+        textTheme: baseTheme.textTheme.apply(fontFamily: 'NotoSansCJK'),
+        primaryTextTheme: baseTheme.primaryTextTheme.apply(
           fontFamily: 'NotoSansCJK',
         ),
       ),
@@ -90,7 +92,7 @@ Widget _preview() {
                           merchant: '喫茶 月舟',
                           satisfactionValue: 9,
                           payerName: '我',
-                          payerTone: FamilyPayerTone.primary,
+                          payerTone: FamilyPayerTone.self,
                           payerAvatarEmoji: '',
                           payerAvatarImagePath: _asset(
                             'family-avatar-owner.png',
@@ -119,7 +121,7 @@ Widget _preview() {
                           merchant: 'ライフ',
                           readOnly: true,
                           familyPayerLabel: '花子',
-                          familyPayerTone: FamilyPayerTone.joy,
+                          familyPayerTone: FamilyPayerTone.memberA,
                           familyPayerAvatarEmoji: '',
                           familyPayerAvatarImagePath: _asset(
                             'family-avatar-hanako.png',
@@ -142,7 +144,7 @@ Widget _preview() {
                           satisfactionValue: 9,
                           readOnly: true,
                           familyPayerLabel: '我',
-                          familyPayerTone: FamilyPayerTone.primary,
+                          familyPayerTone: FamilyPayerTone.self,
                           familyPayerAvatarEmoji: '',
                           familyPayerAvatarImagePath: _asset(
                             'family-avatar-owner.png',
@@ -197,7 +199,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
 
-    await tester.pumpWidget(_preview());
+    await tester.pumpWidget(_preview(Brightness.light));
     await tester.pumpAndSettle();
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 100)),
@@ -207,6 +209,29 @@ void main() {
     await expectLater(
       find.byKey(const Key('family-transaction-attribution-preview')),
       matchesGoldenFile('goldens/family_transaction_attribution_v16_zh.png'),
+    );
+  });
+
+  testWidgets('family payer attribution supports dark identity colors', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 390);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(_preview(Brightness.dark));
+    await tester.pumpAndSettle();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 100)),
+    );
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byKey(const Key('family-transaction-attribution-preview')),
+      matchesGoldenFile(
+        'goldens/family_transaction_attribution_v16_dark_zh.png',
+      ),
     );
   });
 }

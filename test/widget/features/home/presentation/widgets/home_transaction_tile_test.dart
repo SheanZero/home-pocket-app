@@ -230,7 +230,7 @@ void main() {
                 merchant: '喫茶 月舟',
                 satisfactionValue: 8,
                 payerName: '我',
-                payerTone: FamilyPayerTone.primary,
+                payerTone: FamilyPayerTone.self,
                 payerAvatarEmoji: '🌿',
               ),
             ),

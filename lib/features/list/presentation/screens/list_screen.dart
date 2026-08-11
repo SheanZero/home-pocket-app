@@ -451,7 +451,7 @@ class ListScreen extends ConsumerWidget {
       showDate: showDate,
       foreignAnnotation: displayAmounts.foreignAnnotation,
       familyPayerLabel: familyPayer?.label,
-      familyPayerTone: familyPayer?.tone ?? FamilyPayerTone.primary,
+      familyPayerTone: familyPayer?.tone ?? FamilyPayerTone.self,
       familyPayerAvatarEmoji: familyPayer?.avatarEmoji,
       familyPayerAvatarImagePath: familyPayer?.avatarImagePath,
     );
@@ -471,7 +471,7 @@ class ListScreen extends ConsumerWidget {
     if (tagged.transaction.bookId == bookId) {
       return _ListFamilyPayer(
         label: selfLabel,
-        tone: FamilyPayerTone.primary,
+        tone: FamilyPayerTone.self,
         avatarEmoji: profile?.avatarEmoji ?? '',
         avatarImagePath: profile?.avatarImagePath,
       );
@@ -497,7 +497,7 @@ class ListScreen extends ConsumerWidget {
       label: fallback?.name.isNotEmpty == true
           ? fallback!.name
           : memberFallbackLabel,
-      tone: FamilyPayerTone.shared,
+      tone: FamilyPayerTone.memberA,
       avatarEmoji: fallback?.emoji ?? '',
       avatarImagePath: null,
     );

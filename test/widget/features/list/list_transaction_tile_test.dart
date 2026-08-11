@@ -58,7 +58,7 @@ Future<void> _pumpTile(
   String? merchant,
   String? familyPayerLabel,
   String? familyPayerAvatarEmoji,
-  FamilyPayerTone familyPayerTone = FamilyPayerTone.primary,
+  FamilyPayerTone familyPayerTone = FamilyPayerTone.self,
 }) async {
   await tester.pumpWidget(
     UncontrolledProviderScope(
@@ -349,7 +349,7 @@ void main() {
         _makeTx(),
         familyPayerLabel: '我',
         familyPayerAvatarEmoji: '🌿',
-        familyPayerTone: FamilyPayerTone.primary,
+        familyPayerTone: FamilyPayerTone.self,
         merchant: '喫茶 月舟',
         satisfactionValue: 8,
       );

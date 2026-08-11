@@ -575,7 +575,7 @@ class _RecentTransactionTile extends ConsumerWidget {
       tagTextColor: visuals.tagForeground,
       merchant: transaction.merchant,
       payerName: payer?.name,
-      payerTone: payer?.tone ?? FamilyPayerTone.primary,
+      payerTone: payer?.tone ?? FamilyPayerTone.self,
       payerAvatarEmoji: payer?.avatarEmoji,
       payerAvatarImagePath: payer?.avatarImagePath,
       category: category.name,
@@ -700,7 +700,7 @@ _FamilyPayer _familyPayer(
   if (transaction.bookId == primaryBookId) {
     return _FamilyPayer(
       name: selfLabel,
-      tone: FamilyPayerTone.primary,
+      tone: FamilyPayerTone.self,
       avatarEmoji: profile?.avatarEmoji ?? '',
       avatarImagePath: profile?.avatarImagePath,
     );
@@ -720,7 +720,7 @@ _FamilyPayer _familyPayer(
   }
   return _FamilyPayer(
     name: memberFallbackLabel,
-    tone: FamilyPayerTone.shared,
+    tone: FamilyPayerTone.memberA,
     avatarEmoji: '',
     avatarImagePath: null,
   );
