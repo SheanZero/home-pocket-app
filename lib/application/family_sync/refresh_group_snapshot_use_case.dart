@@ -56,9 +56,9 @@ class RefreshGroupSnapshotMembershipInvalid extends RefreshGroupSnapshotResult {
 
 /// Refreshes local control-plane state from the relay's authoritative snapshot.
 ///
-/// Rename notifications are invalidations, not data-plane writes: their
+/// Rename control events are invalidations, not data-plane writes: their
 /// payload is deliberately not trusted. A later request generation always wins
-/// so duplicated or out-of-order push/WebSocket delivery cannot restore an old
+/// so duplicated or out-of-order WebSocket delivery cannot restore an old
 /// name. The event data map remains extensible for a future server revision.
 class RefreshGroupSnapshotUseCase {
   RefreshGroupSnapshotUseCase({
@@ -80,7 +80,7 @@ class RefreshGroupSnapshotUseCase {
     List<Map<String, dynamic>> controlEvents = const [],
   }) async {
     // Allocate at invocation time (before any async boundary), so a later
-    // notification always supersedes an earlier one even if local reads are
+    // control event always supersedes an earlier one even if local reads are
     // scheduled in a different order.
     final generation = (_requestGeneration[groupId] ?? 0) + 1;
     _requestGeneration[groupId] = generation;

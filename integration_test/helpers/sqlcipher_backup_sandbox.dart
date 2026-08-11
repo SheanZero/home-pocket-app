@@ -268,7 +268,6 @@ class SqlCipherBackupSandbox {
       const AppSettings(
         themeMode: AppThemeMode.dark,
         language: 'en',
-        notificationsEnabled: false,
         biometricLockEnabled: false,
         appLockEnabled: true,
         biometricUnlockEnabled: true,
@@ -820,9 +819,6 @@ class _SandboxSettingsRepository implements SettingsRepository {
   @override
   Future<void> setLanguage(String language) =>
       updateSettings(_value.copyWith(language: language));
-  @override
-  Future<void> setNotificationsEnabled(bool enabled) =>
-      updateSettings(_value.copyWith(notificationsEnabled: enabled));
   @override
   Future<void> setBiometricLock(bool enabled) =>
       updateSettings(_value.copyWith(biometricLockEnabled: enabled));

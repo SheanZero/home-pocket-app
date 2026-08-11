@@ -63,5 +63,4 @@ lib/infrastructure/crypto/repositories/key_repository_impl.dart
 lib/infrastructure/crypto/repositories/master_key_repository.dart
 lib/infrastructure/security/secure_storage_service.dart
 lib/infrastructure/speech/speech_recognition_service.dart
-lib/infrastructure/sync/apns_push_messaging_client.dart
 lib/infrastructure/sync/sync_queue_manager.dart

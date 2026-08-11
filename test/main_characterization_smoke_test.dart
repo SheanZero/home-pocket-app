@@ -20,8 +20,6 @@
 //   (3) _initialized + onboardingComplete=false → OnboardingFlowScreen
 //   (4) _initialized + onboardingComplete=true  → MainShellScreen
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,7 +27,6 @@ import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/accounting/ensure_default_book_use_case.dart';
 import 'package:home_pocket/application/accounting/seed_categories_use_case.dart';
-import 'package:home_pocket/application/family_sync/listen_to_push_notifications_use_case.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/profile/get_user_profile_use_case.dart';
 import 'package:home_pocket/core/initialization/app_initializer.dart';
@@ -39,8 +36,6 @@ import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
     show seedCategoriesUseCaseProvider, ensureDefaultBookUseCaseProvider;
-import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/state_notification_navigation.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/applock/presentation/screens/app_lock_screen.dart';
 import 'package:home_pocket/features/applock/presentation/widgets/privacy_mask.dart';
@@ -65,7 +60,6 @@ import 'package:home_pocket/infrastructure/security/biometric_service.dart';
 import 'package:home_pocket/infrastructure/security/models/auth_result.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
 import 'package:home_pocket/infrastructure/security/secure_storage_service.dart';
-import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/main.dart' as app;
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:mocktail/mocktail.dart';
@@ -104,41 +98,7 @@ class _FakeSyncEngine extends Mock implements SyncEngine {
   Future<void> initialize() async {}
 
   @override
-  void connectPushNotifications(PushNotificationService pushService) {}
-
-  @override
   void dispose() {}
-}
-
-class _FakePushNotificationService extends Mock
-    implements PushNotificationService {
-  _FakePushNotificationService({this.onInitialize});
-
-  final void Function()? onInitialize;
-  final _navController = StreamController<PushNavigationIntent>.broadcast();
-
-  @override
-  Future<String?> initialize() async {
-    onInitialize?.call();
-    return 'test-push-token';
-  }
-
-  @override
-  PushNavigationIntent? takePendingNavigationIntent() => null;
-
-  @override
-  Stream<PushNavigationIntent> get navigationIntents => _navController.stream;
-}
-
-class _FakeListenToPushNotificationsUseCase extends Fake
-    implements ListenToPushNotificationsUseCase {
-  final _navController = StreamController<PushNavigationIntent>.broadcast();
-
-  @override
-  Stream<PushNavigationIntent> execute() => _navController.stream;
-
-  @override
-  PushNavigationIntent? takePendingIntent() => null;
 }
 
 class _FakeMasterKeyRepository extends Mock implements MasterKeyRepository {}
@@ -252,7 +212,6 @@ final _testProfile = UserProfile(
 Future<ProviderContainer> _pumpApp(
   WidgetTester tester, {
   required List<Override> overrides,
-  PushNotificationService? pushService,
   AppSettings appSettings = const AppSettings(),
   bool onboardingComplete = true,
   bool appLockEnabled = false,
@@ -277,9 +236,6 @@ Future<ProviderContainer> _pumpApp(
 
   final db = AppDatabase.forTesting();
   addTearDown(db.close);
-
-  final fakePushService = pushService ?? _FakePushNotificationService();
-  final fakeListenUseCase = _FakeListenToPushNotificationsUseCase();
 
   final baseOverrides = [
     appDatabaseProvider.overrideWithValue(db),
@@ -329,10 +285,6 @@ Future<ProviderContainer> _pumpApp(
     ),
     currentLocaleProvider.overrideWith(
       (ref) => Future.value(const Locale('ja')),
-    ),
-    pushNotificationServiceProvider.overrideWithValue(fakePushService),
-    familySyncNotificationNavigationProvider.overrideWith(
-      (ref) => FamilySyncNotificationNavigationController(fakeListenUseCase),
     ),
     ...overrides,
   ];
@@ -397,24 +349,6 @@ void main() {
   }
 
   group('HomePocketApp smoke characterization (pre-Plan-03-02)', () {
-    testWidgets('keeps push delivery dormant during first-release bootstrap', (
-      tester,
-    ) async {
-      var initializeCalls = 0;
-      final pushService = _FakePushNotificationService(
-        onInitialize: () => initializeCalls++,
-      );
-
-      await _pumpApp(
-        tester,
-        pushService: pushService,
-        overrides: buildSuccessOverrides(profile: _testProfile),
-      );
-      await _pumpInitNoSettle(tester);
-
-      expect(initializeCalls, 0);
-    });
-
     testWidgets(
       '_buildHome shows CircularProgressIndicator while initializing',
       (tester) async {
@@ -625,9 +559,6 @@ void main() {
                 syncEngineProvider.overrideWithValue(fakeSyncEngine),
                 getUserProfileUseCaseProvider.overrideWithValue(
                   _FakeGetUserProfileUseCase(_testProfile),
-                ),
-                pushNotificationServiceProvider.overrideWithValue(
-                  _FakePushNotificationService(),
                 ),
                 appSettingsProvider.overrideWith(
                   (ref) => Future.value(const AppSettings()),

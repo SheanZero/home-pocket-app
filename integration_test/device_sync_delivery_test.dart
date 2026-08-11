@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -12,7 +11,6 @@ import 'package:home_pocket/features/family_sync/domain/repositories/group_repos
 import 'package:home_pocket/features/family_sync/domain/repositories/sync_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/e2ee_service.dart';
-import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
 import 'package:home_pocket/infrastructure/sync/sync_queue_manager.dart';
 import 'package:integration_test/integration_test.dart';
@@ -32,69 +30,6 @@ class _MockGroupRepository extends Mock implements GroupRepository {}
 class _MockSyncQueueManager extends Mock implements SyncQueueManager {}
 
 class _MockKeyManager extends Mock implements KeyManager {}
-
-class _DeviceMessagingClient implements PushMessagingClient {
-  final tokenRefresh = StreamController<String>.broadcast();
-  final foreground = StreamController<Map<String, dynamic>>.broadcast();
-  final opened = StreamController<Map<String, dynamic>>.broadcast();
-  final List<String> events;
-
-  _DeviceMessagingClient(this.events);
-
-  @override
-  Future<void> requestPermission() async => events.add('permission');
-
-  @override
-  Future<String?> getToken() async => 'device-e2e-token';
-
-  @override
-  Stream<String> get onTokenRefresh => tokenRefresh.stream;
-
-  @override
-  Stream<Map<String, dynamic>> get onForegroundMessage => foreground.stream;
-
-  @override
-  Stream<Map<String, dynamic>> get onMessageOpenedApp => opened.stream;
-
-  @override
-  Future<Map<String, dynamic>?> getInitialMessage() async => null;
-
-  Future<void> close() async {
-    await tokenRefresh.close();
-    await foreground.close();
-    await opened.close();
-  }
-}
-
-class _DeviceLocalNotificationClient implements LocalNotificationClient {
-  final List<String> events;
-
-  _DeviceLocalNotificationClient(this.events);
-
-  @override
-  Future<void> initialize(
-    Future<void> Function(Map<String, dynamic> data) onTap,
-  ) async => events.add('local-notifications');
-
-  @override
-  Future<void> show({
-    required int id,
-    required String title,
-    required String body,
-    required Map<String, dynamic> payload,
-  }) async => events.add('local-show');
-}
-
-class _AllowDevicePushPolicy implements PushAcceptancePolicy {
-  @override
-  Future<String?> resolveIdentityGeneration() async => 'device-e2e';
-
-  @override
-  Future<bool> accepts(
-    Map<String, dynamic> data, {
-    required String? boundIdentityGeneration,
-  }) async => boundIdentityGeneration == 'device-e2e';
-}
 
 Map<String, dynamic> _dataMessage(String messageId) => {
   'messageId': messageId,
@@ -302,55 +237,4 @@ void main() {
     },
     timeout: const Timeout(Duration(minutes: 2)),
   );
-
-  testWidgets('push provider pipeline registers and routes foreground sync', (
-    tester,
-  ) async {
-    final events = <String>[];
-    final apiClient = _MockRelayApiClient();
-    final messaging = _DeviceMessagingClient(events);
-    final localNotifications = _DeviceLocalNotificationClient(events);
-    final delivered = Completer<void>();
-    when(
-      () => apiClient.updatePushToken(
-        pushToken: any(named: 'pushToken'),
-        pushPlatform: any(named: 'pushPlatform'),
-      ),
-    ).thenAnswer((_) async => events.add('token-registered'));
-
-    final service = PushNotificationService(
-      apiClient: apiClient,
-      messagingClient: messaging,
-      localNotificationClient: localNotifications,
-      firebaseInitializer: () async => events.add('provider-init'),
-      pushPlatform: 'device-e2e',
-      acceptancePolicy: _AllowDevicePushPolicy(),
-    );
-    try {
-      service.registerHandlers(
-        onSyncAvailable: (_) async {
-          events.add('sync-routed');
-          if (!delivered.isCompleted) delivered.complete();
-        },
-      );
-
-      expect(await service.initialize(), 'device-e2e-token');
-      messaging.foreground.add({'type': 'sync_available'});
-      await delivered.future.timeout(const Duration(seconds: 5));
-
-      expect(
-        events,
-        containsAllInOrder([
-          'provider-init',
-          'local-notifications',
-          'permission',
-          'token-registered',
-          'sync-routed',
-        ]),
-      );
-    } finally {
-      await service.dispose();
-      await messaging.close();
-    }
-  });
 }

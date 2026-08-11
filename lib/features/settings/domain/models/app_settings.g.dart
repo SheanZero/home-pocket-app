@@ -11,7 +11,6 @@ _AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => _AppSettings(
       $enumDecodeNullable(_$AppThemeModeEnumMap, json['themeMode']) ??
       AppThemeMode.system,
   language: json['language'] as String? ?? 'system',
-  notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
   biometricLockEnabled: json['biometricLockEnabled'] as bool? ?? true,
   appLockEnabled: json['appLockEnabled'] as bool? ?? false,
   biometricUnlockEnabled: json['biometricUnlockEnabled'] as bool? ?? false,
@@ -29,7 +28,6 @@ Map<String, dynamic> _$AppSettingsToJson(_AppSettings instance) =>
     <String, dynamic>{
       'themeMode': _$AppThemeModeEnumMap[instance.themeMode]!,
       'language': instance.language,
-      'notificationsEnabled': instance.notificationsEnabled,
       'biometricLockEnabled': instance.biometricLockEnabled,
       'appLockEnabled': instance.appLockEnabled,
       'biometricUnlockEnabled': instance.biometricUnlockEnabled,

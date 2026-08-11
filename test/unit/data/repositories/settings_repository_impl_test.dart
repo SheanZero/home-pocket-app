@@ -18,7 +18,6 @@ void main() {
 
       expect(settings.themeMode, AppThemeMode.system);
       expect(settings.language, 'system');
-      expect(settings.notificationsEnabled, true);
       expect(settings.biometricLockEnabled, true);
       // D-01/LOCK-01/LOCK-06: new lock toggles default OFF when keys absent.
       expect(settings.appLockEnabled, false);
@@ -30,7 +29,6 @@ void main() {
       SharedPreferences.setMockInitialValues({
         'theme_mode': 'dark',
         'language': 'en',
-        'notifications_enabled': false,
         'biometric_lock_enabled': false,
         'monthly_joy_target': 75,
       });
@@ -41,7 +39,6 @@ void main() {
 
       expect(settings.themeMode, AppThemeMode.dark);
       expect(settings.language, 'en');
-      expect(settings.notificationsEnabled, false);
       expect(settings.biometricLockEnabled, false);
       expect(settings.monthlyJoyTarget, 75);
     });
@@ -52,7 +49,6 @@ void main() {
       const settings = AppSettings(
         themeMode: AppThemeMode.light,
         language: 'zh',
-        notificationsEnabled: false,
         biometricLockEnabled: false,
         monthlyJoyTarget: 60,
       );
@@ -183,15 +179,6 @@ void main() {
       );
 
       expect((await repository.getSettings()).onboardingComplete, true);
-    });
-  });
-
-  group('setNotificationsEnabled', () {
-    test('persists notifications enabled', () async {
-      await repository.setNotificationsEnabled(false);
-
-      final settings = await repository.getSettings();
-      expect(settings.notificationsEnabled, false);
     });
   });
 

@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/application/family_sync/listen_to_push_notifications_use_case.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/data/repositories/settings_repository_impl.dart';
@@ -13,9 +12,6 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
 import 'package:home_pocket/features/applock/presentation/screens/app_lock_screen.dart';
 import 'package:home_pocket/features/applock/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/domain/models/sync_status_model.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart'
-    show pushNotificationServiceProvider;
-import 'package:home_pocket/features/family_sync/presentation/providers/state_notification_navigation.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/home/presentation/screens/main_shell_screen.dart';
 import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_flow_screen.dart';
@@ -27,7 +23,6 @@ import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/security/biometric_service.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
 import 'package:home_pocket/infrastructure/security/secure_storage_service.dart';
-import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/main.dart' as app;
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
@@ -62,9 +57,6 @@ class _DeviceSyncEngine extends Fake implements SyncEngine {
   }) {}
 
   @override
-  void connectPushNotifications(PushNotificationService pushService) {}
-
-  @override
   Future<void> initialize() async {}
 
   @override
@@ -74,20 +66,6 @@ class _DeviceSyncEngine extends Fake implements SyncEngine {
   void dispose() {
     _status.close();
   }
-}
-
-class _DevicePushService extends Fake implements PushNotificationService {
-  @override
-  Future<String?> initialize() async => null;
-}
-
-class _NoopPushNavigationUseCase extends Fake
-    implements ListenToPushNotificationsUseCase {
-  @override
-  Stream<PushNavigationIntent> execute() => const Stream.empty();
-
-  @override
-  PushNavigationIntent? takePendingIntent() => null;
 }
 
 class _MemorySecureStorageService extends Fake implements SecureStorageService {
@@ -126,12 +104,6 @@ ProviderContainer _createContainer({
       syncEngineProvider.overrideWithValue(syncEngine),
       syncStatusStreamProvider.overrideWith(
         (_) => Stream.value(const SyncStatus(state: SyncState.noGroup)),
-      ),
-      pushNotificationServiceProvider.overrideWithValue(_DevicePushService()),
-      familySyncNotificationNavigationProvider.overrideWith(
-        (_) => FamilySyncNotificationNavigationController(
-          _NoopPushNavigationUseCase(),
-        ),
       ),
       currentLocaleProvider.overrideWith((_) async => const Locale('ja')),
     ],

@@ -437,14 +437,6 @@
   "@biometricLockDescription": {
     "description": "Biometric lock subtitle"
   },
-  "notifications": "通知",
-  "@notifications": {
-    "description": "Notifications setting"
-  },
-  "notificationsDescription": "予算アラートと同期通知",
-  "@notificationsDescription": {
-    "description": "Notifications subtitle"
-  },
   "dataManagement": "データ管理",
   "@dataManagement": {
     "description": "Data management section"
@@ -453,8 +445,6 @@
   "settingsFamily": "家族",
   "settingsData": "データ",
   "settingsThisApp": "このアプリ",
-  "settingsAdditional": "その他の設定",
-  "settingsAdditionalDescription": "週の開始日、音声認識、通知",
   "settingsNotSet": "未設定",
   "settingsJoyTargetValue": "{value} Joy",
   "@settingsJoyTargetValue": {
@@ -1714,27 +1704,6 @@
   "@familySyncNewRequest": {
     "description": "Heading for a new join request card"
   },
-  "familySyncJoinRequestNotificationBody": "家族メンバーがグループ参加を希望しています。続行するにはリクエストを確認してください。",
-  "@familySyncJoinRequestNotificationBody": {
-    "description": "Body text for a foreground notification about a new join request"
-  },
-  "familySyncJoinRequestWithName": "{deviceName} があなたの家計簿に参加したいです",
-  "@familySyncJoinRequestWithName": {
-    "description": "Body text for a foreground notification about a new join request with device name",
-    "placeholders": {
-      "deviceName": {
-        "type": "String"
-      }
-    }
-  },
-  "familySyncMemberConfirmedNotificationTitle": "グループの準備ができました",
-  "@familySyncMemberConfirmedNotificationTitle": {
-    "description": "Title for a foreground notification after a member is confirmed"
-  },
-  "familySyncMemberConfirmedNotificationBody": "ファミリー同期グループの準備ができました。最新の状態を確認するにはグループ管理を開いてください。",
-  "@familySyncMemberConfirmedNotificationBody": {
-    "description": "Body text for a foreground notification after a member is confirmed"
-  },
   "familySyncJustNow": "たった今リクエスト",
   "@familySyncJustNow": {
     "description": "Text indicating a request was received just now"
@@ -1956,7 +1925,7 @@
   "groupKeyRecoveryTitle": "ファミリーキーを復元しています",
   "groupKeyRecoveryWaiting": "メンバー承認は完了しています。別の有効なファミリーデバイスが、現在のキーをこの端末向けに安全に再暗号化する必要があります。リレーはキーを閲覧・再作成できません。",
   "groupKeyRecoveryUnavailable": "期限内に有効なデバイスから現在のキーを受け取れませんでした。ゼロ知識設計のため、リレーでキーを復元することはできません。再試行するか、安全にファミリーを退出／解散して新しく作成してください。",
-  "groupKeyRecoveryRateLimited": "復元リクエストは直前に送信されています。ほかのデバイスへ再通知するまで少しお待ちください。",
+  "groupKeyRecoveryRateLimited": "復元リクエストは直前に送信されています。再度リクエストするまで少しお待ちください。",
   "groupKeyRecoveryRetry": "キーの復元を再試行",
   "groupKeyRecoveryRebuild": "退出して別のファミリーを選ぶ",
   "groupWaitingHint1": "アプリを閉じても大丈夫です。",
@@ -2004,15 +1973,6 @@
   "syncInitialProgress": "初回同期中...",
   "@syncInitialProgress": {
     "description": "Initial sync in progress"
-  },
-  "syncProfileUpdated": "{name}がプロフィール���更新しました",
-  "@syncProfileUpdated": {
-    "description": "Profile update notification",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
   },
   "familySyncManualSync": "帳簿を同期",
   "@familySyncManualSync": {

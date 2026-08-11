@@ -109,39 +109,6 @@ final webSocketServiceProvider = Provider(
   (ref) => ref.watch(app_family_sync.appWebSocketServiceProvider),
 );
 
-/// PushNotificationService — delegates to application-layer appPushNotificationServiceProvider.
-final pushNotificationServiceProvider = Provider((ref) {
-  final service = ref.watch(app_family_sync.appPushNotificationServiceProvider);
-  final keyManager = ref.watch(keyManagerProvider);
-  final groupRepository = ref.watch(groupRepositoryProvider);
-  service.configureAcceptancePolicy(
-    app_family_sync.IdentityBoundFamilyPushAcceptancePolicy(
-      identityGenerationResolver: keyManager.getDeviceId,
-      contextResolver: () async {
-        final deviceId = await keyManager.getDeviceId();
-        if (deviceId == null || deviceId.isEmpty) return null;
-        final group = await groupRepository.getCurrentGroup();
-        if (group == null) return null;
-        final localMembers = group.members.where(
-          (member) => member.deviceId == deviceId,
-        );
-        if (localMembers.length != 1) return null;
-        final localMember = localMembers.single;
-        if (localMember.role != group.role) return null;
-        return app_family_sync.FamilyPushAcceptanceContext(
-          deviceId: deviceId,
-          groupId: group.groupId,
-          groupStatus: group.status.name,
-          groupRole: group.role,
-          memberStatus: localMember.status,
-          controlRevision: group.controlRevision,
-        );
-      },
-    ),
-  );
-  return service;
-});
-
 // ---------------------------------------------------------------------------
 // Data access providers
 // ---------------------------------------------------------------------------

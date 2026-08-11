@@ -18,13 +18,10 @@
 // route is the detached shell bound to the boot bookId). After routing
 // completion through a gate-owned callback they pass.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/application/family_sync/listen_to_push_notifications_use_case.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/profile/get_user_profile_use_case.dart';
 import 'package:home_pocket/application/profile/save_user_profile_use_case.dart';
@@ -39,10 +36,7 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
         bookRepositoryProvider,
         deviceIdentityRepositoryProvider,
         seedAllUseCaseProvider;
-import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart'
-    show pushNotificationServiceProvider;
 import 'package:home_pocket/features/family_sync/presentation/providers/state_active_group.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/state_notification_navigation.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/home/presentation/screens/main_shell_screen.dart';
 import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_flow_screen.dart';
@@ -57,7 +51,6 @@ import 'package:home_pocket/features/settings/presentation/providers/state_local
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
 import 'package:home_pocket/infrastructure/security/secure_storage_service.dart';
-import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/main.dart' as app;
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -86,35 +79,7 @@ class _FakeSyncEngine extends Fake implements SyncEngine {
   Future<void> initialize() async {}
 
   @override
-  void connectPushNotifications(PushNotificationService pushService) {}
-
-  @override
   void dispose() {}
-}
-
-class _FakePushNotificationService extends Fake
-    implements PushNotificationService {
-  final _navController = StreamController<PushNavigationIntent>.broadcast();
-
-  @override
-  Future<String?> initialize() async => 'test-push-token';
-
-  @override
-  PushNavigationIntent? takePendingNavigationIntent() => null;
-
-  @override
-  Stream<PushNavigationIntent> get navigationIntents => _navController.stream;
-}
-
-class _FakeListenToPushNotificationsUseCase extends Fake
-    implements ListenToPushNotificationsUseCase {
-  final _navController = StreamController<PushNavigationIntent>.broadcast();
-
-  @override
-  Stream<PushNavigationIntent> execute() => _navController.stream;
-
-  @override
-  PushNavigationIntent? takePendingIntent() => null;
 }
 
 class _FakeGetUserProfileUseCase implements GetUserProfileUseCase {
@@ -184,14 +149,6 @@ Future<({SharedPreferences prefs, ProviderContainer container})> _pumpApp(
       syncEngineProvider.overrideWithValue(_FakeSyncEngine()),
       syncStatusStreamProvider.overrideWith((_) => const Stream.empty()),
       activeGroupProvider.overrideWith((_) => Stream.value(null)),
-      pushNotificationServiceProvider.overrideWithValue(
-        _FakePushNotificationService(),
-      ),
-      familySyncNotificationNavigationProvider.overrideWith(
-        (ref) => FamilySyncNotificationNavigationController(
-          _FakeListenToPushNotificationsUseCase(),
-        ),
-      ),
       getUserProfileUseCaseProvider.overrideWithValue(
         _FakeGetUserProfileUseCase(),
       ),

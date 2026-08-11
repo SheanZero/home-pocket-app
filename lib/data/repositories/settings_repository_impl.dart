@@ -11,7 +11,6 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   static const String _themeModeKey = 'theme_mode';
   static const String _languageKey = 'language';
-  static const String _notificationsKey = 'notifications_enabled';
   static const String _biometricLockKey = 'biometric_lock_enabled';
   static const String _appLockEnabledKey = 'app_lock_enabled';
   static const String _biometricUnlockKey = 'biometric_unlock_enabled';
@@ -27,7 +26,6 @@ class SettingsRepositoryImpl implements SettingsRepository {
     return AppSettings(
       themeMode: _getThemeMode(),
       language: _prefs.getString(_languageKey) ?? 'system',
-      notificationsEnabled: _prefs.getBool(_notificationsKey) ?? true,
       biometricLockEnabled: _prefs.getBool(_biometricLockKey) ?? true,
       appLockEnabled: _prefs.getBool(_appLockEnabledKey) ?? false,
       biometricUnlockEnabled: _prefs.getBool(_biometricUnlockKey) ?? false,
@@ -46,9 +44,6 @@ class SettingsRepositoryImpl implements SettingsRepository {
       _prefs.setString(_themeModeKey, settings.themeMode.name),
     );
     await _requireWrite(_prefs.setString(_languageKey, settings.language));
-    await _requireWrite(
-      _prefs.setBool(_notificationsKey, settings.notificationsEnabled),
-    );
     await _requireWrite(
       _prefs.setBool(_biometricLockKey, settings.biometricLockEnabled),
     );
@@ -110,11 +105,6 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<void> setOnboardingComplete(bool enabled) async {
     await _requireWrite(_prefs.setBool(_onboardingCompleteKey, enabled));
-  }
-
-  @override
-  Future<void> setNotificationsEnabled(bool enabled) async {
-    await _requireWrite(_prefs.setBool(_notificationsKey, enabled));
   }
 
   @override

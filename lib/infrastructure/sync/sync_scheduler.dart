@@ -62,7 +62,7 @@ class SyncScheduler {
     _pollingTimer = null;
   }
 
-  /// Push notification: syncAvailable — immediate pull.
+  /// Realtime control event: syncAvailable — immediate pull.
   void onSyncAvailable() {
     if (_isSuspended) return;
     _enqueueSync(SyncMode.incrementalPull);

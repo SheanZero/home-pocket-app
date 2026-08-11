@@ -7,7 +7,6 @@ import '../../features/family_sync/domain/models/sync_status_model.dart';
 import '../../features/family_sync/domain/repositories/group_repository.dart';
 import '../../features/family_sync/domain/repositories/sync_repository.dart';
 import '../../infrastructure/crypto/services/key_manager.dart';
-import '../../infrastructure/sync/push_notification_service.dart';
 import '../../infrastructure/sync/sync_lifecycle_observer.dart';
 import '../../infrastructure/sync/sync_scheduler.dart';
 import '../../infrastructure/sync/websocket_service.dart';
@@ -118,8 +117,7 @@ class SyncEngine {
 
   /// Configure the application-layer effects for membership lifecycle events.
   ///
-  /// Kept separate from [connectPushNotifications] so handlers can be installed
-  /// before push initialization consumes a cold-start message.
+  /// Installed before realtime control events are consumed.
   void configureLifecycleHandlers({
     required JoinRequestLifecycleHandler onJoinRequest,
     required MemberLeftLifecycleHandler onMemberLeft,
@@ -128,28 +126,6 @@ class SyncEngine {
     _onJoinRequest = onJoinRequest;
     _onMemberLeft = onMemberLeft;
     _onGroupDissolved = onGroupDissolved;
-  }
-
-  /// Wire every push notification handler to the unified sync lifecycle.
-  ///
-  /// Call before [PushNotificationService.initialize] so foreground, opened-app,
-  /// and cold-start messages all enter the same handler chain.
-  void connectPushNotifications(PushNotificationService pushService) {
-    pushService.registerHandlers(
-      onSyncAvailable: (_) async => onSyncAvailable(),
-      onMemberConfirmed: onMemberConfirmed,
-      onJoinRequest: (data) =>
-          _runLifecycleOperation(() => _handleJoinRequest(data)),
-      onMemberLeft: (data) =>
-          _runLifecycleOperation(() => _handleMemberLeft(data)),
-      onGroupDissolved: (data) =>
-          _runLifecycleOperation(() => _handleGroupDissolved(data)),
-      onGroupSnapshotInvalidated: (data) =>
-          _runLifecycleOperation(() => _handleGroupSnapshotInvalidated(data)),
-      onGroupKeyRequested: (_) => _runLifecycleOperation(() async {
-        await _groupKeyRecovery?.respondForCurrentGroup();
-      }),
-    );
   }
 
   /// Dispose all timers, observers, and WebSocket connection.
@@ -161,7 +137,7 @@ class SyncEngine {
     unawaited(_statusController.close());
   }
 
-  // --- Public API (called by transaction use cases, push handlers, etc.) ---
+  // --- Public API (called by transaction use cases and realtime sync) ---
 
   /// Transaction created/updated/deleted.
   void onTransactionChanged() {
@@ -178,7 +154,7 @@ class SyncEngine {
     _scheduler.onProfileChanged();
   }
 
-  /// Push notification: syncAvailable.
+  /// Realtime control event: syncAvailable.
   void onSyncAvailable() {
     if (_localDataWipeSuspended) return;
     if (_isDuplicate('syncAvailable')) return;
@@ -433,12 +409,6 @@ class SyncEngine {
     unawaited(_runLifecycleOperation(operation));
   }
 
-  Future<void> _handleJoinRequest(Map<String, dynamic> data) async {
-    final groupId = _nonEmptyString(data['groupId']);
-    if (groupId == null) return;
-    await _onJoinRequest?.call(groupId);
-  }
-
   Future<void> _handleMemberConfirmedWebSocket(WebSocketEvent event) async {
     final groupId = event.groupId;
     if (groupId == null) return;
@@ -479,18 +449,6 @@ class SyncEngine {
     await _onGroupDissolved?.call(groupId);
     _disconnectWebSocket();
     await _refreshInitialStatus();
-  }
-
-  Future<void> _handleGroupSnapshotInvalidated(
-    Map<String, dynamic> data,
-  ) async {
-    final groupId = _nonEmptyString(data['groupId']);
-    if (groupId == null) return;
-    if (data['type'] == 'owner_transferred') {
-      await _handleOwnerTransferred(groupId, data);
-      return;
-    }
-    await _refreshGroupSnapshot(groupId, data);
   }
 
   Future<void> _handleOwnerTransferred(

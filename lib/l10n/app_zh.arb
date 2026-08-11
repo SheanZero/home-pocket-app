@@ -437,14 +437,6 @@
   "@biometricLockDescription": {
     "description": "Biometric lock subtitle"
   },
-  "notifications": "通知",
-  "@notifications": {
-    "description": "Notifications setting"
-  },
-  "notificationsDescription": "预算提醒和同步通知",
-  "@notificationsDescription": {
-    "description": "Notifications subtitle"
-  },
   "dataManagement": "数据管理",
   "@dataManagement": {
     "description": "Data management section"
@@ -453,8 +445,6 @@
   "settingsFamily": "家庭",
   "settingsData": "数据",
   "settingsThisApp": "关于本应用",
-  "settingsAdditional": "其他设置",
-  "settingsAdditionalDescription": "每周起始日、语音识别与通知",
   "settingsNotSet": "未设置",
   "settingsJoyTargetValue": "{value} Joy",
   "@settingsJoyTargetValue": {
@@ -1714,27 +1704,6 @@
   "@familySyncNewRequest": {
     "description": "Heading for a new join request card"
   },
-  "familySyncJoinRequestNotificationBody": "有家庭成员想加入你的分组。请查看请求后继续。",
-  "@familySyncJoinRequestNotificationBody": {
-    "description": "Body text for a foreground notification about a new join request"
-  },
-  "familySyncJoinRequestWithName": "{deviceName} 想要加入你的家庭账本",
-  "@familySyncJoinRequestWithName": {
-    "description": "Body text for a foreground notification about a new join request with device name",
-    "placeholders": {
-      "deviceName": {
-        "type": "String"
-      }
-    }
-  },
-  "familySyncMemberConfirmedNotificationTitle": "分组已就绪",
-  "@familySyncMemberConfirmedNotificationTitle": {
-    "description": "Title for a foreground notification after a member is confirmed"
-  },
-  "familySyncMemberConfirmedNotificationBody": "家庭同步分组已经准备好。打开分组管理查看最新状态。",
-  "@familySyncMemberConfirmedNotificationBody": {
-    "description": "Body text for a foreground notification after a member is confirmed"
-  },
   "familySyncJustNow": "刚刚发出请求",
   "@familySyncJustNow": {
     "description": "Text indicating a request was received just now"
@@ -1956,7 +1925,7 @@
   "groupKeyRecoveryTitle": "正在恢复家庭密钥",
   "groupKeyRecoveryWaiting": "成员资格已经生效，需要另一台仍持有密钥的家庭设备为本设备重新密封当前密钥。中继服务器无法读取或重新生成密钥。",
   "groupKeyRecoveryUnavailable": "请求过期前没有任何有效设备提供当前密钥。由于采用零知识设计，中继服务器无法恢复密钥。你可以重试，或安全退出／解散该家庭后重新创建。",
-  "groupKeyRecoveryRateLimited": "刚刚已经发送过恢复请求，请稍后再通知其他设备。",
+  "groupKeyRecoveryRateLimited": "刚刚已经发送过恢复请求，请稍后再试。",
   "groupKeyRecoveryRetry": "重试密钥恢复",
   "groupKeyRecoveryRebuild": "退出并重新选择家庭",
   "groupWaitingHint1": "关闭应用也没有关系。",
@@ -2004,15 +1973,6 @@
   "syncInitialProgress": "首次同步中...",
   "@syncInitialProgress": {
     "description": "Initial sync in progress"
-  },
-  "syncProfileUpdated": "{name}更新了个人资料",
-  "@syncProfileUpdated": {
-    "description": "Profile update notification",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
   },
   "familySyncManualSync": "同步账本",
   "@familySyncManualSync": {

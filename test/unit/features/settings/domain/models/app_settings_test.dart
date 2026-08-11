@@ -8,7 +8,6 @@ void main() {
 
       expect(settings.themeMode, AppThemeMode.system);
       expect(settings.language, 'system');
-      expect(settings.notificationsEnabled, true);
       expect(settings.biometricLockEnabled, true);
       // D-01/LOCK-01/LOCK-06: new lock toggles default OFF.
       expect(settings.appLockEnabled, false);
@@ -36,13 +35,11 @@ void main() {
       const settings = AppSettings(
         themeMode: AppThemeMode.dark,
         language: 'en',
-        notificationsEnabled: false,
         biometricLockEnabled: false,
       );
 
       expect(settings.themeMode, AppThemeMode.dark);
       expect(settings.language, 'en');
-      expect(settings.notificationsEnabled, false);
       expect(settings.biometricLockEnabled, false);
     });
 
@@ -56,7 +53,6 @@ void main() {
       expect(updated.themeMode, AppThemeMode.light);
       expect(updated.language, 'zh');
       // Unchanged fields retain original values
-      expect(updated.notificationsEnabled, true);
       expect(updated.biometricLockEnabled, true);
       // Original is unchanged
       expect(original.themeMode, AppThemeMode.system);
@@ -67,7 +63,6 @@ void main() {
       const settings = AppSettings(
         themeMode: AppThemeMode.dark,
         language: 'en',
-        notificationsEnabled: false,
         biometricLockEnabled: true,
       );
 

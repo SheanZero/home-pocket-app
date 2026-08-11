@@ -14,12 +14,10 @@ import '../../../list/presentation/providers/state_list_transactions.dart';
 import '../../../list/presentation/screens/list_screen.dart';
 import '../../../family_sync/domain/models/sync_status_model.dart';
 import '../../../family_sync/presentation/providers/state_sync.dart';
-import '../../../family_sync/presentation/widgets/family_sync_notification_route_listener.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
 import '../../../shopping_list/presentation/screens/shopping_item_form_screen.dart';
 import '../../../shopping_list/presentation/screens/shopping_list_screen.dart';
 import '../../../../shared/widgets/lazy_indexed_stack.dart';
-import '../../../../core/config/release_features.dart';
 import '../providers/state_home.dart';
 import '../providers/state_shadow_books.dart';
 import '../providers/state_today_transactions.dart';
@@ -234,8 +232,6 @@ class MainShellScreen extends ConsumerWidget {
         ],
       ),
     );
-    return ReleaseFeatures.pushNotifications
-        ? FamilySyncNotificationRouteListener(child: shell)
-        : shell;
+    return shell;
   }
 }

@@ -75,14 +75,14 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('master toggle renders; dormant notifications stay hidden', (
+  testWidgets('master toggle renders without notification controls', (
     tester,
   ) async {
     await pump(tester, settings: const AppSettings());
 
     final l = l10nOf(tester);
     expect(find.text(l.securityAppLock), findsOneWidget);
-    expect(find.text(l.notifications), findsNothing);
+    expect(find.byIcon(Icons.notifications_outlined), findsNothing);
     // Lock disabled -> no sub-items.
     expect(find.text(l.securityChangePin), findsNothing);
     expect(find.text(l.securityBiometricUnlock), findsNothing);

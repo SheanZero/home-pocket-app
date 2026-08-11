@@ -389,13 +389,12 @@ void main() {
           'lib/infrastructure/crypto/services/backup_crypto_service.dart',
           'lib/infrastructure/sync/relay_api_client.dart',
           'lib/infrastructure/sync/websocket_service.dart',
-          'lib/infrastructure/sync/push_notification_service.dart',
           'lib/application/family_sync/sync_engine.dart',
           'lib/application/family_sync/sync_orchestrator.dart',
         };
 
         expect(required, containsAll(highRisk));
-        expect(required, hasLength(15));
+        expect(required, hasLength(14));
         for (final path in required) {
           expect(File('$root/$path').existsSync(), isTrue, reason: path);
           expect(path, endsWith('.dart'));

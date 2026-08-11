@@ -327,12 +327,6 @@ class SZh extends S {
   String get biometricLockDescription => '使用面容/指纹解锁';
 
   @override
-  String get notifications => '通知';
-
-  @override
-  String get notificationsDescription => '预算提醒和同步通知';
-
-  @override
   String get dataManagement => '数据管理';
 
   @override
@@ -346,12 +340,6 @@ class SZh extends S {
 
   @override
   String get settingsThisApp => '关于本应用';
-
-  @override
-  String get settingsAdditional => '其他设置';
-
-  @override
-  String get settingsAdditionalDescription => '每周起始日、语音识别与通知';
 
   @override
   String get settingsNotSet => '未设置';
@@ -1332,21 +1320,6 @@ class SZh extends S {
   String get familySyncNewRequest => '新的加入请求';
 
   @override
-  String get familySyncJoinRequestNotificationBody => '有家庭成员想加入你的分组。请查看请求后继续。';
-
-  @override
-  String familySyncJoinRequestWithName(String deviceName) {
-    return '$deviceName 想要加入你的家庭账本';
-  }
-
-  @override
-  String get familySyncMemberConfirmedNotificationTitle => '分组已就绪';
-
-  @override
-  String get familySyncMemberConfirmedNotificationBody =>
-      '家庭同步分组已经准备好。打开分组管理查看最新状态。';
-
-  @override
   String get familySyncJustNow => '刚刚发出请求';
 
   @override
@@ -1714,7 +1687,7 @@ class SZh extends S {
       '请求过期前没有任何有效设备提供当前密钥。由于采用零知识设计，中继服务器无法恢复密钥。你可以重试，或安全退出／解散该家庭后重新创建。';
 
   @override
-  String get groupKeyRecoveryRateLimited => '刚刚已经发送过恢复请求，请稍后再通知其他设备。';
+  String get groupKeyRecoveryRateLimited => '刚刚已经发送过恢复请求，请稍后再试。';
 
   @override
   String get groupKeyRecoveryRetry => '重试密钥恢复';
@@ -1761,11 +1734,6 @@ class SZh extends S {
 
   @override
   String get syncInitialProgress => '首次同步中...';
-
-  @override
-  String syncProfileUpdated(String name) {
-    return '$name更新了个人资料';
-  }
 
   @override
   String get familySyncManualSync => '同步账本';

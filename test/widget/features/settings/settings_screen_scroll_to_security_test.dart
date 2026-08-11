@@ -154,17 +154,10 @@ void main() {
     final listView = tester.widget<ListView>(find.byType(ListView).first);
     final children =
         (listView.childrenDelegate as SliverChildListDelegate).children;
-    int indexForKey(Key key) =>
-        children.indexWhere((child) => child.key == key);
     int indexForType<T extends Widget>() =>
         children.indexWhere((child) => child is T);
 
     expect(indexForType<FamilySyncSettingsSection>(), greaterThan(0));
-    expect(
-      indexForKey(const ValueKey('settings-notifications-section')),
-      equals(-1),
-      reason: 'push notification settings are hidden in the first release',
-    );
     expect(
       indexForType<BackupRestoreNavigationSection>(),
       greaterThan(indexForType<FamilySyncSettingsSection>()),

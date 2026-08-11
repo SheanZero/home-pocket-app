@@ -4,7 +4,7 @@ import 'shadow_book_service.dart';
 
 enum LocalGroupCleanupMode { deactivate, delete }
 
-/// Handles group_dissolved push notification.
+/// Handles a realtime group_dissolved control event.
 ///
 /// Cleans local sync data and permanently removes the dissolved group.
 class HandleGroupDissolvedUseCase {

@@ -8,7 +8,6 @@ import 'package:home_pocket/features/family_sync/domain/repositories/sync_reposi
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/e2ee_service.dart';
-import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
 import 'package:home_pocket/infrastructure/sync/sync_queue_manager.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
@@ -77,14 +76,6 @@ void main() {
         expect(manager, isA<SyncQueueManager>());
       });
 
-      test(
-        'pushNotificationServiceProvider delegates to application layer',
-        () {
-          final service = container.read(pushNotificationServiceProvider);
-          expect(service, isA<PushNotificationService>());
-        },
-      );
-
       test('webSocketServiceProvider delegates to application layer', () {
         final service = container.read(webSocketServiceProvider);
         expect(service, isA<WebSocketService>());
@@ -95,7 +86,6 @@ void main() {
         () {
           expect(container.read(relayApiClientProvider), isNotNull);
           expect(container.read(e2eeServiceProvider), isNotNull);
-          expect(container.read(pushNotificationServiceProvider), isNotNull);
           expect(container.read(syncQueueManagerProvider), isNotNull);
           expect(container.read(webSocketServiceProvider), isNotNull);
         },

@@ -18,7 +18,6 @@ import '../../../../features/family_sync/presentation/providers/repository_provi
     show
         familySyncOutboxRepositoryProvider,
         groupRepositoryProvider,
-        pushNotificationServiceProvider,
         syncQueueManagerProvider;
 import '../../../../features/family_sync/presentation/providers/state_sync.dart';
 import '../../../../infrastructure/security/providers.dart' as security;
@@ -97,15 +96,8 @@ ImportBackupUseCase importBackupUseCase(Ref ref) {
 /// but any pre-restore queued or semantic operation is discarded before sync is
 /// allowed to resume so it cannot publish rows that the restore replaced.
 final restoreBackupUseCaseProvider = Provider<RestoreBackupUseCase>((ref) {
-  final pushNotifications = ref.watch(pushNotificationServiceProvider);
   final syncEngine = ref.watch(syncEngineProvider);
-  Future<void> suspendFamilySync() {
-    // The dependency-free client preserves the identity-clear ordering around
-    // destructive operations without configuring native notifications.
-    final pushSuspension = pushNotifications.clearIdentityBoundState();
-    final syncSuspension = syncEngine.suspendForLocalDataWipe();
-    return Future.wait<void>([pushSuspension, syncSuspension]);
-  }
+  Future<void> suspendFamilySync() => syncEngine.suspendForLocalDataWipe();
 
   Future<void> resumeFamilySync() async {
     try {
@@ -160,15 +152,7 @@ ClearAllDataUseCase clearAllDataUseCase(Ref ref) {
   );
   return ClearAllDataUseCase(
     journalStore: wipeJournal,
-    suspendSync: () {
-      final pushSuspension = ref
-          .read(pushNotificationServiceProvider)
-          .clearIdentityBoundState();
-      final syncSuspension = ref
-          .read(syncEngineProvider)
-          .suspendForLocalDataWipe();
-      return Future.wait<void>([pushSuspension, syncSuspension]);
-    },
+    suspendSync: () => ref.read(syncEngineProvider).suspendForLocalDataWipe(),
     wipeDatabase: database.wipeLocalUserData,
     wipeAppOwnedFiles: fileCleaner.clear,
     clearSecureUserData: secureStorage.clearUserData,
@@ -176,7 +160,6 @@ ClearAllDataUseCase clearAllDataUseCase(Ref ref) {
     resetInMemoryState: () async {
       ref.read(transactionChangeTrackerProvider).clear();
       ref.read(shoppingItemChangeTrackerProvider).clear();
-      await ref.read(pushNotificationServiceProvider).clearIdentityBoundState();
       ref.read(syncEngineProvider).resetAfterLocalDataWipe();
     },
   );

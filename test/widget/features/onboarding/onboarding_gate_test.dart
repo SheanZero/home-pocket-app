@@ -9,23 +9,18 @@
 // Mirrors main_characterization_smoke_test's override harness but drives the
 // decision purely through settingsRepositoryProvider.getSettings().
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/accounting/ensure_default_book_use_case.dart';
 import 'package:home_pocket/application/accounting/seed_categories_use_case.dart';
-import 'package:home_pocket/application/family_sync/listen_to_push_notifications_use_case.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/features/accounting/domain/models/book.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart'
     show seedCategoriesUseCaseProvider, ensureDefaultBookUseCaseProvider;
-import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_active_group.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/state_notification_navigation.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/home/presentation/screens/main_shell_screen.dart';
 import 'package:home_pocket/features/onboarding/presentation/screens/onboarding_flow_screen.dart';
@@ -36,7 +31,6 @@ import 'package:home_pocket/features/settings/presentation/providers/state_local
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
 import 'package:home_pocket/infrastructure/security/secure_storage_service.dart';
-import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/main.dart' as app;
 import 'package:home_pocket/shared/utils/result.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -67,40 +61,10 @@ class _FakeSyncEngine implements SyncEngine {
   Future<void> initialize() async {}
 
   @override
-  void connectPushNotifications(PushNotificationService pushService) {}
-
-  @override
   void dispose() {}
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class _FakePushNotificationService implements PushNotificationService {
-  final _navController = StreamController<PushNavigationIntent>.broadcast();
-
-  @override
-  Future<String?> initialize() async => 'test-push-token';
-
-  @override
-  PushNavigationIntent? takePendingNavigationIntent() => null;
-
-  @override
-  Stream<PushNavigationIntent> get navigationIntents => _navController.stream;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class _FakeListenToPushNotificationsUseCase extends Fake
-    implements ListenToPushNotificationsUseCase {
-  final _navController = StreamController<PushNavigationIntent>.broadcast();
-
-  @override
-  Stream<PushNavigationIntent> execute() => _navController.stream;
-
-  @override
-  PushNavigationIntent? takePendingIntent() => null;
 }
 
 /// Settings repo whose `getSettings()` returns a fixed onboardingComplete flag.
@@ -143,9 +107,6 @@ Future<AppDatabase> _pumpGate(
 
   final db = AppDatabase.forTesting();
   addTearDown(db.close);
-  final fakePushService = _FakePushNotificationService();
-  final fakeListenUseCase = _FakeListenToPushNotificationsUseCase();
-
   final container = ProviderContainer(
     overrides: [
       appDatabaseProvider.overrideWithValue(db),
@@ -163,10 +124,6 @@ Future<AppDatabase> _pumpGate(
       ),
       currentLocaleProvider.overrideWith(
         (ref) => Future.value(const Locale('ja')),
-      ),
-      pushNotificationServiceProvider.overrideWithValue(fakePushService),
-      familySyncNotificationNavigationProvider.overrideWith(
-        (ref) => FamilySyncNotificationNavigationController(fakeListenUseCase),
       ),
       secureStorageServiceProvider.overrideWithValue(
         _FakeSecureStorageService(),

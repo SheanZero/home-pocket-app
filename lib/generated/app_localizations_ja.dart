@@ -327,12 +327,6 @@ class SJa extends S {
   String get biometricLockDescription => 'Face ID / 指紋認証でロック解除';
 
   @override
-  String get notifications => '通知';
-
-  @override
-  String get notificationsDescription => '予算アラートと同期通知';
-
-  @override
   String get dataManagement => 'データ管理';
 
   @override
@@ -346,12 +340,6 @@ class SJa extends S {
 
   @override
   String get settingsThisApp => 'このアプリ';
-
-  @override
-  String get settingsAdditional => 'その他の設定';
-
-  @override
-  String get settingsAdditionalDescription => '週の開始日、音声認識、通知';
 
   @override
   String get settingsNotSet => '未設定';
@@ -1340,22 +1328,6 @@ class SJa extends S {
   String get familySyncNewRequest => '新しい参加リクエスト';
 
   @override
-  String get familySyncJoinRequestNotificationBody =>
-      '家族メンバーがグループ参加を希望しています。続行するにはリクエストを確認してください。';
-
-  @override
-  String familySyncJoinRequestWithName(String deviceName) {
-    return '$deviceName があなたの家計簿に参加したいです';
-  }
-
-  @override
-  String get familySyncMemberConfirmedNotificationTitle => 'グループの準備ができました';
-
-  @override
-  String get familySyncMemberConfirmedNotificationBody =>
-      'ファミリー同期グループの準備ができました。最新の状態を確認するにはグループ管理を開いてください。';
-
-  @override
   String get familySyncJustNow => 'たった今リクエスト';
 
   @override
@@ -1729,7 +1701,7 @@ class SJa extends S {
 
   @override
   String get groupKeyRecoveryRateLimited =>
-      '復元リクエストは直前に送信されています。ほかのデバイスへ再通知するまで少しお待ちください。';
+      '復元リクエストは直前に送信されています。再度リクエストするまで少しお待ちください。';
 
   @override
   String get groupKeyRecoveryRetry => 'キーの復元を再試行';
@@ -1776,11 +1748,6 @@ class SJa extends S {
 
   @override
   String get syncInitialProgress => '初回同期中...';
-
-  @override
-  String syncProfileUpdated(String name) {
-    return '$nameがプロフィール���更新しました';
-  }
 
   @override
   String get familySyncManualSync => '帳簿を同期';

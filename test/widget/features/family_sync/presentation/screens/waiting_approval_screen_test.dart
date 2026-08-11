@@ -27,7 +27,6 @@ import 'package:home_pocket/application/family_sync/complete_member_activation_u
 import 'package:home_pocket/application/family_sync/join_request_lifecycle_use_cases.dart';
 import 'package:home_pocket/application/family_sync/group_key_recovery_use_case.dart';
 import 'package:home_pocket/application/family_sync/group_operation_error.dart';
-import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_connection_state.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
@@ -52,9 +51,6 @@ class MockGetJoinRequestStatusUseCase extends Mock
 class MockCancelJoinRequestUseCase extends Mock
     implements CancelJoinRequestUseCase {}
 
-class MockPushNotificationService extends Mock
-    implements PushNotificationService {}
-
 class MockGroupKeyRecoveryCoordinator extends Mock
     implements GroupKeyRecoveryCoordinator {}
 
@@ -77,11 +73,9 @@ void main() {
   late MockKeyManager keyManager;
   late MockGetJoinRequestStatusUseCase getJoinRequestStatusUseCase;
   late MockCancelJoinRequestUseCase cancelJoinRequestUseCase;
-  late MockPushNotificationService pushNotificationService;
   late MockCheckGroupUseCase checkGroupUseCase;
   late MockLeaveGroupUseCase leaveGroupUseCase;
   late MockDeactivateGroupUseCase deactivateGroupUseCase;
-  late StreamController<Map<String, dynamic>> joinRequestEvents;
 
   GroupInfo buildConfirmingGroup() => GroupInfo(
     groupId: 'group-1',
@@ -156,11 +150,9 @@ void main() {
     keyManager = MockKeyManager();
     getJoinRequestStatusUseCase = MockGetJoinRequestStatusUseCase();
     cancelJoinRequestUseCase = MockCancelJoinRequestUseCase();
-    pushNotificationService = MockPushNotificationService();
     checkGroupUseCase = MockCheckGroupUseCase();
     leaveGroupUseCase = MockLeaveGroupUseCase();
     deactivateGroupUseCase = MockDeactivateGroupUseCase();
-    joinRequestEvents = StreamController<Map<String, dynamic>>.broadcast();
 
     when(
       () => webSocketService.connectionStateStream,
@@ -203,10 +195,6 @@ void main() {
     when(
       () => deactivateGroupUseCase.execute(any()),
     ).thenAnswer((_) async => const DeactivateGroupResult.success());
-    when(
-      () => pushNotificationService.joinRequestLifecycleEvents,
-    ).thenAnswer((_) => joinRequestEvents.stream);
-
     syncEngine = SyncEngine(
       orchestrator: mockOrchestrator,
       groupRepo: groupRepository,
@@ -221,7 +209,6 @@ void main() {
 
   tearDown(() {
     syncEngine.dispose();
-    joinRequestEvents.close();
   });
 
   testWidgets('shows waiting approval state using repository group data', (
@@ -254,9 +241,6 @@ void main() {
           ),
           cancelJoinRequestUseCaseProvider.overrideWithValue(
             cancelJoinRequestUseCase,
-          ),
-          pushNotificationServiceProvider.overrideWithValue(
-            pushNotificationService,
           ),
         ],
       ),
@@ -326,9 +310,6 @@ void main() {
             ),
             cancelJoinRequestUseCaseProvider.overrideWithValue(
               cancelJoinRequestUseCase,
-            ),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
             ),
             groupKeyRecoveryCoordinatorProvider.overrideWithValue(recovery),
           ],
@@ -402,14 +383,10 @@ void main() {
             cancelJoinRequestUseCaseProvider.overrideWithValue(
               cancelJoinRequestUseCase,
             ),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
-            ),
             groupKeyRecoveryCoordinatorProvider.overrideWithValue(recovery),
           ],
         ),
       );
-      joinRequestEvents.add({'groupId': 'group-1', 'status': 'approved'});
       recoveryEvents.add(
         GroupKeyRecoveryStatus(
           phase: GroupKeyRecoveryPhase.unrecoverable,
@@ -498,9 +475,6 @@ void main() {
             cancelJoinRequestUseCaseProvider.overrideWithValue(
               cancelJoinRequestUseCase,
             ),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
-            ),
             groupKeyRecoveryCoordinatorProvider.overrideWithValue(recovery),
             leaveGroupUseCaseProvider.overrideWithValue(leaveGroupUseCase),
             deactivateGroupUseCaseProvider.overrideWithValue(
@@ -559,9 +533,6 @@ void main() {
             cancelJoinRequestUseCaseProvider.overrideWithValue(
               cancelJoinRequestUseCase,
             ),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
-            ),
             groupKeyRecoveryCoordinatorProvider.overrideWithValue(recovery),
             leaveGroupUseCaseProvider.overrideWithValue(leaveGroupUseCase),
             deactivateGroupUseCaseProvider.overrideWithValue(
@@ -616,9 +587,6 @@ void main() {
             ),
             cancelJoinRequestUseCaseProvider.overrideWithValue(
               cancelJoinRequestUseCase,
-            ),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
             ),
             groupKeyRecoveryCoordinatorProvider.overrideWithValue(recovery),
             leaveGroupUseCaseProvider.overrideWithValue(leaveGroupUseCase),
@@ -675,9 +643,6 @@ void main() {
             cancelJoinRequestUseCaseProvider.overrideWithValue(
               cancelJoinRequestUseCase,
             ),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
-            ),
             groupKeyRecoveryCoordinatorProvider.overrideWithValue(recovery),
             leaveGroupUseCaseProvider.overrideWithValue(leaveGroupUseCase),
             deactivateGroupUseCaseProvider.overrideWithValue(
@@ -733,9 +698,6 @@ void main() {
             ),
             cancelJoinRequestUseCaseProvider.overrideWithValue(
               cancelJoinRequestUseCase,
-            ),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
             ),
           ],
         ),
@@ -794,9 +756,6 @@ void main() {
             cancelJoinRequestUseCaseProvider.overrideWithValue(
               cancelJoinRequestUseCase,
             ),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
-            ),
           ],
         ),
       );
@@ -850,9 +809,6 @@ void main() {
             cancelJoinRequestUseCaseProvider.overrideWithValue(
               cancelJoinRequestUseCase,
             ),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
-            ),
           ],
         ),
       );
@@ -899,9 +855,6 @@ void main() {
             ),
             cancelJoinRequestUseCaseProvider.overrideWithValue(
               cancelJoinRequestUseCase,
-            ),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
             ),
           ],
         ),
@@ -959,9 +912,6 @@ void main() {
               cancelJoinRequestUseCaseProvider.overrideWithValue(
                 cancelJoinRequestUseCase,
               ),
-              pushNotificationServiceProvider.overrideWithValue(
-                pushNotificationService,
-              ),
             ],
           ),
         );
@@ -1013,9 +963,6 @@ void main() {
             cancelJoinRequestUseCaseProvider.overrideWithValue(
               cancelJoinRequestUseCase,
             ),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
-            ),
           ],
         ),
       );
@@ -1066,9 +1013,6 @@ void main() {
             cancelJoinRequestUseCaseProvider.overrideWithValue(
               cancelJoinRequestUseCase,
             ),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
-            ),
           ],
         ),
       );
@@ -1114,9 +1058,6 @@ void main() {
             cancelJoinRequestUseCaseProvider.overrideWithValue(
               cancelJoinRequestUseCase,
             ),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
-            ),
           ],
         ),
       );
@@ -1140,51 +1081,6 @@ void main() {
     });
   });
 
-  testWidgets('first release does not subscribe to terminal push events', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      createLocalizedWidget(
-        const WaitingApprovalScreen(
-          groupId: 'group-1',
-          groupName: 'Test Family',
-          ownerDisplayName: 'Owner phone',
-        ),
-        overrides: [
-          groupRepositoryProvider.overrideWithValue(groupRepository),
-          completeMemberActivationUseCaseProvider.overrideWithValue(
-            memberActivationUseCase,
-          ),
-          syncEngineProvider.overrideWithValue(syncEngine),
-          webSocketServiceProvider.overrideWithValue(webSocketService),
-          keyManagerProvider.overrideWithValue(keyManager),
-          getJoinRequestStatusUseCaseProvider.overrideWithValue(
-            getJoinRequestStatusUseCase,
-          ),
-          cancelJoinRequestUseCaseProvider.overrideWithValue(
-            cancelJoinRequestUseCase,
-          ),
-          pushNotificationServiceProvider.overrideWithValue(
-            pushNotificationService,
-          ),
-        ],
-      ),
-    );
-    await tester.pump();
-
-    verifyNever(() => pushNotificationService.joinRequestLifecycleEvents);
-
-    joinRequestEvents.add({
-      'type': 'join_request_rejected',
-      'groupId': 'group-1',
-      'status': 'rejected',
-    });
-    await tester.pump();
-
-    expect(find.text('Waiting for approval'), findsOneWidget);
-    expect(find.text('Unable to join this family right now'), findsNothing);
-  });
-
   testWidgets('applicant can cancel a pending request', (tester) async {
     await tester.pumpWidget(
       createLocalizedWidget(
@@ -1206,9 +1102,6 @@ void main() {
           ),
           cancelJoinRequestUseCaseProvider.overrideWithValue(
             cancelJoinRequestUseCase,
-          ),
-          pushNotificationServiceProvider.overrideWithValue(
-            pushNotificationService,
           ),
         ],
       ),
@@ -1257,9 +1150,6 @@ void main() {
             ),
             cancelJoinRequestUseCaseProvider.overrideWithValue(
               cancelJoinRequestUseCase,
-            ),
-            pushNotificationServiceProvider.overrideWithValue(
-              pushNotificationService,
             ),
           ],
         ),

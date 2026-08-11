@@ -11,26 +11,11 @@ import 'package:home_pocket/features/family_sync/domain/models/sync_status_model
 import 'package:home_pocket/features/family_sync/domain/repositories/group_repository.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/sync_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
-import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
-import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_connection_state.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockSyncOrchestrator extends Mock implements SyncOrchestrator {}
-
-class _AllowPushAcceptancePolicy implements PushAcceptancePolicy {
-  const _AllowPushAcceptancePolicy();
-
-  @override
-  Future<bool> accepts(
-    Map<String, dynamic> data, {
-    required String? boundIdentityGeneration,
-  }) async => true;
-
-  @override
-  Future<String?> resolveIdentityGeneration() async => 'test-identity';
-}
 
 class MockCompleteMemberActivationUseCase extends Mock
     implements CompleteMemberActivationUseCase {}
@@ -70,8 +55,6 @@ class MockWebSocketService extends Mock implements WebSocketService {
 }
 
 class MockKeyManager extends Mock implements KeyManager {}
-
-class MockRelayApiClient extends Mock implements RelayApiClient {}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -240,7 +223,7 @@ void main() {
     });
 
     test(
-      'push confirmation reaches ready only after bootstrap succeeds',
+      'realtime confirmation reaches ready only after bootstrap succeeds',
       () async {
         when(
           () => memberActivation.execute(expectedGroupId: 'group-1'),
@@ -250,17 +233,7 @@ void main() {
         final statuses = <SyncStatus>[];
         engine.statusStream.listen(statuses.add);
 
-        final pushService = PushNotificationService(
-          apiClient: MockRelayApiClient(),
-          acceptancePolicy: const _AllowPushAcceptancePolicy(),
-        );
-        engine.connectPushNotifications(pushService);
-
-        await pushService.handleMessage({
-          'type': 'member_confirmed',
-          'groupId': 'group-1',
-        });
-        await pushService.dispose();
+        await engine.onMemberConfirmed({'groupId': 'group-1'});
 
         expect(statuses.map((status) => status.state), [
           SyncState.initialSyncing,
@@ -358,57 +331,6 @@ void main() {
     });
 
     tearDown(() => engine.dispose());
-
-    test(
-      'push rename invalidation invokes the authoritative refresh',
-      () async {
-        final pushService = PushNotificationService(
-          apiClient: MockRelayApiClient(),
-          acceptancePolicy: const _AllowPushAcceptancePolicy(),
-        );
-        engine.connectPushNotifications(pushService);
-
-        await pushService.handleMessage({
-          'type': 'group_name_updated',
-          'groupId': 'group-1',
-          'groupName': 'Untrusted hint',
-        });
-        await pushService.dispose();
-
-        verify(
-          () => refreshGroupSnapshot.execute(
-            groupId: 'group-1',
-            controlEvent: any(named: 'controlEvent'),
-          ),
-        ).called(1);
-      },
-    );
-
-    test(
-      'owner transfer refreshes role and epoch before pulling the new key',
-      () async {
-        final pushService = PushNotificationService(
-          apiClient: MockRelayApiClient(),
-          acceptancePolicy: const _AllowPushAcceptancePolicy(),
-        );
-        engine.connectPushNotifications(pushService);
-
-        await pushService.handleMessage({
-          'type': 'owner_transferred',
-          'groupId': 'group-1',
-          'keyEpoch': 2,
-        });
-        await pushService.dispose();
-
-        verifyInOrder([
-          () => refreshGroupSnapshot.execute(
-            groupId: 'group-1',
-            controlEvent: any(named: 'controlEvent'),
-          ),
-          () => orchestrator.execute(SyncMode.incrementalPull),
-        ]);
-      },
-    );
 
     test(
       'WebSocket group status and rename events use the same refresh',

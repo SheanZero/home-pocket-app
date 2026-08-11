@@ -23,7 +23,6 @@ import 'package:home_pocket/features/profile/presentation/providers/repository_p
 import 'package:home_pocket/features/settings/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
-import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// No-op sync engine so booting MainShellScreen after completion doesn't start
@@ -31,9 +30,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 class _FakeSyncEngine implements SyncEngine {
   @override
   Future<void> initialize() async {}
-
-  @override
-  void connectPushNotifications(PushNotificationService pushService) {}
 
   @override
   void dispose() {}

@@ -711,18 +711,6 @@ abstract class S {
   /// **'Use Face ID / fingerprint to unlock'**
   String get biometricLockDescription;
 
-  /// Notifications setting
-  ///
-  /// In en, this message translates to:
-  /// **'Notifications'**
-  String get notifications;
-
-  /// Notifications subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Budget alerts and sync notifications'**
-  String get notificationsDescription;
-
   /// Data management section
   ///
   /// In en, this message translates to:
@@ -752,18 +740,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'This App'**
   String get settingsThisApp;
-
-  /// No description provided for @settingsAdditional.
-  ///
-  /// In en, this message translates to:
-  /// **'Other settings'**
-  String get settingsAdditional;
-
-  /// No description provided for @settingsAdditionalDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Week start, voice recognition, and notifications'**
-  String get settingsAdditionalDescription;
 
   /// No description provided for @settingsNotSet.
   ///
@@ -2595,30 +2571,6 @@ abstract class S {
   /// **'New Join Request'**
   String get familySyncNewRequest;
 
-  /// Body text for a foreground notification about a new join request
-  ///
-  /// In en, this message translates to:
-  /// **'A family member wants to join your group. Review the request to continue.'**
-  String get familySyncJoinRequestNotificationBody;
-
-  /// Body text for a foreground notification about a new join request with device name
-  ///
-  /// In en, this message translates to:
-  /// **'{deviceName} wants to join your family ledger'**
-  String familySyncJoinRequestWithName(String deviceName);
-
-  /// Title for a foreground notification after a member is confirmed
-  ///
-  /// In en, this message translates to:
-  /// **'Group Ready'**
-  String get familySyncMemberConfirmedNotificationTitle;
-
-  /// Body text for a foreground notification after a member is confirmed
-  ///
-  /// In en, this message translates to:
-  /// **'Your family sync group is ready. Open group management to review the latest status.'**
-  String get familySyncMemberConfirmedNotificationBody;
-
   /// Text indicating a request was received just now
   ///
   /// In en, this message translates to:
@@ -3286,7 +3238,7 @@ abstract class S {
   /// No description provided for @groupKeyRecoveryRateLimited.
   ///
   /// In en, this message translates to:
-  /// **'A recovery request was sent recently. Wait a moment before notifying the other devices again.'**
+  /// **'A recovery request was sent recently. Wait a moment before sending another request.'**
   String get groupKeyRecoveryRateLimited;
 
   /// No description provided for @groupKeyRecoveryRetry.
@@ -3372,12 +3324,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Initial sync...'**
   String get syncInitialProgress;
-
-  /// Profile update notification
-  ///
-  /// In en, this message translates to:
-  /// **'{name} updated their profile'**
-  String syncProfileUpdated(String name);
 
   /// Manual sync button label
   ///

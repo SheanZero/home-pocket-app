@@ -46,7 +46,7 @@ typedef GroupKeyRecoveryClock = DateTime Function();
 ///
 /// The relay stores request metadata and an already-sealed response only. It
 /// never receives the group key. Every responder re-fetches the authoritative
-/// membership snapshot before sealing so notification data is never trusted as
+/// membership snapshot before sealing so control-event data is never trusted as
 /// authority.
 class GroupKeyRecoveryCoordinator {
   GroupKeyRecoveryCoordinator({

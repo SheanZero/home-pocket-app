@@ -437,14 +437,6 @@
   "@biometricLockDescription": {
     "description": "Biometric lock subtitle"
   },
-  "notifications": "Notifications",
-  "@notifications": {
-    "description": "Notifications setting"
-  },
-  "notificationsDescription": "Budget alerts and sync notifications",
-  "@notificationsDescription": {
-    "description": "Notifications subtitle"
-  },
   "dataManagement": "Data Management",
   "@dataManagement": {
     "description": "Data management section"
@@ -453,8 +445,6 @@
   "settingsFamily": "Family",
   "settingsData": "Data",
   "settingsThisApp": "This App",
-  "settingsAdditional": "Other settings",
-  "settingsAdditionalDescription": "Week start, voice recognition, and notifications",
   "settingsNotSet": "Not set",
   "settingsJoyTargetValue": "{value} Joy",
   "@settingsJoyTargetValue": {
@@ -1714,27 +1704,6 @@
   "@familySyncNewRequest": {
     "description": "Heading for a new join request card"
   },
-  "familySyncJoinRequestNotificationBody": "A family member wants to join your group. Review the request to continue.",
-  "@familySyncJoinRequestNotificationBody": {
-    "description": "Body text for a foreground notification about a new join request"
-  },
-  "familySyncJoinRequestWithName": "{deviceName} wants to join your family ledger",
-  "@familySyncJoinRequestWithName": {
-    "description": "Body text for a foreground notification about a new join request with device name",
-    "placeholders": {
-      "deviceName": {
-        "type": "String"
-      }
-    }
-  },
-  "familySyncMemberConfirmedNotificationTitle": "Group Ready",
-  "@familySyncMemberConfirmedNotificationTitle": {
-    "description": "Title for a foreground notification after a member is confirmed"
-  },
-  "familySyncMemberConfirmedNotificationBody": "Your family sync group is ready. Open group management to review the latest status.",
-  "@familySyncMemberConfirmedNotificationBody": {
-    "description": "Body text for a foreground notification after a member is confirmed"
-  },
   "familySyncJustNow": "Requested just now",
   "@familySyncJustNow": {
     "description": "Text indicating a request was received just now"
@@ -1956,7 +1925,7 @@
   "groupKeyRecoveryTitle": "Restoring the family key",
   "groupKeyRecoveryWaiting": "Your membership is active. Another active family device must securely re-seal the current key for this device. The relay cannot read or recreate it.",
   "groupKeyRecoveryUnavailable": "No active device supplied the current key before the request expired. Because the relay is zero-knowledge, it cannot recover the key. You can retry or safely leave/dissolve this family and create a new one.",
-  "groupKeyRecoveryRateLimited": "A recovery request was sent recently. Wait a moment before notifying the other devices again.",
+  "groupKeyRecoveryRateLimited": "A recovery request was sent recently. Wait a moment before sending another request.",
   "groupKeyRecoveryRetry": "Retry key recovery",
   "groupKeyRecoveryRebuild": "Leave and choose another family",
   "groupWaitingHint1": "It's safe to close the app.",
@@ -2004,15 +1973,6 @@
   "syncInitialProgress": "Initial sync...",
   "@syncInitialProgress": {
     "description": "Initial sync in progress"
-  },
-  "syncProfileUpdated": "{name} updated their profile",
-  "@syncProfileUpdated": {
-    "description": "Profile update notification",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
   },
   "familySyncManualSync": "Sync Ledger",
   "@familySyncManualSync": {

@@ -65,8 +65,6 @@ class _JournalSettingsRepository implements SettingsRepository {
       (current) => current.copyWith(themeMode: settings.themeMode),
       (current) => current.copyWith(language: settings.language),
       (current) =>
-          current.copyWith(notificationsEnabled: settings.notificationsEnabled),
-      (current) =>
           current.copyWith(biometricLockEnabled: settings.biometricLockEnabled),
       (current) => current.copyWith(appLockEnabled: settings.appLockEnabled),
       (current) => current.copyWith(
@@ -107,11 +105,6 @@ class _JournalSettingsRepository implements SettingsRepository {
   @override
   Future<void> setLanguage(String language) =>
       _restoreField((current) => current.copyWith(language: language));
-
-  @override
-  Future<void> setNotificationsEnabled(bool enabled) => _restoreField(
-    (current) => current.copyWith(notificationsEnabled: enabled),
-  );
 
   @override
   Future<void> setBiometricLock(bool enabled) => _restoreField(
@@ -299,7 +292,6 @@ void main() {
       final restoredSettings = const AppSettings(
         themeMode: AppThemeMode.dark,
         language: 'en',
-        notificationsEnabled: false,
         biometricLockEnabled: false,
         appLockEnabled: true,
         biometricUnlockEnabled: true,
@@ -375,7 +367,7 @@ void main() {
 
         expect(result.isError, isTrue);
         expect(journalSettings.currentSettings, oldSettings);
-        expect(journalSettings.compensationWrites, 11);
+        expect(journalSettings.compensationWrites, 10);
         await expectPreImportDbState();
       },
     );
@@ -410,7 +402,7 @@ void main() {
 
         expect(result.isError, isTrue);
         expect(journalSettings.currentSettings, oldSettings);
-        expect(journalSettings.compensationWrites, 11);
+        expect(journalSettings.compensationWrites, 10);
         await expectPreImportDbState();
       },
     );
@@ -445,7 +437,6 @@ void main() {
           const AppSettings(
             themeMode: AppThemeMode.dark,
             language: 'en',
-            notificationsEnabled: false,
             biometricLockEnabled: false,
             appLockEnabled: true,
             biometricUnlockEnabled: true,
@@ -492,7 +483,7 @@ void main() {
 
         expect(result.isError, isTrue);
         expect(result.error, contains('settings compensation incomplete'));
-        expect(journalSettings.compensationWrites, 11);
+        expect(journalSettings.compensationWrites, 10);
         await expectPreImportDbState();
       },
     );

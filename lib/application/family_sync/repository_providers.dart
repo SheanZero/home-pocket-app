@@ -5,21 +5,13 @@ import '../../features/family_sync/domain/repositories/sync_repository.dart';
 import '../../infrastructure/crypto/providers.dart' as crypto;
 import '../../infrastructure/crypto/services/key_manager.dart';
 import '../../infrastructure/sync/e2ee_service.dart';
-import '../../infrastructure/sync/push_notification_service.dart';
 import '../../infrastructure/sync/relay_api_client.dart';
 import '../../infrastructure/sync/sync_queue_manager.dart';
 import '../../infrastructure/sync/websocket_service.dart';
-import 'listen_to_push_notifications_use_case.dart';
 import 'notify_member_approval_use_case.dart';
 
 // Re-exports so feature/presentation can use these types via application/
 // without importing infrastructure/ directly.
-export '../../infrastructure/sync/push_notification_service.dart'
-    show
-        FamilyPushAcceptanceContext,
-        IdentityBoundFamilyPushAcceptancePolicy,
-        PushNavigationIntent,
-        PushNavigationDestination;
 export '../../infrastructure/sync/sync_queue_manager.dart'
     show SyncQueueManager;
 export '../../infrastructure/sync/websocket_service.dart'
@@ -55,19 +47,6 @@ RelayApiClient appRelayApiClient(Ref ref) {
   return RelayApiClient(baseUrl: RelayApiClient.defaultBaseUrl, signer: signer);
 }
 
-/// Dormant, dependency-free notification seam reserved for a future release.
-///
-/// The MVP never reads this provider. Its default clients are inert and cannot
-/// request permission, register a token, display a notification, or initialize
-/// a vendor SDK.
-@riverpod
-PushNotificationService appPushNotificationService(Ref ref) {
-  final apiClient = ref.watch(appRelayApiClientProvider);
-  final service = PushNotificationService(apiClient: apiClient);
-  ref.onDispose(service.dispose);
-  return service;
-}
-
 /// SyncRepository holder — expects to be overridden by feature presentation.
 ///
 /// Feature-side override in Plan 04-02:
@@ -94,7 +73,7 @@ SyncQueueManager appSyncQueueManager(Ref ref) {
   return SyncQueueManager(syncRepository: syncRepo, apiClient: apiClient);
 }
 
-/// WebSocket service for realtime group status notifications.
+/// WebSocket service for realtime group status events.
 @riverpod
 WebSocketService appWebSocketService(Ref ref) {
   final service = WebSocketService(baseUrl: RelayApiClient.wsBaseUrl);
@@ -109,15 +88,5 @@ NotifyMemberApprovalUseCase notifyMemberApprovalUseCase(Ref ref) {
   return NotifyMemberApprovalUseCase(
     wsService: ref.watch(appWebSocketServiceProvider),
     keyManager: ref.watch(appKeyManagerProvider),
-  );
-}
-
-/// ListenToPushNotificationsUseCase provider — wraps PushNotificationService
-/// stream so notification_navigation_provider and the route listener no longer
-/// import infrastructure/ directly.
-@riverpod
-ListenToPushNotificationsUseCase listenToPushNotificationsUseCase(Ref ref) {
-  return ListenToPushNotificationsUseCase(
-    service: ref.watch(appPushNotificationServiceProvider),
   );
 }

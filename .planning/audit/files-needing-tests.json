@@ -332,11 +332,6 @@
       "lines_below_threshold": 18
     },
     {
-      "file_path": "lib/infrastructure/sync/apns_push_messaging_client.dart",
-      "percentage": 46.875,
-      "lines_below_threshold": 17
-    },
-    {
       "file_path": "lib/infrastructure/sync/sync_queue_manager.dart",
       "percentage": 4.166666666666666,
       "lines_below_threshold": 23

@@ -54,7 +54,7 @@ class WebSocketEvent {
 }
 
 /// Manages an on-demand WebSocket connection to the relay server
-/// for realtime group status notifications.
+/// for realtime group status events.
 ///
 /// Connection is scoped to a single group and established only when
 /// entering waiting/approval screens. Events are exposed as a stream

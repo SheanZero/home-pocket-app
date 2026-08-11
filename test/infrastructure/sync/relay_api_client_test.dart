@@ -474,10 +474,9 @@ void main() {
   });
 
   test(
-    'device and sync methods cover unauthenticated, put, pull, and ack',
+    'device and sync methods cover unauthenticated registration, pull, and ack',
     () async {
       _stubPost(httpClient, '/device/register', {'deviceId': 'device-1'});
-      _stubPut(httpClient, '/device/push-token', {});
       _stubPull(httpClient, {'messages': <Object>[]});
       _stubPost(httpClient, '/sync/ack', {'acked': true});
 
@@ -490,7 +489,6 @@ void main() {
         ),
         containsPair('deviceId', 'device-1'),
       );
-      await apiClient.updatePushToken(pushToken: 'push', pushPlatform: 'fcm');
       expect(await apiClient.pullSync(), contains('messages'));
       expect(
         await apiClient.ackSync(messageIds: ['m1']),

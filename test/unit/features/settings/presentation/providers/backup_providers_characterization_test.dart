@@ -16,8 +16,6 @@ import 'package:home_pocket/features/accounting/domain/repositories/category_rep
 import 'package:home_pocket/features/accounting/domain/repositories/transaction_repository.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/currency/domain/repositories/exchange_rate_repository.dart';
-import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart'
-    show pushNotificationServiceProvider;
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart'
     show syncEngineProvider;
 import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
@@ -27,7 +25,6 @@ import 'package:home_pocket/features/settings/presentation/providers/repository_
 import 'package:home_pocket/data/app_database.dart';
 import 'package:home_pocket/infrastructure/security/providers.dart';
 import 'package:home_pocket/infrastructure/security/secure_storage_service.dart';
-import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 // Inline Mocktail-only mocks (no @GenerateMocks, no package:mockito)
@@ -50,9 +47,6 @@ class _MockAppDatabase extends Mock implements AppDatabase {}
 
 class _MockSecureStorageService extends Mock implements SecureStorageService {}
 
-class _MockPushNotificationService extends Mock
-    implements PushNotificationService {}
-
 class _MockSyncEngine extends Mock implements SyncEngine {}
 
 void main() {
@@ -64,7 +58,6 @@ void main() {
   late _MockSettingsRepository mockSettingsRepo;
   late _MockExchangeRateRepository mockExchangeRateRepo;
   late _MockUserProfileRepository mockUserProfileRepo;
-  late _MockPushNotificationService mockPushNotificationService;
   late _MockSyncEngine mockSyncEngine;
   late AppDatabase testDb;
   late ProviderContainer container;
@@ -76,7 +69,6 @@ void main() {
     mockSettingsRepo = _MockSettingsRepository();
     mockExchangeRateRepo = _MockExchangeRateRepository();
     mockUserProfileRepo = _MockUserProfileRepository();
-    mockPushNotificationService = _MockPushNotificationService();
     mockSyncEngine = _MockSyncEngine();
     testDb = AppDatabase.forTesting();
 
@@ -93,9 +85,6 @@ void main() {
         // unitOfWorkProvider reaches the shared AppDatabase for its Drift
         // transaction scope.
         appDatabaseProvider.overrideWithValue(testDb),
-        pushNotificationServiceProvider.overrideWithValue(
-          mockPushNotificationService,
-        ),
         syncEngineProvider.overrideWithValue(mockSyncEngine),
       ],
     );
@@ -136,7 +125,7 @@ void main() {
       });
 
       test(
-        'clear-all provider suspends push and sync before a database failure',
+        'clear-all provider suspends sync before a database failure',
         () async {
           final temp = await Directory.systemTemp.createTemp(
             'home-pocket-provider-wipe-',
@@ -158,14 +147,10 @@ void main() {
 
           final database = _MockAppDatabase();
           final secureStorage = _MockSecureStorageService();
-          final pushNotifications = _MockPushNotificationService();
           final syncEngine = _MockSyncEngine();
           when(
             database.wipeLocalUserData,
           ).thenAnswer((_) async => throw StateError('database unavailable'));
-          when(
-            pushNotifications.clearIdentityBoundState,
-          ).thenAnswer((_) async {});
           when(syncEngine.suspendForLocalDataWipe).thenAnswer((_) async {});
 
           final providerContainer = ProviderContainer.test(
@@ -173,9 +158,6 @@ void main() {
               app_accounting.appAppDatabaseProvider.overrideWithValue(database),
               settingsRepositoryProvider.overrideWithValue(mockSettingsRepo),
               secureStorageServiceProvider.overrideWithValue(secureStorage),
-              pushNotificationServiceProvider.overrideWithValue(
-                pushNotifications,
-              ),
               syncEngineProvider.overrideWithValue(syncEngine),
             ],
           );
@@ -187,7 +169,6 @@ void main() {
           expect(result.isError, isTrue);
           expect(result.error, contains('database unavailable'));
           verifyInOrder([
-            pushNotifications.clearIdentityBoundState,
             syncEngine.suspendForLocalDataWipe,
             database.wipeLocalUserData,
           ]);

@@ -330,12 +330,6 @@ class SEn extends S {
   String get biometricLockDescription => 'Use Face ID / fingerprint to unlock';
 
   @override
-  String get notifications => 'Notifications';
-
-  @override
-  String get notificationsDescription => 'Budget alerts and sync notifications';
-
-  @override
   String get dataManagement => 'Data Management';
 
   @override
@@ -349,13 +343,6 @@ class SEn extends S {
 
   @override
   String get settingsThisApp => 'This App';
-
-  @override
-  String get settingsAdditional => 'Other settings';
-
-  @override
-  String get settingsAdditionalDescription =>
-      'Week start, voice recognition, and notifications';
 
   @override
   String get settingsNotSet => 'Not set';
@@ -1363,22 +1350,6 @@ class SEn extends S {
   String get familySyncNewRequest => 'New Join Request';
 
   @override
-  String get familySyncJoinRequestNotificationBody =>
-      'A family member wants to join your group. Review the request to continue.';
-
-  @override
-  String familySyncJoinRequestWithName(String deviceName) {
-    return '$deviceName wants to join your family ledger';
-  }
-
-  @override
-  String get familySyncMemberConfirmedNotificationTitle => 'Group Ready';
-
-  @override
-  String get familySyncMemberConfirmedNotificationBody =>
-      'Your family sync group is ready. Open group management to review the latest status.';
-
-  @override
   String get familySyncJustNow => 'Requested just now';
 
   @override
@@ -1764,7 +1735,7 @@ class SEn extends S {
 
   @override
   String get groupKeyRecoveryRateLimited =>
-      'A recovery request was sent recently. Wait a moment before notifying the other devices again.';
+      'A recovery request was sent recently. Wait a moment before sending another request.';
 
   @override
   String get groupKeyRecoveryRetry => 'Retry key recovery';
@@ -1811,11 +1782,6 @@ class SEn extends S {
 
   @override
   String get syncInitialProgress => 'Initial sync...';
-
-  @override
-  String syncProfileUpdated(String name) {
-    return '$name updated their profile';
-  }
 
   @override
   String get familySyncManualSync => 'Sync Ledger';

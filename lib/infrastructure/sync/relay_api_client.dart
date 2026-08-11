@@ -200,20 +200,6 @@ class RelayApiClient {
     return _parseResponse(response);
   }
 
-  /// Update push token (authenticated).
-  Future<void> updatePushToken({
-    required String pushToken,
-    required String pushPlatform,
-  }) async {
-    final body = jsonEncode({
-      'pushToken': pushToken,
-      'pushPlatform': pushPlatform,
-    });
-
-    final response = await _put('/device/push-token', body);
-    _parseResponse(response);
-  }
-
   // ── Groups ──
 
   Future<Map<String, dynamic>> createGroup({

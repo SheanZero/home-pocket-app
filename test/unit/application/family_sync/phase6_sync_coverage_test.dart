@@ -23,7 +23,6 @@ import 'package:home_pocket/features/family_sync/domain/repositories/sync_reposi
 import 'package:home_pocket/features/profile/domain/models/user_profile.dart';
 import 'package:home_pocket/features/profile/domain/repositories/user_profile_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
-import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/sync/sync_lifecycle_observer.dart';
 import 'package:home_pocket/infrastructure/sync/sync_queue_manager.dart';
 import 'package:home_pocket/infrastructure/sync/sync_scheduler.dart';
@@ -60,9 +59,6 @@ class _MockSyncOrchestrator extends Mock implements SyncOrchestrator {}
 
 class _MockGroupKeyRecoveryCoordinator extends Mock
     implements GroupKeyRecoveryCoordinator {}
-
-class _MockPushNotificationService extends Mock
-    implements PushNotificationService {}
 
 class _FakeWebSocketService extends Mock implements WebSocketService {
   final _eventController = StreamController<WebSocketEvent>.broadcast();
@@ -923,22 +919,6 @@ void main() {
     test(
       'initializes websocket and routes websocket events into scheduler',
       () async {
-        final pushService = _MockPushNotificationService();
-        when(
-          () => pushService.registerHandlers(
-            onMemberConfirmed: any(named: 'onMemberConfirmed'),
-            onSyncAvailable: any(named: 'onSyncAvailable'),
-            onJoinRequest: any(named: 'onJoinRequest'),
-            onMemberLeft: any(named: 'onMemberLeft'),
-            onGroupDissolved: any(named: 'onGroupDissolved'),
-            onGroupSnapshotInvalidated: any(
-              named: 'onGroupSnapshotInvalidated',
-            ),
-            onGroupKeyRequested: any(named: 'onGroupKeyRequested'),
-          ),
-        ).thenReturn(null);
-
-        engine.connectPushNotifications(pushService);
         engine.initialize();
         await Future<void>.delayed(const Duration(milliseconds: 20));
 
@@ -961,77 +941,6 @@ void main() {
         verify(() => orchestrator.execute(SyncMode.initialSync)).called(1);
       },
     );
-
-    test('registers and routes every push lifecycle handler', () async {
-      final pushService = _MockPushNotificationService();
-      late PushMessageHandler joinRequestHandler;
-      late PushMessageHandler memberLeftHandler;
-      late PushMessageHandler groupDissolvedHandler;
-      late PushMessageHandler groupSnapshotInvalidatedHandler;
-      var joinRequests = 0;
-      var memberLeftGroupId = '';
-      var memberLeftDeviceId = '';
-      String? memberLeftReason;
-      int? memberLeftKeyEpoch;
-      var dissolvedGroupId = '';
-
-      when(
-        () => pushService.registerHandlers(
-          onMemberConfirmed: any(named: 'onMemberConfirmed'),
-          onSyncAvailable: any(named: 'onSyncAvailable'),
-          onJoinRequest: any(named: 'onJoinRequest'),
-          onMemberLeft: any(named: 'onMemberLeft'),
-          onGroupDissolved: any(named: 'onGroupDissolved'),
-          onGroupSnapshotInvalidated: any(named: 'onGroupSnapshotInvalidated'),
-          onGroupKeyRequested: any(named: 'onGroupKeyRequested'),
-        ),
-      ).thenAnswer((invocation) {
-        joinRequestHandler =
-            invocation.namedArguments[#onJoinRequest] as PushMessageHandler;
-        memberLeftHandler =
-            invocation.namedArguments[#onMemberLeft] as PushMessageHandler;
-        groupDissolvedHandler =
-            invocation.namedArguments[#onGroupDissolved] as PushMessageHandler;
-        groupSnapshotInvalidatedHandler =
-            invocation.namedArguments[#onGroupSnapshotInvalidated]
-                as PushMessageHandler;
-      });
-
-      engine.configureLifecycleHandlers(
-        onJoinRequest: (groupId) async {
-          joinRequests++;
-        },
-        onMemberLeft: (groupId, deviceId, reason, keyEpoch) async {
-          memberLeftGroupId = groupId;
-          memberLeftDeviceId = deviceId;
-          memberLeftReason = reason;
-          memberLeftKeyEpoch = keyEpoch;
-        },
-        onGroupDissolved: (groupId) async {
-          dissolvedGroupId = groupId;
-        },
-      );
-      engine.connectPushNotifications(pushService);
-
-      await joinRequestHandler({'groupId': 'group-1', 'deviceId': 'device-2'});
-      await memberLeftHandler({
-        'groupId': 'group-1',
-        'deviceId': 'device-2',
-        'reason': 'removed',
-        'keyEpoch': 2,
-      });
-      when(() => groupRepo.getActiveGroup()).thenAnswer((_) async => null);
-      await groupDissolvedHandler({'groupId': 'group-1'});
-      await groupSnapshotInvalidatedHandler({'groupId': 'group-1'});
-
-      expect(joinRequests, 1);
-      expect(memberLeftGroupId, 'group-1');
-      expect(memberLeftDeviceId, 'device-2');
-      expect(memberLeftReason, 'removed');
-      expect(memberLeftKeyEpoch, 2);
-      expect(dissolvedGroupId, 'group-1');
-      expect(engine.currentStatus.state, SyncState.noGroup);
-    });
   });
 }
 

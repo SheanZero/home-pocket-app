@@ -15,7 +15,6 @@ T _$identity<T>(T value) => value;
 mixin _$AppSettings {
   AppThemeMode get themeMode;
   String get language;
-  bool get notificationsEnabled;
   bool get biometricLockEnabled;
   bool get appLockEnabled;
   bool get biometricUnlockEnabled;
@@ -44,8 +43,6 @@ mixin _$AppSettings {
                 other.themeMode == themeMode) &&
             (identical(other.language, language) ||
                 other.language == language) &&
-            (identical(other.notificationsEnabled, notificationsEnabled) ||
-                other.notificationsEnabled == notificationsEnabled) &&
             (identical(other.biometricLockEnabled, biometricLockEnabled) ||
                 other.biometricLockEnabled == biometricLockEnabled) &&
             (identical(other.appLockEnabled, appLockEnabled) ||
@@ -74,7 +71,6 @@ mixin _$AppSettings {
     runtimeType,
     themeMode,
     language,
-    notificationsEnabled,
     biometricLockEnabled,
     appLockEnabled,
     biometricUnlockEnabled,
@@ -87,7 +83,7 @@ mixin _$AppSettings {
 
   @override
   String toString() {
-    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled, appLockEnabled: $appLockEnabled, biometricUnlockEnabled: $biometricUnlockEnabled, onboardingComplete: $onboardingComplete, voiceLanguage: $voiceLanguage, voiceAllowOnDeviceFallback: $voiceAllowOnDeviceFallback, monthlyJoyTarget: $monthlyJoyTarget, weekStartDay: $weekStartDay)';
+    return 'AppSettings(themeMode: $themeMode, language: $language, biometricLockEnabled: $biometricLockEnabled, appLockEnabled: $appLockEnabled, biometricUnlockEnabled: $biometricUnlockEnabled, onboardingComplete: $onboardingComplete, voiceLanguage: $voiceLanguage, voiceAllowOnDeviceFallback: $voiceAllowOnDeviceFallback, monthlyJoyTarget: $monthlyJoyTarget, weekStartDay: $weekStartDay)';
   }
 }
 
@@ -101,7 +97,6 @@ abstract mixin class $AppSettingsCopyWith<$Res> {
   $Res call({
     AppThemeMode themeMode,
     String language,
-    bool notificationsEnabled,
     bool biometricLockEnabled,
     bool appLockEnabled,
     bool biometricUnlockEnabled,
@@ -127,7 +122,6 @@ class _$AppSettingsCopyWithImpl<$Res> implements $AppSettingsCopyWith<$Res> {
   $Res call({
     Object? themeMode = null,
     Object? language = null,
-    Object? notificationsEnabled = null,
     Object? biometricLockEnabled = null,
     Object? appLockEnabled = null,
     Object? biometricUnlockEnabled = null,
@@ -147,10 +141,6 @@ class _$AppSettingsCopyWithImpl<$Res> implements $AppSettingsCopyWith<$Res> {
             ? _self.language
             : language // ignore: cast_nullable_to_non_nullable
                   as String,
-        notificationsEnabled: null == notificationsEnabled
-            ? _self.notificationsEnabled
-            : notificationsEnabled // ignore: cast_nullable_to_non_nullable
-                  as bool,
         biometricLockEnabled: null == biometricLockEnabled
             ? _self.biometricLockEnabled
             : biometricLockEnabled // ignore: cast_nullable_to_non_nullable
@@ -284,7 +274,6 @@ extension AppSettingsPatterns on AppSettings {
     TResult Function(
       AppThemeMode themeMode,
       String language,
-      bool notificationsEnabled,
       bool biometricLockEnabled,
       bool appLockEnabled,
       bool biometricUnlockEnabled,
@@ -303,7 +292,6 @@ extension AppSettingsPatterns on AppSettings {
         return $default(
           _that.themeMode,
           _that.language,
-          _that.notificationsEnabled,
           _that.biometricLockEnabled,
           _that.appLockEnabled,
           _that.biometricUnlockEnabled,
@@ -336,7 +324,6 @@ extension AppSettingsPatterns on AppSettings {
     TResult Function(
       AppThemeMode themeMode,
       String language,
-      bool notificationsEnabled,
       bool biometricLockEnabled,
       bool appLockEnabled,
       bool biometricUnlockEnabled,
@@ -354,7 +341,6 @@ extension AppSettingsPatterns on AppSettings {
         return $default(
           _that.themeMode,
           _that.language,
-          _that.notificationsEnabled,
           _that.biometricLockEnabled,
           _that.appLockEnabled,
           _that.biometricUnlockEnabled,
@@ -386,7 +372,6 @@ extension AppSettingsPatterns on AppSettings {
     TResult? Function(
       AppThemeMode themeMode,
       String language,
-      bool notificationsEnabled,
       bool biometricLockEnabled,
       bool appLockEnabled,
       bool biometricUnlockEnabled,
@@ -404,7 +389,6 @@ extension AppSettingsPatterns on AppSettings {
         return $default(
           _that.themeMode,
           _that.language,
-          _that.notificationsEnabled,
           _that.biometricLockEnabled,
           _that.appLockEnabled,
           _that.biometricUnlockEnabled,
@@ -426,7 +410,6 @@ class _AppSettings implements AppSettings {
   const _AppSettings({
     this.themeMode = AppThemeMode.system,
     this.language = 'system',
-    this.notificationsEnabled = true,
     this.biometricLockEnabled = true,
     this.appLockEnabled = false,
     this.biometricUnlockEnabled = false,
@@ -445,9 +428,6 @@ class _AppSettings implements AppSettings {
   @override
   @JsonKey()
   final String language;
-  @override
-  @JsonKey()
-  final bool notificationsEnabled;
   @override
   @JsonKey()
   final bool biometricLockEnabled;
@@ -494,8 +474,6 @@ class _AppSettings implements AppSettings {
                 other.themeMode == themeMode) &&
             (identical(other.language, language) ||
                 other.language == language) &&
-            (identical(other.notificationsEnabled, notificationsEnabled) ||
-                other.notificationsEnabled == notificationsEnabled) &&
             (identical(other.biometricLockEnabled, biometricLockEnabled) ||
                 other.biometricLockEnabled == biometricLockEnabled) &&
             (identical(other.appLockEnabled, appLockEnabled) ||
@@ -524,7 +502,6 @@ class _AppSettings implements AppSettings {
     runtimeType,
     themeMode,
     language,
-    notificationsEnabled,
     biometricLockEnabled,
     appLockEnabled,
     biometricUnlockEnabled,
@@ -537,7 +514,7 @@ class _AppSettings implements AppSettings {
 
   @override
   String toString() {
-    return 'AppSettings(themeMode: $themeMode, language: $language, notificationsEnabled: $notificationsEnabled, biometricLockEnabled: $biometricLockEnabled, appLockEnabled: $appLockEnabled, biometricUnlockEnabled: $biometricUnlockEnabled, onboardingComplete: $onboardingComplete, voiceLanguage: $voiceLanguage, voiceAllowOnDeviceFallback: $voiceAllowOnDeviceFallback, monthlyJoyTarget: $monthlyJoyTarget, weekStartDay: $weekStartDay)';
+    return 'AppSettings(themeMode: $themeMode, language: $language, biometricLockEnabled: $biometricLockEnabled, appLockEnabled: $appLockEnabled, biometricUnlockEnabled: $biometricUnlockEnabled, onboardingComplete: $onboardingComplete, voiceLanguage: $voiceLanguage, voiceAllowOnDeviceFallback: $voiceAllowOnDeviceFallback, monthlyJoyTarget: $monthlyJoyTarget, weekStartDay: $weekStartDay)';
   }
 }
 
@@ -553,7 +530,6 @@ abstract mixin class _$AppSettingsCopyWith<$Res>
   $Res call({
     AppThemeMode themeMode,
     String language,
-    bool notificationsEnabled,
     bool biometricLockEnabled,
     bool appLockEnabled,
     bool biometricUnlockEnabled,
@@ -579,7 +555,6 @@ class __$AppSettingsCopyWithImpl<$Res> implements _$AppSettingsCopyWith<$Res> {
   $Res call({
     Object? themeMode = null,
     Object? language = null,
-    Object? notificationsEnabled = null,
     Object? biometricLockEnabled = null,
     Object? appLockEnabled = null,
     Object? biometricUnlockEnabled = null,
@@ -599,10 +574,6 @@ class __$AppSettingsCopyWithImpl<$Res> implements _$AppSettingsCopyWith<$Res> {
             ? _self.language
             : language // ignore: cast_nullable_to_non_nullable
                   as String,
-        notificationsEnabled: null == notificationsEnabled
-            ? _self.notificationsEnabled
-            : notificationsEnabled // ignore: cast_nullable_to_non_nullable
-                  as bool,
         biometricLockEnabled: null == biometricLockEnabled
             ? _self.biometricLockEnabled
             : biometricLockEnabled // ignore: cast_nullable_to_non_nullable

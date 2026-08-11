@@ -16,7 +16,6 @@ import 'package:home_pocket/features/family_sync/presentation/screens/waiting_ap
 import 'package:home_pocket/features/family_sync/presentation/screens/group_management_screen.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_connection_state.dart';
-import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -39,9 +38,6 @@ class MockGetJoinRequestStatusUseCase extends Mock
 class MockCancelJoinRequestUseCase extends Mock
     implements CancelJoinRequestUseCase {}
 
-class MockPushNotificationService extends Mock
-    implements PushNotificationService {}
-
 void main() {
   setUpAll(() {
     registerFallbackValue(SyncMode.initialSync);
@@ -55,10 +51,8 @@ void main() {
   late MockKeyManager keyManager;
   late MockGetJoinRequestStatusUseCase getJoinRequestStatusUseCase;
   late MockCancelJoinRequestUseCase cancelJoinRequestUseCase;
-  late MockPushNotificationService pushNotificationService;
   late StreamController<WebSocketConnectionState> wsStateController;
   late StreamController<WebSocketEvent> wsEventController;
-  late StreamController<Map<String, dynamic>> joinRequestEvents;
 
   setUp(() {
     groupRepository = MockGroupRepository();
@@ -68,10 +62,8 @@ void main() {
     keyManager = MockKeyManager();
     getJoinRequestStatusUseCase = MockGetJoinRequestStatusUseCase();
     cancelJoinRequestUseCase = MockCancelJoinRequestUseCase();
-    pushNotificationService = MockPushNotificationService();
     wsStateController = StreamController<WebSocketConnectionState>.broadcast();
     wsEventController = StreamController<WebSocketEvent>.broadcast();
-    joinRequestEvents = StreamController<Map<String, dynamic>>.broadcast();
 
     when(() => mockOrchestrator.needsFullPull()).thenAnswer((_) async => false);
     when(
@@ -92,10 +84,6 @@ void main() {
     ).thenAnswer(
       (_) async => const JoinRequestLifecycleSuccess(JoinRequestStatus.pending),
     );
-    when(
-      () => pushNotificationService.joinRequestLifecycleEvents,
-    ).thenAnswer((_) => joinRequestEvents.stream);
-
     syncEngine = SyncEngine(
       orchestrator: mockOrchestrator,
       groupRepo: groupRepository,
@@ -144,7 +132,6 @@ void main() {
     syncEngine.dispose();
     await wsStateController.close();
     await wsEventController.close();
-    await joinRequestEvents.close();
   });
 
   List<Override> buildOverrides() => [
@@ -161,7 +148,6 @@ void main() {
     cancelJoinRequestUseCaseProvider.overrideWithValue(
       cancelJoinRequestUseCase,
     ),
-    pushNotificationServiceProvider.overrideWithValue(pushNotificationService),
   ];
 
   testWidgets('member_confirmed WebSocket event activates immediately', (

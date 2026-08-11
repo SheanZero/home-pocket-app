@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../application/security/app_lock_service.dart';
 import '../../../../core/theme/app_palette.dart';
-import '../../../../core/config/release_features.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../infrastructure/security/biometric_service.dart';
 import '../../../../infrastructure/security/models/auth_result.dart';
@@ -27,7 +26,6 @@ import '../providers/state_settings.dart';
 ///   * When enabled, two sub-items are revealed: the `生体認証で解除` sub-toggle
 ///     (gated by [biometricAvailabilityProvider]) and a `修改 PIN` entry that
 ///     re-authenticates before re-opening [SetPinScreen].
-///   * The existing `notifications` [SwitchListTile] is unchanged.
 ///
 /// All lock decisions/PIN operations route through the single [appLockServiceProvider]
 /// so the Settings surface can never diverge from the cold-start gate. Plaintext
@@ -36,12 +34,10 @@ class SecuritySection extends ConsumerWidget {
   const SecuritySection({
     super.key,
     required this.settings,
-    this.showNotifications = true,
     this.compact = false,
   });
 
   final AppSettings settings;
-  final bool showNotifications;
   final bool compact;
 
   @override
@@ -106,8 +102,6 @@ class SecuritySection extends ConsumerWidget {
             onTap: () => _changePin(context, ref),
           ),
         ],
-        if (showNotifications && ReleaseFeatures.pushNotifications)
-          NotificationsSettingTile(settings: settings),
       ],
     );
   }
@@ -186,33 +180,6 @@ class SecuritySection extends ConsumerWidget {
       builder: (_) => _PinReauthDialog(service: service),
     );
     return ok ?? false;
-  }
-}
-
-/// Notification preference row shown on the secondary settings screen.
-class NotificationsSettingTile extends ConsumerWidget {
-  const NotificationsSettingTile({super.key, required this.settings});
-
-  final AppSettings settings;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return SwitchListTile(
-      minTileHeight: kSettingsItemMinHeight,
-      minVerticalPadding: 8,
-      visualDensity: VisualDensity.standard,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      secondary: const SettingsTileIcon(icon: Icons.notifications_outlined),
-      title: Text(S.of(context).notifications),
-      subtitle: Text(S.of(context).notificationsDescription),
-      value: settings.notificationsEnabled,
-      onChanged: (value) async {
-        await ref
-            .read(settingsRepositoryProvider)
-            .setNotificationsEnabled(value);
-        ref.invalidate(appSettingsProvider);
-      },
-    );
   }
 }
 

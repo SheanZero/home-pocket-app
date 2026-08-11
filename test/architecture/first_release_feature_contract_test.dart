@@ -5,8 +5,7 @@ import 'package:home_pocket/core/config/legal_urls.dart';
 import 'package:home_pocket/core/config/release_features.dart';
 
 void main() {
-  test('first release keeps push notifications and sponsorship disabled', () {
-    expect(ReleaseFeatures.pushNotifications, isFalse);
+  test('first release keeps sponsorship disabled', () {
     expect(ReleaseFeatures.sponsorship, isFalse);
   });
 
@@ -46,18 +45,22 @@ void main() {
     expect(entitlements, isNot(contains('aps-environment')));
   });
 
-  test('MVP has no native notification client or registration path', () {
+  test('MVP has no application or native notification stack', () {
+    for (final path in <String>[
+      'lib/infrastructure/sync/push_notification_service.dart',
+      'lib/infrastructure/sync/apns_push_messaging_client.dart',
+      'lib/application/family_sync/listen_to_push_notifications_use_case.dart',
+      'lib/features/family_sync/presentation/providers/state_notification_navigation.dart',
+      'lib/features/family_sync/presentation/widgets/family_sync_notification_route_listener.dart',
+    ]) {
+      expect(File(path).existsSync(), isFalse, reason: path);
+    }
+
     final providers = File(
       'lib/application/family_sync/repository_providers.dart',
     ).readAsStringSync();
-    expect(providers, isNot(contains('Firebase')));
-    expect(providers, isNot(contains('ApnsPushMessagingClient')));
-    final service = File(
-      'lib/infrastructure/sync/push_notification_service.dart',
-    ).readAsStringSync();
-    expect(service, contains('DisabledPushMessagingClient'));
-    expect(service, isNot(contains('FirebaseMessaging')));
-    expect(service, isNot(contains('FlutterLocalNotificationsPlugin')));
+    expect(providers, isNot(contains('PushNotification')));
+    expect(providers, isNot(contains('FamilyPush')));
 
     final main = File('lib/main.dart').readAsStringSync();
     expect(main, isNot(contains('connectPushNotifications')));
@@ -66,8 +69,7 @@ void main() {
     final settingsProviders = File(
       'lib/features/settings/presentation/providers/repository_providers.dart',
     ).readAsStringSync();
-    expect(settingsProviders, contains('pushNotificationServiceProvider'));
-    expect(settingsProviders, isNot(contains('registerCurrentToken')));
+    expect(settingsProviders, isNot(contains('pushNotification')));
 
     final appDelegate = File('ios/Runner/AppDelegate.swift').readAsStringSync();
     expect(appDelegate, isNot(contains('UserNotifications')));

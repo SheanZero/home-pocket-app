@@ -24,7 +24,6 @@ abstract class SettingsRepository {
   /// Persists the onboarding-completion flag (single source of truth for the
   /// onboarding gate). Plaintext SharedPreferences key, no Drift migration.
   Future<void> setOnboardingComplete(bool enabled);
-  Future<void> setNotificationsEnabled(bool enabled);
   Future<void> setVoiceLanguage(String languageCode);
 
   /// Persists the on-device recognition auto-degradation policy (default true =
@@ -74,7 +73,6 @@ extension SettingsRepositoryRestoreJournal on SettingsRepository {
 
     await restore(() => setThemeMode(settings.themeMode));
     await restore(() => setLanguage(settings.language));
-    await restore(() => setNotificationsEnabled(settings.notificationsEnabled));
     await restore(() => setBiometricLock(settings.biometricLockEnabled));
     await restore(() => setAppLockEnabled(settings.appLockEnabled));
     await restore(

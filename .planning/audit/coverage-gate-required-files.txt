@@ -26,7 +26,6 @@ lib/infrastructure/crypto/services/backup_crypto_service.dart
 # Relay and WebSocket transport lifecycle.
 lib/infrastructure/sync/relay_api_client.dart
 lib/infrastructure/sync/websocket_service.dart
-lib/infrastructure/sync/push_notification_service.dart
 lib/infrastructure/sync/sync_lifecycle_observer.dart
 lib/infrastructure/sync/sync_queue_manager.dart
 lib/infrastructure/sync/sync_scheduler.dart

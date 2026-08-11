@@ -4,7 +4,7 @@ import '../../infrastructure/sync/sync_queue_manager.dart';
 import 'rotate_group_key_use_case.dart';
 import 'shadow_book_service.dart';
 
-/// Handles member_left push notification.
+/// Handles a realtime member_left control event.
 ///
 /// If this device was removed: cleanup + deactivate group.
 /// If another member left: update local member list.

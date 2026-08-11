@@ -1,13 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_pocket/application/family_sync/listen_to_push_notifications_use_case.dart';
 import 'package:home_pocket/application/family_sync/notify_member_approval_use_case.dart';
 import 'package:home_pocket/application/family_sync/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/domain/repositories/sync_repository.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/crypto/providers.dart' as crypto;
 import 'package:home_pocket/infrastructure/sync/e2ee_service.dart';
-import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
 import 'package:home_pocket/infrastructure/sync/relay_api_client.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
 import 'package:mocktail/mocktail.dart';
@@ -49,16 +47,6 @@ void main() {
       expect(result, isA<E2EEService>());
     });
 
-    test(
-      'appPushNotificationServiceProvider returns a PushNotificationService',
-      () {
-        final container = makeContainer();
-        addTearDown(container.dispose);
-        final result = container.read(appPushNotificationServiceProvider);
-        expect(result, isA<PushNotificationService>());
-      },
-    );
-
     test('appSyncQueueManagerProvider returns a SyncQueueManager', () {
       final container = makeContainer();
       addTearDown(container.dispose);
@@ -90,16 +78,6 @@ void main() {
         addTearDown(container.dispose);
         final result = container.read(notifyMemberApprovalUseCaseProvider);
         expect(result, isA<NotifyMemberApprovalUseCase>());
-      },
-    );
-
-    test(
-      'listenToPushNotificationsUseCaseProvider returns a ListenToPushNotificationsUseCase',
-      () {
-        final container = makeContainer();
-        addTearDown(container.dispose);
-        final result = container.read(listenToPushNotificationsUseCaseProvider);
-        expect(result, isA<ListenToPushNotificationsUseCase>());
       },
     );
   });
