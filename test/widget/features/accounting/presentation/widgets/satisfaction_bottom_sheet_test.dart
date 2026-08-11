@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/satisfaction_bottom_sheet.dart';
 
@@ -48,6 +49,12 @@ void main() {
       expect(find.text('不错'), findsOneWidget);
       expect(find.text('很棒'), findsOneWidget);
       expect(find.text('最爱'), findsOneWidget);
+      final faces = tester.widgetList<SvgPicture>(find.byType(SvgPicture));
+      expect(faces, hasLength(5));
+      expect(
+        faces.every((face) => face.width == 48 && face.height == 48),
+        isTrue,
+      );
 
       await tester.tap(find.byKey(const ValueKey('face_3')));
       await tester.pumpAndSettle();

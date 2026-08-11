@@ -153,7 +153,8 @@ class SatisfactionBottomSheet extends StatelessWidget {
                 ],
                 showHeader: false,
                 choiceLabels: levelLabels,
-                chipSize: 64,
+                chipSize: 68,
+                iconSize: 48,
               ),
               const SizedBox(height: 35),
               Text(

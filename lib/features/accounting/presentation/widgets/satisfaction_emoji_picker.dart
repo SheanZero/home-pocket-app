@@ -15,10 +15,13 @@ class SatisfactionEmojiPicker extends StatelessWidget {
     this.showHeader = true,
     this.choiceLabels,
     this.chipSize = _defaultChipSize,
+    this.iconSize = _defaultIconSize,
+    this.titleIcon,
   });
 
   static const _faceValues = [2, 4, 6, 8, 10];
   static const _defaultChipSize = 56.0;
+  static const _defaultIconSize = 34.0;
 
   /// Satisfaction faces (cat set), ordered low → high satisfaction.
   /// Monochrome SVGs — tinted via [ColorFilter] to match the picker state.
@@ -38,6 +41,8 @@ class SatisfactionEmojiPicker extends StatelessWidget {
   final bool showHeader;
   final List<String>? choiceLabels;
   final double chipSize;
+  final double iconSize;
+  final Widget? titleIcon;
 
   int get _selectedIndex {
     if (value <= 2) return 0;
@@ -58,6 +63,10 @@ class SatisfactionEmojiPicker extends StatelessWidget {
         if (showHeader) ...[
           Row(
             children: [
+              if (titleIcon != null) ...[
+                SizedBox(width: 20, child: Center(child: titleIcon)),
+                const SizedBox(width: 9),
+              ],
               Text(
                 title,
                 style: AppTextStyles.titleMedium.copyWith(
@@ -86,6 +95,9 @@ class SatisfactionEmojiPicker extends StatelessWidget {
             final effectiveChipSize = availableChipSize < chipSize
                 ? availableChipSize
                 : chipSize;
+            final effectiveIconSize = iconSize < effectiveChipSize - 12
+                ? iconSize
+                : effectiveChipSize - 12;
 
             return Column(
               children: [
@@ -120,8 +132,8 @@ class SatisfactionEmojiPicker extends StatelessWidget {
                           ),
                           child: SvgPicture.asset(
                             _icons[index],
-                            width: 34,
-                            height: 34,
+                            width: effectiveIconSize,
+                            height: effectiveIconSize,
                             colorFilter: ColorFilter.mode(
                               isSelected ? palette.joy : palette.textSecondary,
                               BlendMode.srcIn,

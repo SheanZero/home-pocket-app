@@ -2560,3 +2560,58 @@ final result: passed
 final result: passed
 
 ---
+
+# Satisfaction Icon Design QA
+
+## Evidence
+
+- Source visual truth: `/Users/xinz/.codex/generated_images/019ff024-f4c0-7dc2-8068-971a15214182/exec-2bbd9023-23e3-4447-9cfd-2c4df944d10a.png`
+- Rendered implementation: `/Users/xinz/Development/home-pocket-app/test/golden/goldens/satisfaction_bottom_sheet_selected_dark_zh.png`
+- Combined comparison: `/tmp/satisfaction_design_qa_comparison.png`
+- Viewport: 390 × 844 logical pixels, device pixel ratio 1
+- Source pixels: 944 × 2048, normalized with a centered aspect-fit crop to 390 × 844
+- Implementation pixels: 390 × 844, captured at 390 × 844 CSS/logical size and DPR 1
+- State: Simplified Chinese, dark mode, Joy ledger, satisfaction value 8 (`很棒`), satisfaction sheet open
+
+## Full-view Comparison
+
+The implementation preserves the existing add-transaction hierarchy and dark forest/joy-pink tokens. The purpose-card satisfaction row now follows the selected design's compact interaction model: a neutral cat-face title icon is aligned to the same 20-pixel icon column as `用途` and `备注`, while the selected 32-pixel face, pink label, and chevron form the trailing action. The bottom sheet presents five evenly distributed 48-pixel SVG faces in 68-pixel targets without horizontal overflow.
+
+The implementation sheet begins higher than the concept because it intentionally retains the shipped category-inference reason, current-value explanation, auto-return copy, and keep-current action. This is an accepted product-content constraint; the purpose and satisfaction rows remain visible above the sheet.
+
+## Focused-region Comparison
+
+Focused comparison was required for the purpose card and picker row. It confirms:
+
+- Title alignment: the satisfaction icon uses the same 20-pixel column and 9-pixel label gap as adjacent field titles.
+- Selected summary: the current face is visually dominant over the title icon and uses the existing Joy semantic color.
+- Picker scale: each face renders at 48 × 48 pixels, within the selected design's 46–52 pixel target.
+- Asset fidelity: all five controls use the existing `sat_01.svg` through `sat_05.svg` assets; no emoji or approximate icon replacements were introduced.
+- Responsive behavior: the same row renders without overflow at 320 logical pixels, reducing only the effective icon size when necessary.
+
+## Required Fidelity Surfaces
+
+- Fonts and typography: existing `AppTextStyles` and localized strings are preserved. The Flutter golden environment lacks the production CJK font and therefore renders Chinese glyphs as boxes; geometry, weights, and wrapping remain testable and stable.
+- Spacing and layout rhythm: the 20-pixel icon column, 9-pixel title gap, 48-pixel summary row, 68-pixel picker targets, and existing card radii match the app's established rhythm.
+- Colors and visual tokens: all colors come from `AppPalette`; muted title icons and Joy-selected controls use the existing semantic tokens.
+- Image quality and asset fidelity: original vector cat-face assets are rendered directly and remain sharp at the larger size.
+- Copy and content: all existing localized product copy and the selected `很棒` state are preserved.
+
+## Findings
+
+- No actionable P0, P1, or P2 differences remain for the requested satisfaction-title and satisfaction-option changes.
+- P3: the retained explanatory content makes the production sheet taller than the concept. This is acceptable because it preserves existing guidance and dismissal behavior.
+
+## Comparison History
+
+- Pass 1: no P0/P1/P2 issues found. The rendered dark-mode golden already met the alignment, icon-size, token, asset, and responsive requirements, so no post-comparison visual fix was necessary.
+
+## Implementation Checklist
+
+- [x] Add an aligned satisfaction title icon.
+- [x] Show the selected satisfaction face in the compact summary row.
+- [x] Increase sheet choice targets to 68 pixels and face icons to 48 pixels.
+- [x] Preserve five-level selection behavior and semantics.
+- [x] Verify 320-pixel width, dark mode, widget behavior, and goldens.
+
+final result: passed

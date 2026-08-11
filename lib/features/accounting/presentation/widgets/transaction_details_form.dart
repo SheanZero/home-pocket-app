@@ -49,6 +49,7 @@ import '../widgets/currency_linked_edit_fields.dart';
 import '../widgets/detail_info_card.dart';
 import '../widgets/keyboard_toolbar.dart' show kKeyboardToolbarTapRegionGroup;
 import '../../../../shared/widgets/ledger_type_selector.dart';
+import '../../../../shared/widgets/satisfaction_face_icon.dart';
 import '../widgets/satisfaction_bottom_sheet.dart';
 import '../widgets/satisfaction_emoji_picker.dart';
 
@@ -1615,6 +1616,7 @@ class TransactionDetailsFormState
   }
 
   Widget _buildV16SatisfactionCard(S l10n) {
+    final palette = context.palette;
     if (widget.onSatisfactionRequested != null) {
       final label = satisfactionSheetLabelFor(l10n, _joyFullness);
       return KeyedSubtree(
@@ -1631,30 +1633,48 @@ class TransactionDetailsFormState
                 _requestSatisfaction(SatisfactionPromptReason.revisit),
               ),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 44),
+                constraints: const BoxConstraints(minHeight: 48),
                 child: Row(
                   children: [
-                    Text(
-                      l10n.satisfactionLevel,
-                      style: AppTextStyles.label.copyWith(
-                        color: context.palette.textPrimary,
-                        fontWeight: FontWeight.w700,
+                    SizedBox(
+                      width: 20,
+                      child: SatisfactionFaceIcon(
+                        key: const ValueKey('v16-satisfaction-title-icon'),
+                        value: 6,
+                        size: 20,
+                        color: palette.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(width: 9),
+                    SizedBox(
+                      width: 48,
+                      child: Text(
+                        l10n.satisfactionLevel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.label.copyWith(
+                          color: palette.textPrimary,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     const Spacer(),
+                    SatisfactionFaceIcon(
+                      key: const ValueKey('v16-satisfaction-selected-icon'),
+                      value: _joyFullness,
+                      size: 32,
+                      color: palette.joyText,
+                    ),
+                    const SizedBox(width: 8),
                     Text(
                       label,
                       style: AppTextStyles.label.copyWith(
-                        color: context.palette.joyText,
+                        color: palette.joyText,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(width: 4),
-                    Icon(
-                      Icons.chevron_right,
-                      size: 18,
-                      color: context.palette.joyText,
-                    ),
+                    Icon(Icons.chevron_right, size: 18, color: palette.joyText),
                   ],
                 ),
               ),
@@ -1683,6 +1703,11 @@ class TransactionDetailsFormState
         value: _joyFullness,
         onChanged: updateSatisfaction,
         title: l10n.satisfactionLevel,
+        titleIcon: SatisfactionFaceIcon(
+          value: 6,
+          size: 20,
+          color: palette.textSecondary,
+        ),
         levelLabels: levelLabels,
         bottomLabels: [
           l10n.satisfactionBad,

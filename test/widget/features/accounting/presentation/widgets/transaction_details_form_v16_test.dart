@@ -272,7 +272,7 @@ void main() {
     );
     expect(
       find.descendant(of: satisfactionCard, matching: find.byType(SvgPicture)),
-      findsNWidgets(5),
+      findsNWidgets(6),
     );
     expect(
       find.descendant(of: satisfactionCard, matching: find.byType(Icon)),
@@ -365,7 +365,21 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Great'), findsOneWidget);
-    expect(find.byType(SvgPicture), findsNothing);
+    expect(
+      find.byKey(const ValueKey('v16-satisfaction-title-icon')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('v16-satisfaction-selected-icon')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('v16-satisfaction-summary')),
+        matching: find.byType(SvgPicture),
+      ),
+      findsNWidgets(2),
+    );
 
     await tester.tap(find.byKey(const ValueKey('v16-satisfaction-summary')));
     await tester.pumpAndSettle();
