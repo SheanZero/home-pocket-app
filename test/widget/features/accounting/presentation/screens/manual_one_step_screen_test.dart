@@ -213,6 +213,7 @@ class _CapturingSpeechService implements StartSpeechRecognitionUseCase {
   var canceled = false;
   var startCount = 0;
   var cancelCount = 0;
+  var initializeCount = 0;
   var available = true;
   Completer<void>? cancelGate;
   Duration? lastPauseFor;
@@ -222,6 +223,7 @@ class _CapturingSpeechService implements StartSpeechRecognitionUseCase {
     void Function(String status)? onStatus,
     void Function(String errorMsg, bool permanent)? onError,
   }) async {
+    initializeCount++;
     this.onStatus = onStatus;
     return available;
   }
@@ -1626,15 +1628,18 @@ void main() {
       tester,
     ) async {
       tall(tester);
+      final speech = _CapturingSpeechService();
       await tester.pumpWidget(
-        pumpPtt(
-          speech: _CapturingSpeechService(),
-          parse: _FakeParseVoiceInputUseCase(const {}),
-        ),
+        pumpPtt(speech: speech, parse: _FakeParseVoiceInputUseCase(const {})),
       );
       await tester.pumpAndSettle();
 
       expect(find.byType(VoiceRecordBar), findsOneWidget);
+      expect(
+        speech.initializeCount,
+        0,
+        reason: 'opening manual entry must not request voice permissions',
+      );
       // R2: the bar sits ABOVE the keypad (R1 placed it below = iOS gesture
       // zone): its top edge is LESS than the SmartKeyboard's top edge.
       final barTop = tester.getTopLeft(micBarFinder).dy;
@@ -1662,6 +1667,11 @@ void main() {
       await tester.pump();
       await tester.pump();
 
+      expect(
+        speech.initializeCount,
+        1,
+        reason: 'the first explicit voice-record tap initializes speech',
+      );
       expect(_voiceDock(tester).state, UnifiedVoiceEntryState.idle);
       expect(speech.startCount, 0);
       expect(find.text('Ready when you are'), findsOneWidget);

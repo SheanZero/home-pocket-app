@@ -26,6 +26,12 @@ extension _ManualOneStepVoiceWiring on _ManualOneStepScreenState {
   /// holds the dock's central microphone.
   void _onVoiceRecordTap() {
     if (_voiceModalOpen || _isSubmitting) return;
+    // speech_to_text requests iOS microphone / speech-recognition permissions
+    // during initialize(). Keep that request attached to this explicit user
+    // action instead of presenting it as soon as manual entry opens.
+    if (!pttServiceInitialized) {
+      unawaited(initPttSpeechService());
+    }
     _voiceCoreHeld = false;
     final form = _formKey.currentState;
     if (form != null) {

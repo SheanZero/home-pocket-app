@@ -278,10 +278,11 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
     _noteFocus = FocusNode()..addListener(_handleFocusChange);
 
     // 260622-nhs: single-page push-to-talk. Observe app lifecycle so a paused
-    // app cancels any in-progress recording (T-nhs-02), and init the speech
-    // service + locale-readiness gate via the shared mixin.
+    // app cancels any in-progress recording (T-nhs-02). Prepare the Dart-side
+    // speech use case now, but defer platform initialization (and therefore the
+    // iOS permission prompts) until the user explicitly taps 「语音记录」.
     WidgetsBinding.instance.addObserver(this);
-    initPttSpeechService();
+    preparePttSpeechService();
     initLocaleReadiness();
 
     // Initialize amount string from widget param. The initial amount is a JPY

@@ -138,6 +138,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   // ── Owned recording-session state (ported from _VoiceInputScreenState) ─────
 
   late final StartSpeechRecognitionUseCase pttSpeechService;
+  bool _pttSpeechServicePrepared = false;
   bool _pttServiceInitialized = false;
 
   bool _isRecording = false;
@@ -392,15 +393,25 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
-  /// Build (or adopt the injected) speech service and initialize it. Returns
-  /// `true` when the recognizer is available. Call from the host's initState
-  /// (after super.initState).
-  Future<bool> initPttSpeechService() async {
+  /// Build (or adopt the injected) speech service without initializing the
+  /// platform recognizer. This is safe to call from the host's initState:
+  /// speech_to_text requests iOS permissions from [initPttSpeechService], not
+  /// while this Dart-side use case is constructed.
+  void preparePttSpeechService() {
+    if (_pttSpeechServicePrepared) return;
     pttSpeechService =
         pttInjectedSpeechService ??
         StartSpeechRecognitionUseCase(
           service: ref.read(appSpeechRecognitionServiceProvider),
         );
+    _pttSpeechServicePrepared = true;
+  }
+
+  /// Initialize the platform recognizer. Hosts should call this only in
+  /// response to an explicit voice action because iOS may request microphone
+  /// and speech-recognition permissions here.
+  Future<bool> initPttSpeechService() async {
+    preparePttSpeechService();
     final available = await pttSpeechService.initialize(
       onStatus: onStatus,
       onError: onError,
