@@ -1243,6 +1243,31 @@
   "@dragToReorder": {
     "description": "Hint banner shown in category reorder edit mode"
   },
+  "hideCategoryTooltip": "隐藏分类",
+  "@hideCategoryTooltip": {
+    "description": "Tooltip for the soft-delete control in category reorder mode"
+  },
+  "hideCategoryTitle": "隐藏“{categoryName}”？",
+  "@hideCategoryTitle": {
+    "description": "Confirmation title before hiding a category",
+    "placeholders": {"categoryName": {"type": "String"}}
+  },
+  "hideL1CategoryBody": "此分类及其下的二级分类将不再出现在分类选择和语音记账中。历史账目及家庭同步账目不受影响。",
+  "@hideL1CategoryBody": {
+    "description": "Confirmation explanation before hiding an L1 category branch"
+  },
+  "hideL2CategoryBody": "此分类将不再出现在分类选择和语音记账中。历史账目及家庭同步账目不受影响。",
+  "@hideL2CategoryBody": {
+    "description": "Confirmation explanation before hiding an L2 category"
+  },
+  "categoryHidden": "分类已隐藏",
+  "@categoryHidden": {
+    "description": "Success feedback after locally hiding a category"
+  },
+  "categoryHideFailed": "隐藏失败，请重试",
+  "@categoryHideFailed": {
+    "description": "Error feedback after locally hiding a category fails"
+  },
   "orderUpdated": "顺序已更新",
   "@orderUpdated": {
     "description": "SnackBar shown after successfully saving category reorder"
@@ -2924,6 +2949,10 @@
   "@shoppingToggleComplete": {
     "description": "Semantics label for the leading circular completion toggle on a shopping item tile (EC2)"
   },
+  "shoppingToggleFailed": "无法更新完成状态，请重试。",
+  "@shoppingToggleFailed": {
+    "description": "Error shown when a shopping item's completed state cannot be persisted"
+  },
   "shoppingEnterReorderMode": "排序",
   "@shoppingEnterReorderMode": {
     "description": "Semantics/tooltip for the filter-bar reorder entry (≡) that enters manual drag-reorder mode (EC2 D-2)"
@@ -3178,7 +3207,6 @@
   "shoppingUnitCustom": "自定义单位",
   "shoppingUnitCustomHint": "例如：杯",
   "shoppingUnitCustomError": "请输入 1–12 个字符",
-  "shoppingUnitApply": "应用",
   "shoppingUnitPiece": "件",
   "shoppingUnitGram": "g",
   "shoppingUnitKilogram": "kg",
@@ -3281,23 +3309,23 @@
   },
   "entryVoiceLaunchHelp": "一次说出金额、商家、分类和日期",
   "entryVoicePrivacy": "仅在设备内处理",
-  "entryVoiceIdleStatus": "等待语音输入中",
-  "entryVoiceListeningStatus": "正在聆听",
+  "entryVoiceIdleStatus": "准备好了，随时可以说",
+  "entryVoiceListeningStatus": "正在听你说",
   "entryVoiceProcessingStatus": "正在整理内容",
   "entryVoiceReviewStatus": "已填入账目",
   "entryVoiceUnavailableStatus": "无法使用语音输入",
   "entryVoiceIdleTranscript": "可以开始记录下一笔",
   "entryVoiceListeningPlaceholder": "“森林咖啡，午餐两千三百八十日元……”",
   "entryVoiceProcessingPlaceholder": "“森林咖啡，午餐两千三百八十日元”",
-  "entryVoiceIdleHelp": "点击麦克风开始语音记录",
-  "entryVoiceListeningHelp": "说完稍候将自动识别，也可点按立即完成",
+  "entryVoiceIdleHelp": "按住麦克风说话，松手后我来帮你整理",
+  "entryVoiceListeningHelp": "请继续按住，慢慢说，说完松手就好",
   "entryVoiceProcessingHelp": "正在把识别结果填入同一份表单",
-  "entryVoiceReviewHelp": "点按麦克风重新录音，也可修改后直接记录",
+  "entryVoiceReviewHelp": "想再说一次？长按麦克风即可重新录音",
   "entryVoiceUnavailableHelp": "请在系统设置中允许麦克风，也可继续手动输入",
   "entryVoiceKeyboardAction": "切换到键盘输入",
-  "entryVoiceStartAction": "开始语音输入",
-  "entryVoiceStopAction": "立即结束并解析",
-  "entryVoiceRerecordAction": "重新录音",
+  "entryVoiceStartAction": "长按开始语音输入",
+  "entryVoiceStopAction": "松手结束并解析",
+  "entryVoiceRerecordAction": "长按麦克风重新录音",
   "entryVoiceSourceBadge": "语音填入",
   "entryCategorySelectRequired": "需选择",
   "entryContinuousReturnHome": "记录后返回主页",
@@ -3683,9 +3711,13 @@
   "@onboardingSetupTitle": {
     "description": "Compact centered title for the onboarding setup screen"
   },
-  "onboardingRowName": "姓名・必填",
+  "onboardingRowName": "姓名",
   "@onboardingRowName": {
-    "description": "Design-04 setup screen: inline name field label"
+    "description": "Design-04 setup screen: inline name field label, without the required marker"
+  },
+  "onboardingRequired": "必填",
+  "@onboardingRequired": {
+    "description": "Required marker shown beside the onboarding name field label"
   },
   "onboardingRowLanguage": "显示语言",
   "@onboardingRowLanguage": {

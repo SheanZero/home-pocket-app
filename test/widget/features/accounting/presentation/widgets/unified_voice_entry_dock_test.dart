@@ -25,6 +25,9 @@ Widget _testApp({
   bool isSubmitting = false,
   VoidCallback? onKeyboard,
   VoidCallback? onCore,
+  VoidCallback? onCoreHoldStart,
+  VoidCallback? onCoreHoldEnd,
+  VoidCallback? onCoreHoldCancel,
   VoidCallback? onPrimary,
   VoidCallback? onSettings,
   VoidCallback? onToggleContinuous,
@@ -44,6 +47,9 @@ Widget _testApp({
             isSubmitting: isSubmitting,
             onKeyboard: onKeyboard ?? () {},
             onCore: onCore ?? () {},
+            onCoreHoldStart: onCoreHoldStart ?? () {},
+            onCoreHoldEnd: onCoreHoldEnd ?? () {},
+            onCoreHoldCancel: onCoreHoldCancel ?? () {},
             onPrimary: onPrimary ?? () {},
             onSettings: onSettings ?? () {},
             onToggleContinuous: onToggleContinuous ?? () {},
@@ -90,7 +96,7 @@ void main() {
           expect(find.text(copy.primaryAction), findsNothing);
           expect(find.text(copy.settingsAction), findsNothing);
         case UnifiedVoiceEntryState.listening:
-          expect(find.byIcon(Icons.stop_rounded), findsOneWidget);
+          expect(find.byIcon(Icons.mic), findsOneWidget);
           expect(find.text(copy.primaryAction), findsNothing);
           expect(find.text(copy.settingsAction), findsNothing);
         case UnifiedVoiceEntryState.processing:
@@ -111,11 +117,13 @@ void main() {
     });
   }
 
-  testWidgets('routes keyboard, core, primary, settings, and continuous taps', (
+  testWidgets('routes keyboard, core hold, primary, settings, and continuous', (
     tester,
   ) async {
     var keyboardTaps = 0;
     var coreTaps = 0;
+    var coreHoldStarts = 0;
+    var coreHoldEnds = 0;
     var primaryTaps = 0;
     var settingsTaps = 0;
     var continuousTaps = 0;
@@ -124,6 +132,8 @@ void main() {
       state: state,
       onKeyboard: () => keyboardTaps++,
       onCore: () => coreTaps++,
+      onCoreHoldStart: () => coreHoldStarts++,
+      onCoreHoldEnd: () => coreHoldEnds++,
       onPrimary: () => primaryTaps++,
       onSettings: () => settingsTaps++,
       onToggleContinuous: () => continuousTaps++,
@@ -131,7 +141,11 @@ void main() {
 
     await tester.pumpWidget(app(UnifiedVoiceEntryState.review));
     await tester.tap(find.byKey(const Key('unified-voice-keyboard')));
-    await tester.tap(find.byKey(const Key('unified-voice-core')));
+    final core = find.byKey(const Key('unified-voice-core'));
+    await tester.tap(core);
+    final hold = await tester.startGesture(tester.getCenter(core));
+    await tester.pump(const Duration(milliseconds: 600));
+    await hold.up();
     await tester.tap(find.byKey(const Key('unified-voice-primary-action')));
     await tester.tap(find.byKey(const Key('unified-voice-continuous-action')));
 
@@ -139,26 +153,30 @@ void main() {
     await tester.tap(find.byKey(const Key('unified-voice-settings-action')));
 
     expect(keyboardTaps, 1);
-    expect(coreTaps, 1);
+    expect(coreTaps, 0, reason: 'a physical tap must not start recording');
+    expect(coreHoldStarts, 1);
+    expect(coreHoldEnds, 1);
     expect(primaryTaps, 1);
     expect(settingsTaps, 1);
     expect(continuousTaps, 1);
   });
 
-  testWidgets('processing and unavailable core actions are disabled', (
+  testWidgets('processing and unavailable core hold actions are disabled', (
     tester,
   ) async {
-    var coreTaps = 0;
+    var coreHoldStarts = 0;
 
     for (final state in [
       UnifiedVoiceEntryState.processing,
       UnifiedVoiceEntryState.unavailable,
     ]) {
-      await tester.pumpWidget(_testApp(state: state, onCore: () => coreTaps++));
-      await tester.tap(find.byKey(const Key('unified-voice-core')));
+      await tester.pumpWidget(
+        _testApp(state: state, onCoreHoldStart: () => coreHoldStarts++),
+      );
+      await tester.longPress(find.byKey(const Key('unified-voice-core')));
     }
 
-    expect(coreTaps, 0);
+    expect(coreHoldStarts, 0);
   });
 
   testWidgets('submitting disables the review primary action', (tester) async {

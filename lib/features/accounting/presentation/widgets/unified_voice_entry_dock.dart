@@ -51,6 +51,9 @@ class UnifiedVoiceEntryDock extends StatelessWidget {
     required this.isSubmitting,
     required this.onKeyboard,
     required this.onCore,
+    required this.onCoreHoldStart,
+    required this.onCoreHoldEnd,
+    required this.onCoreHoldCancel,
     required this.onPrimary,
     required this.onSettings,
     required this.onToggleContinuous,
@@ -64,7 +67,13 @@ class UnifiedVoiceEntryDock extends StatelessWidget {
   final bool continuousMode;
   final bool isSubmitting;
   final VoidCallback onKeyboard;
+
+  /// Accessibility fallback: assistive technologies can toggle recording with
+  /// repeated semantic activation when a physical press-and-hold is unavailable.
   final VoidCallback onCore;
+  final VoidCallback onCoreHoldStart;
+  final VoidCallback onCoreHoldEnd;
+  final VoidCallback onCoreHoldCancel;
   final VoidCallback onPrimary;
   final VoidCallback onSettings;
   final VoidCallback onToggleContinuous;
@@ -104,6 +113,9 @@ class UnifiedVoiceEntryDock extends StatelessWidget {
                   copy: copy,
                   soundLevel: soundLevel,
                   onCore: onCore,
+                  onCoreHoldStart: onCoreHoldStart,
+                  onCoreHoldEnd: onCoreHoldEnd,
+                  onCoreHoldCancel: onCoreHoldCancel,
                 ),
               ),
               _VoiceActionSlot(
@@ -250,12 +262,18 @@ class _VoiceDockMain extends StatelessWidget {
     required this.copy,
     required this.soundLevel,
     required this.onCore,
+    required this.onCoreHoldStart,
+    required this.onCoreHoldEnd,
+    required this.onCoreHoldCancel,
   });
 
   final UnifiedVoiceEntryState state;
   final UnifiedVoiceEntryCopy copy;
   final double soundLevel;
   final VoidCallback onCore;
+  final VoidCallback onCoreHoldStart;
+  final VoidCallback onCoreHoldEnd;
+  final VoidCallback onCoreHoldCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -287,7 +305,14 @@ class _VoiceDockMain extends StatelessWidget {
             isListening: state == UnifiedVoiceEntryState.listening,
           ),
           const SizedBox(height: 16),
-          _VoiceCoreButton(state: state, copy: copy, onTap: onCore),
+          _VoiceCoreButton(
+            state: state,
+            copy: copy,
+            onSemanticActivate: onCore,
+            onHoldStart: onCoreHoldStart,
+            onHoldEnd: onCoreHoldEnd,
+            onHoldCancel: onCoreHoldCancel,
+          ),
           const SizedBox(height: 12),
           SizedBox(
             height: 17,
@@ -367,12 +392,18 @@ class _VoiceCoreButton extends StatelessWidget {
   const _VoiceCoreButton({
     required this.state,
     required this.copy,
-    required this.onTap,
+    required this.onSemanticActivate,
+    required this.onHoldStart,
+    required this.onHoldEnd,
+    required this.onHoldCancel,
   });
 
   final UnifiedVoiceEntryState state;
   final UnifiedVoiceEntryCopy copy;
-  final VoidCallback onTap;
+  final VoidCallback onSemanticActivate;
+  final VoidCallback onHoldStart;
+  final VoidCallback onHoldEnd;
+  final VoidCallback onHoldCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -386,7 +417,7 @@ class _VoiceCoreButton extends StatelessWidget {
       UnifiedVoiceEntryState.listening => (
         palette.joy,
         palette.card,
-        Icons.stop_rounded,
+        Icons.mic,
       ),
       UnifiedVoiceEntryState.processing => (
         palette.backgroundMuted,
@@ -410,6 +441,7 @@ class _VoiceCoreButton extends StatelessWidget {
       enabled: enabled,
       label: copy.coreSemanticLabel,
       excludeSemantics: true,
+      onTap: enabled ? onSemanticActivate : null,
       child: SizedBox.square(
         key: const Key('unified-voice-core'),
         dimension: 60,
@@ -421,8 +453,12 @@ class _VoiceCoreButton extends StatelessWidget {
           elevation: 2,
           borderRadius: BorderRadius.circular(20),
           clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: enabled ? onTap : null,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            excludeFromSemantics: true,
+            onLongPressStart: enabled ? (_) => onHoldStart() : null,
+            onLongPressEnd: enabled ? (_) => onHoldEnd() : null,
+            onLongPressCancel: enabled ? onHoldCancel : null,
             child: Icon(icon, size: 30, color: foreground),
           ),
         ),

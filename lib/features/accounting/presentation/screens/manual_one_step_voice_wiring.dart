@@ -4,7 +4,7 @@
 // `_ManualOneStepScreenState`, moved out of `manual_one_step_screen.dart` as a
 // same-library `part` (the host State class is private, so a part is the only
 // split that keeps zero renames and zero visibility promotion). Covers the
-// tap-modal voice-record lifecycle, the PTT-commit keypad mirror, and the
+// hold-to-record voice lifecycle, the PTT-commit keypad mirror, and the
 // inline voice panel builder — verbatim moves. The keypad / currency / save /
 // foreign-triple segments stay in the main file untouched.
 //
@@ -19,13 +19,14 @@
 part of 'manual_one_step_screen.dart';
 
 extension _ManualOneStepVoiceWiring on _ManualOneStepScreenState {
-  // ── 260622-nhs R2: tap-modal voice-record lifecycle ───────────────────────
+  // ── 260622-nhs R2: hold-to-record voice lifecycle ────────────────────
 
   /// Tap 「语音记录」: snapshot the form (D-2 reset-restore) and open the voice
   /// dock in its explicit idle state. Recognition starts only when the user
-  /// taps the dock's central microphone.
+  /// holds the dock's central microphone.
   void _onVoiceRecordTap() {
     if (_voiceModalOpen || _isSubmitting) return;
+    _voiceCoreHeld = false;
     final form = _formKey.currentState;
     if (form != null) {
       _voiceSnapshot = ManualEntrySnapshot.capture(
@@ -46,6 +47,7 @@ extension _ManualOneStepVoiceWiring on _ManualOneStepScreenState {
 
   Future<void> _onVoiceKeyboard() async {
     if (_isSubmitting) return;
+    _voiceCoreHeld = false;
     final shouldRestore =
         _voiceDockState == UnifiedVoiceEntryState.listening ||
         _voiceDockState == UnifiedVoiceEntryState.processing;
@@ -62,20 +64,67 @@ extension _ManualOneStepVoiceWiring on _ManualOneStepScreenState {
     _voiceSnapshot = null;
   }
 
-  Future<void> _onVoiceCore() async {
+  void _onVoiceCore() {
     if (_isSubmitting) return;
     switch (_voiceDockState) {
       case UnifiedVoiceEntryState.idle:
-        onPttSessionChanged(() => _voiceIdleForNext = false);
-        await startPttTapSession();
-      case UnifiedVoiceEntryState.listening:
-        await exitPttTapSession();
       case UnifiedVoiceEntryState.review:
-        await _onVoiceReset();
+        _onVoiceCoreHoldStart();
+      case UnifiedVoiceEntryState.listening:
+        _onVoiceCoreHoldEnd();
       case UnifiedVoiceEntryState.processing:
       case UnifiedVoiceEntryState.unavailable:
         return;
     }
+  }
+
+  void _onVoiceCoreHoldStart() {
+    if (_isSubmitting || _voiceCoreHeld) return;
+    final state = _voiceDockState;
+    if (state != UnifiedVoiceEntryState.idle &&
+        state != UnifiedVoiceEntryState.review) {
+      return;
+    }
+    _voiceCoreHeld = true;
+    if (state == UnifiedVoiceEntryState.review) {
+      unawaited(_prepareVoiceRerecordHold());
+      return;
+    }
+    _beginVoiceReleaseControlledHold();
+  }
+
+  Future<void> _prepareVoiceRerecordHold() async {
+    onPttSessionChanged(() => _voiceRerecordPreparing = true);
+    try {
+      _restoreVoiceSnapshot();
+      // A full cancel clears the platform recognizer's previous utterance buffer
+      // before the next hold starts, preventing old words from resurfacing.
+      await cancelPttSessionAndDiscard();
+      if (!mounted || !_voiceModalOpen || !_voiceCoreHeld) return;
+      _beginVoiceReleaseControlledHold();
+    } finally {
+      if (mounted) {
+        onPttSessionChanged(() => _voiceRerecordPreparing = false);
+      }
+    }
+  }
+
+  void _beginVoiceReleaseControlledHold() {
+    if (!_voiceCoreHeld || !_voiceModalOpen) return;
+    onPttSessionChanged(() => _voiceIdleForNext = false);
+    onPttReleaseHoldStart();
+  }
+
+  void _onVoiceCoreHoldEnd() {
+    if (!_voiceCoreHeld) return;
+    _voiceCoreHeld = false;
+    onPttReleaseHoldEnd();
+  }
+
+  void _onVoiceCoreHoldCancel() {
+    if (!_voiceCoreHeld) return;
+    _voiceCoreHeld = false;
+    onPttReleaseHoldCancel();
   }
 
   void _restoreVoiceSnapshot() {
@@ -94,18 +143,6 @@ extension _ManualOneStepVoiceWiring on _ManualOneStepScreenState {
     });
   }
 
-  /// 「重置·恢复账目」: restore the form to the pre-speech snapshot, clear the
-  /// transcript/merger/parse buffers, and KEEP listening (the user can re-speak).
-  Future<void> _onVoiceReset() async {
-    _restoreVoiceSnapshot();
-    // 260622-nhs R4 (BUG A + BUG B): a reset must CANCEL the recognizer (to
-    // clear its accumulated in-window buffer — the R3 buffer-only clear left the
-    // iOS recognizer's prior transcript alive, so the next partial re-surfaced
-    // the old text) and start a FRESH serialized listening session (the cancel→
-    // start is guarded so onStatus can't double-start into a freeze).
-    await resetPttSessionAndRestart();
-  }
-
   /// 260622-nhs (T-nhs-03) / voice-consolidation P1-7 (R2): the PTT-commit
   /// keypad mirror — the body of the host's [onPttCommitted] override, moved
   /// verbatim (the `@override` itself stays in the class as a one-line
@@ -114,25 +151,52 @@ extension _ManualOneStepVoiceWiring on _ManualOneStepScreenState {
     if (!mounted) return;
     // A PTT fill happened — the session mixin already pushed amount / category /
     // merchant / date / satisfaction (+ foreign triple) into _formKey's state.
-    // Mirror the booked JPY amount into AmountDisplay's string + the keypad
-    // controller so an edit continues from the fill, and flip provenance to
-    // voice so the saved row stamps EntrySource.voice (T-nhs-03). Keep the
-    // keypad on the JPY native path: the form already carries the real foreign
-    // triple for the save, so the headline shows the booked JPY figure (mirrors
-    // the legacy voice screen, D-4) without re-driving _syncAmountToForm.
+    // For an explicit foreign utterance, mirror the ORIGINAL currency + amount
+    // into the headline/keypad so the normal foreign-rate card mounts and shows
+    // the already-resolved conversion. The form keeps the booked JPY amount and
+    // foreign triple written by the mixin; do not re-drive _syncAmountToForm.
+    final form = _formKey.currentState;
+    final displayCurrency = pttDisplayCurrency.toUpperCase();
+    final originalCurrency = form?.currentOriginalCurrency?.toUpperCase();
+    final originalMinorUnits = form?.currentOriginalAmount;
+    final hasForeignTriple =
+        displayCurrency != 'JPY' &&
+        originalCurrency == displayCurrency &&
+        originalMinorUnits != null &&
+        originalMinorUnits > 0;
+    final nextCurrency = hasForeignTriple ? displayCurrency : 'JPY';
+    final nextAmount = hasForeignTriple
+        ? formatMinorAsMajor(originalMinorUnits, displayCurrency)
+        : pttLastFilledAmount > 0
+        ? pttLastFilledAmount.toString()
+        : '';
+
+    if (hasForeignTriple) {
+      ref.read(recentCurrencyProvider.notifier).recordUse(displayCurrency);
+    }
     onPttSessionChanged(() {
       _lastFillWasVoice = true;
-      final filled = pttLastFilledAmount;
-      if (filled > 0) {
-        while (_controller.text.isNotEmpty) {
-          _controller.onDelete();
-        }
-        for (final ch in filled.toString().split('')) {
-          _controller.onDigit(ch);
-        }
-        _amount = _controller.text;
+      if (nextAmount.isNotEmpty) {
+        _currency = nextCurrency;
+        _manualForeignRate = null;
+        _replaceVoiceAmountInController(nextAmount, nextCurrency);
+        _amount = nextAmount;
       }
     });
+  }
+
+  void _replaceVoiceAmountInController(String amount, String currency) {
+    _controller.onCurrencyChange(currencyFractionDigitsFor(currency));
+    while (_controller.text.isNotEmpty) {
+      _controller.onDelete();
+    }
+    for (final character in amount.split('')) {
+      if (character == '.') {
+        _controller.onDot();
+      } else {
+        _controller.onDigit(character);
+      }
+    }
   }
 
   /// voice-consolidation P1-7 (R2): the inline voice panel builder — the
@@ -143,6 +207,7 @@ extension _ManualOneStepVoiceWiring on _ManualOneStepScreenState {
       return UnifiedVoiceEntryState.unavailable;
     }
     if (_voiceIdleForNext) return UnifiedVoiceEntryState.idle;
+    if (_voiceRerecordPreparing) return UnifiedVoiceEntryState.processing;
     return switch (pttListenStatus) {
       PttListenStatus.listening => UnifiedVoiceEntryState.listening,
       PttListenStatus.processing => UnifiedVoiceEntryState.processing,
@@ -204,6 +269,9 @@ extension _ManualOneStepVoiceWiring on _ManualOneStepScreenState {
       isSubmitting: _isSubmitting || _isVoiceDraftTransient || !_canSave,
       onKeyboard: _onVoiceKeyboard,
       onCore: _onVoiceCore,
+      onCoreHoldStart: _onVoiceCoreHoldStart,
+      onCoreHoldEnd: _onVoiceCoreHoldEnd,
+      onCoreHoldCancel: _onVoiceCoreHoldCancel,
       onPrimary: _trySave,
       onSettings: () {
         showErrorFeedback(context, l10n.entryVoiceUnavailableHelp);

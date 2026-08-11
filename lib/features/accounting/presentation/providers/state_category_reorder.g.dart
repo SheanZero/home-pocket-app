@@ -42,7 +42,7 @@ final class CategoryReorderNotifierProvider
 }
 
 String _$categoryReorderNotifierHash() =>
-    r'4338ccc503b0fd37d13974312078d9ed83a5c0da';
+    r'e13d2ee2f6a53407b9afdfd121e552cabb6cc84d';
 
 abstract class _$CategoryReorderNotifier
     extends $Notifier<CategoryReorderState> {

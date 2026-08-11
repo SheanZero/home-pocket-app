@@ -49,6 +49,32 @@ class CategoryReorderNotifier extends _$CategoryReorderNotifier {
     state = state.copyWith(l2ByParent: updatedMap, isDirty: true);
   }
 
+  /// Removes a category that has already been persisted as hidden.
+  ///
+  /// This is not an unsaved ordering change, so the current dirty flag is
+  /// preserved. Removing an L1 also removes its child list from the working
+  /// copy; removing an L2 leaves its siblings untouched.
+  void removeHidden(String categoryId) {
+    if (!state.isEditing) return;
+    final l1 = List<Category>.of(state.l1);
+    final l2ByParent = {
+      for (final entry in state.l2ByParent.entries)
+        entry.key: List<Category>.of(entry.value),
+    };
+
+    final l1Index = l1.indexWhere((category) => category.id == categoryId);
+    if (l1Index >= 0) {
+      final removed = l1.removeAt(l1Index);
+      l2ByParent.remove(removed.id);
+    } else {
+      for (final entry in l2ByParent.entries) {
+        entry.value.removeWhere((category) => category.id == categoryId);
+      }
+    }
+
+    state = state.copyWith(l1: l1, l2ByParent: l2ByParent);
+  }
+
   /// Persist the working copy via
   /// [CategoryRepository.updateSortOrders] and return to idle.
   ///

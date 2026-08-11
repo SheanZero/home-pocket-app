@@ -215,6 +215,7 @@ class _CapturingSpeechService implements StartSpeechRecognitionUseCase {
   var cancelCount = 0;
   var available = true;
   Completer<void>? cancelGate;
+  Duration? lastPauseFor;
 
   @override
   Future<bool> initialize({
@@ -242,6 +243,7 @@ class _CapturingSpeechService implements StartSpeechRecognitionUseCase {
   }) async {
     this.onResult = onResult;
     startedLocaleId = localeId;
+    lastPauseFor = pauseFor;
     stopped = false;
     startCount++;
   }
@@ -360,7 +362,7 @@ Future<void> _finishVoiceUtterance(
   _CapturingSpeechService speech,
 ) async {
   speech.startedLocaleId = null;
-  speech.emitStatus('done');
+  _voiceDock(tester).onCoreHoldEnd();
   await tester.pump();
   await tester.pump();
 }
@@ -375,7 +377,7 @@ Future<void> _openVoiceDockAndStart(WidgetTester tester) async {
   await tester.tap(find.byKey(const ValueKey('voice-record-bar')));
   await tester.pump();
   await tester.pump();
-  await tester.tap(find.byKey(const Key('unified-voice-core')));
+  _voiceDock(tester).onCoreHoldStart();
   await tester.pump();
   await tester.pump();
 }
@@ -1644,14 +1646,16 @@ void main() {
       );
     });
 
-    testWidgets('voice entry opens idle and starts only from the center mic', (
+    testWidgets('voice entry records only while the center mic is held', (
       tester,
     ) async {
       tall(tester);
       final speech = _CapturingSpeechService();
-      await tester.pumpWidget(
-        pumpPtt(speech: speech, parse: _FakeParseVoiceInputUseCase(const {})),
-      );
+      final parse = _FakeParseVoiceInputUseCase({
+        '500円': const VoiceParseResult(rawText: '500円', amount: 500),
+        '700円': const VoiceParseResult(rawText: '700円', amount: 700),
+      });
+      await tester.pumpWidget(pumpPtt(speech: speech, parse: parse));
       await tester.pumpAndSettle();
 
       await tester.tap(micBarFinder);
@@ -1660,18 +1664,81 @@ void main() {
 
       expect(_voiceDock(tester).state, UnifiedVoiceEntryState.idle);
       expect(speech.startCount, 0);
-      expect(find.text('Waiting for voice input'), findsOneWidget);
+      expect(find.text('Ready when you are'), findsOneWidget);
       expect(
-        find.text('Tap the microphone to start voice recording'),
+        find.text("Hold the microphone to speak; release when you're done"),
         findsOneWidget,
       );
 
-      await tester.tap(find.byKey(const Key('unified-voice-core')));
+      final core = find.byKey(const Key('unified-voice-core'));
+      await tester.tap(core);
       await tester.pump();
-      await tester.pump();
+      expect(speech.startCount, 0, reason: 'a quick tap must not start audio');
+
+      final hold = await tester.startGesture(tester.getCenter(core));
+      await tester.pump(const Duration(milliseconds: 600));
 
       expect(_voiceDock(tester).state, UnifiedVoiceEntryState.listening);
       expect(speech.startCount, 1);
+      expect(speech.lastPauseFor, const Duration(seconds: 30));
+
+      speech.emitFinal('500円');
+      await tester.pump();
+      await tester.pump();
+      expect(
+        tester.widget<AmountDisplay>(find.byType(AmountDisplay)).amount,
+        isEmpty,
+        reason: 'the form is filled only after the user releases the mic',
+      );
+
+      await hold.up();
+      await tester.pump();
+      await tester.pump();
+
+      expect(_voiceDock(tester).state, UnifiedVoiceEntryState.review);
+      expect(speech.stopped, isTrue);
+      expect(
+        tester.widget<AmountDisplay>(find.byType(AmountDisplay)).amount,
+        '500',
+      );
+      expect(
+        find.text('Hold the microphone to record again, or edit this entry'),
+        findsOneWidget,
+      );
+
+      final rerecord = await tester.startGesture(tester.getCenter(core));
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pump();
+
+      expect(_voiceDock(tester).state, UnifiedVoiceEntryState.listening);
+      expect(speech.startCount, 2);
+      expect(speech.canceled, isTrue);
+      expect(
+        tester.widget<AmountDisplay>(find.byType(AmountDisplay)).amount,
+        isEmpty,
+        reason: 're-record restores the form snapshot before listening',
+      );
+
+      speech.emitPartial('700円');
+      await tester.pump(const Duration(milliseconds: 350));
+      await rerecord.up();
+      await tester.pump();
+      expect(
+        speech.stopped,
+        isTrue,
+        reason: 'the regression requires the iOS-style final-after-stop order',
+      );
+      // iOS may complete SpeechToText.stop() before it delivers the terminal
+      // recognition result. The late final must still own the re-record fill.
+      speech.emitFinal('700円');
+      await tester.pump();
+      await tester.pump();
+
+      expect(_voiceDock(tester).state, UnifiedVoiceEntryState.review);
+      expect(
+        tester.widget<AmountDisplay>(find.byType(AmountDisplay)).amount,
+        '700',
+      );
     });
 
     testWidgets(
@@ -1742,6 +1809,8 @@ void main() {
         speech.emitFinal('500円 processing');
         await tester.pump();
         await tester.pump();
+        _voiceDock(tester).onCoreHoldEnd();
+        await tester.pump();
         expect(repository.isWaiting, isTrue);
         expect(_voiceDock(tester).state, UnifiedVoiceEntryState.processing);
 
@@ -1789,9 +1858,8 @@ void main() {
         await _openVoiceDockAndStart(tester);
         speech.emitFinal('500円 delayed');
         await tester.pump();
-        expect(parse.isWaiting, isTrue);
-
         await _finishVoiceUtterance(tester, speech);
+        expect(parse.isWaiting, isTrue);
         expect(
           _voiceDock(tester).state,
           UnifiedVoiceEntryState.processing,
@@ -1849,6 +1917,7 @@ void main() {
         await tester.pump();
         await tester.pump();
         await tester.pump();
+        await _finishVoiceUtterance(tester, speech);
 
         var form = tester.state<TransactionDetailsFormState>(
           find.byType(TransactionDetailsForm),
@@ -1939,7 +2008,7 @@ void main() {
         await tester.pump();
         verifyNever(() => mockCreateUseCase.execute(any()));
 
-        await tester.tap(find.byKey(const ValueKey('unified-voice-core')));
+        _voiceDock(tester).onCoreHoldStart();
         await tester.pump();
         await tester.pump();
 
@@ -2013,8 +2082,8 @@ void main() {
           reason: 'the V16 dock replaces the keypad in the same footprint',
         );
 
-        // A speech-final result AUTO-fills the form (no release needed). The
-        // form above stays visible (no scrim dimming it).
+        // A speech-final result fills the form only when the hold is released.
+        // The form above stays visible (no scrim dimming it).
         speech.emitFinal('1千8百4十元 星巴克');
         await tester.pump();
         await tester.pump();
@@ -2100,10 +2169,10 @@ void main() {
         expect(_voiceDock(tester).state, UnifiedVoiceEntryState.listening);
         expect(
           tester.widget<AmountDisplay>(find.byType(AmountDisplay)).amount,
-          '500',
-          reason: 'precondition: the live partial changed the form',
+          '300',
+          reason: 'a partial result cannot mutate the form before release',
         );
-        expect(find.text('仮入力'), findsOneWidget);
+        expect(find.text('仮入力'), findsNothing);
 
         await _switchVoiceDockToKeyboard(tester);
 
@@ -2174,6 +2243,8 @@ void main() {
         speech.emitFinal('700円 遅延カフェ');
         await tester.pump();
         await tester.pump();
+        _voiceDock(tester).onCoreHoldEnd();
+        await tester.pump();
 
         expect(repository.isWaiting, isTrue);
         expect(_voiceDock(tester).state, UnifiedVoiceEntryState.processing);
@@ -2242,7 +2313,7 @@ void main() {
         await _finishVoiceUtterance(tester, speech);
         expect(_voiceDock(tester).state, UnifiedVoiceEntryState.review);
 
-        await tester.tap(find.byKey(const ValueKey('unified-voice-core')));
+        _voiceDock(tester).onCoreHoldStart();
         await tester.pump();
         await tester.pump();
       },
@@ -2462,7 +2533,7 @@ void main() {
 
         // The dock is already an empty fresh slate, but no new recording may
         // start until the default-category lookup and ledger mapping finish.
-        await tester.tap(find.byKey(const ValueKey('unified-voice-core')));
+        _voiceDock(tester).onCoreHoldStart();
         await tester.pump();
         expect(speech.startCount, startsBeforeSave);
         expect(_voiceDock(tester).isSubmitting, isTrue);
@@ -2510,18 +2581,17 @@ void main() {
       await tester.pumpWidget(pumpPtt(speech: speech, parse: parse));
       await tester.pumpAndSettle();
 
-      // Tap → modal; speak → auto-fill merchant 星巴克.
+      // Hold → speak → release to fill merchant 星巴克.
       await _openVoiceDockAndStart(tester);
       speech.emitFinal('1千8百4十元 星巴克');
       await tester.pump();
       await tester.pump();
-      expect(find.text('星巴克'), findsOneWidget);
-
       await _finishVoiceUtterance(tester, speech);
+      expect(find.text('星巴克'), findsOneWidget);
       expect(_voiceDock(tester).state, UnifiedVoiceEntryState.review);
 
       // Review mic means re-record: restore the snapshot and restart.
-      await tester.tap(find.byKey(const ValueKey('unified-voice-core')));
+      _voiceDock(tester).onCoreHoldStart();
       await tester.pump();
       await tester.pump();
 
@@ -2575,7 +2645,7 @@ void main() {
         final cancelGate = Completer<void>();
         speech.cancelGate = cancelGate;
 
-        await tester.tap(find.byKey(const ValueKey('unified-voice-core')));
+        _voiceDock(tester).onCoreHoldStart();
         await tester.pump();
         expect(speech.cancelCount, 1);
         expect(
@@ -2712,8 +2782,9 @@ void main() {
         await tester.pump();
         await tester.pump();
         expect(_voiceDock(tester).state, UnifiedVoiceEntryState.idle);
+        _voiceDock(tester).onCoreHoldEnd();
 
-        await tester.tap(find.byKey(const ValueKey('unified-voice-core')));
+        _voiceDock(tester).onCoreHoldStart();
         await tester.pump();
         await tester.pump();
 
@@ -2842,6 +2913,7 @@ void main() {
         speech.emitFinal('午饭');
         await tester.pump();
         await tester.pump();
+        await _finishVoiceUtterance(tester, speech);
 
         final merchantField = tester.widget<TextField>(
           find.byKey(const ValueKey('merchant-textfield')),
@@ -2880,9 +2952,9 @@ void main() {
         speech.emitFinal('500円');
         await tester.pump();
         await tester.pump();
+        await _finishVoiceUtterance(tester, speech);
         expect(displayedAmount(tester), '500');
 
-        await _finishVoiceUtterance(tester, speech);
         expect(_voiceDock(tester).state, UnifiedVoiceEntryState.review);
         await _switchVoiceDockToKeyboard(tester);
 
@@ -2890,6 +2962,7 @@ void main() {
         speech.emitFinal('1200円');
         await tester.pump();
         await tester.pump();
+        await _finishVoiceUtterance(tester, speech);
 
         expect(
           displayedAmount(tester),
@@ -2924,16 +2997,16 @@ void main() {
         speech.emitFinal('500円');
         await tester.pump();
         await tester.pump();
+        await _finishVoiceUtterance(tester, speech);
         expect(
           displayedAmount(tester),
           '500',
           reason: 'precondition: the voice fill mirrored 500',
         );
 
-        await _finishVoiceUtterance(tester, speech);
         expect(_voiceDock(tester).state, UnifiedVoiceEntryState.review);
 
-        await tester.tap(find.byKey(const ValueKey('unified-voice-core')));
+        _voiceDock(tester).onCoreHoldStart();
         await tester.pump();
         await tester.pump();
 
@@ -2976,9 +3049,9 @@ void main() {
         speech.emitFinal('500円');
         await tester.pump();
         await tester.pump();
+        await _finishVoiceUtterance(tester, speech);
         expect(displayedAmount(tester), '500');
 
-        await _finishVoiceUtterance(tester, speech);
         expect(_voiceDock(tester).state, UnifiedVoiceEntryState.review);
         // Review → keyboard discards the snapshot rather than applying it.
         await _switchVoiceDockToKeyboard(tester);

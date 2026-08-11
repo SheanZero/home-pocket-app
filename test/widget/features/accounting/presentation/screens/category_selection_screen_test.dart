@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/accounting/create_category_use_case.dart';
+import 'package:home_pocket/application/accounting/hide_category_use_case.dart';
 import 'package:home_pocket/features/accounting/domain/models/category.dart';
 import 'package:home_pocket/features/accounting/domain/models/category_ledger_config.dart';
 import 'package:home_pocket/features/accounting/domain/models/transaction.dart';
@@ -11,6 +12,7 @@ import 'package:home_pocket/features/accounting/domain/repositories/category_rep
 import 'package:home_pocket/features/accounting/presentation/providers/state_category_reorder.dart';
 import 'package:home_pocket/features/accounting/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/category_selection_screen.dart';
+import 'package:home_pocket/features/accounting/presentation/widgets/category_reorder_row.dart';
 import 'package:home_pocket/features/settings/domain/repositories/unit_of_work.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
 
@@ -23,7 +25,8 @@ class FakeCategoryRepository implements CategoryRepository {
   final List<Category> categories;
 
   @override
-  Future<List<Category>> findActive() async => categories;
+  Future<List<Category>> findActive() async =>
+      categories.where((category) => !category.isArchived).toList();
 
   @override
   Future<Category?> findById(String id) async {
@@ -59,7 +62,18 @@ class FakeCategoryRepository implements CategoryRepository {
     String? color,
     bool? isArchived,
     int? sortOrder,
-  }) async {}
+  }) async {
+    final index = categories.indexWhere((category) => category.id == id);
+    if (index < 0) return;
+    final category = categories[index];
+    categories[index] = category.copyWith(
+      name: name ?? category.name,
+      icon: icon ?? category.icon,
+      color: color ?? category.color,
+      isArchived: isArchived ?? category.isArchived,
+      sortOrder: sortOrder ?? category.sortOrder,
+    );
+  }
 
   @override
   Future<void> deleteAll() async {}
@@ -456,6 +470,61 @@ void main() {
       expect(find.text('Drag to reorder'), findsOneWidget);
       expect(find.byIcon(Icons.drag_indicator), findsWidgets);
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('L2 delete confirms soft hide and removes it from the editor', (
+      tester,
+    ) async {
+      final repo = FakeCategoryRepository(categories);
+      final hideUseCase = HideCategoryUseCase(
+        repo,
+        _ImmediateUnitOfWork(),
+      );
+      await tester.pumpWidget(
+        createLocalizedWidget(
+          const CategorySelectionScreen(),
+          overrides: [
+            categoryRepositoryProvider.overrideWithValue(repo),
+            hideCategoryUseCaseProvider.overrideWithValue(hideUseCase),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.reorder));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const ValueKey('l1_food')),
+          matching: find.byType(CategoryReorderRow),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final childDelete = find.descendant(
+        of: find.byKey(const ValueKey('l2_convenience')),
+        matching: find.byIcon(Icons.delete_outline),
+      );
+      await tester.tap(childDelete);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Hide “コンビニ”?'), findsOneWidget);
+      expect(
+        find.textContaining(
+          'Existing and family-synced records stay unchanged',
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Delete'));
+      await tester.pumpAndSettle();
+
+      expect(
+        repo.categories
+            .firstWhere((item) => item.id == 'convenience')
+            .isArchived,
+        isTrue,
+      );
+      expect(find.byKey(const ValueKey('l2_convenience')), findsNothing);
+      expect(find.text('Category hidden'), findsOneWidget);
     });
 
     testWidgets('cancel after dragging shows discard dialog', (tester) async {

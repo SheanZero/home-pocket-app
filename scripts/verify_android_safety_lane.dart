@@ -2566,7 +2566,7 @@ Future<ReleaseEvidenceResult> runReleaseEvidence(
       }
       metadata = _parseApkBadging(apkMetadata!.output);
       if (metadata!['application_id'] != 'com.sheanzero.happypocket.app' ||
-          metadata!['version_name'] != '0.1.0' ||
+          metadata!['version_name'] != '1.0.0' ||
           metadata!['version_code'] != '1' ||
           metadata!['min_sdk'] != '24' ||
           metadata!['target_sdk'] != '36') {

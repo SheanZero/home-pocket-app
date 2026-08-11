@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:path_provider/path_provider.dart';
 
+import '../../core/constants/app_info.dart' as app_info;
 import '../../features/accounting/domain/models/book.dart';
 import '../../features/accounting/domain/models/category.dart';
 import '../../features/accounting/domain/models/transaction.dart';
@@ -88,7 +89,7 @@ class ExportBackupUseCase {
           version: '1.0',
           createdAt: DateTime.now().millisecondsSinceEpoch,
           deviceId: deviceId ?? 'unknown',
-          appVersion: appVersion ?? '0.1.0',
+          appVersion: appVersion ?? app_info.appVersion,
         ),
         transactions: snapshot.transactions
             .map(TransactionPhotoSyncPolicy.toBackupJson)

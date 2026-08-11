@@ -7,9 +7,9 @@ import '../../../../generated/app_localizations.dart';
 /// Floating pill-style bottom navigation bar with 4 tabs and a FAB.
 ///
 /// The pill has rounded corners (32px radius) and a subtle shadow. The active
-/// tab has no background — its icon and label are tinted with the primary
-/// accent colour and slightly bolded; inactive tabs use the V15 faint text
-/// token. The FAB sits to the right of the pill with a Joy-to-deep-rose gradient.
+/// tab uses a high-contrast filled icon indicator plus a stronger label, so the
+/// current destination is not communicated by a subtle tint change alone.
+/// The FAB sits to the right of the pill with a Joy-to-deep-rose gradient.
 class HomeBottomNavBar extends StatelessWidget {
   const HomeBottomNavBar({
     super.key,
@@ -85,7 +85,6 @@ class HomeBottomNavBar extends StatelessWidget {
               ),
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: List.generate(
                   4,
                   (i) => _buildTab(context, i, labels[i]),
@@ -103,35 +102,74 @@ class HomeBottomNavBar extends StatelessWidget {
 
   Widget _buildTab(BuildContext context, int index, String label) {
     final isActive = index == currentIndex;
-
-    final activeColor = context.palette.accentPrimaryText;
+    final palette = context.palette;
+    final activeColor = palette.accentPrimaryText;
     // V15 text-faint token, resolved per brightness by the theme extension.
-    final inactiveColor = context.palette.navInactive;
+    final inactiveColor = palette.navInactive;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => onTap(index),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 7),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isActive ? _activeIcons[index] : _icons[index],
-              size: 20,
-              color: isActive ? activeColor : inactiveColor,
+    return Expanded(
+      child: Semantics(
+        key: ValueKey('home-bottom-nav-tab-$index'),
+        label: label,
+        button: true,
+        selected: isActive,
+        onTap: () => onTap(index),
+        child: ExcludeSemantics(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => onTap(index),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AnimatedContainer(
+                    key: ValueKey('home-bottom-nav-indicator-$index'),
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOutCubic,
+                    width: 44,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? palette.accentPrimary
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: isActive
+                          ? [
+                              BoxShadow(
+                                offset: const Offset(0, 3),
+                                blurRadius: 9,
+                                color: palette.navShadow,
+                              ),
+                            ]
+                          : const [],
+                    ),
+                    child: Icon(
+                      isActive ? _activeIcons[index] : _icons[index],
+                      size: isActive ? 21 : 20,
+                      color: isActive
+                          ? palette.primaryActionForeground
+                          : inactiveColor,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.fade,
+                    softWrap: false,
+                    style: isActive
+                        ? AppTextStyles.navLabelActive.copyWith(
+                            color: activeColor,
+                            fontWeight: FontWeight.w700,
+                          )
+                        : AppTextStyles.navLabel.copyWith(color: inactiveColor),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.fade,
-              softWrap: false,
-              style: isActive
-                  ? AppTextStyles.navLabelActive.copyWith(color: activeColor)
-                  : AppTextStyles.navLabel.copyWith(color: inactiveColor),
-            ),
-          ],
+          ),
         ),
       ),
     );

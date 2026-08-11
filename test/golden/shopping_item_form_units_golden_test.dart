@@ -68,7 +68,6 @@ void main() {
     await tester.tap(find.byKey(const Key('shopping_form_unit_select')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('shopping_unit_option_gram')));
-    await tester.tap(find.byKey(const Key('shopping_unit_apply')));
     await tester.pumpAndSettle();
 
     await expectLater(

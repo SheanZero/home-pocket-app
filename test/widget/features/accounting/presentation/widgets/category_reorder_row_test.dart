@@ -51,5 +51,26 @@ void main() {
       expect(find.text('L1'), findsOneWidget);
       expect(find.text('L2'), findsOneWidget);
     });
+
+    testWidgets('delete control has an independent tap target', (tester) async {
+      var deleted = false;
+      await tester.pumpWidget(
+        host(
+          CategoryReorderRow(
+            label: '食費',
+            iconData: Icons.restaurant,
+            color: const Color(0xFFFF5722),
+            variant: CategoryReorderRowVariant.l1,
+            onDelete: () => deleted = true,
+            deleteTooltip: 'Hide category',
+          ),
+        ),
+      );
+
+      await tester.tap(find.byIcon(Icons.delete_outline));
+
+      expect(deleted, isTrue);
+      expect(find.byTooltip('Hide category'), findsOneWidget);
+    });
   });
 }

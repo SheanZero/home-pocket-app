@@ -331,12 +331,32 @@ class ShoppingItemTile extends ConsumerWidget {
       child: GestureDetector(
         // ValueKey for stable test targeting.
         key: ValueKey('toggle-${item.id}'),
-        onTap: () =>
-            ref.read(toggleItemCompletedUseCaseProvider).execute(item.id),
+        onTap: () => _toggleCompleted(context, ref),
         behavior: HitTestBehavior.opaque,
         child: SizedBox.square(dimension: 44, child: Center(child: circle)),
       ),
     );
+  }
+
+  Future<void> _toggleCompleted(BuildContext context, WidgetRef ref) async {
+    try {
+      final result = await ref
+          .read(toggleItemCompletedUseCaseProvider)
+          .execute(item.id);
+      if (!context.mounted) return;
+      if (result.isError) {
+        showErrorFeedback(context, S.of(context).shoppingToggleFailed);
+        return;
+      }
+
+      // Drift normally re-emits automatically. Re-query after this explicit
+      // local action as a safety net so a missed/stalled stream notification
+      // can never leave the completion circle looking unresponsive.
+      ref.invalidate(filteredShoppingItemsProvider);
+    } catch (_) {
+      if (!context.mounted) return;
+      showErrorFeedback(context, S.of(context).shoppingToggleFailed);
+    }
   }
 
   /// Active rows reserve a 44px trailing lane for delayed drag. Completed rows

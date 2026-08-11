@@ -1698,29 +1698,37 @@ class TransactionDetailsFormState
 
     return Container(
       key: const ValueKey('v16-note-card'),
-      height: 52,
-      padding: const EdgeInsets.symmetric(horizontal: 11),
+      padding: const EdgeInsets.fromLTRB(11, 10, 11, 12),
       decoration: BoxDecoration(
         color: palette.card,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: palette.borderDefault),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 20,
-            child: Icon(
-              Icons.description_outlined,
-              size: 20,
-              color: palette.textSecondary,
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: SizedBox(
+              width: 20,
+              child: Icon(
+                Icons.description_outlined,
+                size: 20,
+                color: palette.textSecondary,
+              ),
             ),
           ),
           const SizedBox(width: 9),
-          SizedBox(
-            width: 48,
-            child: Text(
-              l10n.note,
-              style: AppTextStyles.label.copyWith(color: palette.textSecondary),
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: SizedBox(
+              width: 48,
+              child: Text(
+                l10n.note,
+                style: AppTextStyles.label.copyWith(
+                  color: palette.textSecondary,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -1730,25 +1738,35 @@ class TransactionDetailsFormState
               controller: _memoController,
               focusNode: widget.noteFocusNode,
               groupId: kKeyboardToolbarTapRegionGroup,
-              maxLines: 1,
-              textAlign: TextAlign.end,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) => FocusScope.of(context).unfocus(),
+              minLines: 3,
+              maxLines: 5,
+              keyboardType: TextInputType.multiline,
+              textInputAction: TextInputAction.newline,
               onTapOutside: (_) => FocusScope.of(context).unfocus(),
               decoration: InputDecoration(
-                isDense: true,
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
                 hintText: l10n.enterMemo,
-                hintStyle: AppTextStyles.label.copyWith(
+                hintStyle: AppTextStyles.body.copyWith(
                   color: palette.textSecondary,
                 ),
+                filled: true,
+                fillColor: palette.backgroundMuted,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 9,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(11),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(11),
+                  borderSide: BorderSide.none,
+                ),
               ),
-              style: AppTextStyles.label.copyWith(color: palette.textPrimary),
+              style: AppTextStyles.body.copyWith(color: palette.textPrimary),
             ),
           ),
-          const SizedBox(width: 5),
-          Icon(Icons.chevron_right, size: 18, color: palette.textTertiary),
         ],
       ),
     );

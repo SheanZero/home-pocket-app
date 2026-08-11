@@ -229,7 +229,7 @@ final class CreateShoppingItemUseCaseProvider
 }
 
 String _$createShoppingItemUseCaseHash() =>
-    r'be8d5d79044a7fa62e27b005a1baf831bb71535a';
+    r'fded410abf70f510652f451ba66025fe214f4406';
 
 /// [ToggleItemCompletedUseCase] provider wired with repo + sync deps.
 
@@ -283,7 +283,7 @@ final class ToggleItemCompletedUseCaseProvider
 }
 
 String _$toggleItemCompletedUseCaseHash() =>
-    r'6833b8a4b128b416533c93bb954b669da4a7b9fe';
+    r'0e49550156ba136f75c182031cde3449f31d1435';
 
 /// [DeleteShoppingItemUseCase] provider wired with repo + sync deps.
 
@@ -336,7 +336,7 @@ final class DeleteShoppingItemUseCaseProvider
 }
 
 String _$deleteShoppingItemUseCaseHash() =>
-    r'2bfd83076822b59b2dc38c6bbee1e2ee5609217e';
+    r'46fc8884130cf503b7a02d8144919c287b2316de';
 
 /// [UpdateShoppingItemUseCase] provider wired with repo + sync deps.
 
@@ -389,7 +389,7 @@ final class UpdateShoppingItemUseCaseProvider
 }
 
 String _$updateShoppingItemUseCaseHash() =>
-    r'c4e40d9a158ac092841dd28ec6aa37316c649a6f';
+    r'1e1b2067e387ce88294d99a70e59ae5dde79edcf';
 
 /// [ReorderShoppingItemsUseCase] provider — repo only, no sync deps.
 ///
@@ -506,7 +506,7 @@ final class ClearCompletedItemsUseCaseProvider
 }
 
 String _$clearCompletedItemsUseCaseHash() =>
-    r'5b5f42eee206bfd8bd890e9d9e8ab36845698f88';
+    r'34555a6ff4cf9aa361a7c16cab1f9de8a4c87ac8';
 
 /// Derived stream of filtered shopping items for the current segment.
 ///
@@ -519,8 +519,9 @@ String _$clearCompletedItemsUseCaseHash() =>
 /// extra DAO variants. The privacy gate (public/private separation) is enforced
 /// at the DAO level via [watchByListType]; the client-side filter is cosmetic.
 ///
-/// NEVER call ref.invalidate on this provider — reactivity comes from the
-/// Drift stream emitting on DB writes (SC-5, reactive delivery).
+/// Sync-driven updates rely on the Drift stream and must not invalidate this
+/// provider. An explicit local completion toggle may re-query after persistence
+/// as a recovery fallback when a platform stream notification stalls.
 
 @ProviderFor(filteredShoppingItems)
 final filteredShoppingItemsProvider = FilteredShoppingItemsProvider._();
@@ -536,8 +537,9 @@ final filteredShoppingItemsProvider = FilteredShoppingItemsProvider._();
 /// extra DAO variants. The privacy gate (public/private separation) is enforced
 /// at the DAO level via [watchByListType]; the client-side filter is cosmetic.
 ///
-/// NEVER call ref.invalidate on this provider — reactivity comes from the
-/// Drift stream emitting on DB writes (SC-5, reactive delivery).
+/// Sync-driven updates rely on the Drift stream and must not invalidate this
+/// provider. An explicit local completion toggle may re-query after persistence
+/// as a recovery fallback when a platform stream notification stalls.
 
 final class FilteredShoppingItemsProvider
     extends
@@ -560,8 +562,9 @@ final class FilteredShoppingItemsProvider
   /// extra DAO variants. The privacy gate (public/private separation) is enforced
   /// at the DAO level via [watchByListType]; the client-side filter is cosmetic.
   ///
-  /// NEVER call ref.invalidate on this provider — reactivity comes from the
-  /// Drift stream emitting on DB writes (SC-5, reactive delivery).
+  /// Sync-driven updates rely on the Drift stream and must not invalidate this
+  /// provider. An explicit local completion toggle may re-query after persistence
+  /// as a recovery fallback when a platform stream notification stalls.
   FilteredShoppingItemsProvider._()
     : super(
         from: null,

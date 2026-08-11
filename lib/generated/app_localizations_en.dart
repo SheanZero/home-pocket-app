@@ -1015,6 +1015,28 @@ class SEn extends S {
   String get dragToReorder => 'Drag to reorder';
 
   @override
+  String get hideCategoryTooltip => 'Hide category';
+
+  @override
+  String hideCategoryTitle(String categoryName) {
+    return 'Hide “$categoryName”?';
+  }
+
+  @override
+  String get hideL1CategoryBody =>
+      'This category and its subcategories will no longer appear in category selection or voice entry. Existing and family-synced records stay unchanged.';
+
+  @override
+  String get hideL2CategoryBody =>
+      'This category will no longer appear in category selection or voice entry. Existing and family-synced records stay unchanged.';
+
+  @override
+  String get categoryHidden => 'Category hidden';
+
+  @override
+  String get categoryHideFailed => 'Couldn\'t hide the category. Please retry.';
+
+  @override
   String get orderUpdated => 'Order updated';
 
   @override
@@ -2510,6 +2532,10 @@ class SEn extends S {
   String get shoppingToggleComplete => 'Toggle complete';
 
   @override
+  String get shoppingToggleFailed =>
+      'Couldn\'t update completion. Please try again.';
+
+  @override
   String get shoppingEnterReorderMode => 'Reorder list';
 
   @override
@@ -2710,9 +2736,6 @@ class SEn extends S {
   String get shoppingUnitCustomError => 'Enter 1–12 characters';
 
   @override
-  String get shoppingUnitApply => 'Apply';
-
-  @override
   String get shoppingUnitPiece => 'pc';
 
   @override
@@ -2821,10 +2844,10 @@ class SEn extends S {
   String get entryVoicePrivacy => 'Processed only on this device';
 
   @override
-  String get entryVoiceIdleStatus => 'Waiting for voice input';
+  String get entryVoiceIdleStatus => 'Ready when you are';
 
   @override
-  String get entryVoiceListeningStatus => 'Listening';
+  String get entryVoiceListeningStatus => 'Listening to you';
 
   @override
   String get entryVoiceProcessingStatus => 'Organizing the details';
@@ -2848,11 +2871,11 @@ class SEn extends S {
 
   @override
   String get entryVoiceIdleHelp =>
-      'Tap the microphone to start voice recording';
+      'Hold the microphone to speak; release when you\'re done';
 
   @override
   String get entryVoiceListeningHelp =>
-      'Pause to recognize automatically, or tap to finish now';
+      'Keep holding while you speak, then release when you\'re ready';
 
   @override
   String get entryVoiceProcessingHelp =>
@@ -2860,7 +2883,7 @@ class SEn extends S {
 
   @override
   String get entryVoiceReviewHelp =>
-      'Tap the microphone to record again, or edit and record';
+      'Hold the microphone to record again, or edit this entry';
 
   @override
   String get entryVoiceUnavailableHelp =>
@@ -2870,13 +2893,13 @@ class SEn extends S {
   String get entryVoiceKeyboardAction => 'Switch to keyboard input';
 
   @override
-  String get entryVoiceStartAction => 'Start voice input';
+  String get entryVoiceStartAction => 'Press and hold to start recording';
 
   @override
-  String get entryVoiceStopAction => 'Finish now and analyze';
+  String get entryVoiceStopAction => 'Release to finish and analyze';
 
   @override
-  String get entryVoiceRerecordAction => 'Record again';
+  String get entryVoiceRerecordAction => 'Press and hold to record again';
 
   @override
   String get entryVoiceSourceBadge => 'Voice filled';
@@ -3172,7 +3195,10 @@ class SEn extends S {
   String get onboardingSetupTitle => 'Initial Setup';
 
   @override
-  String get onboardingRowName => 'Name · Required';
+  String get onboardingRowName => 'Name';
+
+  @override
+  String get onboardingRequired => 'Required';
 
   @override
   String get onboardingRowLanguage => 'Display language';

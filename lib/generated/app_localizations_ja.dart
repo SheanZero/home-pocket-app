@@ -1001,6 +1001,28 @@ class SJa extends S {
   String get dragToReorder => 'ドラッグして並べ替え';
 
   @override
+  String get hideCategoryTooltip => '分類を非表示';
+
+  @override
+  String hideCategoryTitle(String categoryName) {
+    return '「$categoryName」を非表示にしますか？';
+  }
+
+  @override
+  String get hideL1CategoryBody =>
+      'この分類と配下の分類は、分類選択と音声入力に表示されなくなります。過去の記録や家族同期の記録には影響しません。';
+
+  @override
+  String get hideL2CategoryBody =>
+      'この分類は、分類選択と音声入力に表示されなくなります。過去の記録や家族同期の記録には影響しません。';
+
+  @override
+  String get categoryHidden => '分類を非表示にしました';
+
+  @override
+  String get categoryHideFailed => '分類を非表示にできませんでした。再試行してください';
+
+  @override
   String get orderUpdated => '順序を更新しました';
 
   @override
@@ -2453,6 +2475,9 @@ class SJa extends S {
   String get shoppingToggleComplete => '完了を切り替え';
 
   @override
+  String get shoppingToggleFailed => '完了状態を更新できませんでした。もう一度お試しください。';
+
+  @override
   String get shoppingEnterReorderMode => '並べ替え';
 
   @override
@@ -2651,9 +2676,6 @@ class SJa extends S {
   String get shoppingUnitCustomError => '1〜12文字で入力してください';
 
   @override
-  String get shoppingUnitApply => '適用';
-
-  @override
   String get shoppingUnitPiece => '個';
 
   @override
@@ -2753,7 +2775,7 @@ class SJa extends S {
   String get entryVoicePrivacy => 'デバイス内でのみ処理';
 
   @override
-  String get entryVoiceIdleStatus => '音声入力を待機中';
+  String get entryVoiceIdleStatus => 'いつでもどうぞ';
 
   @override
   String get entryVoiceListeningStatus => '聞いています';
@@ -2777,16 +2799,16 @@ class SJa extends S {
   String get entryVoiceProcessingPlaceholder => '“森のカフェ、ランチ、2,380円”';
 
   @override
-  String get entryVoiceIdleHelp => 'マイクをタップして音声記録を開始';
+  String get entryVoiceIdleHelp => 'マイクを長押しして明細を話し、終わったら指を離してください';
 
   @override
-  String get entryVoiceListeningHelp => '話し終えると自動認識。タップですぐ完了';
+  String get entryVoiceListeningHelp => '押したまま話して、終わったら指を離してください';
 
   @override
   String get entryVoiceProcessingHelp => '認識結果を同じフォームに入力しています';
 
   @override
-  String get entryVoiceReviewHelp => 'マイクで録音し直すか、修正してそのまま記録';
+  String get entryVoiceReviewHelp => 'もう一度話すときは、マイクを長押しして録音し直せます';
 
   @override
   String get entryVoiceUnavailableHelp => 'システム設定でマイクを許可するか、そのまま手動入力を続けられます';
@@ -2795,13 +2817,13 @@ class SJa extends S {
   String get entryVoiceKeyboardAction => 'キーボード入力に切り替える';
 
   @override
-  String get entryVoiceStartAction => '音声入力を開始';
+  String get entryVoiceStartAction => '長押しして音声入力を開始';
 
   @override
-  String get entryVoiceStopAction => 'すぐに終了して解析';
+  String get entryVoiceStopAction => '指を離して終了・解析';
 
   @override
-  String get entryVoiceRerecordAction => '録音し直す';
+  String get entryVoiceRerecordAction => '長押しして録音し直す';
 
   @override
   String get entryVoiceSourceBadge => '音声入力';
@@ -3091,7 +3113,10 @@ class SJa extends S {
   String get onboardingSetupTitle => '初期設定';
 
   @override
-  String get onboardingRowName => 'お名前・必須';
+  String get onboardingRowName => 'お名前';
+
+  @override
+  String get onboardingRequired => '必須';
 
   @override
   String get onboardingRowLanguage => '表示言語';

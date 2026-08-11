@@ -49,9 +49,14 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
             generation,
             resultRevision,
           );
-          _pttPendingFillGeneration = generation;
-          _pttPendingFillRevision = resultRevision;
-          _pttPendingFill = fill;
+          // Only the continuous path writes partials into the form. A
+          // release-controlled partial is parse-only, so it must not masquerade
+          // as a pending fill and make completion skip the buffered final fill.
+          if (_continuousActive) {
+            _pttPendingFillGeneration = generation;
+            _pttPendingFillRevision = resultRevision;
+            _pttPendingFill = fill;
+          }
           unawaited(fill);
         }
       });
@@ -65,6 +70,10 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
 
       _parseDebounce?.cancel();
       if (text.isNotEmpty) {
+        final finalResultSignal = _pttFinalResultSignal;
+        if (finalResultSignal != null && !finalResultSignal.isCompleted) {
+          finalResultSignal.complete();
+        }
         _amountMerger?.feedChunk(text, isFinal: true);
         // 260703 BUG-1 (1D): the recognizer's alternate transcripts (the
         // transcription list minus its best entry) ride along so the parse
@@ -92,7 +101,7 @@ extension _VoicePttFillOrchestration<W extends ConsumerStatefulWidget>
           _pttPendingFill = fill;
           _armPttFinalCompletion(generation);
           unawaited(fill);
-        } else {
+        } else if (!_releaseControlledActive) {
           _parseFinalResult(
             text,
             generation: generation,

@@ -37,6 +37,16 @@ void main() {
       expect(VoiceTuning.listenFor, const Duration(seconds: 30));
       expect(VoiceTuning.pauseFor, const Duration(milliseconds: 1200));
       expect(
+        VoiceTuning.releaseControlledPauseFor,
+        VoiceTuning.listenFor,
+        reason:
+            'press-and-hold recording must survive natural pauses until release',
+      );
+      expect(
+        VoiceTuning.releaseControlledPauseFor,
+        greaterThan(VoiceTuning.pauseFor),
+      );
+      expect(
         VoiceTuning.finalCompletionGrace,
         const Duration(milliseconds: 650),
       );

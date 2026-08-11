@@ -140,7 +140,24 @@ void main() {
       tester.getTopLeft(find.text('Category')).dx,
     );
     expect(note, findsOneWidget);
-    expect(tester.getSize(note).height, 52);
+    expect(tester.getSize(note).height, greaterThan(52));
+    final noteField = tester.widget<TextField>(
+      find.descendant(
+        of: note,
+        matching: find.byKey(const ValueKey('note-textfield')),
+      ),
+    );
+    expect(noteField.minLines, 3);
+    expect(noteField.maxLines, 5);
+    expect(noteField.keyboardType, TextInputType.multiline);
+    expect(noteField.textInputAction, TextInputAction.newline);
+    expect(noteField.style?.fontSize, 14);
+    expect(noteField.style?.fontWeight, FontWeight.w500);
+    expect(noteField.decoration?.hintStyle?.fontSize, 14);
+    expect(
+      find.descendant(of: note, matching: find.byIcon(Icons.chevron_right)),
+      findsNothing,
+    );
     expect(
       tester.getTopLeft(purpose).dy - tester.getBottomLeft(details).dy,
       10,

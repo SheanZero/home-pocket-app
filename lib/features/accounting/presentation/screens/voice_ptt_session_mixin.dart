@@ -155,6 +155,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// speech-final result auto-fills the form live. The legacy hold path leaves
   /// this false so its behavior is byte-unchanged.
   bool _continuousActive = false;
+  bool _releaseControlledActive = false;
 
   /// 260622-nhs R4 (BUG B): true while [resetPttSessionAndRestart] is serializing
   /// a `cancel() → startListening()` sequence. While set, [onStatus] must NOT
@@ -194,6 +195,12 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// generation is claimed before any async call can emit another signal.
   int? _pttCompletionGeneration;
   Future<void>? _pttCompletionFuture;
+
+  /// Completes when the current recognizer generation delivers a non-empty
+  /// terminal result. On iOS, `SpeechToText.stop()` can finish before that
+  /// callback arrives, so release-controlled recording briefly waits on this
+  /// signal before reading the final draft.
+  Completer<void>? _pttFinalResultSignal;
 
   /// Latest live parse/fill for this generation and result revision. A
   /// completion signal that arrives while it is running awaits it and skips the
@@ -408,6 +415,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   void disposePttSession() {
     _pttSessionGeneration++;
     _continuousActive = false;
+    _releaseControlledActive = false;
     _resetPttCompletionForGeneration();
     _parseDebounce?.cancel();
     _amountMerger?.dispose();
@@ -417,10 +425,13 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
 
   // ── Recording start (ported from _startRecording) ──────────────────────────
 
-  Future<void> startPttSession() async {
+  Future<void> startPttSession({
+    Duration pauseFor = VoiceTuning.pauseFor,
+  }) async {
     final generation = ++_pttSessionGeneration;
     final localeId = pttVoiceLocaleId;
     _resetPttCompletionForGeneration();
+    _pttFinalResultSignal = Completer<void>();
 
     onPttSessionChanged(() {
       _isRecording = true;
@@ -450,7 +461,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
         onSoundLevel: (level) => _onSoundLevel(level, generation),
         localeId: localeId,
         listenFor: VoiceTuning.listenFor,
-        pauseFor: VoiceTuning.pauseFor,
+        pauseFor: pauseFor,
         allowOnDeviceFallback: _voiceAllowOnDeviceFallback,
       );
       if (_isPttSessionCurrent(generation) && _isRecording) {
@@ -505,11 +516,17 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     _pttCompletionGeneration = generation;
     _cancelPttCompletionTimers();
     _parseDebounce?.cancel();
-    final future = _runPttCompletion(
-      generation: generation,
-      beforeStop: beforeStop,
-      fillBufferedDraft: fillBufferedDraft,
-    );
+    final future =
+        _runPttCompletion(
+          generation: generation,
+          beforeStop: beforeStop,
+          fillBufferedDraft: fillBufferedDraft,
+          waitForFinalResult: _releaseControlledActive,
+        ).whenComplete(() {
+          if (generation == _pttSessionGeneration) {
+            _releaseControlledActive = false;
+          }
+        });
     _pttCompletionFuture = future;
     return future;
   }
@@ -535,6 +552,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     required int generation,
     required Future<void> Function()? beforeStop,
     required bool fillBufferedDraft,
+    required bool waitForFinalResult,
   }) async {
     if (beforeStop != null) await beforeStop();
     if (!_isPttSessionCurrent(generation)) return;
@@ -542,8 +560,30 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     // Pattern 7: merger.stop() bypasses the 2.5s window. MUST run BEFORE
     // pttSpeechService.stop() to preserve the original ordering invariant.
     _amountMerger?.stop();
+    final finalResultSignal = _pttFinalResultSignal;
     await pttSpeechService.stop();
     if (!_isPttSessionCurrent(generation)) return;
+
+    // speech_to_text on iOS may resolve stop() before sending its final onResult.
+    // Keep the release-owned completion open for the existing short final grace;
+    // a non-empty final wakes it immediately, while recognizers that only provide
+    // a partial still fall back to that partial when the grace expires.
+    if (waitForFinalResult &&
+        _finalText.isEmpty &&
+        _partialText.trim().isNotEmpty &&
+        finalResultSignal != null &&
+        !finalResultSignal.isCompleted) {
+      onPttSessionChanged(() {
+        _soundLevel = 0.0;
+        _listenStatus = PttListenStatus.processing;
+      });
+      await finalResultSignal.future.timeout(
+        VoiceTuning.finalCompletionGrace,
+        onTimeout: () {},
+      );
+      if (!_isPttSessionCurrent(generation)) return;
+    }
+
     onPttSessionChanged(() {
       _isRecording = false;
       _soundLevel = 0.0;
@@ -568,6 +608,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// status can finish earlier through the same idempotent path. There is NO
   /// hold/`pressStart`; the host may also stop manually or restore its snapshot.
   Future<void> startPttTapSession() async {
+    _releaseControlledActive = false;
     _continuousActive = true;
     _pressStart = null;
     await startPttSession();
@@ -607,6 +648,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   /// and `_continuousActive` is unconditionally restored in step 2 — the reset
   /// button always honors 重新录入 regardless of how the previous session died.
   Future<void> resetPttSessionAndRestart() async {
+    _releaseControlledActive = false;
     if (_restarting || !mounted) return;
     final generation = ++_pttSessionGeneration;
     _resetPttCompletionForGeneration();
@@ -798,6 +840,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   Future<void> cancelPttSessionAndDiscard() async {
     final generation = ++_pttSessionGeneration;
     _continuousActive = false;
+    _releaseControlledActive = false;
     _resetPttCompletionForGeneration();
     _parseDebounce?.cancel();
     _amountMerger?.dispose();
@@ -819,6 +862,7 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
   bool get pttCanStart => _pttServiceInitialized && !_isRecording;
 
   void onPttHoldStart() {
+    _releaseControlledActive = false;
     _pressStart = DateTime.now();
     startPttSession();
   }
@@ -840,6 +884,31 @@ mixin VoicePttSessionMixin<W extends ConsumerStatefulWidget>
     if (_pressStart == null || !_isRecording) return;
     _pressStart = null;
     cancelPttSessionAndDiscard();
+  }
+
+  /// Release-controlled recording used by the unified entry dock. Flutter's
+  /// long-press recognizer already filters quick taps, so this path does not use
+  /// the legacy 300 ms misfire threshold. A long silence window keeps the OS
+  /// recognizer alive through natural pauses; releasing the button owns commit.
+  void onPttReleaseHoldStart() {
+    if (!pttCanStart) return;
+    _continuousActive = false;
+    _releaseControlledActive = true;
+    _pressStart = DateTime.now();
+    unawaited(startPttSession(pauseFor: VoiceTuning.releaseControlledPauseFor));
+  }
+
+  void onPttReleaseHoldEnd() {
+    _pressStart = null;
+    if (!_isRecording) return;
+    unawaited(stopPttSessionAndCommit());
+  }
+
+  void onPttReleaseHoldCancel() {
+    _pressStart = null;
+    _releaseControlledActive = false;
+    if (!_isRecording) return;
+    unawaited(cancelPttSessionAndDiscard());
   }
 
   /// Reset the session's transcript/parse buffers (continuous-entry reset).

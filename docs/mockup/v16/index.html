@@ -1006,7 +1006,7 @@ body {
   .shopping-custom-unit-input { width: 100%; height: 48px; padding: 0 13px; border: 1px solid var(--hp-border); border-radius: 13px; outline: 0; background: var(--hp-surface); color: var(--hp-text); font-size: var(--type-item); line-height: var(--line-item); font-weight: 750; }
   .shopping-custom-unit-input:focus { border-color: var(--hp-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--hp-primary) 14%, transparent); }
   .shopping-custom-unit-help { margin: 7px 2px 0; color: var(--hp-text-faint); font-size: var(--type-compact); line-height: var(--line-compact); }
-  .shopping-unit-sheet-actions { margin-top: 15px; display: grid; grid-template-columns: 1fr 1.25fr; gap: 9px; }
+  .shopping-unit-sheet-actions { margin-top: 15px; display: grid; grid-template-columns: 1fr; gap: 9px; }
   .shopping-unit-sheet-actions .primary-btn, .shopping-unit-sheet-actions .secondary-btn { min-height: 48px; }
   .shopping-unit-sheet-actions .primary-btn:disabled { opacity: .45; box-shadow: none; cursor: not-allowed; }
   .modal-sheet:has(.shopping-unit-sheet) { max-height: 88%; }
@@ -2414,9 +2414,8 @@ body {
   function shoppingUnitSheet(){
     const selected=state.shoppingFormUnitDraft;
     const customSelected=selected==='custom';
-    const applyDisabled=customSelected&&!state.shoppingFormCustomUnitDraft.trim();
     const options=shoppingUnitOptions.map(([unit,name,label])=>`<button class="shopping-unit-option ${selected===unit?'active':''}" data-shopping-unit-option="${unit}" aria-pressed="${selected===unit}"><span><strong>${label}</strong><br><small>${name}</small></span>${selected===unit?icon('check'):''}</button>`).join('');
-    return `<div class="shopping-unit-sheet"><div class="shopping-unit-sheet-head"><h3>単位を選ぶ</h3><button class="shopping-unit-sheet-close" data-action="close-modal" aria-label="閉じる">${icon('close')}</button></div><p class="shopping-unit-sheet-copy">よく使う単位を選ぶか、家で使う呼び方を追加できます。</p><div class="shopping-unit-options" role="group" aria-label="単位">${options}<button class="shopping-unit-option ${customSelected?'active':''}" data-shopping-unit-option="custom" aria-pressed="${customSelected}"><span><strong>カスタム</strong><br><small>自由入力</small></span>${customSelected?icon('check'):icon('edit')}</button></div>${customSelected?`<div class="shopping-custom-unit-card"><label for="shopping-custom-unit">自分の単位</label><input id="shopping-custom-unit" class="shopping-custom-unit-input" data-shopping-custom-unit maxlength="12" value="${escapeHtml(state.shoppingFormCustomUnitDraft)}" placeholder="例：ひとつまみ、箱、束" autocomplete="off"><p class="shopping-custom-unit-help">12文字まで。入力した表記のまま保存します。</p></div>`:''}<div class="shopping-unit-sheet-actions"><button class="secondary-btn" data-action="close-modal">キャンセル</button><button class="primary-btn" data-action="shopping-unit-apply" ${applyDisabled?'disabled':''}>この単位を使う</button></div></div>`;
+    return `<div class="shopping-unit-sheet"><div class="shopping-unit-sheet-head"><h3>単位を選ぶ</h3><button class="shopping-unit-sheet-close" data-action="close-modal" aria-label="閉じる">${icon('close')}</button></div><p class="shopping-unit-sheet-copy">よく使う単位を選ぶか、家で使う呼び方を追加できます。</p><div class="shopping-unit-options" role="group" aria-label="単位">${options}<button class="shopping-unit-option ${customSelected?'active':''}" data-shopping-unit-option="custom" aria-pressed="${customSelected}"><span><strong>カスタム</strong><br><small>自由入力</small></span>${customSelected?icon('check'):icon('edit')}</button></div>${customSelected?`<div class="shopping-custom-unit-card"><label for="shopping-custom-unit">自分の単位</label><input id="shopping-custom-unit" class="shopping-custom-unit-input" data-shopping-custom-unit maxlength="12" value="${escapeHtml(state.shoppingFormCustomUnitDraft)}" placeholder="例：ひとつまみ、箱、束" autocomplete="off"><p class="shopping-custom-unit-help">12文字まで。入力後、Enterで確定します。</p></div>`:''}<div class="shopping-unit-sheet-actions"><button class="secondary-btn" data-action="close-modal">キャンセル</button></div></div>`;
   }
   function shoppingForm() {
     const isEdit = state.shoppingFormMode === 'edit';
@@ -3265,7 +3264,6 @@ body {
     const customUnitInput=e.target.closest?.('[data-shopping-custom-unit]');
     if(customUnitInput){
       state.shoppingFormCustomUnitDraft=customUnitInput.value;
-      const apply=document.querySelector('[data-action="shopping-unit-apply"]'); if(apply) apply.disabled=!state.shoppingFormCustomUnitDraft.trim();
       return;
     }
     const shoppingInput=e.target.closest?.('[data-shopping-input]'); if(!shoppingInput) return;
@@ -3352,7 +3350,7 @@ body {
     const shoppingFormLedger=e.target.closest('[data-shopping-form-ledger]'); if(shoppingFormLedger){ state.shoppingFormLedger=shoppingFormLedger.dataset.shoppingFormLedger; render(); return; }
     const shoppingFormListType=e.target.closest('[data-shopping-form-list-type]'); if(shoppingFormListType && state.shoppingFormMode!=='edit'){ state.shoppingFormListType=shoppingFormListType.dataset.shoppingFormListType; render(); return; }
     const shoppingUnit=e.target.closest('[data-shopping-unit]'); if(shoppingUnit){ state.shoppingFormUnit=shoppingUnit.dataset.shoppingUnit; state.shoppingFormCustomUnit=''; render(); return; }
-    const shoppingUnitOption=e.target.closest('[data-shopping-unit-option]'); if(shoppingUnitOption){ state.shoppingFormUnitDraft=shoppingUnitOption.dataset.shoppingUnitOption; document.getElementById('modal-content').innerHTML=shoppingUnitSheet(); if(state.shoppingFormUnitDraft==='custom') requestAnimationFrame(()=>document.querySelector('[data-shopping-custom-unit]')?.focus()); return; }
+    const shoppingUnitOption=e.target.closest('[data-shopping-unit-option]'); if(shoppingUnitOption){ const unit=shoppingUnitOption.dataset.shoppingUnitOption; state.shoppingFormUnitDraft=unit; if(unit==='custom'){ document.getElementById('modal-content').innerHTML=shoppingUnitSheet(); requestAnimationFrame(()=>document.querySelector('[data-shopping-custom-unit]')?.focus()); return; } state.shoppingFormUnit=unit; state.shoppingFormCustomUnit=''; closeModal(); render(); toast(`単位を「${shoppingUnitLabel()}」にしました`); return; }
     const listMonthChoice=e.target.closest('[data-list-month]'); if(listMonthChoice){ state.listYear=Number(listMonthChoice.dataset.listYear); state.listMonth=Number(listMonthChoice.dataset.listMonth); state.listDay=null; closeModal(); render(); return; }
     const analyticsTab=e.target.closest('[data-analytics-tab]'); if(analyticsTab){ state.analyticsTab=analyticsTab.dataset.analyticsTab; render(); document.getElementById('app-screen').scrollTop=0; return; }
     const analyticsTrend=e.target.closest('[data-analytics-trend]'); if(analyticsTrend){ state.analyticsTrend=analyticsTrend.dataset.analyticsTrend; render(); return; }
@@ -3466,12 +3464,6 @@ body {
     else if(a==='shopping-voice-rerecord') rerecordShoppingVoice();
     else if(a==='shopping-mic-settings') toast('マイクの権限設定を開きます');
     else if(a==='shopping-unit-open'){ state.shoppingFormUnitDraft=state.shoppingFormUnit; state.shoppingFormCustomUnitDraft=state.shoppingFormCustomUnit; openModal(shoppingUnitSheet()); }
-    else if(a==='shopping-unit-apply'){
-      const customUnit=state.shoppingFormCustomUnitDraft.trim();
-      if(state.shoppingFormUnitDraft==='custom'&&!customUnit){ document.querySelector('[data-shopping-custom-unit]')?.focus(); return; }
-      state.shoppingFormUnit=state.shoppingFormUnitDraft; state.shoppingFormCustomUnit=state.shoppingFormUnitDraft==='custom'?customUnit:'';
-      closeModal(); render(); toast(`単位を「${shoppingUnitLabel()}」にしました`);
-    }
     else if(a==='shopping-form-category') setScreen('category');
     else if(a==='shopping-form-category-select'){ state.shoppingFormCategory=action.dataset.category||''; closeModal(); render(); }
     else if(a==='list-sort-menu') openModal(`<h3>並び替え</h3><div class="flat-card">${[['date','desc','日付・降順'],['date','asc','日付・昇順'],['amount','desc','金額・降順'],['amount','asc','金額・昇順']].map(([sort,direction,label],index)=>`<button class="tap-row ${index<3?'row-divider':''}" data-action="list-sort-option" data-sort="${sort}" data-direction="${direction}"><span class="row-copy"><strong>${label}</strong></span>${state.listSort===sort&&state.listDirection===direction?icon('check'):''}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
@@ -3518,6 +3510,15 @@ body {
     else if(a==='legal-doc') openModal(`<h3>${action.innerText.trim()}</h3><p class="legal-copy">この文書は読みやすさを優先し、見出し・本文・更新日を一つの紙面として表示します。正式な内容は既存の法務文書を使用します。</p><button class="secondary-btn" data-action="close-modal">閉じる</button>`);
   });
   document.addEventListener('keydown', e => {
+    const customUnitInput=e.target.closest?.('[data-shopping-custom-unit]');
+    if(customUnitInput&&e.key==='Enter'){
+      e.preventDefault();
+      const customUnit=state.shoppingFormCustomUnitDraft.trim();
+      if(!customUnit){ customUnitInput.focus(); return; }
+      state.shoppingFormUnit='custom'; state.shoppingFormCustomUnit=customUnit;
+      closeModal(); render(); toast(`単位を「${shoppingUnitLabel()}」にしました`);
+      return;
+    }
     const familyCodeInput=e.target.closest?.('[data-family-code-index]');
     if(familyCodeInput&&e.key==='Backspace'&&!familyCodeInput.value){
       const index=Number(familyCodeInput.dataset.familyCodeIndex);

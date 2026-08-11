@@ -131,6 +131,10 @@ extension VoicePttForeignNotice<W extends ConsumerStatefulWidget>
             _lastFilledAmount = spokenAmount;
             if (mounted) {
               onPttSessionChanged(() => _displayCurrency = 'JPY');
+              // The manual-entry host mirrors the display currency/amount in
+              // [onPttCommitted]. Re-run that mirror so Undo also removes the
+              // foreign headline and rate card instead of leaving stale UI.
+              onPttCommitted();
             }
           },
         );

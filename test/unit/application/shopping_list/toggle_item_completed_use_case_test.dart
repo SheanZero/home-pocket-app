@@ -251,6 +251,48 @@ void main() {
       verifyNever(() => syncEngine.onTransactionChanged());
     });
 
+    test(
+      'durable private toggle does not resolve sync device identity',
+      () async {
+        final privateItem = incompletePublicItem.copyWith(
+          id: 'item-private-local',
+          listType: 'private',
+        );
+        final durableRepo = _MockDurableShoppingItemRepository();
+        var resolverCalled = false;
+        when(
+          () => durableRepo.findById('item-private-local'),
+        ).thenAnswer((_) async => privateItem);
+        when(
+          () => durableRepo.updateWithFamilySyncOutbox(
+            any(),
+            originDeviceId: 'device-1',
+          ),
+        ).thenAnswer(
+          (invocation) async =>
+              invocation.positionalArguments.first as ShoppingItem,
+        );
+        final privateUseCase = ToggleItemCompletedUseCase(
+          shoppingItemRepository: durableRepo,
+          deviceIdResolver: () async {
+            resolverCalled = true;
+            throw StateError('private updates must not read sync identity');
+          },
+        );
+
+        final result = await privateUseCase.execute('item-private-local');
+
+        expect(result.isSuccess, isTrue);
+        expect(resolverCalled, isFalse);
+        verify(
+          () => durableRepo.updateWithFamilySyncOutbox(
+            any(),
+            originDeviceId: 'device-1',
+          ),
+        ).called(1);
+      },
+    );
+
     test('failed persistence does not trigger sync', () async {
       when(() => mockRepo.update(any())).thenThrow(StateError('write failed'));
       final syncingUseCase = ToggleItemCompletedUseCase(

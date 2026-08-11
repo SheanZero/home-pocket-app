@@ -69,6 +69,7 @@ Future<void> _pumpScreen(
   MockReorderShoppingItemsUseCase? reorder,
   MockClearCompletedItemsUseCase? clearCompleted,
   Stream<List<ShoppingItem>>? itemsStream,
+  Stream<List<ShoppingItem>> Function()? itemsStreamFactory,
   VoidCallback? onSettingsTap,
   List<Override> extraOverrides = const [],
 }) async {
@@ -94,7 +95,8 @@ Future<void> _pumpScreen(
       overrides: [
         // Provide a stream of items for filteredShoppingItemsProvider
         filteredShoppingItemsProvider.overrideWith(
-          (ref) => itemsStream ?? Stream.value(items),
+          (ref) =>
+              itemsStreamFactory?.call() ?? itemsStream ?? Stream.value(items),
         ),
         deleteShoppingItemUseCaseProvider.overrideWithValue(deleteUC),
         toggleItemCompletedUseCaseProvider.overrideWithValue(toggleUC),
@@ -348,6 +350,65 @@ void main() {
 
       expect(find.text('Active 1'), findsOneWidget);
       expect(find.text('Active 2'), findsOneWidget);
+    });
+
+    testWidgets(
+      'tapping the leading circle re-queries after a successful toggle',
+      (tester) async {
+        final toggle = MockToggleItemCompletedUseCase();
+        final item = _makeItem(id: 'toggle-live', name: 'Milk');
+        var completed = false;
+        var streamBuilds = 0;
+
+        await _pumpScreen(
+          tester,
+          items: [item],
+          toggle: toggle,
+          itemsStreamFactory: () {
+            streamBuilds++;
+            return Stream.value([
+              item.copyWith(
+                isCompleted: completed,
+                completedAt: completed ? DateTime(2026, 8, 11) : null,
+              ),
+            ]);
+          },
+        );
+        when(() => toggle.execute('toggle-live')).thenAnswer((_) async {
+          completed = true;
+          return Result.success(item.copyWith(isCompleted: true));
+        });
+
+        await tester.tap(find.byKey(const ValueKey('toggle-toggle-live')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(streamBuilds, 2);
+        expect(
+          find.byKey(const ValueKey('shopping-check-icon-toggle-live')),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets('failed completion toggle gives visible feedback', (
+      tester,
+    ) async {
+      final toggle = MockToggleItemCompletedUseCase();
+      final item = _makeItem(id: 'toggle-error', name: 'Milk');
+
+      await _pumpScreen(tester, items: [item], toggle: toggle);
+      when(
+        () => toggle.execute('toggle-error'),
+      ).thenAnswer((_) async => Result.error('write failed'));
+
+      await tester.tap(find.byKey(const ValueKey('toggle-toggle-error')));
+      await tester.pump();
+
+      expect(
+        find.text("Couldn't update completion. Please try again."),
+        findsOneWidget,
+      );
     });
   });
 

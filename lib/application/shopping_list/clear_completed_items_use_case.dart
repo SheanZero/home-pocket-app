@@ -15,7 +15,9 @@ import '../family_sync/sync_engine.dart';
 class ClearCompletedItemsUseCase {
   ClearCompletedItemsUseCase({
     required ShoppingItemRepository shoppingItemRepository,
-    this._changeTracker, this._syncEngine, this._deviceIdResolver,
+    this._changeTracker,
+    this._syncEngine,
+    this._deviceIdResolver,
   }) : _repo = shoppingItemRepository;
 
   final ShoppingItemRepository _repo;
@@ -33,15 +35,20 @@ class ClearCompletedItemsUseCase {
     final durable = _repo is DurableFamilySyncShoppingItemRepository
         ? _repo
         : null;
+    final includesPublic = targetListTypes.contains('public');
     if (durable != null) {
-      final originDeviceId = await _deviceIdResolver?.call() ?? '';
+      final originDeviceId = includesPublic
+          ? await _deviceIdResolver?.call() ?? ''
+          : '';
       for (final targetListType in targetListTypes) {
         await durable.softDeleteAllCompletedWithFamilySyncOutbox(
           targetListType,
           originDeviceId: originDeviceId,
         );
       }
-      _syncEngine?.onTransactionChanged();
+      if (includesPublic) {
+        _syncEngine?.onTransactionChanged();
+      }
       return Result.success(null);
     }
 
@@ -66,8 +73,10 @@ class ClearCompletedItemsUseCase {
       }
     }
 
-    // Fire-and-forget sync trigger — SyncEngine handles debounce (D-20).
-    _syncEngine?.onTransactionChanged();
+    // Private-only clears are local database operations.
+    if (includesPublic) {
+      _syncEngine?.onTransactionChanged();
+    }
 
     return Result.success(null);
   }

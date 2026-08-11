@@ -4,15 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Architecture test: trilingual legal-asset parity gate (D-02 / LEGAL-06).
 ///
-/// Asserts all 9 `assets/legal/{doc}_{lang}.md` final documents are present AND
+/// Asserts all 9 `assets/legal/{doc}_{lang}.html` final documents are present AND
 /// structurally consistent so `rootBundle.loadString` resolves at runtime /
 /// in widget tests, and so a locale cannot silently ship a stub or a document
 /// whose section structure diverges from its siblings.
 ///
 /// Guarantees per file:
 ///   - non-empty (guards against blank/stub drafts),
-///   - its first non-blank line is a top-level `#` heading (well-formed doc),
-///   - the count of `##` section headers matches across all three locales of
+///   - it contains one top-level `<h1>` heading (well-formed HTML document),
+///   - the count of `<h2>` section headers matches across all three locales of
 ///     the same doc (cross-locale structural parity),
 ///   - contains no launch placeholders or draft markers.
 ///
@@ -94,22 +94,15 @@ const _obsoletePrivacyClaims = <String, List<String>>{
   ],
 };
 
-int _countSectionHeaders(List<String> lines) =>
-    lines.where((l) => l.startsWith('## ')).length;
-
-String? _firstNonBlankLine(List<String> lines) {
-  for (final line in lines) {
-    if (line.trim().isNotEmpty) return line;
-  }
-  return null;
-}
+int _countSectionHeaders(String content) =>
+    RegExp(r'<h2(?:\s[^>]*)?>').allMatches(content).length;
 
 void main() {
   group('legal asset parity', () {
     test('all doc × locale assets exist', () {
       for (final doc in _docs) {
         for (final lang in _langs) {
-          final path = 'assets/legal/${doc}_$lang.md';
+          final path = 'assets/legal/${doc}_$lang.html';
           expect(
             File(path).existsSync(),
             isTrue,
@@ -119,41 +112,43 @@ void main() {
       }
     });
 
-    test('each asset is non-empty and starts with a # heading', () {
+    test('each asset is non-empty HTML with one h1 heading', () {
       for (final doc in _docs) {
         for (final lang in _langs) {
-          final path = 'assets/legal/${doc}_$lang.md';
+          final path = 'assets/legal/${doc}_$lang.html';
           final content = File(path).readAsStringSync();
           expect(
             content.trim(),
             isNotEmpty,
             reason: 'legal asset $path is empty or blank',
           );
-          final firstLine = _firstNonBlankLine(content.split('\n'));
           expect(
-            firstLine != null && firstLine.startsWith('# '),
-            isTrue,
-            reason:
-                'legal asset $path must start with a top-level # heading, '
-                'got: ${firstLine ?? '<none>'}',
+            RegExp(r'<h1(?:\s[^>]*)?>').allMatches(content).length,
+            1,
+            reason: 'legal asset $path must contain exactly one h1 heading',
           );
+          expect(
+            content,
+            isNot(contains(RegExp(r'^#{1,6}\s', multiLine: true))),
+          );
+          expect(content, isNot(contains('**')));
         }
       }
     });
 
-    test('## section-header count matches across locales of the same doc', () {
+    test('h2 section-header count matches across locales of the same doc', () {
       for (final doc in _docs) {
         final counts = <String, int>{};
         for (final lang in _langs) {
-          final path = 'assets/legal/${doc}_$lang.md';
-          final lines = File(path).readAsLinesSync();
-          counts[lang] = _countSectionHeaders(lines);
+          final path = 'assets/legal/${doc}_$lang.html';
+          final content = File(path).readAsStringSync();
+          counts[lang] = _countSectionHeaders(content);
         }
         final reference = counts[_langs.first]!;
         expect(
           reference,
           greaterThan(0),
-          reason: '$doc drafts have no ## section headers',
+          reason: '$doc documents have no h2 section headers',
         );
         for (final lang in _langs) {
           expect(
@@ -169,7 +164,7 @@ void main() {
 
     test('privacy policies match the encrypted relay retention contract', () {
       for (final lang in _langs) {
-        final path = 'assets/legal/privacy_$lang.md';
+        final path = 'assets/legal/privacy_$lang.html';
         final content = File(path).readAsStringSync();
 
         for (final requiredText in _privacyRelayContract[lang]!) {
@@ -194,7 +189,7 @@ void main() {
     test('shipping documents contain final operator information', () {
       for (final doc in _docs) {
         for (final lang in _langs) {
-          final path = 'assets/legal/${doc}_$lang.md';
+          final path = 'assets/legal/${doc}_$lang.html';
           final content = File(path).readAsStringSync();
 
           expect(content, contains('ナープ株式会社'), reason: path);
@@ -209,7 +204,7 @@ void main() {
         }
       }
 
-      final tokushoJa = File('assets/legal/tokusho_ja.md').readAsStringSync();
+      final tokushoJa = File('assets/legal/tokusho_ja.html').readAsStringSync();
       expect(tokushoJa, contains('代表取締役 張欣'));
       expect(tokushoJa, contains('03-6859-7235'));
       expect(tokushoJa, contains('〒101-0041'));
@@ -217,7 +212,7 @@ void main() {
 
     test('terms disclose the no-age-restriction product decision', () {
       for (final lang in _langs) {
-        final path = 'assets/legal/terms_$lang.md';
+        final path = 'assets/legal/terms_$lang.html';
         final content = File(path).readAsStringSync();
         for (final requiredText in _ageContract[lang]!) {
           expect(content, contains(requiredText), reason: path);
@@ -228,7 +223,7 @@ void main() {
     test('release snapshots exactly match app legal assets', () {
       for (final doc in _docs) {
         for (final lang in _langs) {
-          final name = '${doc}_$lang.md';
+          final name = '${doc}_$lang.html';
           final asset = File('assets/legal/$name').readAsStringSync();
           final snapshot = File(
             'publish/ios/legal/current/$name',

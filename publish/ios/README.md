@@ -14,7 +14,7 @@
 |---|---|
 | Bundle ID | `com.sheanzero.happypocket.app` |
 | Apple Team ID | `6Y64KR8RLP` |
-| pubspec 版本 | `0.1.0+1` |
+| pubspec 版本 | `1.0.0+1` |
 | iOS Deployment Target | iOS 15.0 |
 | 支持设备 | iPhone + iPad（`TARGETED_DEVICE_FAMILY = 1,2`） |
 | Xcode | `26.2`，满足 2026-04-28 起的 Xcode 26 / iOS 26 SDK 上传要求 |

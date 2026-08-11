@@ -277,6 +277,46 @@ class _CategorySelectionScreenState
     }
   }
 
+  Future<void> _hideCategory(Category category, Locale locale) async {
+    final l10n = S.of(context);
+    final name = CategoryLocalizationService.resolve(category.name, locale);
+    final confirmed = await showSoftConfirmDialog(
+      context,
+      title: l10n.hideCategoryTitle(name),
+      body: category.level == 1
+          ? l10n.hideL1CategoryBody
+          : l10n.hideL2CategoryBody,
+      confirmLabel: l10n.delete,
+      cancelLabel: l10n.cancel,
+    );
+    if (!confirmed || !mounted) return;
+
+    final result = await ref
+        .read(hideCategoryUseCaseProvider)
+        .execute(category.id);
+    if (!mounted) return;
+    if (result.isError) {
+      showErrorFeedback(context, l10n.categoryHideFailed);
+      return;
+    }
+
+    ref.read(categoryReorderProvider.notifier).removeHidden(category.id);
+    setState(() {
+      if (category.level == 1) {
+        _l1Categories.removeWhere((item) => item.id == category.id);
+        _l2ByParent.remove(category.id);
+        if (_expandedL1IdInEdit == category.id) {
+          _expandedL1IdInEdit = null;
+        }
+      } else {
+        _l2ByParent[category.parentId]?.removeWhere(
+          (item) => item.id == category.id,
+        );
+      }
+    });
+    showSuccessFeedback(context, l10n.categoryHidden);
+  }
+
   Set<String> _localizedSiblingNames({
     required Locale locale,
     String? parentId,
@@ -614,6 +654,8 @@ class _CategorySelectionScreenState
                     onReorderChild: (o, n) => ref
                         .read(categoryReorderProvider.notifier)
                         .reorderL2(l1.id, o, n),
+                    onHideCategory: (category) =>
+                        _hideCategory(category, locale),
                     locale: locale,
                   );
                 },
@@ -667,6 +709,7 @@ class _L1ReorderTile extends StatelessWidget {
     required this.l2Colors,
     required this.onToggle,
     required this.onReorderChild,
+    required this.onHideCategory,
     required this.locale,
   });
 
@@ -678,6 +721,7 @@ class _L1ReorderTile extends StatelessWidget {
   final Map<String, Color> l2Colors;
   final VoidCallback onToggle;
   final void Function(int, int) onReorderChild;
+  final ValueChanged<Category> onHideCategory;
   final Locale locale;
 
   @override
@@ -686,16 +730,23 @@ class _L1ReorderTile extends StatelessWidget {
       key: ValueKey('tile_${category.id}'),
       mainAxisSize: MainAxisSize.min,
       children: [
-        ReorderableDelayedDragStartListener(
-          index: index,
-          child: GestureDetector(
-            onTap: onToggle,
-            child: CategoryReorderRow(
-              label: CategoryLocalizationService.resolve(category.name, locale),
-              iconData: resolveCategoryIcon(category.icon),
-              color: categoryColor,
-              variant: CategoryReorderRowVariant.l1,
+        GestureDetector(
+          onTap: onToggle,
+          child: CategoryReorderRow(
+            label: CategoryLocalizationService.resolve(category.name, locale),
+            iconData: resolveCategoryIcon(category.icon),
+            color: categoryColor,
+            variant: CategoryReorderRowVariant.l1,
+            dragHandle: ReorderableDelayedDragStartListener(
+              index: index,
+              child: Icon(
+                Icons.drag_indicator,
+                size: 22,
+                color: context.palette.textSecondary,
+              ),
             ),
+            onDelete: () => onHideCategory(category),
+            deleteTooltip: S.of(context).hideCategoryTooltip,
           ),
         ),
         if (expanded && children.isNotEmpty)
@@ -712,17 +763,24 @@ class _L1ReorderTile extends StatelessWidget {
               return Padding(
                 key: ValueKey('l2_${child.id}'),
                 padding: const EdgeInsets.only(left: 24, bottom: 4),
-                child: ReorderableDragStartListener(
-                  index: i,
-                  child: CategoryReorderRow(
-                    label: CategoryLocalizationService.resolve(
-                      child.name,
-                      locale,
-                    ),
-                    iconData: resolveCategoryIcon(child.icon),
-                    color: childColor,
-                    variant: CategoryReorderRowVariant.l2,
+                child: CategoryReorderRow(
+                  label: CategoryLocalizationService.resolve(
+                    child.name,
+                    locale,
                   ),
+                  iconData: resolveCategoryIcon(child.icon),
+                  color: childColor,
+                  variant: CategoryReorderRowVariant.l2,
+                  dragHandle: ReorderableDragStartListener(
+                    index: i,
+                    child: Icon(
+                      Icons.drag_indicator,
+                      size: 22,
+                      color: ctx.palette.textSecondary,
+                    ),
+                  ),
+                  onDelete: () => onHideCategory(child),
+                  deleteTooltip: S.of(context).hideCategoryTooltip,
                 ),
               );
             },

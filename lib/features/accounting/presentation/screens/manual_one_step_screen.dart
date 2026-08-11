@@ -164,6 +164,12 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
   /// the tap-reset hint) until the user taps the blank area to exit.
   bool _voiceModalOpen = false;
 
+  /// True from the dock's recognized long-press until release/cancel. Re-record
+  /// preparation awaits a recognizer cancel, so this also prevents a late async
+  /// restart when the finger was already released.
+  bool _voiceCoreHeld = false;
+  bool _voiceRerecordPreparing = false;
+
   // ── VoicePttSessionMixin contract ─────────────────────────────────────────
 
   @override
@@ -252,7 +258,11 @@ class _ManualOneStepScreenState extends ConsumerState<ManualOneStepScreen>
   /// Text-field focus can slide the dock away and expose KeyboardToolbar, so
   /// save gating must be host state rather than a property of the dock alone.
   bool get _isVoiceDraftTransient =>
-      _voiceModalOpen && (pttIsRecording || pttIsParsing || pttIsRestarting);
+      _voiceModalOpen &&
+      (pttIsRecording ||
+          pttIsParsing ||
+          pttIsRestarting ||
+          _voiceRerecordPreparing);
 
   // D-05: SmartKeyboard slides off-screen when any TextField is focused.
   bool get _showSmartKeypad => _amountFocused && !_isTextFieldFocused;

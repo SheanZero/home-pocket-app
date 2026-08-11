@@ -14,7 +14,7 @@
 - [x] **披露语音识别降级路径。** 三语隐私政策说明用户允许时 Apple/Google OS 语音服务可能处理音频。
 - [ ] **App Privacy 最终确认。** 以 `privacy/app_privacy_answers.md` 为运营确认基线，结合生产 relay 的数据保留、日志、IP 和第三方 SDK 行为完成最终申报；首版不收集推送 token。
 - [ ] **出口合规结论。** App 自带 SQLCipher、AES-256-GCM、ChaCha20-Poly1305、Ed25519/E2EE，不是“仅使用 Apple OS 加密”。按 `privacy/export_compliance.md` 完成 Apple 问卷及必要的自分类/文件审查；结论未确认前不要添加 `ITSAppUsesNonExemptEncryption=false`。
-- [ ] **版本号定版。** 当前 `pubspec.yaml` 为 `0.1.0+1`，而项目文档描述多个已完成里程碑。发布负责人需决定首发 Marketing Version 与递增 Build Number，并让 pubspec、归档和 App Store Connect 一致。
+- [x] **版本号定版。** 首发 Marketing Version 已定为 `1.0.0`，当前 `pubspec.yaml` 为 `1.0.0+1`；后续上传需持续递增 Build Number，并保持归档与 App Store Connect 一致。
 - [ ] **iPad 发布策略定版。** 当前 target 同时支持 iPhone 和 iPad，因此 App Store 必须提交 13 英寸 iPad 截图。若产品未做 iPad 真机/模拟器验收，先决定是完成适配和截图，还是在代码变更中正式改为 iPhone-only。
 - [ ] **最终商店截图。** 现有 golden 使用测试字体/图标替身，只能作布局参考，不能上传。必须从最终 Release build 采集无敏感数据的 iPhone 6.9 英寸和 iPad 13 英寸截图。
 - [x] **照片权限说明。** App 的头像选择使用 `ImageSource.gallery`；`Info.plist` 和 `ja` / `zh-Hans` / `en` `InfoPlist.strings` 均已提供最小化的 `NSPhotoLibraryUsageDescription`。不请求 add-only 权限；照片选择真机验证仍属于下方 P1 设备验收。

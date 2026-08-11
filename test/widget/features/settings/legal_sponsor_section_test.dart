@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:home_pocket/core/licenses/app_license_registry.dart';
 import 'package:home_pocket/features/settings/presentation/screens/legal_doc_screen.dart';
 import 'package:home_pocket/features/settings/presentation/widgets/legal_sponsor_section.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
@@ -7,6 +8,8 @@ import 'package:home_pocket/generated/app_localizations.dart';
 import '../../../helpers/test_localizations.dart';
 
 void main() {
+  setUpAll(registerBundledThirdPartyLicenses);
+
   Future<void> pump(WidgetTester tester) async {
     await tester.pumpWidget(
       createLocalizedWidget(
@@ -92,6 +95,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(LicensePage), findsOneWidget);
+    expect(find.text('1.0.0'), findsOneWidget);
+    expect(find.text('Roboto Mono'), findsOneWidget);
   });
 
   testWidgets('legal rows use internal-navigation affordances', (tester) async {

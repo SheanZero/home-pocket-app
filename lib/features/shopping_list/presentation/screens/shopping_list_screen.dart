@@ -28,9 +28,10 @@ import '../widgets/shopping_item_tile.dart';
 /// the rest of each row owns the single-item action menu. Batch selection and
 /// the separate reorder mode are intentionally absent.
 ///
-/// NEVER call ref.invalidate(filteredShoppingItemsProvider) for sync-driven
-/// updates — the Drift .watch() stream handles reactivity (GAP-2 lesson).
-/// ref.invalidate is ONLY used in the error state's retry button.
+/// Never invalidate [filteredShoppingItemsProvider] for sync-driven updates —
+/// the Drift .watch() stream handles reactivity (GAP-2 lesson). Explicit local
+/// actions may re-query after persistence as a recovery fallback; the error
+/// state also invalidates on user-triggered retry.
 class ShoppingListScreen extends ConsumerWidget {
   const ShoppingListScreen({super.key, this.onSettingsTap});
 

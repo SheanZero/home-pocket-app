@@ -27,6 +27,11 @@ class VoiceTuning {
   /// natural pauses usable while making the one-shot flow feel responsive.
   static const Duration pauseFor = Duration(milliseconds: 1200);
 
+  /// Silence window for explicit press-and-hold recording. The user controls
+  /// completion by releasing the microphone, so natural pauses must not end the
+  /// session first. It matches [listenFor], which remains the safety ceiling.
+  static const Duration releaseControlledPauseFor = listenFor;
+
   /// App-owned grace after a non-empty final result. A platform-final transcript
   /// is already stable, so only a short window is retained for a closely
   /// following split chunk; another result resets this deadline.

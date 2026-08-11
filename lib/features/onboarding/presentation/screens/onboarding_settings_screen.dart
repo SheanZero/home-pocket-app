@@ -527,7 +527,10 @@ class _OnboardingSettingsScreenState
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _FieldLabel(text: l10n.onboardingRowName),
+                                _FieldLabel(
+                                  text: l10n.onboardingRowName,
+                                  requiredText: l10n.onboardingRequired,
+                                ),
                                 Container(
                                   height: 54,
                                   padding: const EdgeInsets.symmetric(
@@ -666,22 +669,28 @@ BoxDecoration _fieldBoxDecoration(AppPalette palette) => BoxDecoration(
 
 /// Small field label above each input (design 04: 11px w600).
 class _FieldLabel extends StatelessWidget {
-  const _FieldLabel({required this.text});
+  const _FieldLabel({required this.text, required this.requiredText});
 
   final String text;
+  final String requiredText;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final style = TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+      color: palette.textSecondary,
+    );
     return Padding(
       padding: const EdgeInsets.only(left: 2, bottom: 6),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: palette.textSecondary,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(text, style: style),
+          const SizedBox(width: 8),
+          Text(requiredText, style: style),
+        ],
       ),
     );
   }

@@ -1977,6 +1977,42 @@ abstract class S {
   /// **'Drag to reorder'**
   String get dragToReorder;
 
+  /// Tooltip for the soft-delete control in category reorder mode
+  ///
+  /// In en, this message translates to:
+  /// **'Hide category'**
+  String get hideCategoryTooltip;
+
+  /// Confirmation title before hiding a category
+  ///
+  /// In en, this message translates to:
+  /// **'Hide “{categoryName}”?'**
+  String hideCategoryTitle(String categoryName);
+
+  /// Confirmation explanation before hiding an L1 category branch
+  ///
+  /// In en, this message translates to:
+  /// **'This category and its subcategories will no longer appear in category selection or voice entry. Existing and family-synced records stay unchanged.'**
+  String get hideL1CategoryBody;
+
+  /// Confirmation explanation before hiding an L2 category
+  ///
+  /// In en, this message translates to:
+  /// **'This category will no longer appear in category selection or voice entry. Existing and family-synced records stay unchanged.'**
+  String get hideL2CategoryBody;
+
+  /// Success feedback after locally hiding a category
+  ///
+  /// In en, this message translates to:
+  /// **'Category hidden'**
+  String get categoryHidden;
+
+  /// Error feedback after locally hiding a category fails
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t hide the category. Please retry.'**
+  String get categoryHideFailed;
+
   /// SnackBar shown after successfully saving category reorder
   ///
   /// In en, this message translates to:
@@ -4541,6 +4577,12 @@ abstract class S {
   /// **'Toggle complete'**
   String get shoppingToggleComplete;
 
+  /// Error shown when a shopping item's completed state cannot be persisted
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update completion. Please try again.'**
+  String get shoppingToggleFailed;
+
   /// Semantics/tooltip for the filter-bar reorder entry (≡) that enters manual drag-reorder mode (EC2 D-2)
   ///
   /// In en, this message translates to:
@@ -4925,12 +4967,6 @@ abstract class S {
   /// **'Enter 1–12 characters'**
   String get shoppingUnitCustomError;
 
-  /// No description provided for @shoppingUnitApply.
-  ///
-  /// In en, this message translates to:
-  /// **'Apply'**
-  String get shoppingUnitApply;
-
   /// No description provided for @shoppingUnitPiece.
   ///
   /// In en, this message translates to:
@@ -5132,13 +5168,13 @@ abstract class S {
   /// No description provided for @entryVoiceIdleStatus.
   ///
   /// In en, this message translates to:
-  /// **'Waiting for voice input'**
+  /// **'Ready when you are'**
   String get entryVoiceIdleStatus;
 
   /// No description provided for @entryVoiceListeningStatus.
   ///
   /// In en, this message translates to:
-  /// **'Listening'**
+  /// **'Listening to you'**
   String get entryVoiceListeningStatus;
 
   /// No description provided for @entryVoiceProcessingStatus.
@@ -5180,13 +5216,13 @@ abstract class S {
   /// No description provided for @entryVoiceIdleHelp.
   ///
   /// In en, this message translates to:
-  /// **'Tap the microphone to start voice recording'**
+  /// **'Hold the microphone to speak; release when you\'re done'**
   String get entryVoiceIdleHelp;
 
   /// No description provided for @entryVoiceListeningHelp.
   ///
   /// In en, this message translates to:
-  /// **'Pause to recognize automatically, or tap to finish now'**
+  /// **'Keep holding while you speak, then release when you\'re ready'**
   String get entryVoiceListeningHelp;
 
   /// No description provided for @entryVoiceProcessingHelp.
@@ -5198,7 +5234,7 @@ abstract class S {
   /// No description provided for @entryVoiceReviewHelp.
   ///
   /// In en, this message translates to:
-  /// **'Tap the microphone to record again, or edit and record'**
+  /// **'Hold the microphone to record again, or edit this entry'**
   String get entryVoiceReviewHelp;
 
   /// No description provided for @entryVoiceUnavailableHelp.
@@ -5216,19 +5252,19 @@ abstract class S {
   /// No description provided for @entryVoiceStartAction.
   ///
   /// In en, this message translates to:
-  /// **'Start voice input'**
+  /// **'Press and hold to start recording'**
   String get entryVoiceStartAction;
 
   /// No description provided for @entryVoiceStopAction.
   ///
   /// In en, this message translates to:
-  /// **'Finish now and analyze'**
+  /// **'Release to finish and analyze'**
   String get entryVoiceStopAction;
 
   /// No description provided for @entryVoiceRerecordAction.
   ///
   /// In en, this message translates to:
-  /// **'Record again'**
+  /// **'Press and hold to record again'**
   String get entryVoiceRerecordAction;
 
   /// No description provided for @entryVoiceSourceBadge.
@@ -5777,11 +5813,17 @@ abstract class S {
   /// **'Initial Setup'**
   String get onboardingSetupTitle;
 
-  /// Design-04 setup screen: inline name field label
+  /// Design-04 setup screen: inline name field label, without the required marker
   ///
   /// In en, this message translates to:
-  /// **'Name · Required'**
+  /// **'Name'**
   String get onboardingRowName;
+
+  /// Required marker shown beside the onboarding name field label
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get onboardingRequired;
 
   /// Design-04 setup screen: display-language segment group label
   ///

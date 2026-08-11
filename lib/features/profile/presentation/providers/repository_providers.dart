@@ -29,10 +29,10 @@ GetUserProfileUseCase getUserProfileUseCase(Ref ref) {
 
 @riverpod
 SaveUserProfileUseCase saveUserProfileUseCase(Ref ref) {
+  final keyManager = ref.watch(app_profile.appKeyManagerProvider);
   return SaveUserProfileUseCase(
     ref.watch(userProfileRepositoryProvider),
-    deviceIdResolver: () =>
-        ref.read(app_profile.appKeyManagerProvider).getDeviceId(),
+    deviceIdResolver: keyManager.getDeviceId,
     avatarStagingStore: ref.watch(
       app_profile.appAvatarSemanticStagingStoreProvider,
     ),

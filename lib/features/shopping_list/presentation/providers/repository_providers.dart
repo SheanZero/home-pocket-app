@@ -59,48 +59,52 @@ Stream<List<ShoppingUnitSuggestion>> shoppingUnitSuggestions(Ref ref) =>
 /// Privacy gate (D37-06): only public items enter the sync pipeline;
 /// the use case enforces this internally.
 @riverpod
-CreateShoppingItemUseCase createShoppingItemUseCase(Ref ref) =>
-    CreateShoppingItemUseCase(
-      shoppingItemRepository: ref.watch(shoppingItemRepositoryProvider),
-      changeTracker: ref.watch(shoppingItemChangeTrackerProvider),
-      syncEngine: ref.watch(syncEngineProvider),
-      deviceIdResolver: () =>
-          ref.read(app_accounting.appKeyManagerProvider).getDeviceId(),
-      unitUsageRepository: ref.watch(shoppingUnitUsageRepositoryProvider),
-    );
+CreateShoppingItemUseCase createShoppingItemUseCase(Ref ref) {
+  final keyManager = ref.watch(app_accounting.appKeyManagerProvider);
+  return CreateShoppingItemUseCase(
+    shoppingItemRepository: ref.watch(shoppingItemRepositoryProvider),
+    changeTracker: ref.watch(shoppingItemChangeTrackerProvider),
+    syncEngine: ref.watch(syncEngineProvider),
+    deviceIdResolver: keyManager.getDeviceId,
+    unitUsageRepository: ref.watch(shoppingUnitUsageRepositoryProvider),
+  );
+}
 
 /// [ToggleItemCompletedUseCase] provider wired with repo + sync deps.
 @riverpod
-ToggleItemCompletedUseCase toggleItemCompletedUseCase(Ref ref) =>
-    ToggleItemCompletedUseCase(
-      shoppingItemRepository: ref.watch(shoppingItemRepositoryProvider),
-      changeTracker: ref.watch(shoppingItemChangeTrackerProvider),
-      syncEngine: ref.watch(syncEngineProvider),
-      deviceIdResolver: () =>
-          ref.read(app_accounting.appKeyManagerProvider).getDeviceId(),
-    );
+ToggleItemCompletedUseCase toggleItemCompletedUseCase(Ref ref) {
+  final keyManager = ref.watch(app_accounting.appKeyManagerProvider);
+  return ToggleItemCompletedUseCase(
+    shoppingItemRepository: ref.watch(shoppingItemRepositoryProvider),
+    changeTracker: ref.watch(shoppingItemChangeTrackerProvider),
+    syncEngine: ref.watch(syncEngineProvider),
+    deviceIdResolver: keyManager.getDeviceId,
+  );
+}
 
 /// [DeleteShoppingItemUseCase] provider wired with repo + sync deps.
 @riverpod
-DeleteShoppingItemUseCase deleteShoppingItemUseCase(Ref ref) =>
-    DeleteShoppingItemUseCase(
-      shoppingItemRepository: ref.watch(shoppingItemRepositoryProvider),
-      changeTracker: ref.watch(shoppingItemChangeTrackerProvider),
-      syncEngine: ref.watch(syncEngineProvider),
-      deviceIdResolver: () =>
-          ref.read(app_accounting.appKeyManagerProvider).getDeviceId(),
-    );
+DeleteShoppingItemUseCase deleteShoppingItemUseCase(Ref ref) {
+  final keyManager = ref.watch(app_accounting.appKeyManagerProvider);
+  return DeleteShoppingItemUseCase(
+    shoppingItemRepository: ref.watch(shoppingItemRepositoryProvider),
+    changeTracker: ref.watch(shoppingItemChangeTrackerProvider),
+    syncEngine: ref.watch(syncEngineProvider),
+    deviceIdResolver: keyManager.getDeviceId,
+  );
+}
 
 /// [UpdateShoppingItemUseCase] provider wired with repo + sync deps.
 @riverpod
-UpdateShoppingItemUseCase updateShoppingItemUseCase(Ref ref) =>
-    UpdateShoppingItemUseCase(
-      shoppingItemRepository: ref.watch(shoppingItemRepositoryProvider),
-      changeTracker: ref.watch(shoppingItemChangeTrackerProvider),
-      syncEngine: ref.watch(syncEngineProvider),
-      deviceIdResolver: () =>
-          ref.read(app_accounting.appKeyManagerProvider).getDeviceId(),
-    );
+UpdateShoppingItemUseCase updateShoppingItemUseCase(Ref ref) {
+  final keyManager = ref.watch(app_accounting.appKeyManagerProvider);
+  return UpdateShoppingItemUseCase(
+    shoppingItemRepository: ref.watch(shoppingItemRepositoryProvider),
+    changeTracker: ref.watch(shoppingItemChangeTrackerProvider),
+    syncEngine: ref.watch(syncEngineProvider),
+    deviceIdResolver: keyManager.getDeviceId,
+  );
+}
 
 /// [ReorderShoppingItemsUseCase] provider — repo only, no sync deps.
 ///
@@ -114,14 +118,15 @@ ReorderShoppingItemsUseCase reorderShoppingItemsUseCase(Ref ref) =>
 
 /// [ClearCompletedItemsUseCase] provider wired with repo + sync deps.
 @riverpod
-ClearCompletedItemsUseCase clearCompletedItemsUseCase(Ref ref) =>
-    ClearCompletedItemsUseCase(
-      shoppingItemRepository: ref.watch(shoppingItemRepositoryProvider),
-      changeTracker: ref.watch(shoppingItemChangeTrackerProvider),
-      syncEngine: ref.watch(syncEngineProvider),
-      deviceIdResolver: () =>
-          ref.read(app_accounting.appKeyManagerProvider).getDeviceId(),
-    );
+ClearCompletedItemsUseCase clearCompletedItemsUseCase(Ref ref) {
+  final keyManager = ref.watch(app_accounting.appKeyManagerProvider);
+  return ClearCompletedItemsUseCase(
+    shoppingItemRepository: ref.watch(shoppingItemRepositoryProvider),
+    changeTracker: ref.watch(shoppingItemChangeTrackerProvider),
+    syncEngine: ref.watch(syncEngineProvider),
+    deviceIdResolver: keyManager.getDeviceId,
+  );
+}
 
 /// Derived stream of filtered shopping items for the current segment.
 ///
@@ -134,8 +139,9 @@ ClearCompletedItemsUseCase clearCompletedItemsUseCase(Ref ref) =>
 /// extra DAO variants. The privacy gate (public/private separation) is enforced
 /// at the DAO level via [watchByListType]; the client-side filter is cosmetic.
 ///
-/// NEVER call ref.invalidate on this provider — reactivity comes from the
-/// Drift stream emitting on DB writes (SC-5, reactive delivery).
+/// Sync-driven updates rely on the Drift stream and must not invalidate this
+/// provider. An explicit local completion toggle may re-query after persistence
+/// as a recovery fallback when a platform stream notification stalls.
 @riverpod
 Stream<List<ShoppingItem>> filteredShoppingItems(Ref ref) {
   final filter = ref.watch(shoppingFilterProvider);

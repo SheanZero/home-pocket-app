@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/shopping_item_change_tracker.dart';
+import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/shopping_list/delete_shopping_item_use_case.dart';
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
 import 'package:home_pocket/features/shopping_list/domain/repositories/shopping_item_repository.dart';
@@ -7,6 +8,11 @@ import 'package:mocktail/mocktail.dart';
 
 class _MockShoppingItemRepository extends Mock
     implements ShoppingItemRepository {}
+
+class _MockDurableShoppingItemRepository extends Mock
+    implements DurableFamilySyncShoppingItemRepository {}
+
+class _MockSyncEngine extends Mock implements SyncEngine {}
 
 void main() {
   late _MockShoppingItemRepository mockRepo;
@@ -43,7 +49,9 @@ void main() {
 
     // any() registered first so specific stubs registered after it win (mocktail lastWhere)
     when(() => mockRepo.findById(any())).thenAnswer((_) async => null);
-    when(() => mockRepo.findById('item-pub')).thenAnswer((_) async => publicItem);
+    when(
+      () => mockRepo.findById('item-pub'),
+    ).thenAnswer((_) async => publicItem);
     when(
       () => mockRepo.findById('item-priv'),
     ).thenAnswer((_) async => privateItem);
@@ -75,6 +83,35 @@ void main() {
         expect(tracker.pendingCount, 0);
       },
     );
+
+    test('durable private delete stays local-only', () async {
+      final durableRepo = _MockDurableShoppingItemRepository();
+      final syncEngine = _MockSyncEngine();
+      var resolverCalled = false;
+      when(
+        () => durableRepo.findById('item-priv'),
+      ).thenAnswer((_) async => privateItem);
+      when(
+        () => durableRepo.softDeleteWithFamilySyncOutbox(
+          'item-priv',
+          originDeviceId: 'device-1',
+        ),
+      ).thenAnswer((_) async => privateItem.copyWith(isDeleted: true));
+      final privateUseCase = DeleteShoppingItemUseCase(
+        shoppingItemRepository: durableRepo,
+        syncEngine: syncEngine,
+        deviceIdResolver: () async {
+          resolverCalled = true;
+          throw StateError('private deletes must not read sync identity');
+        },
+      );
+
+      final result = await privateUseCase.execute('item-priv');
+
+      expect(result.isSuccess, isTrue);
+      expect(resolverCalled, isFalse);
+      verifyNever(() => syncEngine.onTransactionChanged());
+    });
 
     test('itemId not found returns Result.error (MGMT-02)', () async {
       final result = await useCase.execute('missing-item');

@@ -48,6 +48,41 @@ void main() {
       ); // Active tab text maps to Mockup V16's primary-text role.
     });
 
+    testWidgets('active tab has a filled indicator and selected semantics', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        testLocalizedApp(
+          child: Scaffold(
+            bottomNavigationBar: HomeBottomNavBar(
+              currentIndex: 0,
+              onTap: (_) {},
+              onFabTap: () {},
+            ),
+          ),
+        ),
+      );
+
+      final indicator = tester.widget<AnimatedContainer>(
+        find.byKey(const ValueKey('home-bottom-nav-indicator-0')),
+      );
+      final decoration = indicator.decoration! as BoxDecoration;
+
+      expect(decoration.color, AppPalette.light.accentPrimary);
+      expect(
+        tester.getSemantics(
+          find.byKey(const ValueKey('home-bottom-nav-tab-0')),
+        ),
+        matchesSemantics(
+          label: 'ホーム',
+          isButton: true,
+          hasSelectedState: true,
+          isSelected: true,
+          hasTapAction: true,
+        ),
+      );
+    });
+
     testWidgets('inactive tab uses inactive color', (tester) async {
       await tester.pumpWidget(
         testLocalizedApp(

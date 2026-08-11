@@ -5,9 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../providers/state_locale.dart';
+import '../widgets/legal_html_view.dart';
 
 /// The legal documents this reader can render, each mapped to its bundled
-/// asset stem (`assets/legal/{slug}_{lang}.md`).
+/// asset stem (`assets/legal/{slug}_{lang}.html`).
 enum LegalDoc {
   privacy,
   terms,
@@ -15,14 +16,14 @@ enum LegalDoc {
 
   /// The asset filename stem for this document.
   String get slug => switch (this) {
-        LegalDoc.privacy => 'privacy',
-        LegalDoc.terms => 'terms',
-        LegalDoc.tokusho => 'tokusho',
-      };
+    LegalDoc.privacy => 'privacy',
+    LegalDoc.terms => 'terms',
+    LegalDoc.tokusho => 'tokusho',
+  };
 }
 
-/// Generic offline reader for the long-form legal drafts (privacy / terms /
-/// 特商法) shipped as bundled per-locale Markdown assets (D-02, LEGAL-01/02/04).
+/// Generic offline reader for the long-form legal documents (privacy / terms /
+/// 特商法) shipped as bundled per-locale HTML assets (D-02, LEGAL-01/02/04).
 ///
 /// This is the repo's first `rootBundle` consumer. The asset path is built from
 /// two closed inputs only — the [LegalDoc] enum and a whitelist-guarded
@@ -31,9 +32,9 @@ enum LegalDoc {
 /// [currentLocaleProvider]; an unexpected locale falls back to `ja` and never
 /// throws a missing-asset error.
 ///
-/// Long legal text is rendered verbatim as plain [SelectableText] inside a
-/// scroll view — no Markdown renderer dependency (RESEARCH A2). The AppBar title
-/// is localized via [S]; theming follows [AppPaletteContext.palette] (ADR-019).
+/// Long legal text is rendered by [LegalHtmlView] inside the app, without a
+/// WebView or Markdown syntax leaking into the document. The AppBar title is
+/// localized via [S]; theming follows [AppPaletteContext.palette] (ADR-019).
 class LegalDocScreen extends ConsumerStatefulWidget {
   const LegalDocScreen({super.key, required this.doc});
 
@@ -58,10 +59,10 @@ class _LegalDocScreenState extends ConsumerState<LegalDocScreen> {
   Future<String>? _content;
 
   String _titleFor(S l10n) => switch (widget.doc) {
-        LegalDoc.privacy => l10n.privacyPolicy,
-        LegalDoc.terms => l10n.termsOfUse,
-        LegalDoc.tokusho => l10n.tokushoNotice,
-      };
+    LegalDoc.privacy => l10n.privacyPolicy,
+    LegalDoc.terms => l10n.termsOfUse,
+    LegalDoc.tokusho => l10n.tokushoNotice,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +72,7 @@ class _LegalDocScreenState extends ConsumerState<LegalDocScreen> {
     // V12 guard: whitelist the locale segment before it reaches the asset path.
     final lang = ref.watch(currentLocaleProvider).value?.languageCode ?? 'ja';
     final safeLang = _supportedLangs.contains(lang) ? lang : 'ja';
-    final assetPath = 'assets/legal/${widget.doc.slug}_$safeLang.md';
+    final assetPath = 'assets/legal/${widget.doc.slug}_$safeLang.html';
 
     // Memoize: only rebuild the future when the resolved asset path changes.
     if (assetPath != _assetPath) {
@@ -92,8 +93,8 @@ class _LegalDocScreenState extends ConsumerState<LegalDocScreen> {
             return Center(child: Text(l10n.error));
           }
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: SelectableText(snapshot.data!),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+            child: LegalHtmlView(html: snapshot.data!),
           );
         },
       ),

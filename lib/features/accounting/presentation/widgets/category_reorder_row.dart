@@ -15,12 +15,18 @@ class CategoryReorderRow extends StatelessWidget {
     required this.iconData,
     required this.color,
     required this.variant,
+    this.dragHandle,
+    this.onDelete,
+    this.deleteTooltip,
   });
 
   final String label;
   final IconData iconData;
   final Color color;
   final CategoryReorderRowVariant variant;
+  final Widget? dragHandle;
+  final VoidCallback? onDelete;
+  final String? deleteTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -37,17 +43,16 @@ class CategoryReorderRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: palette.card,
         borderRadius: BorderRadius.circular(isL1 ? 14 : 10),
-        border: Border.all(
-          color: palette.borderDefault,
-        ),
+        border: Border.all(color: palette.borderDefault),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.drag_indicator,
-            size: 22,
-            color: palette.textSecondary,
-          ),
+          dragHandle ??
+              Icon(
+                Icons.drag_indicator,
+                size: 22,
+                color: palette.textSecondary,
+              ),
           const SizedBox(width: 10),
           if (isL1) ...[
             Container(
@@ -74,6 +79,16 @@ class CategoryReorderRow extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          if (onDelete != null)
+            IconButton(
+              onPressed: onDelete,
+              tooltip: deleteTooltip,
+              icon: Icon(
+                Icons.delete_outline,
+                color: palette.textSecondary,
+                size: 21,
+              ),
+            ),
         ],
       ),
     );

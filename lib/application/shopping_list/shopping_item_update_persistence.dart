@@ -25,12 +25,20 @@ class ShoppingItemUpdatePersistence {
     final durable = _repo is DurableFamilySyncShoppingItemRepository
         ? _repo
         : null;
-    final persisted = durable != null
-        ? await durable.updateWithFamilySyncOutbox(
-            item,
-            originDeviceId: await _deviceIdResolver?.call() ?? item.deviceId,
-          )
-        : item;
+    final ShoppingItem persisted;
+    if (durable != null) {
+      // Private shopping items are local-only. Do not couple their database
+      // update to secure-storage identity or any family-sync prerequisite.
+      final originDeviceId = item.listType == 'public'
+          ? await _deviceIdResolver?.call() ?? item.deviceId
+          : item.deviceId;
+      persisted = await durable.updateWithFamilySyncOutbox(
+        item,
+        originDeviceId: originDeviceId,
+      );
+    } else {
+      persisted = item;
+    }
 
     if (durable == null) {
       await _repo.update(item);

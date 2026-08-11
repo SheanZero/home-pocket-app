@@ -8,6 +8,7 @@ import '../../../../application/accounting/delete_transaction_use_case.dart';
 import '../../../../application/accounting/update_transaction_use_case.dart';
 import '../../../../application/accounting/ensure_default_book_use_case.dart';
 import '../../../../application/accounting/get_transactions_use_case.dart';
+import '../../../../application/accounting/hide_category_use_case.dart';
 import '../../../../application/accounting/merchant_category_learning_service.dart';
 import '../../../../application/accounting/repository_providers.dart'
     as app_accounting;
@@ -132,6 +133,15 @@ final createCategoryUseCaseProvider = Provider<CreateCategoryUseCase>((ref) {
     categoryRepository: ref.watch(categoryRepositoryProvider),
     ledgerConfigRepository: ref.watch(categoryLedgerConfigRepositoryProvider),
     unitOfWork: UnitOfWorkImpl(db: database),
+  );
+});
+
+/// Device-local category hiding used by the reorder editor.
+final hideCategoryUseCaseProvider = Provider<HideCategoryUseCase>((ref) {
+  final database = ref.watch(app_accounting.appAppDatabaseProvider);
+  return HideCategoryUseCase(
+    ref.watch(categoryRepositoryProvider),
+    UnitOfWorkImpl(db: database),
   );
 });
 

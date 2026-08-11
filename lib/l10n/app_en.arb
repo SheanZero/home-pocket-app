@@ -1243,6 +1243,31 @@
   "@dragToReorder": {
     "description": "Hint banner shown in category reorder edit mode"
   },
+  "hideCategoryTooltip": "Hide category",
+  "@hideCategoryTooltip": {
+    "description": "Tooltip for the soft-delete control in category reorder mode"
+  },
+  "hideCategoryTitle": "Hide “{categoryName}”?",
+  "@hideCategoryTitle": {
+    "description": "Confirmation title before hiding a category",
+    "placeholders": {"categoryName": {"type": "String"}}
+  },
+  "hideL1CategoryBody": "This category and its subcategories will no longer appear in category selection or voice entry. Existing and family-synced records stay unchanged.",
+  "@hideL1CategoryBody": {
+    "description": "Confirmation explanation before hiding an L1 category branch"
+  },
+  "hideL2CategoryBody": "This category will no longer appear in category selection or voice entry. Existing and family-synced records stay unchanged.",
+  "@hideL2CategoryBody": {
+    "description": "Confirmation explanation before hiding an L2 category"
+  },
+  "categoryHidden": "Category hidden",
+  "@categoryHidden": {
+    "description": "Success feedback after locally hiding a category"
+  },
+  "categoryHideFailed": "Couldn't hide the category. Please retry.",
+  "@categoryHideFailed": {
+    "description": "Error feedback after locally hiding a category fails"
+  },
   "orderUpdated": "Order updated",
   "@orderUpdated": {
     "description": "SnackBar shown after successfully saving category reorder"
@@ -2910,6 +2935,10 @@
   "@shoppingToggleComplete": {
     "description": "Semantics label for the leading circular completion toggle on a shopping item tile (EC2)"
   },
+  "shoppingToggleFailed": "Couldn't update completion. Please try again.",
+  "@shoppingToggleFailed": {
+    "description": "Error shown when a shopping item's completed state cannot be persisted"
+  },
   "shoppingEnterReorderMode": "Reorder list",
   "@shoppingEnterReorderMode": {
     "description": "Semantics/tooltip for the filter-bar reorder entry (≡) that enters manual drag-reorder mode (EC2 D-2)"
@@ -3164,7 +3193,6 @@
   "shoppingUnitCustom": "Custom unit",
   "shoppingUnitCustomHint": "e.g. cup",
   "shoppingUnitCustomError": "Enter 1–12 characters",
-  "shoppingUnitApply": "Apply",
   "shoppingUnitPiece": "pc",
   "shoppingUnitGram": "g",
   "shoppingUnitKilogram": "kg",
@@ -3267,23 +3295,23 @@
   },
   "entryVoiceLaunchHelp": "Say the amount, merchant, category, and date in one go",
   "entryVoicePrivacy": "Processed only on this device",
-  "entryVoiceIdleStatus": "Waiting for voice input",
-  "entryVoiceListeningStatus": "Listening",
+  "entryVoiceIdleStatus": "Ready when you are",
+  "entryVoiceListeningStatus": "Listening to you",
   "entryVoiceProcessingStatus": "Organizing the details",
   "entryVoiceReviewStatus": "Added to this entry",
   "entryVoiceUnavailableStatus": "Voice input unavailable",
   "entryVoiceIdleTranscript": "Ready when you are",
   "entryVoiceListeningPlaceholder": "“Forest Café, lunch, 2,380 yen…”",
   "entryVoiceProcessingPlaceholder": "“Forest Café, lunch, 2,380 yen”",
-  "entryVoiceIdleHelp": "Tap the microphone to start voice recording",
-  "entryVoiceListeningHelp": "Pause to recognize automatically, or tap to finish now",
+  "entryVoiceIdleHelp": "Hold the microphone to speak; release when you're done",
+  "entryVoiceListeningHelp": "Keep holding while you speak, then release when you're ready",
   "entryVoiceProcessingHelp": "Adding the recognition result to this form",
-  "entryVoiceReviewHelp": "Tap the microphone to record again, or edit and record",
+  "entryVoiceReviewHelp": "Hold the microphone to record again, or edit this entry",
   "entryVoiceUnavailableHelp": "Allow microphone access in system Settings, or continue with manual input",
   "entryVoiceKeyboardAction": "Switch to keyboard input",
-  "entryVoiceStartAction": "Start voice input",
-  "entryVoiceStopAction": "Finish now and analyze",
-  "entryVoiceRerecordAction": "Record again",
+  "entryVoiceStartAction": "Press and hold to start recording",
+  "entryVoiceStopAction": "Release to finish and analyze",
+  "entryVoiceRerecordAction": "Press and hold to record again",
   "entryVoiceSourceBadge": "Voice filled",
   "entryCategorySelectRequired": "Select required",
   "entryContinuousReturnHome": "Return home after recording",
@@ -3669,9 +3697,13 @@
   "@onboardingSetupTitle": {
     "description": "Compact centered title for the onboarding setup screen"
   },
-  "onboardingRowName": "Name · Required",
+  "onboardingRowName": "Name",
   "@onboardingRowName": {
-    "description": "Design-04 setup screen: inline name field label"
+    "description": "Design-04 setup screen: inline name field label, without the required marker"
+  },
+  "onboardingRequired": "Required",
+  "@onboardingRequired": {
+    "description": "Required marker shown beside the onboarding name field label"
   },
   "onboardingRowLanguage": "Display language",
   "@onboardingRowLanguage": {

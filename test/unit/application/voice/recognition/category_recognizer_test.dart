@@ -24,7 +24,12 @@ class _MockCategoryKeywordPreferenceRepository extends Mock
 
 class _MockCategoryService extends Mock implements CategoryService {}
 
-Category _makeCategory(String id, {int level = 2, String? parentId}) {
+Category _makeCategory(
+  String id, {
+  int level = 2,
+  String? parentId,
+  bool isArchived = false,
+}) {
   return Category(
     id: id,
     name: id,
@@ -32,10 +37,10 @@ Category _makeCategory(String id, {int level = 2, String? parentId}) {
     color: '#000000',
     level: level,
     parentId: parentId,
+    isArchived: isArchived,
     createdAt: DateTime(2026),
   );
 }
-
 CategoryKeywordPreference _pref(
   String keyword,
   String categoryId, {
@@ -98,6 +103,46 @@ void main() {
       when(() => mockCategoryRepo.findById('cat_missing'))
           .thenAnswer((_) async => null);
       expect(await recognizer.normalizeToL2('cat_missing'), isNull);
+    });
+
+    test(
+      'hidden category is never normalized for voice auto-selection',
+      () async {
+        when(() => mockCategoryRepo.findById('cat_hidden')).thenAnswer(
+          (_) async => _makeCategory(
+            'cat_hidden',
+            parentId: 'cat_parent',
+            isArchived: true,
+          ),
+        );
+
+        expect(await recognizer.normalizeToL2('cat_hidden'), isNull);
+      },
+    );
+
+    test('hidden conventional L2 falls back to an active sibling', () async {
+      when(() => mockCategoryRepo.findById('cat_food')).thenAnswer(
+        (_) async => _makeCategory('cat_food', level: 1),
+      );
+      when(() => mockCategoryRepo.findById('cat_food_other')).thenAnswer(
+        (_) async => _makeCategory(
+          'cat_food_other',
+          parentId: 'cat_food',
+          isArchived: true,
+        ),
+      );
+      when(() => mockCategoryRepo.findByParent('cat_food')).thenAnswer(
+        (_) async => [
+          _makeCategory(
+            'cat_food_other',
+            parentId: 'cat_food',
+            isArchived: true,
+          ),
+          _makeCategory('cat_food_cafe', parentId: 'cat_food'),
+        ],
+      );
+
+      expect(await recognizer.normalizeToL2('cat_food'), 'cat_food_cafe');
     });
   });
 

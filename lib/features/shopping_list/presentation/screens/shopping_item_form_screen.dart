@@ -665,6 +665,22 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
         return StatefulBuilder(
           builder: (context, setSheetState) {
             final options = ShoppingUnit.values;
+            final canConfirmCustomUnit = customController.text
+                .trim()
+                .isNotEmpty;
+
+            void confirmCustomUnit() {
+              final custom = customController.text.trim();
+              if (custom.isEmpty) {
+                setSheetState(() => customError = l.shoppingUnitCustomError);
+                return;
+              }
+              Navigator.pop(
+                context,
+                ShoppingUnitSelection(ShoppingUnit.custom, customLabel: custom),
+              );
+            }
+
             return Padding(
               padding: EdgeInsets.only(
                 bottom: MediaQuery.viewInsetsOf(context).bottom,
@@ -720,77 +736,73 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
                                 key: Key('shopping_unit_option_${unit.name}'),
                                 label: Text(label),
                                 selected: draftUnit == unit,
-                                onSelected: (_) => setSheetState(() {
-                                  draftUnit = unit;
-                                  customError = null;
-                                }),
+                                onSelected: (_) {
+                                  if (unit != ShoppingUnit.custom) {
+                                    Navigator.pop(
+                                      context,
+                                      ShoppingUnitSelection(unit),
+                                    );
+                                    return;
+                                  }
+                                  setSheetState(() {
+                                    draftUnit = unit;
+                                    customError = null;
+                                  });
+                                },
                               );
                             })
                             .toList(growable: false),
                       ),
                       if (draftUnit == ShoppingUnit.custom) ...[
                         const SizedBox(height: 14),
-                        TextField(
-                          key: const Key('shopping_custom_unit_field'),
-                          controller: customController,
-                          autofocus: true,
-                          maxLength: 12,
-                          textInputAction: TextInputAction.done,
-                          decoration: InputDecoration(
-                            hintText: l.shoppingUnitCustomHint,
-                            errorText: customError,
-                            counterText: '',
-                            filled: true,
-                            fillColor: palette.backgroundMuted,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                key: const Key('shopping_custom_unit_field'),
+                                controller: customController,
+                                autofocus: true,
+                                maxLength: 12,
+                                textInputAction: TextInputAction.done,
+                                onChanged: (_) {
+                                  setSheetState(() => customError = null);
+                                },
+                                onSubmitted: (_) => confirmCustomUnit(),
+                                decoration: InputDecoration(
+                                  hintText: l.shoppingUnitCustomHint,
+                                  errorText: customError,
+                                  counterText: '',
+                                  filled: true,
+                                  fillColor: palette.backgroundMuted,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 10),
+                            SizedBox(
+                              height: 56,
+                              child: FilledButton(
+                                key: const Key('shopping_custom_unit_confirm'),
+                                onPressed: canConfirmCustomUnit
+                                    ? confirmCustomUnit
+                                    : null,
+                                child: Text(l.confirm),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                       const SizedBox(height: 18),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: Text(
-                                MaterialLocalizations.of(
-                                  context,
-                                ).cancelButtonLabel,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: FilledButton(
-                              key: const Key('shopping_unit_apply'),
-                              onPressed: () {
-                                final custom = customController.text.trim();
-                                if (draftUnit == ShoppingUnit.custom &&
-                                    custom.isEmpty) {
-                                  setSheetState(
-                                    () =>
-                                        customError = l.shoppingUnitCustomError,
-                                  );
-                                  return;
-                                }
-                                Navigator.pop(
-                                  context,
-                                  ShoppingUnitSelection(
-                                    draftUnit,
-                                    customLabel:
-                                        draftUnit == ShoppingUnit.custom
-                                        ? custom
-                                        : null,
-                                  ),
-                                );
-                              },
-                              child: Text(l.shoppingUnitApply),
-                            ),
-                          ),
-                        ],
+                      OutlinedButton(
+                        key: const Key('shopping_unit_cancel'),
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          MaterialLocalizations.of(context).cancelButtonLabel,
+                        ),
                       ),
                     ],
                   ),
@@ -859,18 +871,23 @@ class _ShoppingItemFormScreenState extends ConsumerState<ShoppingItemFormScreen>
   }) {
     return Scaffold(
       appBar: AppBar(
-        leadingWidth: 52,
-        titleSpacing: 4,
+        toolbarHeight: 52,
+        backgroundColor: palette.background,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           key: const Key('shopping_form_back_button'),
-          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
           onPressed: () => Navigator.maybePop(context),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          icon: Icon(Icons.close, color: palette.textPrimary),
         ),
         title: Text(
           isEditMode ? l.shoppingFormEditTitle : l.shoppingFormAddTitle,
-          style: AppTextStyles.pageTitle.copyWith(color: palette.textPrimary),
+          style: AppTextStyles.headlineMedium.copyWith(
+            color: palette.textPrimary,
+          ),
         ),
+        centerTitle: true,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
@@ -1050,29 +1067,44 @@ class _ShoppingNameSection extends StatelessWidget {
             ),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
-          child: TextFormField(
-            key: const Key('shopping_form_name_field'),
-            controller: controller,
-            focusNode: focusNode,
-            autofocus: autofocus,
-            maxLength: 200,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              counterText: '',
-              hintText: l.shoppingFormNameLabel,
-              hintStyle: AppTextStyles.amountMedium.copyWith(
-                color: palette.textTertiary,
-                fontWeight: FontWeight.w500,
+          child: Row(
+            children: [
+              Icon(
+                Icons.shopping_bag_outlined,
+                key: const Key('shopping_form_name_icon'),
+                size: 20,
+                color: palette.textSecondary,
               ),
-            ),
-            style: AppTextStyles.amountMedium.copyWith(
-              color: palette.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-            textInputAction: TextInputAction.next,
-            onChanged: (value) {
-              if (showError && value.trim().isNotEmpty) onValidNameEntered();
-            },
+              const SizedBox(width: 9),
+              Expanded(
+                child: TextFormField(
+                  key: const Key('shopping_form_name_field'),
+                  controller: controller,
+                  focusNode: focusNode,
+                  autofocus: autofocus,
+                  maxLength: 200,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    counterText: '',
+                    hintText: l.shoppingFormNameLabel,
+                    hintStyle: AppTextStyles.amountMedium.copyWith(
+                      color: palette.textTertiary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  style: AppTextStyles.amountMedium.copyWith(
+                    color: palette.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textInputAction: TextInputAction.next,
+                  onChanged: (value) {
+                    if (showError && value.trim().isNotEmpty) {
+                      onValidNameEntered();
+                    }
+                  },
+                ),
+              ),
+            ],
           ),
         ),
         SizedBox(
@@ -1160,22 +1192,29 @@ class _ShoppingPrimaryCard extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
             child: Row(
               children: [
-                Text(
-                  l.expenseClassification,
-                  style: AppTextStyles.label.copyWith(
-                    color: palette.textSecondary,
-                  ),
+                _ShoppingFieldLabel(
+                  iconKey: const Key('shopping_form_ledger_icon'),
+                  icon: Icons.account_balance_wallet_outlined,
+                  label: l.expenseClassification,
+                  palette: palette,
+                  width: 78,
                 ),
-                const Spacer(),
-                LedgerTypeSelector(
-                  key: const Key('shopping_form_ledger_selector'),
-                  selected: ledgerType,
-                  onChanged: onLedgerChanged,
-                  dailyLabel: l.shoppingFormLedgerDaily,
-                  joyLabel: l.shoppingFormLedgerJoy,
-                  showIcons: false,
-                  chipMinHeight: 44,
-                  chipMinWidth: 84,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: LedgerTypeSelector(
+                      key: const Key('shopping_form_ledger_selector'),
+                      selected: ledgerType,
+                      onChanged: onLedgerChanged,
+                      dailyLabel: l.shoppingFormLedgerDaily,
+                      joyLabel: l.shoppingFormLedgerJoy,
+                      showIcons: false,
+                      chipMinHeight: 44,
+                      chipMinWidth: 84,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -1185,23 +1224,30 @@ class _ShoppingPrimaryCard extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(14, 10, 14, 6),
             child: Row(
               children: [
-                Text(
-                  l.shoppingFormListTypeLabel,
-                  style: AppTextStyles.label.copyWith(
-                    color: palette.textSecondary,
-                  ),
+                _ShoppingFieldLabel(
+                  iconKey: const Key('shopping_form_list_type_icon'),
+                  icon: Icons.list_alt_outlined,
+                  label: l.shoppingFormListTypeLabel,
+                  palette: palette,
+                  width: 78,
                 ),
-                const Spacer(),
-                ListTypeSelector(
-                  key: const Key('shopping_form_list_type_selector'),
-                  selected: listType == 'public' ? 'public' : 'private',
-                  onChanged: onListTypeChanged,
-                  publicLabel: l.shoppingSegmentPublic,
-                  privateLabel: l.shoppingSegmentPrivate,
-                  enabled: !isEditMode,
-                  showIcons: false,
-                  chipMinHeight: 40,
-                  chipMinWidth: 84,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: ListTypeSelector(
+                      key: const Key('shopping_form_list_type_selector'),
+                      selected: listType == 'public' ? 'public' : 'private',
+                      onChanged: onListTypeChanged,
+                      publicLabel: l.shoppingSegmentPublic,
+                      privateLabel: l.shoppingSegmentPrivate,
+                      enabled: !isEditMode,
+                      showIcons: false,
+                      chipMinHeight: 40,
+                      chipMinWidth: 84,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -1266,16 +1312,13 @@ class _ShoppingQuantitySection extends StatelessWidget {
         children: [
           Row(
             children: [
-              SizedBox(
-                width: 68,
-                child: Text(
-                  l.shoppingFormQuantityLabel,
-                  style: AppTextStyles.label.copyWith(
-                    color: palette.textSecondary,
-                  ),
-                ),
+              _ShoppingFieldLabel(
+                iconKey: const Key('shopping_form_quantity_icon'),
+                icon: Icons.numbers_rounded,
+                label: l.shoppingFormQuantityLabel,
+                palette: palette,
+                width: 84,
               ),
-              const SizedBox(width: 10),
               Expanded(
                 child: Row(
                   children: [
@@ -1536,11 +1579,11 @@ class _ShoppingSecondaryCard extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 child: Row(
                   children: [
-                    Text(
-                      l.shoppingFormCategoryLabel,
-                      style: AppTextStyles.label.copyWith(
-                        color: palette.textSecondary,
-                      ),
+                    _ShoppingFieldLabel(
+                      iconKey: const Key('shopping_form_category_icon'),
+                      icon: Icons.category_outlined,
+                      label: l.shoppingFormCategoryLabel,
+                      palette: palette,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -1575,11 +1618,11 @@ class _ShoppingSecondaryCard extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 14),
               child: Row(
                 children: [
-                  Text(
-                    l.shoppingFormPrice,
-                    style: AppTextStyles.label.copyWith(
-                      color: palette.textSecondary,
-                    ),
+                  _ShoppingFieldLabel(
+                    iconKey: const Key('shopping_form_price_icon'),
+                    icon: Icons.payments_outlined,
+                    label: l.shoppingFormPrice,
+                    palette: palette,
                   ),
                   const SizedBox(width: 10),
                   Text(
@@ -1624,14 +1667,12 @@ class _ShoppingSecondaryCard extends ConsumerWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
-                  child: SizedBox(
-                    width: 63,
-                    child: Text(
-                      l.shoppingFormNoteLabel,
-                      style: AppTextStyles.label.copyWith(
-                        color: palette.textSecondary,
-                      ),
-                    ),
+                  child: _ShoppingFieldLabel(
+                    iconKey: const Key('shopping_form_note_icon'),
+                    icon: Icons.description_outlined,
+                    label: l.shoppingFormNoteLabel,
+                    palette: palette,
+                    width: 78,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -1673,6 +1714,50 @@ class _ShoppingSecondaryCard extends ConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+class _ShoppingFieldLabel extends StatelessWidget {
+  const _ShoppingFieldLabel({
+    required this.iconKey,
+    required this.icon,
+    required this.label,
+    required this.palette,
+    this.width,
+  });
+
+  final Key iconKey;
+  final IconData icon;
+  final String label;
+  final AppPalette palette;
+  final double? width;
+
+  @override
+  Widget build(BuildContext context) {
+    final labelText = Text(
+      label,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: AppTextStyles.label.copyWith(color: palette.textSecondary),
+    );
+    final content = Row(
+      mainAxisSize: width == null ? MainAxisSize.min : MainAxisSize.max,
+      children: [
+        SizedBox(
+          width: 20,
+          child: Icon(
+            icon,
+            key: iconKey,
+            size: 20,
+            color: palette.textSecondary,
+          ),
+        ),
+        const SizedBox(width: 9),
+        if (width == null) labelText else Expanded(child: labelText),
+      ],
+    );
+    if (width == null) return content;
+    return SizedBox(width: width, child: content);
   }
 }
 

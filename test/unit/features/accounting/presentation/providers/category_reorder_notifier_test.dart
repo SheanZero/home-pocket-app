@@ -125,6 +125,41 @@ void main() {
       expect(s.isDirty, isTrue);
     });
 
+    test('removeHidden removes an L1 branch without marking order dirty', () {
+      notifier().enterEditing(
+        l1: [_cat('food'), _cat('daily')],
+        l2ByParent: {
+          'food': [_cat('cafe', parent: 'food', level: 2)],
+        },
+      );
+
+      notifier().removeHidden('food');
+
+      expect(state().l1.map((category) => category.id), ['daily']);
+      expect(state().l2ByParent, isNot(contains('food')));
+      expect(state().isDirty, isFalse);
+    });
+
+    test('removeHidden removes only the requested L2 category', () {
+      notifier().enterEditing(
+        l1: [_cat('food')],
+        l2ByParent: {
+          'food': [
+            _cat('cafe', parent: 'food', level: 2),
+            _cat('snack', parent: 'food', level: 2),
+          ],
+        },
+      );
+
+      notifier().removeHidden('cafe');
+
+      expect(state().l1.map((category) => category.id), ['food']);
+      expect(state().l2ByParent['food']!.map((category) => category.id), [
+        'snack',
+      ]);
+      expect(state().isDirty, isFalse);
+    });
+
     test('save writes flat index map and returns to idle', () async {
       notifier().enterEditing(
         l1: [_cat('a'), _cat('b')],

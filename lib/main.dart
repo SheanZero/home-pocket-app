@@ -10,6 +10,7 @@ import 'core/app_gate_transition.dart';
 import 'core/initialization/app_initializer.dart';
 import 'core/initialization/init_failure_screen.dart';
 import 'core/initialization/init_result.dart';
+import 'core/licenses/app_license_registry.dart';
 import 'core/state/data_reset_signal.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/text_scale_clamp.dart';
@@ -69,6 +70,7 @@ const _useInMemoryDatabase = false;
 // Tests exercise the branch logic through bootWithInitializerForTesting below.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  registerBundledThirdPartyLicenses();
   await _boot();
 }
 

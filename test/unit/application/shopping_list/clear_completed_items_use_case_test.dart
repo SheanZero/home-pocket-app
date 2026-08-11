@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/shopping_item_change_tracker.dart';
+import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/shopping_list/clear_completed_items_use_case.dart';
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
 import 'package:home_pocket/features/shopping_list/domain/repositories/shopping_item_repository.dart';
@@ -10,6 +11,8 @@ class _MockShoppingItemRepository extends Mock
 
 class _MockDurableShoppingItemRepository extends Mock
     implements DurableFamilySyncShoppingItemRepository {}
+
+class _MockSyncEngine extends Mock implements SyncEngine {}
 
 void main() {
   late _MockShoppingItemRepository mockRepo;
@@ -60,9 +63,7 @@ void main() {
     when(
       () => mockRepo.softDeleteAllCompleted('private'),
     ).thenAnswer((_) async {});
-    when(
-      () => mockRepo.watchByListType('public'),
-    ).thenAnswer(
+    when(() => mockRepo.watchByListType('public')).thenAnswer(
       (_) => Stream.value([completedPublicItem1, completedPublicItem2]),
     );
     when(
@@ -105,6 +106,32 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       verify(() => mockRepo.softDeleteAllCompleted('private')).called(1);
+    });
+
+    test('durable private clear stays local-only', () async {
+      final durableRepo = _MockDurableShoppingItemRepository();
+      final syncEngine = _MockSyncEngine();
+      var resolverCalled = false;
+      when(
+        () => durableRepo.softDeleteAllCompletedWithFamilySyncOutbox(
+          'private',
+          originDeviceId: '',
+        ),
+      ).thenAnswer((_) async => [completedPrivateItem]);
+      final privateUseCase = ClearCompletedItemsUseCase(
+        shoppingItemRepository: durableRepo,
+        syncEngine: syncEngine,
+        deviceIdResolver: () async {
+          resolverCalled = true;
+          throw StateError('private clears must not read sync identity');
+        },
+      );
+
+      final result = await privateUseCase.execute('private');
+
+      expect(result.isSuccess, isTrue);
+      expect(resolverCalled, isFalse);
+      verifyNever(() => syncEngine.onTransactionChanged());
     });
 
     test('all clears completed items from both persisted list types', () async {

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/shopping_item_change_tracker.dart';
+import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/shopping_list/create_shopping_item_use_case.dart';
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_item.dart';
 import 'package:home_pocket/features/shopping_list/domain/models/shopping_unit.dart';
@@ -9,6 +10,11 @@ import 'package:mocktail/mocktail.dart';
 
 class _MockShoppingItemRepository extends Mock
     implements ShoppingItemRepository {}
+
+class _MockDurableShoppingItemRepository extends Mock
+    implements DurableFamilySyncShoppingItemRepository {}
+
+class _MockSyncEngine extends Mock implements SyncEngine {}
 
 class _RecordingUnitUsageRepository implements ShoppingUnitUsageRepository {
   final selections = <ShoppingUnitSelection>[];
@@ -62,6 +68,41 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       expect(tracker.pendingCount, 0);
+    });
+
+    test('durable private create stays local-only', () async {
+      final durableRepo = _MockDurableShoppingItemRepository();
+      final syncEngine = _MockSyncEngine();
+      var resolverCalled = false;
+      when(
+        () => durableRepo.insertWithFamilySyncOutbox(
+          any(),
+          originDeviceId: 'device-1',
+        ),
+      ).thenAnswer(
+        (invocation) async =>
+            invocation.positionalArguments.first as ShoppingItem,
+      );
+      final privateUseCase = CreateShoppingItemUseCase(
+        shoppingItemRepository: durableRepo,
+        syncEngine: syncEngine,
+        deviceIdResolver: () async {
+          resolverCalled = true;
+          throw StateError('private creates must not read sync identity');
+        },
+      );
+
+      final result = await privateUseCase.execute(
+        const CreateShoppingItemParams(
+          deviceId: 'device-1',
+          listType: 'private',
+          name: 'Secret Gift',
+        ),
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(resolverCalled, isFalse);
+      verifyNever(() => syncEngine.onTransactionChanged());
     });
 
     test('public create enqueues tracker op (SC-1, SYNC-02)', () async {

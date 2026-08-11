@@ -24,10 +24,9 @@
 ///     (the edited row still saves EntrySource.voice) until the amount is cleared.
 ///   - item 4b: a reset restores `_lastFillWasVoice` from the pre-speech snapshot
 ///     (a pure-manual slate → a later keypad save is manual again).
-///   - item 4c: the PTT-commit keypad mirror writes the booked JPY figure into
-///     the display when the form's foreign triple was ALREADY written, WITHOUT
-///     clobbering that triple (headline shows booked JPY; the save carries the
-///     foreign triple, D-4).
+///   - item 4c: the PTT-commit keypad mirror switches the display to the spoken
+///     foreign currency and original amount when the form's foreign triple was
+///     written, while the save keeps the converted JPY + foreign triple.
 library;
 
 import 'package:flutter/material.dart';
@@ -51,8 +50,10 @@ import 'package:home_pocket/features/accounting/presentation/providers/repositor
         createTransactionUseCaseProvider,
         merchantCategoryLearningServiceProvider,
         parseVoiceInputUseCaseProvider;
+import 'package:home_pocket/features/accounting/presentation/screens/manual_one_step_foreign_card.dart';
 import 'package:home_pocket/features/accounting/presentation/screens/manual_one_step_screen.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_display.dart';
+import 'package:home_pocket/features/accounting/presentation/widgets/currency_linked_edit_fields.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/smart_keyboard.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/transaction_details_form.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/unified_voice_entry_dock.dart';
@@ -359,7 +360,7 @@ void main() {
     _CapturingSpeechService speech,
   ) async {
     speech.startedLocaleId = null;
-    speech.emitStatus('done');
+    voiceDock(tester).onCoreHoldEnd();
     await tester.pump();
     await tester.pump();
   }
@@ -374,7 +375,7 @@ void main() {
     await tester.tap(micBarFinder);
     await tester.pump();
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('unified-voice-core')));
+    voiceDock(tester).onCoreHoldStart();
     await tester.pump();
     await tester.pump();
   }
@@ -431,9 +432,9 @@ void main() {
         speech.emitFinal('500円');
         await tester.pump();
         await tester.pump();
+        await finishVoiceUtterance(tester, speech);
         expect(displayedAmount(tester), '500');
 
-        await finishVoiceUtterance(tester, speech);
         expect(voiceDock(tester).state, UnifiedVoiceEntryState.review);
         await switchVoiceDockToKeyboard(tester);
 
@@ -618,9 +619,9 @@ void main() {
     speech.emitFinal('500円');
     await tester.pump();
     await tester.pump();
+    await finishVoiceUtterance(tester, speech);
     expect(displayedAmount(tester), '500');
 
-    await finishVoiceUtterance(tester, speech);
     expect(voiceDock(tester).state, UnifiedVoiceEntryState.review);
     await switchVoiceDockToKeyboard(tester);
     await tapKey(tester, '1');
@@ -677,13 +678,13 @@ void main() {
       speech.emitFinal('500円');
       await tester.pump();
       await tester.pump();
+      await finishVoiceUtterance(tester, speech);
       expect(displayedAmount(tester), '500');
 
-      await finishVoiceUtterance(tester, speech);
       expect(voiceDock(tester).state, UnifiedVoiceEntryState.review);
 
       // Review mic → restore the pre-speech snapshot and re-record.
-      await tester.tap(find.byKey(const ValueKey('unified-voice-core')));
+      voiceDock(tester).onCoreHoldStart();
       await tester.pump();
       await tester.pump();
       expect(
@@ -768,8 +769,8 @@ void main() {
       await tester.pump();
       expect(
         form.currentAmount,
-        500,
-        reason: 'precondition: voice dirtied JPY',
+        1500,
+        reason: 'press-and-hold does not mutate the form before release',
       );
 
       await switchVoiceDockToKeyboard(tester);
@@ -798,8 +799,8 @@ void main() {
   );
 
   testWidgets(
-    '4c: the PTT-commit mirror writes booked JPY into the display WITHOUT '
-    'clobbering the form foreign triple (D-4)',
+    '4c: explicit foreign voice input switches the display to the spoken '
+    'currency and original amount without clobbering the form triple',
     (tester) async {
       tall(tester);
       when(
@@ -808,11 +809,11 @@ void main() {
 
       final speech = _CapturingSpeechService();
       final parse = _FakeParseVoiceInputUseCase(const {
-        '10 dollars coffee': VoiceParseResult(
-          rawText: '10 dollars coffee',
-          amount: 10,
-          merchantName: 'Coffee',
-          detectedCurrency: 'USD',
+        'buy phone for 5000 CNY': VoiceParseResult(
+          rawText: 'buy phone for 5000 CNY',
+          amount: 5000,
+          merchantName: 'Phone shop',
+          detectedCurrency: 'CNY',
           categoryMatch: CategoryMatchResult(
             categoryId: 'convenience',
             confidence: 0.91,
@@ -831,8 +832,8 @@ void main() {
           parse: parse,
           // A resolvable rate so the voice fill writes the foreign triple.
           rate: RateFetched(
-            rate: '150.0',
-            currency: 'USD',
+            rate: '23.52388',
+            currency: 'CNY',
             rateDate: DateTime(2026, 7, 7),
             source: 'test',
           ),
@@ -841,43 +842,55 @@ void main() {
       await tester.pumpAndSettle();
 
       await openVoiceDockAndStart(tester);
-      speech.emitFinal('10 dollars coffee');
+      speech.emitFinal('buy phone for 5000 CNY');
       await tester.pump();
       await tester.pump();
       await tester.pump();
+      await finishVoiceUtterance(tester, speech);
 
       final form = formState(tester);
       // The voice fill wrote the foreign triple onto the form.
       expect(
         form.currentOriginalCurrency,
-        'USD',
+        'CNY',
         reason: 'the foreign triple was written before the mirror ran',
       );
       expect(
         form.currentOriginalAmount,
-        1000,
-        reason: '10 USD → 1000 minor units',
+        500000,
+        reason: '5,000 CNY → 500,000 minor units',
       );
-      // The mirror wrote the booked JPY figure into the keypad/AmountDisplay
-      // (host stays JPY-native, headline shows booked JPY, D-4) WITHOUT
-      // re-syncing the form (the triple survives).
+      expect(
+        form.currentAmount,
+        117619,
+        reason: '5,000 CNY converts to 117,619 JPY',
+      );
       expect(
         displayedAmount(tester),
-        form.currentAmount.toString(),
-        reason: 'the display mirrors the booked JPY from the form',
+        '5000',
+        reason: 'the headline keeps the amount the user actually spoke',
       );
       expect(
         displayedCurrency(tester),
-        'JPY',
-        reason: 'the keypad stays on the JPY native path (D-4)',
+        'CNY',
+        reason: 'an explicit foreign currency switches the active currency',
       );
       expect(
+        find.byType(AddScreenForeignCard),
+        findsOneWidget,
+        reason: 'the exchange-rate card is shown for the spoken currency',
+      );
+      final rateCard = tester.widget<CurrencyLinkedEditFields>(
+        find.byType(CurrencyLinkedEditFields),
+      );
+      expect(rateCard.originalCurrency, 'CNY');
+      expect(rateCard.originalAmount, 500000);
+      expect(rateCard.appliedRate, '23.52388');
+      expect(
         form.currentOriginalCurrency,
-        'USD',
+        'CNY',
         reason: 'the mirror did not clobber the foreign triple',
       );
-
-      await finishVoiceUtterance(tester, speech);
       expect(voiceDock(tester).state, UnifiedVoiceEntryState.review);
       await switchVoiceDockToKeyboard(tester);
       // Clear the floating conversion-notice snackbar so it cannot obscure the
@@ -895,11 +908,70 @@ void main() {
         () => mockCreateUseCase.execute(captureAny()),
       ).captured;
       expect(captured.length, 1);
+      final saved = captured.first as CreateTransactionParams;
       expect(
-        (captured.first as CreateTransactionParams).entrySource,
+        saved.entrySource,
         EntrySource.voice,
         reason: 'a PTT-filled row stamps voice provenance',
       );
+      expect(saved.amount, 117619);
+      expect(saved.originalCurrency, 'CNY');
+      expect(saved.originalAmount, 500000);
+      expect(saved.appliedRate, '23.52388');
+    },
+  );
+
+  testWidgets(
+    'foreign conversion Undo returns the headline to JPY and removes the '
+    'exchange-rate card',
+    (tester) async {
+      tall(tester);
+      final speech = _CapturingSpeechService();
+      final parse = _FakeParseVoiceInputUseCase(const {
+        '5000 CNY': VoiceParseResult(
+          rawText: '5000 CNY',
+          amount: 5000,
+          detectedCurrency: 'CNY',
+        ),
+      });
+
+      await tester.pumpWidget(
+        pumpManual(
+          categoryRepo: _FakeCategoryRepository(_fakeCategories),
+          initialCategory: _l2Category,
+          initialParentCategory: _l1Category,
+          speech: speech,
+          parse: parse,
+          rate: RateFetched(
+            rate: '23.52388',
+            currency: 'CNY',
+            rateDate: DateTime(2026, 7, 7),
+            source: 'test',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await openVoiceDockAndStart(tester);
+      speech.emitFinal('5000 CNY');
+      await tester.pump();
+      await tester.pump();
+      await finishVoiceUtterance(tester, speech);
+
+      expect(displayedCurrency(tester), 'CNY');
+      expect(find.byType(AddScreenForeignCard), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('feedback-toast-action')));
+      await tester.pump();
+
+      final form = formState(tester);
+      expect(displayedCurrency(tester), 'JPY');
+      expect(displayedAmount(tester), '5000');
+      expect(find.byType(AddScreenForeignCard), findsNothing);
+      expect(form.currentAmount, 5000);
+      expect(form.currentOriginalCurrency, isNull);
+      expect(form.currentOriginalAmount, isNull);
+      expect(form.currentAppliedRate, isNull);
     },
   );
 }

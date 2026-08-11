@@ -47,7 +47,9 @@ class CreateShoppingItemParams {
 class CreateShoppingItemUseCase {
   CreateShoppingItemUseCase({
     required ShoppingItemRepository shoppingItemRepository,
-    this._changeTracker, this._syncEngine, this._deviceIdResolver,
+    this._changeTracker,
+    this._syncEngine,
+    this._deviceIdResolver,
     this._unitUsageRepository,
   }) : _repo = shoppingItemRepository;
 
@@ -100,7 +102,9 @@ class CreateShoppingItemUseCase {
     final durable = _repo is DurableFamilySyncShoppingItemRepository
         ? _repo
         : null;
-    final originDeviceId = await _deviceIdResolver?.call() ?? params.deviceId;
+    final originDeviceId = item.listType == 'public'
+        ? await _deviceIdResolver?.call() ?? params.deviceId
+        : params.deviceId;
     final persisted = durable != null
         ? await durable.insertWithFamilySyncOutbox(
             item,
@@ -132,8 +136,11 @@ class CreateShoppingItemUseCase {
       );
     }
 
-    // 5. Fire-and-forget sync trigger — SyncEngine handles debounce and validity.
-    _syncEngine?.onTransactionChanged();
+    // 5. Private items are local-only. Public changes schedule family sync;
+    //    SyncEngine handles debounce and group validity.
+    if (item.listType == 'public') {
+      _syncEngine?.onTransactionChanged();
+    }
 
     return Result.success(persisted);
   }

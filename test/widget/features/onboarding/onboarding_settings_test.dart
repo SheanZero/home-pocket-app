@@ -166,6 +166,7 @@ Widget _host({
   BiometricAvailability biometricAvailability = BiometricAvailability.faceId,
   BiometricService? biometricService,
   List<NavigatorObserver> navigatorObservers = const [],
+  Locale locale = const Locale('ja'),
 }) {
   return ProviderScope(
     overrides: [
@@ -178,7 +179,7 @@ Widget _host({
       ...overrides,
     ],
     child: MaterialApp(
-      locale: const Locale('ja'),
+      locale: locale,
       navigatorObservers: navigatorObservers,
       localizationsDelegates: const [
         S.delegate,
@@ -235,7 +236,8 @@ void main() {
         );
         expect(avatar.imagePath, isNull);
         expect(find.text('画像を変更'), findsOneWidget);
-        expect(find.text('お名前・必須'), findsOneWidget);
+        expect(find.text('お名前'), findsOneWidget);
+        expect(find.text('必須'), findsOneWidget);
         expect(find.byType(TextField), findsOneWidget); // inline name field
         expect(
           find.byKey(const ValueKey('onboarding-language-row')),
@@ -256,6 +258,18 @@ void main() {
         expect(find.widgetWithText(TextButton, 'この設定ではじめる'), findsOneWidget);
       },
     );
+
+    testWidgets('keeps a clear gap between the name label and required text', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_host(locale: const Locale('zh')));
+      await tester.pumpAndSettle();
+
+      final nameRect = tester.getRect(find.text('姓名'));
+      final requiredRect = tester.getRect(find.text('必填'));
+
+      expect(requiredRect.left - nameRect.right, greaterThanOrEqualTo(8));
+    });
   });
 
   group('OnboardingSettingsScreen — avatar picker result', () {

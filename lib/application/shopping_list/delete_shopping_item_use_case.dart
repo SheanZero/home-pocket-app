@@ -10,7 +10,9 @@ import '../family_sync/sync_engine.dart';
 class DeleteShoppingItemUseCase {
   DeleteShoppingItemUseCase({
     required ShoppingItemRepository shoppingItemRepository,
-    this._changeTracker, this._syncEngine, this._deviceIdResolver,
+    this._changeTracker,
+    this._syncEngine,
+    this._deviceIdResolver,
   }) : _repo = shoppingItemRepository;
 
   final ShoppingItemRepository _repo;
@@ -36,7 +38,9 @@ class DeleteShoppingItemUseCase {
     final durable = _repo is DurableFamilySyncShoppingItemRepository
         ? _repo
         : null;
-    final originDeviceId = await _deviceIdResolver?.call() ?? existing.deviceId;
+    final originDeviceId = existing.listType == 'public'
+        ? await _deviceIdResolver?.call() ?? existing.deviceId
+        : existing.deviceId;
     if (durable != null) {
       await durable.softDeleteWithFamilySyncOutbox(
         itemId,
@@ -52,8 +56,10 @@ class DeleteShoppingItemUseCase {
       _changeTracker?.trackDelete(itemId: itemId);
     }
 
-    // 5. Fire-and-forget sync trigger
-    _syncEngine?.onTransactionChanged();
+    // 5. Private tombstones remain local and do not schedule family sync.
+    if (existing.listType == 'public') {
+      _syncEngine?.onTransactionChanged();
+    }
 
     return Result.success(null);
   }

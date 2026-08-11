@@ -362,6 +362,32 @@ void main() {
       );
 
       expect(find.text('Add item'), findsOneWidget);
+      expect(find.byIcon(Icons.close), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_back_ios_new_rounded), findsNothing);
+    });
+
+    testWidgets('form field labels use accounting-style semantic icons', (
+      tester,
+    ) async {
+      await _pumpForm(
+        tester,
+        createUseCase: mockCreate,
+        updateUseCase: mockUpdate,
+        deviceIdentityRepo: mockDeviceIdentityRepo,
+      );
+      await tester.pumpAndSettle();
+
+      for (final key in [
+        'shopping_form_name_icon',
+        'shopping_form_quantity_icon',
+        'shopping_form_ledger_icon',
+        'shopping_form_list_type_icon',
+        'shopping_form_category_icon',
+        'shopping_form_price_icon',
+        'shopping_form_note_icon',
+      ]) {
+        expect(find.byKey(Key(key)), findsOneWidget);
+      }
     });
 
     testWidgets(
@@ -840,7 +866,55 @@ void main() {
       expect(params.unit, ShoppingUnit.gram);
     });
 
-    testWidgets('custom unit is entered inside the unit picker', (
+    testWidgets(
+      'tapping a preset unit immediately selects it and closes picker',
+      (tester) async {
+        await _pumpForm(
+          tester,
+          createUseCase: mockCreate,
+          updateUseCase: mockUpdate,
+          deviceIdentityRepo: mockDeviceIdentityRepo,
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('shopping_form_unit_select')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('shopping_unit_apply')), findsNothing);
+        expect(find.byKey(const Key('shopping_unit_cancel')), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('shopping_unit_option_gram')));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const Key('shopping_unit_option_gram')),
+          findsNothing,
+        );
+        expect(find.text('g'), findsOneWidget);
+      },
+    );
+
+    testWidgets('cancel closes the unit picker without changing the unit', (
+      tester,
+    ) async {
+      await _pumpForm(
+        tester,
+        createUseCase: mockCreate,
+        updateUseCase: mockUpdate,
+        deviceIdentityRepo: mockDeviceIdentityRepo,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('shopping_form_unit_select')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('shopping_unit_cancel')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('shopping_unit_option_piece')), findsNothing);
+      expect(find.text('pc'), findsOneWidget);
+    });
+
+    testWidgets('custom unit is confirmed from the keyboard done action', (
       tester,
     ) async {
       await _pumpForm(
@@ -859,9 +933,43 @@ void main() {
         find.byKey(const Key('shopping_custom_unit_field')),
         'cup',
       );
-      await tester.tap(find.byKey(const Key('shopping_unit_apply')));
+      await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pumpAndSettle();
 
+      expect(find.text('cup'), findsOneWidget);
+    });
+
+    testWidgets('custom unit confirm button applies and closes the picker', (
+      tester,
+    ) async {
+      await _pumpForm(
+        tester,
+        createUseCase: mockCreate,
+        updateUseCase: mockUpdate,
+        deviceIdentityRepo: mockDeviceIdentityRepo,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('shopping_form_unit_select')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('shopping_unit_option_custom')));
+      await tester.pumpAndSettle();
+
+      final confirm = find.byKey(const Key('shopping_custom_unit_confirm'));
+      expect(confirm, findsOneWidget);
+      expect(tester.widget<FilledButton>(confirm).onPressed, isNull);
+
+      await tester.enterText(
+        find.byKey(const Key('shopping_custom_unit_field')),
+        'cup',
+      );
+      await tester.pump();
+      expect(tester.widget<FilledButton>(confirm).onPressed, isNotNull);
+
+      await tester.tap(confirm);
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('shopping_custom_unit_field')), findsNothing);
       expect(find.text('cup'), findsOneWidget);
     });
   });

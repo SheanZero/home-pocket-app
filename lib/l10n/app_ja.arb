@@ -1243,6 +1243,31 @@
   "@dragToReorder": {
     "description": "Hint banner shown in category reorder edit mode"
   },
+  "hideCategoryTooltip": "分類を非表示",
+  "@hideCategoryTooltip": {
+    "description": "Tooltip for the soft-delete control in category reorder mode"
+  },
+  "hideCategoryTitle": "「{categoryName}」を非表示にしますか？",
+  "@hideCategoryTitle": {
+    "description": "Confirmation title before hiding a category",
+    "placeholders": {"categoryName": {"type": "String"}}
+  },
+  "hideL1CategoryBody": "この分類と配下の分類は、分類選択と音声入力に表示されなくなります。過去の記録や家族同期の記録には影響しません。",
+  "@hideL1CategoryBody": {
+    "description": "Confirmation explanation before hiding an L1 category branch"
+  },
+  "hideL2CategoryBody": "この分類は、分類選択と音声入力に表示されなくなります。過去の記録や家族同期の記録には影響しません。",
+  "@hideL2CategoryBody": {
+    "description": "Confirmation explanation before hiding an L2 category"
+  },
+  "categoryHidden": "分類を非表示にしました",
+  "@categoryHidden": {
+    "description": "Success feedback after locally hiding a category"
+  },
+  "categoryHideFailed": "分類を非表示にできませんでした。再試行してください",
+  "@categoryHideFailed": {
+    "description": "Error feedback after locally hiding a category fails"
+  },
   "orderUpdated": "順序を更新しました",
   "@orderUpdated": {
     "description": "SnackBar shown after successfully saving category reorder"
@@ -2924,6 +2949,10 @@
   "@shoppingToggleComplete": {
     "description": "Semantics label for the leading circular completion toggle on a shopping item tile (EC2)"
   },
+  "shoppingToggleFailed": "完了状態を更新できませんでした。もう一度お試しください。",
+  "@shoppingToggleFailed": {
+    "description": "Error shown when a shopping item's completed state cannot be persisted"
+  },
   "shoppingEnterReorderMode": "並べ替え",
   "@shoppingEnterReorderMode": {
     "description": "Semantics/tooltip for the filter-bar reorder entry (≡) that enters manual drag-reorder mode (EC2 D-2)"
@@ -3178,7 +3207,6 @@
   "shoppingUnitCustom": "カスタム単位",
   "shoppingUnitCustomHint": "例：カップ",
   "shoppingUnitCustomError": "1〜12文字で入力してください",
-  "shoppingUnitApply": "適用",
   "shoppingUnitPiece": "個",
   "shoppingUnitGram": "g",
   "shoppingUnitKilogram": "kg",
@@ -3281,7 +3309,7 @@
   },
   "entryVoiceLaunchHelp": "金額・店名・カテゴリ・日付をまとめて話せます",
   "entryVoicePrivacy": "デバイス内でのみ処理",
-  "entryVoiceIdleStatus": "音声入力を待機中",
+  "entryVoiceIdleStatus": "いつでもどうぞ",
   "entryVoiceListeningStatus": "聞いています",
   "entryVoiceProcessingStatus": "内容を整理しています",
   "entryVoiceReviewStatus": "明細に入力しました",
@@ -3289,15 +3317,15 @@
   "entryVoiceIdleTranscript": "次の内容を話せます",
   "entryVoiceListeningPlaceholder": "“森のカフェ、ランチ、2,380円…”",
   "entryVoiceProcessingPlaceholder": "“森のカフェ、ランチ、2,380円”",
-  "entryVoiceIdleHelp": "マイクをタップして音声記録を開始",
-  "entryVoiceListeningHelp": "話し終えると自動認識。タップですぐ完了",
+  "entryVoiceIdleHelp": "マイクを長押しして明細を話し、終わったら指を離してください",
+  "entryVoiceListeningHelp": "押したまま話して、終わったら指を離してください",
   "entryVoiceProcessingHelp": "認識結果を同じフォームに入力しています",
-  "entryVoiceReviewHelp": "マイクで録音し直すか、修正してそのまま記録",
+  "entryVoiceReviewHelp": "もう一度話すときは、マイクを長押しして録音し直せます",
   "entryVoiceUnavailableHelp": "システム設定でマイクを許可するか、そのまま手動入力を続けられます",
   "entryVoiceKeyboardAction": "キーボード入力に切り替える",
-  "entryVoiceStartAction": "音声入力を開始",
-  "entryVoiceStopAction": "すぐに終了して解析",
-  "entryVoiceRerecordAction": "録音し直す",
+  "entryVoiceStartAction": "長押しして音声入力を開始",
+  "entryVoiceStopAction": "指を離して終了・解析",
+  "entryVoiceRerecordAction": "長押しして録音し直す",
   "entryVoiceSourceBadge": "音声入力",
   "entryCategorySelectRequired": "選択が必要",
   "entryContinuousReturnHome": "記録後にホームへ戻る",
@@ -3683,9 +3711,13 @@
   "@onboardingSetupTitle": {
     "description": "Compact centered title for the onboarding setup screen"
   },
-  "onboardingRowName": "お名前・必須",
+  "onboardingRowName": "お名前",
   "@onboardingRowName": {
-    "description": "Design-04 setup screen: inline name field label"
+    "description": "Design-04 setup screen: inline name field label, without the required marker"
+  },
+  "onboardingRequired": "必須",
+  "@onboardingRequired": {
+    "description": "Required marker shown beside the onboarding name field label"
   },
   "onboardingRowLanguage": "表示言語",
   "@onboardingRowLanguage": {

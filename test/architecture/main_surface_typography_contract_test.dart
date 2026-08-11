@@ -94,7 +94,6 @@ void main() {
         'function shoppingUnitSheet()',
         'data-shopping-unit-option',
         'data-shopping-custom-unit',
-        'data-action="shopping-unit-apply"',
         'data-shopping-form-ledger="daily"',
         'data-shopping-form-list-type="public"',
         'shopping-type-row',
@@ -123,6 +122,13 @@ void main() {
         );
       }
 
+      expect(
+        source,
+        isNot(contains('data-action="shopping-unit-apply"')),
+        reason:
+            '${_mockupFiles.single} must apply preset units immediately; '
+            'the retired apply button cannot remain in the unit sheet.',
+      );
       expect(
         source,
         isNot(contains('data-action="shopping-quantity-decrease"')),

@@ -174,17 +174,21 @@ class CategoryRecognizer {
   /// to the first L2 child by `sortOrder` (D-03 safety net).
   Future<String?> _ensureL2(String categoryId) async {
     final cat = await _categoryRepository.findById(categoryId);
-    if (cat == null) return null;
+    if (cat == null || cat.isArchived) return null;
     if (cat.level == 2) return cat.id;
 
     // L1 case — synthesize the conventional `_other` id, honoring overrides.
     final otherId = kCategoryOtherIdOverrides[cat.id] ?? '${cat.id}_other';
     final otherCat = await _categoryRepository.findById(otherId);
-    if (otherCat != null && otherCat.level == 2) return otherCat.id;
+    if (otherCat != null && otherCat.level == 2 && !otherCat.isArchived) {
+      return otherCat.id;
+    }
 
     // Safety net — first L2 child by sortOrder when the convention fails.
     final children = await _categoryRepository.findByParent(cat.id);
-    if (children.isNotEmpty) return children.first.id;
+    for (final child in children) {
+      if (child.level == 2 && !child.isArchived) return child.id;
+    }
     return null;
   }
 

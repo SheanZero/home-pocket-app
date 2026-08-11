@@ -997,6 +997,27 @@ class SZh extends S {
   String get dragToReorder => '拖拽重排';
 
   @override
+  String get hideCategoryTooltip => '隐藏分类';
+
+  @override
+  String hideCategoryTitle(String categoryName) {
+    return '隐藏“$categoryName”？';
+  }
+
+  @override
+  String get hideL1CategoryBody =>
+      '此分类及其下的二级分类将不再出现在分类选择和语音记账中。历史账目及家庭同步账目不受影响。';
+
+  @override
+  String get hideL2CategoryBody => '此分类将不再出现在分类选择和语音记账中。历史账目及家庭同步账目不受影响。';
+
+  @override
+  String get categoryHidden => '分类已隐藏';
+
+  @override
+  String get categoryHideFailed => '隐藏失败，请重试';
+
+  @override
   String get orderUpdated => '顺序已更新';
 
   @override
@@ -2437,6 +2458,9 @@ class SZh extends S {
   String get shoppingToggleComplete => '切换完成';
 
   @override
+  String get shoppingToggleFailed => '无法更新完成状态，请重试。';
+
+  @override
   String get shoppingEnterReorderMode => '排序';
 
   @override
@@ -2635,9 +2659,6 @@ class SZh extends S {
   String get shoppingUnitCustomError => '请输入 1–12 个字符';
 
   @override
-  String get shoppingUnitApply => '应用';
-
-  @override
   String get shoppingUnitPiece => '件';
 
   @override
@@ -2737,10 +2758,10 @@ class SZh extends S {
   String get entryVoicePrivacy => '仅在设备内处理';
 
   @override
-  String get entryVoiceIdleStatus => '等待语音输入中';
+  String get entryVoiceIdleStatus => '准备好了，随时可以说';
 
   @override
-  String get entryVoiceListeningStatus => '正在聆听';
+  String get entryVoiceListeningStatus => '正在听你说';
 
   @override
   String get entryVoiceProcessingStatus => '正在整理内容';
@@ -2761,16 +2782,16 @@ class SZh extends S {
   String get entryVoiceProcessingPlaceholder => '“森林咖啡，午餐两千三百八十日元”';
 
   @override
-  String get entryVoiceIdleHelp => '点击麦克风开始语音记录';
+  String get entryVoiceIdleHelp => '按住麦克风说话，松手后我来帮你整理';
 
   @override
-  String get entryVoiceListeningHelp => '说完稍候将自动识别，也可点按立即完成';
+  String get entryVoiceListeningHelp => '请继续按住，慢慢说，说完松手就好';
 
   @override
   String get entryVoiceProcessingHelp => '正在把识别结果填入同一份表单';
 
   @override
-  String get entryVoiceReviewHelp => '点按麦克风重新录音，也可修改后直接记录';
+  String get entryVoiceReviewHelp => '想再说一次？长按麦克风即可重新录音';
 
   @override
   String get entryVoiceUnavailableHelp => '请在系统设置中允许麦克风，也可继续手动输入';
@@ -2779,13 +2800,13 @@ class SZh extends S {
   String get entryVoiceKeyboardAction => '切换到键盘输入';
 
   @override
-  String get entryVoiceStartAction => '开始语音输入';
+  String get entryVoiceStartAction => '长按开始语音输入';
 
   @override
-  String get entryVoiceStopAction => '立即结束并解析';
+  String get entryVoiceStopAction => '松手结束并解析';
 
   @override
-  String get entryVoiceRerecordAction => '重新录音';
+  String get entryVoiceRerecordAction => '长按麦克风重新录音';
 
   @override
   String get entryVoiceSourceBadge => '语音填入';
@@ -3073,7 +3094,10 @@ class SZh extends S {
   String get onboardingSetupTitle => '初始设置';
 
   @override
-  String get onboardingRowName => '姓名・必填';
+  String get onboardingRowName => '姓名';
+
+  @override
+  String get onboardingRequired => '必填';
 
   @override
   String get onboardingRowLanguage => '显示语言';

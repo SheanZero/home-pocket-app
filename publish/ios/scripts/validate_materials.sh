@@ -146,7 +146,7 @@ else
 fi
 
 LEGAL_MISMATCH=0
-for legal_file in assets/legal/*.md; do
+for legal_file in assets/legal/*.html; do
   legal_name="$(basename "$legal_file")"
   if ! cmp -s "$legal_file" "$LEGAL_SNAPSHOT_DIR/$legal_name"; then
     block "shipping legal snapshot differs from app asset: $legal_name"
