@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../application/accounting/create_category_use_case.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/category_display_palette.dart';
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/widgets/feedback_toast.dart';
 import '../../../../shared/widgets/soft_confirm_dialog.dart';
@@ -227,8 +228,11 @@ class _CategorySelectionScreenState
   }
 
   Color _parseColor(String colorHex) {
-    final hex = colorHex.replaceFirst('#', '');
-    return Color(int.parse('FF$hex', radix: 16));
+    return CategoryDisplayPalette.resolve(
+      colorHex,
+      brightness: Theme.of(context).brightness,
+      surface: context.palette.card,
+    );
   }
 
   void _onEnterReorderMode() {
@@ -911,7 +915,12 @@ class _CategoryGroup extends StatelessWidget {
                         child: Text(
                           resolveName(child.name),
                           style: AppTextStyles.label.copyWith(
-                            color: isSelected ? Colors.white : color,
+                            color: isSelected
+                                ? Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? palette.card
+                                      : Colors.white
+                                : color,
                           ),
                         ),
                       ),
@@ -1032,12 +1041,35 @@ class _AddCategorySheetState extends State<_AddCategorySheet> {
   }
 
   Color get _selectedColor {
-    final hex = _color.substring(1);
-    return Color(int.parse('FF$hex', radix: 16));
+    return CategoryDisplayPalette.resolve(
+      _color,
+      brightness: Theme.of(context).brightness,
+      surface: context.palette.card,
+    );
   }
 
-  Color _checkColor(Color color, AppPalette palette) =>
-      color.computeLuminance() > 0.55 ? palette.textPrimary : Colors.white;
+  Color _checkColor(Color color, AppPalette palette) {
+    if (Theme.of(context).brightness == Brightness.light) {
+      return color.computeLuminance() > 0.55
+          ? palette.textPrimary
+          : Colors.white;
+    }
+    final darkContrast = _contrastRatio(palette.textPrimary, color);
+    final lightContrast = _contrastRatio(Colors.white, color);
+    return darkContrast >= lightContrast ? palette.textPrimary : Colors.white;
+  }
+
+  double _contrastRatio(Color foreground, Color background) {
+    final foregroundLuminance = foreground.computeLuminance();
+    final backgroundLuminance = background.computeLuminance();
+    final lighter = foregroundLuminance > backgroundLuminance
+        ? foregroundLuminance
+        : backgroundLuminance;
+    final darker = foregroundLuminance > backgroundLuminance
+        ? backgroundLuminance
+        : foregroundLuminance;
+    return (lighter + 0.05) / (darker + 0.05);
+  }
 
   Widget _buildAppearancePicker(S l10n, AppPalette palette) {
     final selectedColor = _selectedColor;
@@ -1168,8 +1200,10 @@ class _AddCategorySheetState extends State<_AddCategorySheet> {
               Builder(
                 builder: (context) {
                   final colorHex = _categoryColorChoices[index];
-                  final color = Color(
-                    int.parse('FF${colorHex.substring(1)}', radix: 16),
+                  final color = CategoryDisplayPalette.resolve(
+                    colorHex,
+                    brightness: Theme.of(context).brightness,
+                    surface: palette.card,
                   );
                   final selected = colorHex == _color;
                   final semanticsLabel =

@@ -65,7 +65,10 @@ class _FakeCategoryRepository implements CategoryRepository {
   Future<void> deleteAll() async => categories.clear();
 }
 
-Widget _subject() {
+Widget _subject({
+  Brightness brightness = Brightness.light,
+  String selectedCategoryId = 'cat_food_dining_out',
+}) {
   const locale = Locale('ja');
   return ProviderScope(
     overrides: [
@@ -83,9 +86,11 @@ Widget _subject() {
       ],
       supportedLocales: S.supportedLocales,
       theme: AppTheme.light,
-      home: const CategorySelectionScreen(
-        selectedCategoryId: 'cat_food_dining_out',
-      ),
+      darkTheme: AppTheme.dark,
+      themeMode: brightness == Brightness.dark
+          ? ThemeMode.dark
+          : ThemeMode.light,
+      home: CategorySelectionScreen(selectedCategoryId: selectedCategoryId),
     ),
   );
 }
@@ -106,6 +111,22 @@ void main() {
     await expectLater(
       find.byType(MaterialApp),
       matchesGoldenFile('goldens/category_selection_v16_light_ja.png'),
+    );
+  });
+
+  testWidgets('v16 category browse state dark', (tester) async {
+    configureSurface(tester);
+    await tester.pumpWidget(
+      _subject(
+        brightness: Brightness.dark,
+        selectedCategoryId: 'cat_clothing_clothes',
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('goldens/category_selection_v16_dark_ja.png'),
     );
   });
 
