@@ -760,37 +760,34 @@ void main() {
       expect(events.single.data?['controlEventType'], 'owner_transferred');
     });
 
-    test(
-      'existing events carry null data when no data field present',
-      () async {
-        final events = <WebSocketEvent>[];
-        service.eventStream.listen(events.add);
+    test('member confirmation preserves the targeted device id', () async {
+      final events = <WebSocketEvent>[];
+      service.eventStream.listen(events.add);
 
-        service.connect(
-          groupId: 'group-1',
-          deviceId: 'device-1',
-          signMessage: (msg) async => 'mock-sig',
-        );
-        incomingController.add(
-          jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
-        );
-        await Future<void>.delayed(Duration.zero);
+      service.connect(
+        groupId: 'group-1',
+        deviceId: 'device-1',
+        signMessage: (msg) async => 'mock-sig',
+      );
+      incomingController.add(
+        jsonEncode({'type': 'auth_success', 'groupId': 'group-1'}),
+      );
+      await Future<void>.delayed(Duration.zero);
 
-        incomingController.add(
-          jsonEncode({
-            'type': 'member_confirmed',
-            'groupId': 'group-1',
-            'deviceId': 'device-2',
-            'timestamp': '2026-04-04T12:00:00Z',
-          }),
-        );
-        await Future<void>.delayed(Duration.zero);
+      incomingController.add(
+        jsonEncode({
+          'type': 'member_confirmed',
+          'groupId': 'group-1',
+          'deviceId': 'device-2',
+          'timestamp': '2026-04-04T12:00:00Z',
+        }),
+      );
+      await Future<void>.delayed(Duration.zero);
 
-        expect(events, hasLength(1));
-        expect(events.first.type, WebSocketEventType.memberConfirmed);
-        expect(events.first.data, isNull);
-      },
-    );
+      expect(events, hasLength(1));
+      expect(events.first.type, WebSocketEventType.memberConfirmed);
+      expect(events.first.data, {'deviceId': 'device-2'});
+    });
 
     test('member_left merges terminal device id with rotation data', () async {
       final events = <WebSocketEvent>[];

@@ -83,9 +83,8 @@ class SyncEngine {
   final _statusController = StreamController<SyncStatus>.broadcast();
   SyncStatus _currentStatus = const SyncStatus(state: SyncState.noGroup);
 
-  /// Tracks event key → timestamp for cross-source deduplication.
-  /// Prevents double-processing when the same event arrives via
-  /// both WebSocket and push notification.
+  /// Tracks event key → timestamp so replayed WebSocket/control events are
+  /// applied at most once inside the deduplication window.
   final _recentEvents = <String, DateTime>{};
   static const _deduplicationWindow = Duration(seconds: 10);
 
@@ -106,6 +105,13 @@ class SyncEngine {
         onPaused: () => _scheduler.onAppPaused(),
       );
       _lifecycleObserver!.start();
+    }
+    // Pending applicants do not yet have an active-group control cursor. Check
+    // their authoritative membership before the normal active-group replay so
+    // an approval received while the app was stopped is applied at launch.
+    if (_memberActivation != null &&
+        await _groupRepo.getActiveGroup() == null) {
+      await _onMemberConfirmed(null);
     }
     await _runForegroundReconciliation();
   }
@@ -179,7 +185,7 @@ class SyncEngine {
     _scheduler.onSyncAvailable();
   }
 
-  /// Push notification or WebSocket: memberConfirmed (Group activated).
+  /// WebSocket/control replay: memberConfirmed (group activated).
   Future<void> onMemberConfirmed([Map<String, dynamic>? data]) {
     return _runLifecycleOperation(() => _onMemberConfirmed(data));
   }
@@ -194,7 +200,7 @@ class SyncEngine {
 
     final activation = _memberActivation;
     if (activation == null) {
-      _scheduler.onMemberConfirmed();
+      await _scheduler.onMemberConfirmed();
       return;
     }
 
@@ -312,6 +318,10 @@ class SyncEngine {
     _webSocketService.startLifecycleObservation();
   }
 
+  /// Ensures the realtime control channel is established after a pending
+  /// member finishes activation outside the engine-owned event pipeline.
+  Future<void> ensureWebSocketConnected() => _connectWebSocket();
+
   void _disconnectWebSocket() {
     unawaited(_disconnectWebSocketAndWait());
   }
@@ -366,12 +376,7 @@ class SyncEngine {
           );
         }
       case WebSocketEventType.memberConfirmed:
-        _launchLifecycleOperation(
-          () => _onMemberConfirmed({
-            ...?event.data,
-            if (event.groupId != null) 'groupId': event.groupId,
-          }),
-        );
+        _launchLifecycleOperation(() => _handleMemberConfirmedWebSocket(event));
       case WebSocketEventType.joinRequest:
         final groupId = event.groupId;
         if (groupId != null) {
@@ -432,6 +437,20 @@ class SyncEngine {
     final groupId = _nonEmptyString(data['groupId']);
     if (groupId == null) return;
     await _onJoinRequest?.call(groupId);
+  }
+
+  Future<void> _handleMemberConfirmedWebSocket(WebSocketEvent event) async {
+    final groupId = event.groupId;
+    if (groupId == null) return;
+    final eventId = _nonEmptyString(event.data?['eventId']);
+    if (_isDuplicate('wsMemberConfirmed:${eventId ?? groupId}')) return;
+
+    // Every already-active client receives the approval as a control-plane
+    // invalidation. Apply the authoritative member snapshot before publishing
+    // the current ledger so the newly active device is an eligible recipient.
+    await _refreshGroupSnapshot(groupId, event.data);
+    await _scheduler.onMemberConfirmed();
+    await _refreshInitialStatus();
   }
 
   Future<void> _handleMemberLeft(Map<String, dynamic> data) async {
@@ -570,7 +589,11 @@ class SyncEngine {
     _membershipReconciliationRequested = false;
     _pendingMembershipStatusCode = null;
     _pendingMembershipReason = null;
-    await _scheduler.onAppResumed();
+    if (controlResult.requiresInitialSync) {
+      await _handleSyncRequest(SyncMode.initialSync);
+    } else {
+      await _scheduler.onAppResumed();
+    }
 
     if (_membershipReconciliationRequested) {
       _membershipReconciliationRequested = false;

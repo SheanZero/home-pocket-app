@@ -232,8 +232,8 @@ class _HomePocketAppState extends ConsumerState<HomePocketApp>
       final bookIdResult = await _seedAndEnsureDefaultBook();
 
       if (bookIdResult.isSuccess && bookIdResult.data != null) {
-        // Install every membership lifecycle callback before push bootstrap:
-        // initialize() consumes a possible cold-start message immediately.
+        // Install membership lifecycle callbacks before WebSocket/control
+        // reconciliation consumes any startup state transition.
         final syncEngine = ref.read(syncEngineProvider);
         syncEngine.configureLifecycleHandlers(
           onJoinRequest: (_) async {

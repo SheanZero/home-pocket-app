@@ -4,6 +4,7 @@ import 'package:home_pocket/data/daos/group_dao.dart';
 import 'package:home_pocket/data/daos/group_member_dao.dart';
 import 'package:home_pocket/data/repositories/group_repository_impl.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
+import 'package:home_pocket/features/family_sync/domain/models/group_member.dart';
 
 void main() {
   late AppDatabase db;
@@ -51,5 +52,53 @@ void main() {
         );
       },
     );
+
+    test('emits again when an active member status changes', () async {
+      await repo.restoreActiveGroup(
+        groupId: 'group-1',
+        role: 'owner',
+        groupKey: 'group-key',
+        members: const [
+          GroupMember(
+            deviceId: 'owner',
+            publicKey: 'owner-key',
+            deviceName: 'Owner phone',
+            role: 'owner',
+            status: 'active',
+            displayName: 'Owner',
+            avatarEmoji: '🏠',
+          ),
+          GroupMember(
+            deviceId: 'joiner',
+            publicKey: 'joiner-key',
+            deviceName: 'Joiner phone',
+            role: 'member',
+            status: 'pending',
+            displayName: 'Joiner',
+            avatarEmoji: '🌱',
+          ),
+        ],
+      );
+
+      Future<void>.delayed(const Duration(milliseconds: 50), () async {
+        await repo.activateMember('group-1', 'joiner');
+      });
+
+      await expectLater(
+        repo.watchActiveGroup().take(2),
+        emitsInOrder([
+          isA<GroupInfo>().having(
+            (group) => group.members.last.status,
+            'initial member status',
+            'pending',
+          ),
+          isA<GroupInfo>().having(
+            (group) => group.members.last.status,
+            'updated member status',
+            'active',
+          ),
+        ]),
+      );
+    });
   });
 }

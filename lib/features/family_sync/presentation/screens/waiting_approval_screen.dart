@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/config/release_features.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../generated/app_localizations.dart';
@@ -16,6 +15,9 @@ import '../../../../application/family_sync/group_key_recovery_use_case.dart';
 import '../../../../application/family_sync/join_request_lifecycle_use_cases.dart';
 import '../../../../application/family_sync/leave_group_use_case.dart';
 import '../../../../application/family_sync/group_operation_error.dart';
+import '../../../../application/family_sync/notify_member_approval_use_case.dart';
+import '../../../../application/family_sync/repository_providers.dart'
+    show WebSocketEvent, WebSocketEventType;
 import '../providers/repository_providers.dart';
 import '../providers/state_sync.dart';
 import '../widgets/family_flow_components.dart';
@@ -55,8 +57,10 @@ class WaitingApprovalScreen extends ConsumerStatefulWidget {
 class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
   bool _hasNavigated = false;
   StreamSubscription<SyncStatus>? _syncSubscription;
-  StreamSubscription<Map<String, dynamic>>? _joinRequestSubscription;
+  StreamSubscription<WebSocketEvent>? _webSocketSubscription;
   StreamSubscription<GroupKeyRecoveryStatus>? _keyRecoverySubscription;
+  NotifyMemberApprovalUseCase? _webSocketUseCase;
+  bool _ownsWaitingWebSocket = false;
   Timer? _pollingTimer;
   int _pollCount = 0;
   late JoinRequestStatus _requestStatus;
@@ -73,7 +77,7 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
         ? JoinRequestStatus.approved
         : JoinRequestStatus.pending;
     _listenForSyncStatus();
-    _listenForJoinRequestResolution();
+    unawaited(_listenForWebSocketResolution());
     _listenForKeyRecovery();
     _startAdaptivePolling();
     if (widget.initialMode == WaitingApprovalInitialMode.recoveringKey) {
@@ -195,23 +199,42 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
     );
   }
 
-  void _listenForJoinRequestResolution() {
-    if (!ReleaseFeatures.pushNotifications) return;
-    _joinRequestSubscription = ref
-        .read(pushNotificationServiceProvider)
-        .joinRequestLifecycleEvents
-        .listen((event) {
-          if (!mounted || event['groupId'] != widget.groupId) return;
-          final status = JoinRequestStatusX.parse(event['status']);
+  Future<void> _listenForWebSocketResolution() async {
+    final useCase = NotifyMemberApprovalUseCase(
+      wsService: ref.read(webSocketServiceProvider),
+      keyManager: ref.read(keyManagerProvider),
+    );
+    _webSocketUseCase = useCase;
+    _webSocketSubscription = useCase.listenForJoinRequests().listen((event) {
+      if (!mounted || event.groupId != widget.groupId) return;
+      switch (event.type) {
+        case WebSocketEventType.memberConfirmed:
+          _applyJoinRequestStatus(JoinRequestStatus.approved);
+          unawaited(_verifyGroupAndNavigate());
+        case WebSocketEventType.joinRequestResolved:
+          final status = JoinRequestStatusX.parse(event.data?['status']);
           if (status != null) {
             _applyJoinRequestStatus(status);
-            if (status == JoinRequestStatus.approved) {
-              unawaited(_verifyGroupAndNavigate());
-            }
           } else {
             unawaited(_refreshJoinRequestStatus());
           }
-        });
+        case WebSocketEventType.groupDissolved:
+          _applyJoinRequestStatus(JoinRequestStatus.expired);
+        default:
+          break;
+      }
+    });
+    _ownsWaitingWebSocket = true;
+    await useCase.connectWebSocket(groupId: widget.groupId);
+  }
+
+  void _releaseWaitingWebSocket() {
+    if (!_ownsWaitingWebSocket) return;
+    _ownsWaitingWebSocket = false;
+    final subscription = _webSocketSubscription;
+    _webSocketSubscription = null;
+    if (subscription != null) unawaited(subscription.cancel());
+    _webSocketUseCase?.disconnectWebSocket();
   }
 
   void _listenForSyncStatus() {
@@ -349,6 +372,9 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
       case MemberActivationReady(:final groupId):
         _hasNavigated = true;
         _stopPolling();
+        _releaseWaitingWebSocket();
+        if (!mounted) return;
+        unawaited(ref.read(syncEngineProvider).ensureWebSocketConnected());
         Navigator.of(context).pushReplacement(
           MaterialPageRoute<void>(
             builder: (_) => GroupManagementScreen(groupId: groupId),
@@ -371,7 +397,10 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
   void dispose() {
     _stopPolling();
     unawaited(_syncSubscription?.cancel());
-    unawaited(_joinRequestSubscription?.cancel());
+    if (_ownsWaitingWebSocket) {
+      unawaited(_webSocketSubscription?.cancel());
+      _webSocketUseCase?.disconnectWebSocket();
+    }
     unawaited(_keyRecoverySubscription?.cancel());
     super.dispose();
   }

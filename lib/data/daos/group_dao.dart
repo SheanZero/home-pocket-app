@@ -5,6 +5,13 @@ import '../tables/groups_table.dart';
 
 part 'group_dao.g.dart';
 
+class ActiveGroupSnapshot {
+  const ActiveGroupSnapshot({required this.group, required this.members});
+
+  final GroupData group;
+  final List<GroupMemberData> members;
+}
+
 @DriftAccessor(tables: [Groups])
 class GroupDao extends DatabaseAccessor<AppDatabase> with _$GroupDaoMixin {
   GroupDao(super.db);
@@ -32,6 +39,41 @@ class GroupDao extends DatabaseAccessor<AppDatabase> with _$GroupDaoMixin {
     (select(groups)..where((table) => table.status.equals('active'))),
     context: 'active',
   );
+
+  /// Watches the complete active-group projection, including membership rows.
+  ///
+  /// A group-only query does not invalidate when a member changes from
+  /// pending to active, which left the family-management screen displaying
+  /// the approval banner indefinitely. The join makes Drift observe both
+  /// tables while preserving the single-live-group invariant.
+  Stream<ActiveGroupSnapshot?> watchActiveGroupSnapshot() {
+    final membersTable = attachedDatabase.groupMembers;
+    final query = select(groups).join([
+      leftOuterJoin(
+        membersTable,
+        membersTable.groupId.equalsExp(groups.groupId),
+      ),
+    ])..where(groups.status.equals('active'));
+
+    return query.watch().map((rows) {
+      if (rows.isEmpty) return null;
+      final groupRows = <String, GroupData>{};
+      final members = <GroupMemberData>[];
+      for (final row in rows) {
+        final group = row.readTable(groups);
+        groupRows[group.groupId] = group;
+        final member = row.readTableOrNull(membersTable);
+        if (member != null) members.add(member);
+      }
+      if (groupRows.length > 1) {
+        throw StateError('Multiple active family groups found');
+      }
+      return ActiveGroupSnapshot(
+        group: groupRows.values.single,
+        members: members,
+      );
+    });
+  }
 
   Future<GroupData?> findPending() => _findOnly(
     (select(groups)..where(

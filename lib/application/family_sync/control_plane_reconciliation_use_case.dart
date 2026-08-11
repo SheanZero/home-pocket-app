@@ -19,6 +19,7 @@ sealed class ControlPlaneReconciliationResult {
     required int pageCount,
     required int eventCount,
     bool eventsEndpointUnsupported,
+    bool requiresInitialSync,
   }) = ControlPlaneReconciliationReconciled;
 
   const factory ControlPlaneReconciliationResult.noGroup() =
@@ -40,22 +41,29 @@ class ControlPlaneReconciliationReconciled
     required this.pageCount,
     required this.eventCount,
     this.eventsEndpointUnsupported = false,
+    this.requiresInitialSync = false,
   });
 
   final int pageCount;
   final int eventCount;
   final bool eventsEndpointUnsupported;
+  final bool requiresInitialSync;
 
   @override
   bool operator ==(Object other) =>
       other is ControlPlaneReconciliationReconciled &&
       other.pageCount == pageCount &&
       other.eventCount == eventCount &&
-      other.eventsEndpointUnsupported == eventsEndpointUnsupported;
+      other.eventsEndpointUnsupported == eventsEndpointUnsupported &&
+      other.requiresInitialSync == requiresInitialSync;
 
   @override
-  int get hashCode =>
-      Object.hash(pageCount, eventCount, eventsEndpointUnsupported);
+  int get hashCode => Object.hash(
+    pageCount,
+    eventCount,
+    eventsEndpointUnsupported,
+    requiresInitialSync,
+  );
 }
 
 class ControlPlaneReconciliationNoGroup
@@ -290,6 +298,9 @@ class ControlPlaneReconciliationUseCase {
           pageCount: pageCount,
           eventCount: events.length,
           eventsEndpointUnsupported: eventsEndpointUnsupported,
+          requiresInitialSync: events.any(
+            (event) => event['eventType'] == 'member_confirmed',
+          ),
         );
     }
   }

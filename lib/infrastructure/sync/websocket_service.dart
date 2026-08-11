@@ -61,7 +61,7 @@ class WebSocketEvent {
 /// of [WebSocketEvent] for consumption by providers that bridge to
 /// [SyncEngine] or UI navigation.
 ///
-/// Three-layer degradation: WebSocket (primary) -> push (backup) -> polling (fallback).
+/// Realtime group control channel with REST/control-event replay as fallback.
 class WebSocketService with WidgetsBindingObserver {
   WebSocketService({
     required this._baseUrl,
@@ -475,7 +475,8 @@ class WebSocketService with WidgetsBindingObserver {
       if (value != null) mergedData[key] = value;
     }
     if (data['eventId'] != null) mergedData['controlEventType'] = type;
-    if (eventType == WebSocketEventType.memberLeft ||
+    if (eventType == WebSocketEventType.memberConfirmed ||
+        eventType == WebSocketEventType.memberLeft ||
         eventType == WebSocketEventType.joinRequestResolved) {
       final deviceId = data['deviceId'];
       if (deviceId is String) {

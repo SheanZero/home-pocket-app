@@ -19,6 +19,7 @@ import 'package:home_pocket/features/family_sync/presentation/providers/reposito
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/family_sync/presentation/navigation/family_flow_launcher.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/group_choice_screen.dart';
+import 'package:home_pocket/features/family_sync/presentation/screens/group_management_screen.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/join_group_screen.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/waiting_approval_screen.dart';
 import 'package:home_pocket/features/profile/presentation/providers/state_user_profile.dart';
@@ -350,7 +351,10 @@ void main() {
           groupId: 'group-1',
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
 
       expect(find.byType(WaitingApprovalScreen), findsNothing);
       expect(find.text('Test Family'), findsOneWidget);
@@ -742,14 +746,16 @@ void main() {
       syncEngine.onMemberConfirmed();
       // Allow the async verification and navigation to complete
       await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
 
       verify(
         () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
       ).called(1);
-      // After approval the screen navigates to GroupManagementScreen,
-      // which shows the group name from the loaded group data
-      expect(find.text('Test Family'), findsOneWidget);
+      // After the authoritative activation succeeds, the waiting route is
+      // replaced by the live group-management route.
+      expect(find.byType(GroupManagementScreen), findsOneWidget);
       expect(find.byType(WaitingApprovalScreen), findsNothing);
     },
   );

@@ -283,11 +283,9 @@ class GroupRepositoryImpl
 
   @override
   Stream<GroupInfo?> watchActiveGroup() {
-    return _groupDao.watchActiveGroup().asyncMap((group) async {
-      if (group == null) {
-        return null;
-      }
-      return _toGroupInfo(group);
+    return _groupDao.watchActiveGroupSnapshot().map((snapshot) {
+      if (snapshot == null) return null;
+      return _mapGroupInfo(snapshot.group, snapshot.members);
     });
   }
 
@@ -811,6 +809,10 @@ class GroupRepositoryImpl
 
   Future<GroupInfo> _toGroupInfo(GroupData group) async {
     final members = await _memberDao.findByGroupId(group.groupId);
+    return _mapGroupInfo(group, members);
+  }
+
+  GroupInfo _mapGroupInfo(GroupData group, List<GroupMemberData> members) {
     return GroupInfo(
       groupId: group.groupId,
       status: GroupStatus.values.byName(group.status),

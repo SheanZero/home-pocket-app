@@ -13,6 +13,7 @@ import 'package:home_pocket/features/family_sync/domain/repositories/sync_reposi
 import 'package:home_pocket/features/family_sync/presentation/providers/repository_providers.dart';
 import 'package:home_pocket/features/family_sync/presentation/providers/state_sync.dart';
 import 'package:home_pocket/features/family_sync/presentation/screens/waiting_approval_screen.dart';
+import 'package:home_pocket/features/family_sync/presentation/screens/group_management_screen.dart';
 import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
 import 'package:home_pocket/infrastructure/sync/websocket_connection_state.dart';
 import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
@@ -56,6 +57,7 @@ void main() {
   late MockCancelJoinRequestUseCase cancelJoinRequestUseCase;
   late MockPushNotificationService pushNotificationService;
   late StreamController<WebSocketConnectionState> wsStateController;
+  late StreamController<WebSocketEvent> wsEventController;
   late StreamController<Map<String, dynamic>> joinRequestEvents;
 
   setUp(() {
@@ -68,6 +70,7 @@ void main() {
     cancelJoinRequestUseCase = MockCancelJoinRequestUseCase();
     pushNotificationService = MockPushNotificationService();
     wsStateController = StreamController<WebSocketConnectionState>.broadcast();
+    wsEventController = StreamController<WebSocketEvent>.broadcast();
     joinRequestEvents = StreamController<Map<String, dynamic>>.broadcast();
 
     when(() => mockOrchestrator.needsFullPull()).thenAnswer((_) async => false);
@@ -78,6 +81,12 @@ void main() {
       () => mockOrchestrator.execute(any()),
     ).thenAnswer((_) async => const SyncOrchestratorSuccess());
     when(() => groupRepository.getActiveGroup()).thenAnswer((_) async => null);
+    when(
+      () => groupRepository.getGroupById(any()),
+    ).thenAnswer((_) async => null);
+    when(
+      () => groupRepository.watchActiveGroup(),
+    ).thenAnswer((_) => Stream.value(null));
     when(
       () => getJoinRequestStatusUseCase.execute(groupId: 'group-1'),
     ).thenAnswer(
@@ -117,7 +126,7 @@ void main() {
     when(() => webSocketService.stopLifecycleObservation()).thenReturn(null);
     when(
       () => webSocketService.eventStream,
-    ).thenAnswer((_) => const Stream.empty());
+    ).thenAnswer((_) => wsEventController.stream);
 
     // KeyManager mock
     when(
@@ -134,6 +143,7 @@ void main() {
   tearDown(() async {
     syncEngine.dispose();
     await wsStateController.close();
+    await wsEventController.close();
     await joinRequestEvents.close();
   });
 
@@ -153,6 +163,51 @@ void main() {
     ),
     pushNotificationServiceProvider.overrideWithValue(pushNotificationService),
   ];
+
+  testWidgets('member_confirmed WebSocket event activates immediately', (
+    tester,
+  ) async {
+    when(
+      () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+    ).thenAnswer((_) async => const MemberActivationReady(groupId: 'group-1'));
+
+    await tester.pumpWidget(
+      createLocalizedWidget(
+        const WaitingApprovalScreen(
+          groupId: 'group-1',
+          groupName: 'Test Family',
+          ownerDisplayName: 'Owner',
+        ),
+        overrides: buildOverrides(),
+      ),
+    );
+    await tester.pump();
+
+    verify(
+      () => webSocketService.connect(
+        groupId: 'group-1',
+        deviceId: 'test-device-id',
+        signMessage: any(named: 'signMessage'),
+      ),
+    ).called(1);
+
+    wsEventController.add(
+      const WebSocketEvent(
+        type: WebSocketEventType.memberConfirmed,
+        groupId: 'group-1',
+        data: {'deviceId': 'test-device-id', 'eventId': 'event-7'},
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    verify(
+      () => memberActivationUseCase.execute(expectedGroupId: 'group-1'),
+    ).called(1);
+    expect(find.byType(GroupManagementScreen), findsOneWidget);
+  });
 
   testWidgets('always polls regardless of WebSocket connection state', (
     tester,

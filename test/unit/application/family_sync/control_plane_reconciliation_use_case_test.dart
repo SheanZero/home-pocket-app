@@ -159,6 +159,38 @@ void main() {
   );
 
   test(
+    'requests initial bill sync after a missed member confirmation',
+    () async {
+      when(
+        () => apiClient.getGroupControlEvents(
+          groupId: 'group-1',
+          afterRevision: 2,
+          limit: 100,
+        ),
+      ).thenAnswer(
+        (_) async => {
+          'events': [
+            {...event('event-3', 3), 'eventType': 'member_confirmed'},
+          ],
+          'hasMore': false,
+          'nextRevision': 3,
+        },
+      );
+
+      final result = await makeUseCase().execute();
+
+      expect(
+        result,
+        const ControlPlaneReconciliationResult.reconciled(
+          pageCount: 1,
+          eventCount: 1,
+          requiresInitialSync: true,
+        ),
+      );
+    },
+  );
+
+  test(
     'stops without applying a snapshot when pagination makes no progress',
     () async {
       when(

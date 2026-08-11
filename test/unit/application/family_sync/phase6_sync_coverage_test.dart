@@ -946,7 +946,11 @@ void main() {
           const WebSocketEvent(type: WebSocketEventType.syncAvailable),
         );
         webSocketService.emit(
-          const WebSocketEvent(type: WebSocketEventType.memberConfirmed),
+          const WebSocketEvent(
+            type: WebSocketEventType.memberConfirmed,
+            groupId: 'group-1',
+            data: {'eventId': 'event-1'},
+          ),
         );
         webSocketService.emit(
           const WebSocketEvent(type: WebSocketEventType.joinRequest),

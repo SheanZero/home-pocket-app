@@ -68,10 +68,10 @@ class SyncScheduler {
     _enqueueSync(SyncMode.incrementalPull);
   }
 
-  /// Push notification: memberConfirmed — initial sync.
-  void onMemberConfirmed() {
+  /// Confirmed membership — initial sync, serialized with any active work.
+  Future<void> onMemberConfirmed() async {
     if (_isSuspended) return;
-    _enqueueSync(SyncMode.initialSync);
+    await _enqueueSync(SyncMode.initialSync);
   }
 
   /// User changed profile — immediate profile sync.

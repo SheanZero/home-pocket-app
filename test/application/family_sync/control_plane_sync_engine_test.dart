@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/application/family_sync/control_plane_reconciliation_use_case.dart';
+import 'package:home_pocket/application/family_sync/refresh_group_snapshot_use_case.dart';
 import 'package:home_pocket/application/family_sync/sync_engine.dart';
 import 'package:home_pocket/application/family_sync/sync_orchestrator.dart';
 import 'package:home_pocket/features/family_sync/domain/models/group_info.dart';
@@ -22,6 +23,9 @@ class _MockKeyManager extends Mock implements KeyManager {}
 
 class _MockControlPlaneReconciliation extends Mock
     implements ControlPlaneReconciliationUseCase {}
+
+class _MockRefreshGroupSnapshot extends Mock
+    implements RefreshGroupSnapshotUseCase {}
 
 class _TrackingWebSocketService extends Mock implements WebSocketService {
   _TrackingWebSocketService(this.onConnect);
@@ -58,6 +62,7 @@ void main() {
   late _MockGroupRepository groupRepository;
   late _MockKeyManager keyManager;
   late _MockControlPlaneReconciliation reconciliation;
+  late _MockRefreshGroupSnapshot refreshGroupSnapshot;
   late _TrackingWebSocketService webSocket;
   late List<String> order;
 
@@ -65,7 +70,7 @@ void main() {
     groupId: 'group-1',
     status: GroupStatus.active,
     groupName: 'Family',
-    role: 'member',
+    role: 'owner',
     groupKey: 'group-key',
     keyEpoch: 2,
     members: const [
@@ -92,6 +97,7 @@ void main() {
     groupRepository = _MockGroupRepository();
     keyManager = _MockKeyManager();
     reconciliation = _MockControlPlaneReconciliation();
+    refreshGroupSnapshot = _MockRefreshGroupSnapshot();
     webSocket = _TrackingWebSocketService(() => order.add('ws'));
 
     when(
@@ -113,6 +119,15 @@ void main() {
         eventCount: 0,
       );
     });
+    when(
+      () => refreshGroupSnapshot.execute(
+        groupId: any(named: 'groupId'),
+        controlEvent: any(named: 'controlEvent'),
+      ),
+    ).thenAnswer((_) async {
+      order.add('snapshot');
+      return const RefreshGroupSnapshotApplied(groupName: 'Family');
+    });
   });
 
   SyncEngine makeEngine({
@@ -126,6 +141,7 @@ void main() {
       groupRepo: groupRepository,
       webSocketService: webSocket,
       keyManager: keyManager,
+      groupSnapshotRefresh: refreshGroupSnapshot,
       controlPlaneReconciliation: reconciliation,
       recoverDurableOutbox:
           recoverOutbox ??
@@ -149,6 +165,103 @@ void main() {
     engine.dispose();
     verify(() => orchestrator.execute(SyncMode.incrementalPull)).called(1);
   });
+
+  test('cold start performs initial bill sync after missed approval', () async {
+    when(() => reconciliation.execute()).thenAnswer(
+      (_) async => const ControlPlaneReconciliationResult.reconciled(
+        pageCount: 1,
+        eventCount: 1,
+        requiresInitialSync: true,
+      ),
+    );
+    final engine = makeEngine();
+    addTearDown(engine.dispose);
+    addTearDown(webSocket.events.close);
+
+    await engine.initialize();
+
+    verify(() => orchestrator.execute(SyncMode.initialSync)).called(1);
+    verifyNever(() => orchestrator.execute(SyncMode.incrementalPull));
+  });
+
+  test(
+    'owner refreshes members before initial bill sync on member confirmation',
+    () async {
+      final engine = makeEngine();
+      addTearDown(engine.dispose);
+      addTearDown(webSocket.events.close);
+      await engine.initialize();
+      order.clear();
+      when(() => orchestrator.execute(SyncMode.initialSync)).thenAnswer((
+        _,
+      ) async {
+        order.add('initial-sync');
+        return const SyncOrchestratorSuccess();
+      });
+
+      webSocket.events.add(
+        const WebSocketEvent(
+          type: WebSocketEventType.memberConfirmed,
+          groupId: 'group-1',
+          data: {'eventId': 'event-1', 'deviceId': 'device-2'},
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(order.take(2), ['snapshot', 'initial-sync']);
+      verify(() => orchestrator.execute(SyncMode.initialSync)).called(1);
+    },
+  );
+
+  test(
+    'member-confirmed WebSocket queues initial sync behind an active pull',
+    () async {
+      final engine = makeEngine();
+      addTearDown(engine.dispose);
+      addTearDown(webSocket.events.close);
+      await engine.initialize();
+      order.clear();
+
+      final pullStarted = Completer<void>();
+      final releasePull = Completer<void>();
+      final initialSyncStarted = Completer<void>();
+      when(() => orchestrator.execute(SyncMode.incrementalPull)).thenAnswer((
+        _,
+      ) async {
+        pullStarted.complete();
+        await releasePull.future;
+        return const SyncOrchestratorSuccess();
+      });
+      when(() => orchestrator.execute(SyncMode.initialSync)).thenAnswer((
+        _,
+      ) async {
+        initialSyncStarted.complete();
+        return const SyncOrchestratorSuccess();
+      });
+
+      webSocket.events.add(
+        const WebSocketEvent(type: WebSocketEventType.syncAvailable),
+      );
+      await pullStarted.future;
+      webSocket.events.add(
+        const WebSocketEvent(
+          type: WebSocketEventType.memberConfirmed,
+          groupId: 'group-1',
+          data: {'eventId': 'event-2', 'deviceId': 'device-2'},
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(initialSyncStarted.isCompleted, isFalse);
+
+      releasePull.complete();
+      await initialSyncStarted.future;
+      verify(() => orchestrator.execute(SyncMode.initialSync)).called(1);
+    },
+  );
 
   test('missed removal on cold start skips every data-plane action', () async {
     when(
