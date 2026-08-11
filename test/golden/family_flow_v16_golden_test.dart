@@ -41,7 +41,8 @@ import 'package:home_pocket/features/family_sync/presentation/screens/waiting_ap
 import 'package:home_pocket/features/profile/domain/models/user_profile.dart';
 import 'package:home_pocket/features/profile/presentation/providers/state_user_profile.dart';
 import 'package:home_pocket/generated/app_localizations.dart';
-import 'package:home_pocket/infrastructure/sync/push_notification_service.dart';
+import 'package:home_pocket/infrastructure/crypto/services/key_manager.dart';
+import 'package:home_pocket/infrastructure/sync/websocket_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockGroupRepository extends Mock implements GroupRepository {}
@@ -77,11 +78,33 @@ class _MockGetJoinRequestStatusUseCase extends Mock
 class _MockCancelJoinRequestUseCase extends Mock
     implements CancelJoinRequestUseCase {}
 
-class _MockPushNotificationService extends Mock
-    implements PushNotificationService {}
+class _MockWebSocketService extends Mock implements WebSocketService {}
+
+class _MockKeyManager extends Mock implements KeyManager {}
 
 class _MockGroupKeyRecoveryCoordinator extends Mock
     implements GroupKeyRecoveryCoordinator {}
+
+List<Override> _waitingTransportOverrides() {
+  final webSocket = _MockWebSocketService();
+  final keyManager = _MockKeyManager();
+  when(
+    () => webSocket.eventStream,
+  ).thenAnswer((_) => const Stream<WebSocketEvent>.empty());
+  when(() => keyManager.getDeviceId()).thenAnswer((_) async => 'golden-device');
+  when(
+    () => webSocket.connect(
+      groupId: any(named: 'groupId'),
+      deviceId: any(named: 'deviceId'),
+      signMessage: any(named: 'signMessage'),
+    ),
+  ).thenReturn(null);
+  when(() => webSocket.disconnect()).thenReturn(null);
+  return [
+    webSocketServiceProvider.overrideWithValue(webSocket),
+    keyManagerProvider.overrideWithValue(keyManager),
+  ];
+}
 
 final _profile = UserProfile(
   id: 'family-golden-profile',
@@ -430,12 +453,8 @@ void main() {
     final syncEngine = _MockSyncEngine();
     final status = _MockGetJoinRequestStatusUseCase();
     final cancel = _MockCancelJoinRequestUseCase();
-    final push = _MockPushNotificationService();
     final recovery = _MockGroupKeyRecoveryCoordinator();
     when(() => syncEngine.statusStream).thenAnswer((_) => const Stream.empty());
-    when(
-      () => push.joinRequestLifecycleEvents,
-    ).thenAnswer((_) => const Stream.empty());
     when(
       () => recovery.currentStatus,
     ).thenReturn(const GroupKeyRecoveryStatus());
@@ -454,8 +473,8 @@ void main() {
           syncEngineProvider.overrideWithValue(syncEngine),
           getJoinRequestStatusUseCaseProvider.overrideWithValue(status),
           cancelJoinRequestUseCaseProvider.overrideWithValue(cancel),
-          pushNotificationServiceProvider.overrideWithValue(push),
           groupKeyRecoveryCoordinatorProvider.overrideWithValue(recovery),
+          ..._waitingTransportOverrides(),
         ],
       ),
     );
@@ -470,12 +489,8 @@ void main() {
     final syncEngine = _MockSyncEngine();
     final status = _MockGetJoinRequestStatusUseCase();
     final cancel = _MockCancelJoinRequestUseCase();
-    final push = _MockPushNotificationService();
     final recovery = _MockGroupKeyRecoveryCoordinator();
     when(() => syncEngine.statusStream).thenAnswer((_) => const Stream.empty());
-    when(
-      () => push.joinRequestLifecycleEvents,
-    ).thenAnswer((_) => const Stream.empty());
     when(
       () => recovery.currentStatus,
     ).thenReturn(const GroupKeyRecoveryStatus());
@@ -497,8 +512,8 @@ void main() {
           syncEngineProvider.overrideWithValue(syncEngine),
           getJoinRequestStatusUseCaseProvider.overrideWithValue(status),
           cancelJoinRequestUseCaseProvider.overrideWithValue(cancel),
-          pushNotificationServiceProvider.overrideWithValue(push),
           groupKeyRecoveryCoordinatorProvider.overrideWithValue(recovery),
+          ..._waitingTransportOverrides(),
         ],
       ),
     );
@@ -513,12 +528,8 @@ void main() {
     final syncEngine = _MockSyncEngine();
     final status = _MockGetJoinRequestStatusUseCase();
     final cancel = _MockCancelJoinRequestUseCase();
-    final push = _MockPushNotificationService();
     final recovery = _MockGroupKeyRecoveryCoordinator();
     when(() => syncEngine.statusStream).thenAnswer((_) => const Stream.empty());
-    when(
-      () => push.joinRequestLifecycleEvents,
-    ).thenAnswer((_) => const Stream.empty());
     when(() => recovery.currentStatus).thenReturn(
       const GroupKeyRecoveryStatus(
         phase: GroupKeyRecoveryPhase.unrecoverable,
@@ -543,8 +554,8 @@ void main() {
           syncEngineProvider.overrideWithValue(syncEngine),
           getJoinRequestStatusUseCaseProvider.overrideWithValue(status),
           cancelJoinRequestUseCaseProvider.overrideWithValue(cancel),
-          pushNotificationServiceProvider.overrideWithValue(push),
           groupKeyRecoveryCoordinatorProvider.overrideWithValue(recovery),
+          ..._waitingTransportOverrides(),
         ],
       ),
     );
