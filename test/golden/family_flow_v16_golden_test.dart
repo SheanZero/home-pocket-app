@@ -190,13 +190,13 @@ Future<void> _precacheEntryImages(WidgetTester tester) async {
     await Future.wait([
       precacheImage(
         const AssetImage(
-          'docs/mockup/v16/assets/family-entry-create-warm-v1.png',
+          'docs/mockup/v17/assets/family-entry-create-warm-v1.png',
         ),
         context,
       ),
       precacheImage(
         const AssetImage(
-          'docs/mockup/v16/assets/family-entry-join-warm-v1.png',
+          'docs/mockup/v17/assets/family-entry-join-warm-v1.png',
         ),
         context,
       ),
@@ -228,7 +228,7 @@ GroupInfo _managementGroup() => GroupInfo(
       displayName: 'あおい',
       avatarEmoji: '🌿',
       avatarImagePath:
-          '${Directory.current.path}/docs/mockup/v16/assets/family-avatar-owner.png',
+          '${Directory.current.path}/docs/mockup/v17/assets/family-avatar-owner.png',
       role: 'owner',
       status: 'active',
     ),
@@ -239,7 +239,7 @@ GroupInfo _managementGroup() => GroupInfo(
       displayName: '花子',
       avatarEmoji: '🌸',
       avatarImagePath:
-          '${Directory.current.path}/docs/mockup/v16/assets/family-avatar-hanako.png',
+          '${Directory.current.path}/docs/mockup/v17/assets/family-avatar-hanako.png',
       role: 'member',
       status: 'active',
     ),
@@ -250,7 +250,7 @@ GroupInfo _managementGroup() => GroupInfo(
       displayName: '太郎',
       avatarEmoji: '🌱',
       avatarImagePath:
-          '${Directory.current.path}/docs/mockup/v16/assets/family-avatar-taro.png',
+          '${Directory.current.path}/docs/mockup/v17/assets/family-avatar-taro.png',
       role: 'member',
       status: 'active',
     ),
@@ -261,7 +261,7 @@ GroupInfo _managementGroup() => GroupInfo(
       displayName: '花子',
       avatarEmoji: '🌸',
       avatarImagePath:
-          '${Directory.current.path}/docs/mockup/v16/assets/family-avatar-hanako.png',
+          '${Directory.current.path}/docs/mockup/v17/assets/family-avatar-hanako.png',
       role: 'member',
       status: 'pending',
     ),

@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Happy Pocket · 日本語 App 紹介画像</title>
+  <script>
+    if (new URLSearchParams(location.search).get('scale') === '2') {
+      document.documentElement.classList.add('capture-2x');
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@0..1&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 1290px; height: 2796px; margin: 0; overflow: hidden; }
+    html.capture-2x, html.capture-2x body { width: 2580px; height: 5592px; }
+    html.capture-2x .slide { transform: scale(2); transform-origin: top left; }
+    body {
+      color: #1c2923;
+      background: #f7f7f8;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .slide {
+      --accent: #537a69;
+      --accent-soft: #e4eee8;
+      position: relative;
+      width: 1290px;
+      height: 2796px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 104% 6%, rgba(255,255,255,.96) 0 180px, rgba(218,228,222,.75) 184px 187px, transparent 191px),
+        radial-gradient(circle at -4% 92%, rgba(255,255,255,.9) 0 250px, rgba(224,231,227,.6) 254px 258px, transparent 262px),
+        linear-gradient(150deg,#ffffff 0%,#fafafa 46%,#eef1f0 100%);
+    }
+    .slide::before {
+      content: "";
+      position: absolute;
+      width: 210px;
+      height: 210px;
+      right: -48px;
+      top: -62px;
+      border: 5px solid rgba(255,255,255,.92);
+      border-radius: 50%;
+      box-shadow: 0 0 60px rgba(255,255,255,.8);
+    }
+    .slide::after {
+      content: "";
+      position: absolute;
+      left: 92px;
+      bottom: 340px;
+      width: 118px;
+      height: 118px;
+      opacity: .28;
+      background-image: radial-gradient(circle,var(--accent) 0 3px,transparent 4px);
+      background-size: 22px 22px;
+    }
+    .eyebrow {
+      position: absolute;
+      left: 104px;
+      top: 132px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--accent);
+      font-size: 25px;
+      font-weight: 800;
+      letter-spacing: .18em;
+    }
+    .eyebrow-mark {
+      width: 13px;
+      height: 24px;
+      border-radius: 13px 2px 13px 2px;
+      background: var(--accent);
+      transform: rotate(38deg);
+    }
+    .counter {
+      position: absolute;
+      right: 98px;
+      top: 132px;
+      color: #a4aaa7;
+      font-size: 24px;
+      font-weight: 750;
+      letter-spacing: .12em;
+    }
+    .headline {
+      position: absolute;
+      left: 102px;
+      top: 270px;
+      margin: 0;
+      max-width: 1060px;
+      color: #17231e;
+      font-size: 88px;
+      font-weight: 850;
+      line-height: 1.15;
+      letter-spacing: -.055em;
+    }
+    .headline .leaf {
+      display: inline-block;
+      width: 25px;
+      height: 40px;
+      margin-left: 22px;
+      border-radius: 28px 5px 28px 5px;
+      background: var(--accent);
+      transform: rotate(38deg) translateY(-18px);
+    }
+    .subhead {
+      position: absolute;
+      left: 106px;
+      top: 410px;
+      margin: 0;
+      color: #6c6c74;
+      font-size: 42px;
+      font-weight: 500;
+      line-height: 1.55;
+      letter-spacing: .025em;
+      white-space: pre-line;
+    }
+    .features {
+      position: absolute;
+      left: 104px;
+      top: 865px;
+      z-index: 4;
+      width: 390px;
+      display: grid;
+      gap: 72px;
+    }
+    .feature {
+      min-height: 118px;
+      display: grid;
+      grid-template-columns: 92px minmax(0,1fr);
+      align-items: center;
+      gap: 28px;
+    }
+    .feature-icon {
+      width: 92px;
+      height: 92px;
+      border: 1px solid rgba(255,255,255,.95);
+      border-radius: 26px;
+      background: rgba(255,255,255,.92);
+      color: var(--accent);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 18px 34px rgba(42,58,50,.11), inset 0 0 0 1px rgba(82,122,105,.04);
+    }
+    .feature-icon .material-symbols-rounded {
+      font-size: 48px;
+      font-variation-settings: "FILL" 1,"wght" 650,"GRAD" 0,"opsz" 48;
+    }
+    .feature-copy { min-width: 0; }
+    .feature-copy strong {
+      display: block;
+      margin-bottom: 9px;
+      color: #26322d;
+      font-size: 31px;
+      font-weight: 800;
+      line-height: 1.25;
+      white-space: nowrap;
+    }
+    .feature-copy span {
+      display: block;
+      color: #77777e;
+      font-size: 22px;
+      font-weight: 500;
+      line-height: 1.55;
+      white-space: pre-line;
+    }
+    .stage {
+      position: absolute;
+      z-index: 2;
+      left: 405px;
+      right: -84px;
+      bottom: 122px;
+      height: 1960px;
+      border-radius: 54% 0 0 8%;
+      background: linear-gradient(164deg,rgba(255,255,255,.2),rgba(255,255,255,.88) 67%,rgba(225,230,228,.88));
+      box-shadow: inset 0 4px 0 rgba(255,255,255,.9);
+      transform: skewY(-4deg);
+    }
+    .stage::after {
+      content: "";
+      position: absolute;
+      left: 60px;
+      right: 120px;
+      bottom: 145px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(37,49,43,.13);
+      filter: blur(35px);
+    }
+    .device {
+      position: absolute;
+      z-index: 5;
+      right: 62px;
+      top: 720px;
+      width: 846px;
+      height: 1862px;
+      padding: 16px;
+      border-radius: 106px;
+      background: linear-gradient(120deg,#141816 0%,#7c817e 4%,#e9ecea 7%,#1a1d1b 10%,#090b0a 92%,#8f9491 97%,#e5e7e6 100%);
+      box-shadow: 0 56px 90px rgba(31,41,36,.22), 0 10px 22px rgba(31,41,36,.17);
+      transform: perspective(2600px) rotateY(-4deg) rotateZ(2.2deg);
+      transform-origin: 52% 88%;
+    }
+    .device::before {
+      content: "";
+      position: absolute;
+      z-index: 3;
+      left: 50%;
+      top: 25px;
+      width: 184px;
+      height: 50px;
+      margin-left: -92px;
+      border-radius: 25px;
+      background: #050606;
+      box-shadow: inset 0 -2px 5px rgba(255,255,255,.08);
+    }
+    .device img {
+      width: 100%;
+      height: 100%;
+      border-radius: 91px;
+      display: block;
+      object-fit: contain;
+      background: #f5f0e7;
+    }
+    .brand-footer {
+      position: absolute;
+      z-index: 7;
+      left: 104px;
+      bottom: 102px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: #758079;
+      font-size: 24px;
+      font-weight: 750;
+      letter-spacing: .1em;
+    }
+    .brand-footer::before {
+      content: "";
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: var(--accent-soft);
+      box-shadow: inset 0 0 0 2px color-mix(in srgb,var(--accent) 28%,transparent);
+    }
+  </style>
+</head>
+<body>
+  <main class="slide" id="slide">
+    <div class="eyebrow"><i class="eyebrow-mark"></i>HAPPY POCKET</div>
+    <div class="counter" id="counter"></div>
+    <h1 class="headline" id="headline"></h1>
+    <p class="subhead" id="subhead"></p>
+    <section class="features" id="features"></section>
+    <div class="stage"></div>
+    <div class="device"><img id="screen" alt="Happy Pocket の画面"></div>
+    <div class="brand-footer">ハピポケ家族家計簿</div>
+  </main>
+  <script>
+    const slides = [
+      {
+        title:'家計がひと目で', subtitle:'今月の支出と、ときめきを\n一枚でやさしく見渡せる', screen:'screens/01-home.png', accent:'#537a69', soft:'#e3eee8',
+        features:[['payments','今月の支出','日常とときめきを\n一緒に確認'],['mood','満足度','金額だけでなく\n気持ちも残せる'],['track_changes','目標の進み具合','月のときめき目標を\nそっと見守る'],['history','最近の記録','よく使う明細へ\nすぐアクセス']]
+      },
+      {
+        title:'すぐに記録', subtitle:'金額もお店も、迷わず入力\n毎日の記録をもっと軽やかに', screen:'screens/02-entry.png', accent:'#56836f', soft:'#e4efe9',
+        features:[['edit_note','かんたん入力','必要な項目を\n一つの画面で入力'],['mic','音声で記録','まとめて話して\n入力をお手伝い'],['sentiment_satisfied','5段階の満足度','ときめき支出の\n気持ちまで残す'],['playlist_add','続けて記録','複数の支出も\n流れを止めずに入力']]
+      },
+      {
+        title:'明細をすっきり', subtitle:'カレンダーと絞り込みで\nあの支出がすぐ見つかる', screen:'screens/03-list.png', accent:'#597e70', soft:'#e5eeea',
+        features:[['calendar_month','日付から探す','月・日ごとの支出を\nすばやく確認'],['tune','条件で絞り込み','帳簿・カテゴリ・金額で\n見たい記録だけ表示'],['search','すぐに検索','お店やメモから\n目的の明細を発見'],['group','家族の支払い','誰が支払ったかを\n色でわかりやすく表示']]
+      },
+      {
+        title:'支出を見える化', subtitle:'数字の流れをやさしく整理\n家計の今がわかる', screen:'screens/04-analytics.png', accent:'#5b7794', soft:'#e5ebf1',
+        features:[['show_chart','月の推移','今月と先月の流れを\nグラフで比較'],['donut_large','カテゴリ別','支出の内訳を\nひと目で把握'],['diversity_3','家族別','家族みんなの支出を\n中立的に整理'],['manage_search','詳しく見る','カテゴリごとの明細を\n読み取り専用で確認']]
+      },
+      {
+        title:'ときめきも残す', subtitle:'使った金額だけじゃない\n心が満たされた瞬間まで', screen:'screens/05-satisfaction.png', accent:'#c47d94', soft:'#f4e5ea',
+        features:[['sentiment_very_satisfied','5段階の満足度','その支出の気持ちを\n直感的に選択'],['calendar_month','ときめきカレンダー','うれしかった日を\n月ごとに振り返る'],['favorite','小さな幸せ','金額に隠れた\n心の価値を大切に'],['insights','自分らしく分析','満足度の傾向を\n静かに見つめる']]
+      },
+      {
+        title:'家族と安心共有', subtitle:'それぞれの記録を大切に\n必要な家計だけ一緒に', screen:'screens/06-family.png', accent:'#5d7f73', soft:'#e5eeea',
+        features:[['encrypted','暗号化して同期','家族の共有データを\n安全にやり取り'],['key','招待コード','6桁のコードで\nかんたんに招待'],['verified_user','承認して参加','本人と端末を確認して\nメンバーを追加'],['visibility_off','個人帳簿は非公開','共有しない記録は\n自分だけのもの']]
+      },
+      {
+        title:'買い物を一緒に', subtitle:'買うものを家族で共有\n買い忘れをやさしく減らす', screen:'screens/07-shopping.png', accent:'#5c866e', soft:'#e6f0ea',
+        features:[['checklist','共有リスト','家族みんなで\n同じリストを確認'],['shield','日常とときめき','買う目的に合わせて\n帳簿を選択'],['category','カテゴリ整理','必要な買い物だけ\n見やすく絞り込み'],['task_alt','完了を管理','買ったものを\nその場でチェック']]
+      },
+      {
+        title:'自分好みに設定', subtitle:'言語や通貨、安全設定まで\n暮らしに合わせて整えられる', screen:'screens/08-settings.png', accent:'#537d6b', soft:'#e3eee8',
+        features:[['translate','表示言語','日本語・中国語・英語を\nいつでも切り替え'],['currency_yen','通貨を選択','暮らしに合う通貨で\n家計をわかりやすく'],['lock','アプリを保護','生体認証や PIN で\n大切な記録を守る'],['person','プロフィール','名前やアイコンを\n自分らしく設定']]
+      },
+      {
+        title:'自分らしく分類', subtitle:'細かな支出も整えて\n暮らしに合う家計簿へ', screen:'screens/09-category.png', accent:'#d18468', soft:'#f5e8e2',
+        features:[['account_tree','大分類と小分類','暮らしの粒度に合わせて\nすっきり整理'],['search','カテゴリ検索','長い一覧からでも\nすぐに見つかる'],['swap_vert','自由に並べ替え','よく使う分類を\n使いやすい順番へ'],['add_circle','分類を追加','自分の暮らしに合う\nカテゴリを作成']]
+      },
+      {
+        title:'データは手元に', subtitle:'ローカル保存と暗号化で\n大切な家計を静かに守る', screen:'screens/10-backup.png', accent:'#57796d', soft:'#e4ede9',
+        features:[['smartphone','端末内に保存','家計データは原則\nあなたの端末の中'],['encrypted','暗号化バックアップ','パスワードで守った\n.hpb ファイルを作成'],['restore','安全に復元','失敗時は変更を戻し\n今のデータを保持'],['password','秘密を保存しない','バックアップ用の\nパスワードは非保存']]
+      }
+    ];
+
+    const index = Math.min(slides.length - 1, Math.max(0, Number(new URLSearchParams(location.search).get('slide') || 1) - 1));
+    const data = slides[index];
+    const root = document.getElementById('slide');
+    root.style.setProperty('--accent',data.accent);
+    root.style.setProperty('--accent-soft',data.soft);
+    document.getElementById('counter').textContent=`${String(index+1).padStart(2,'0')} / 10`;
+    document.getElementById('headline').innerHTML=`${data.title}<i class="leaf"></i>`;
+    document.getElementById('subhead').textContent=data.subtitle;
+    document.getElementById('screen').src=data.screen;
+    document.getElementById('features').innerHTML=data.features.map(([icon,title,copy])=>`<article class="feature"><div class="feature-icon"><span class="material-symbols-rounded">${icon}</span></div><div class="feature-copy"><strong>${title}</strong><span>${copy}</span></div></article>`).join('');
+  </script>
+</body>
+</html>

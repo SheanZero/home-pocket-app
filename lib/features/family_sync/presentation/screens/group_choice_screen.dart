@@ -52,9 +52,9 @@ class GroupChoiceScreen extends ConsumerWidget {
               _FamilyChoiceCard(
                 controlKey: const Key('family-choice-create'),
                 lightAsset:
-                    'docs/mockup/v16/assets/family-entry-create-warm-v1.png',
+                    'docs/mockup/v17/assets/family-entry-create-warm-v1.png',
                 darkAsset:
-                    'docs/mockup/v16/assets/family-entry-create-warm-v1-dark.png',
+                    'docs/mockup/v17/assets/family-entry-create-warm-v1-dark.png',
                 title: l10n.groupCreate,
                 description: l10n.groupCreateDesc,
                 onTap: () => Navigator.push(
@@ -68,9 +68,9 @@ class GroupChoiceScreen extends ConsumerWidget {
               _FamilyChoiceCard(
                 controlKey: const Key('family-choice-join'),
                 lightAsset:
-                    'docs/mockup/v16/assets/family-entry-join-warm-v1.png',
+                    'docs/mockup/v17/assets/family-entry-join-warm-v1.png',
                 darkAsset:
-                    'docs/mockup/v16/assets/family-entry-join-warm-v1-dark.png',
+                    'docs/mockup/v17/assets/family-entry-join-warm-v1-dark.png',
                 title: l10n.familySyncEnterPartnerCode,
                 description: l10n.groupJoinDesc,
                 onTap: () => Navigator.push(

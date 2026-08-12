@@ -1,0 +1,21 @@
+{
+  "version": "v17",
+  "locale": "ja",
+  "canvas": {
+    "width": 2580,
+    "height": 5592,
+    "format": "png"
+  },
+  "slides": [
+    {"index": 1, "title": "家計がひと目で", "screen": "screens/01-home.png", "export": "exports/01-home.png"},
+    {"index": 2, "title": "すぐに記録", "screen": "screens/02-entry.png", "export": "exports/02-entry.png"},
+    {"index": 3, "title": "明細をすっきり", "screen": "screens/03-list.png", "export": "exports/03-list.png"},
+    {"index": 4, "title": "支出を見える化", "screen": "screens/04-analytics.png", "export": "exports/04-analytics.png"},
+    {"index": 5, "title": "ときめきも残す", "screen": "screens/05-satisfaction.png", "export": "exports/05-joy.png"},
+    {"index": 6, "title": "家族と安心共有", "screen": "screens/06-family.png", "export": "exports/06-family.png"},
+    {"index": 7, "title": "買い物を一緒に", "screen": "screens/07-shopping.png", "export": "exports/07-shopping.png"},
+    {"index": 8, "title": "自分好みに設定", "screen": "screens/08-settings.png", "export": "exports/08-settings.png"},
+    {"index": 9, "title": "自分らしく分類", "screen": "screens/09-category.png", "export": "exports/09-category.png"},
+    {"index": 10, "title": "データは手元に", "screen": "screens/10-backup.png", "export": "exports/10-privacy-backup.png"}
+  ]
+}

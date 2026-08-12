@@ -25,7 +25,7 @@ import 'package:home_pocket/shared/widgets/main_surface_header.dart';
 import '../helpers/happiness_test_fixtures.dart';
 
 String _asset(String fileName) =>
-    '${Directory.current.path}/docs/mockup/v16/assets/$fileName';
+    '${Directory.current.path}/docs/mockup/v17/assets/$fileName';
 
 Widget _preview({required bool family}) {
   return MaterialApp(

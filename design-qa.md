@@ -1,3 +1,51 @@
+# Happy Pocket V17 Whole-App Mockup Design QA
+
+## Evidence
+
+- Source visual truth: fresh Flutter goldens for onboarding value capsules, satisfaction sheet, dark category selection and dark family payer attribution under `/Users/xinz/Development/home-pocket-app/test/golden/goldens/`.
+- Rendered implementation: `http://127.0.0.1:4173/v17/?screen=home`.
+- Implementation screenshots: 30 page captures plus key interaction states under `/Users/xinz/.codex/visualizations/2026/08/12/019ff3ed-a3f4-7f53-8641-70e19c08cc7f/v17-audit/`.
+- Full-view evidence: `contact-sheet-1.png`, `contact-sheet-2.png`, `contact-sheet-3.png` in that audit directory.
+- Focused comparison evidence: `comparison-onboarding-dark.png`, `comparison-satisfaction-sheet.png`, `comparison-category-dark.png`, `comparison-family-attribution-dark.png`.
+- Detailed QA report: `/Users/xinz/Development/home-pocket-app/docs/mockup/v17/design-qa.md`.
+
+## Viewport and normalization
+
+- V17 implementation: 390 × 844 CSS and physical pixels, DPR 1, browser viewport 1440 × 1100. All 30 pages were also measured at 375 and 430 CSS px.
+- Flutter source pixels: onboarding 393 × 852, satisfaction 390 × 844, category 390 × 844, family attribution 390 × 390.
+- Onboarding was normalized to 390 × 844; satisfaction and category were compared 1:1; family attribution used a 390 × 390 focused family-list crop.
+- States: personal/family, light/dark, Joy satisfaction sheet, category dark palette, family attribution, approval/joining, key recovery, settings first-release state and analytics family empty state.
+
+## Findings
+
+- No actionable P0, P1, or P2 issues remain.
+- Fonts and typography: existing system sans-serif, tabular number styling and Material Symbols remain consistent; no title clips at 375 / 390 / 430px.
+- Spacing and layout: phone frame, safe-area rhythm, page gutters, cards, bottom navigation and fixed actions remain consistent across all 30 pages.
+- Colors and tokens: V17 reuses production semantic tokens, including current dark category colors and the stable eight-slot payer palette.
+- Image quality and asset fidelity: local family/onboarding assets and all five production satisfaction SVGs are reused. Avatar emoji intentionally mirror the production `warmEmojis` feature.
+- Copy and content: first-release notification controls are removed, family empty insight is deduplicated, legal content has a long-form offline reader, and joining-member copy does not prematurely present an approved member as active.
+- Accessibility and responsiveness: zero horizontal overflow and zero broken images across 30 pages at 375 / 390 / 430px; key controls retain labels/roles and practical targets.
+
+## Comparison history
+
+1. Initial pass found a P2 avatar-picker mismatch: tiny unframed preview and a wrapping cancel label at 375px. Fixed with a 110px picker preview, 88px profile preview and widened header columns. Post-fix evidence: `26-avatar-picker.png` and `contact-sheet-3.png`.
+2. Family approval capture was repeated after the real 450ms transition. Post-fix evidence confirms the approved member is “joining” and absent from the active member list: `state-family-approved-joining.png`.
+3. Final focused and full-view comparisons found no remaining P0/P1/P2 drift.
+
+## Primary interactions and checks
+
+- All 30 routes, analytics category drill-down, avatar selection/save, legal reader, satisfaction bottom sheet, family approval/key recovery, notification removal and family empty-state deduplication.
+- Browser console errors: none; inline JavaScript parse: passed.
+- Flutter targeted golden verification: 8 tests passed; `flutter analyze`: no issues.
+
+## Follow-up polish
+
+- None required for the V17 handoff.
+
+final result: passed
+
+---
+
 # Eight-slot family payer identity palette design QA
 
 ## Evidence

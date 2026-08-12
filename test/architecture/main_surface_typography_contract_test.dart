@@ -271,7 +271,7 @@ const _primarySurfaceFiles = <String>[
   'lib/features/shopping_list/presentation/widgets/shopping_item_tile.dart',
 ];
 
-const _mockupFiles = <String>['docs/mockup/v16/index.html'];
+const _mockupFiles = <String>['docs/mockup/v17/index.html'];
 
 const _mockupTokens = <String, double>{
   'type-page-title': AppTypography.pageTitle,

@@ -3,8 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Happy Pocket — V16 Whole App Mockup</title>
-<style>/* Happy Pocket V16 theme (ADR-019 桜餅×若葉 / Sakura Mochi × Wakaba)
+  <title>Happy Pocket — V17 Whole App Mockup</title>
+<script>
+  const captureScale = new URLSearchParams(location.search).get('capture');
+  if (captureScale === '2' || captureScale === '4') {
+    document.documentElement.classList.add(`capture-${captureScale}x`);
+  }
+</script>
+<style>/* Happy Pocket V17 theme (ADR-019 桜餅×若葉 / Sakura Mochi × Wakaba)
    Mirrors the current lib/core/theme/app_palette.dart values. */
 @font-face {
   font-family: "Happy Pocket Numerals";
@@ -139,7 +145,7 @@ body {
 .dot { width:7px; height:7px; border-radius:50%; background:var(--border); }
 .dot.on { background: var(--primary); width:20px; border-radius:4px; }
 </style>
-<style>/* Mockup V16 — A 温润日系 / 生活手帐
+<style>/* Mockup V17 — A 温润日系 / 生活手帐
    Canonical whole-app reference synchronized with the current Flutter app. */
 :root {
   --hp-bg: #f5f0e7;
@@ -178,6 +184,22 @@ body {
   --hp-shared: #58758c;
   --hp-shared-text: #3f6078;
   --hp-shared-soft: #e4ebf0;
+  --hp-payer-self-bg: #e7eef6;
+  --hp-payer-self-fg: #3f6078;
+  --hp-payer-a-bg: #eeeaf7;
+  --hp-payer-a-fg: #675a8c;
+  --hp-payer-b-bg: #f4e8cf;
+  --hp-payer-b-fg: #76551f;
+  --hp-payer-c-bg: #e2eef1;
+  --hp-payer-c-fg: #35636e;
+  --hp-payer-d-bg: #f3e5dc;
+  --hp-payer-d-fg: #774f3c;
+  --hp-payer-e-bg: #e7e9f4;
+  --hp-payer-e-fg: #4a5885;
+  --hp-payer-f-bg: #eee6e1;
+  --hp-payer-f-fg: #6b5448;
+  --hp-payer-g-bg: #e8ebec;
+  --hp-payer-g-fg: #4f5f64;
   --hp-success: #4f826a;
   --hp-warning: #a8733f;
   --hp-error: #b64f4f;
@@ -260,6 +282,22 @@ body {
   --hp-shared: #91adc2;
   --hp-shared-text: #aac4d7;
   --hp-shared-soft: #263640;
+  --hp-payer-self-bg: #293b47;
+  --hp-payer-self-fg: #b8d4e5;
+  --hp-payer-a-bg: #342f46;
+  --hp-payer-a-fg: #d1c4ee;
+  --hp-payer-b-bg: #433821;
+  --hp-payer-b-fg: #e7cb8f;
+  --hp-payer-c-bg: #233d43;
+  --hp-payer-c-fg: #b5d5dc;
+  --hp-payer-d-bg: #432f27;
+  --hp-payer-d-fg: #e7bfa9;
+  --hp-payer-e-bg: #2d334d;
+  --hp-payer-e-fg: #c5cef2;
+  --hp-payer-f-bg: #3d322d;
+  --hp-payer-f-fg: #d8c3b7;
+  --hp-payer-g-bg: #2e383b;
+  --hp-payer-g-fg: #c4d0d3;
   --hp-success: #89b49c;
   --hp-warning: #d3a571;
   --hp-error: #e58c8c;
@@ -277,6 +315,17 @@ body {
   button, input, select, textarea { font: inherit; }
   button { color: inherit; }
   .material-symbols-rounded { font-family: "Material Symbols Rounded"; font-weight: normal; font-style: normal; font-size: 20px; line-height: 1; letter-spacing: normal; text-transform: none; white-space: nowrap; direction: ltr; -webkit-font-feature-settings: "liga"; font-feature-settings: "liga"; -webkit-font-smoothing: antialiased; }
+  html.capture-2x, html.capture-4x { width: 390px; height: 844px; overflow: visible; }
+  html.capture-2x { zoom: 2; }
+  html.capture-4x { zoom: 4; }
+  html:is(.capture-2x,.capture-4x) body { width: 390px; height: 844px; min-height: 844px; overflow: visible; background: var(--hp-bg); }
+  html:is(.capture-2x,.capture-4x), html:is(.capture-2x,.capture-4x) body { scrollbar-width: none; }
+  html:is(.capture-2x,.capture-4x)::-webkit-scrollbar,
+  html:is(.capture-2x,.capture-4x) body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+  html:is(.capture-2x,.capture-4x) :where(.hub-bar,.catalog,.inspector,#sketch-tools) { display: none !important; }
+  html:is(.capture-2x,.capture-4x) .workspace { width: 390px; height: 844px; margin: 0; padding: 0; display: block; }
+  html:is(.capture-2x,.capture-4x) .phone-wrap { width: 390px; height: 844px; display: block; }
+  html:is(.capture-2x,.capture-4x) .phone { outline: 0; border-radius: 0; box-shadow: none; }
   [data-theme="dark"] body { background: #0f1311; color: #edf0eb; }
   :focus-visible { outline: 3px solid color-mix(in srgb, var(--hp-primary) 45%, transparent); outline-offset: 2px; }
 
@@ -416,7 +465,7 @@ body {
   .story-end .material-symbols-rounded { font-size: 13px; }
   .story-date { width: 40px; height: 40px; border-radius: 10px; background: var(--hp-surface); color: var(--hp-joy-text); display: grid; place-items: center; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 900; }
 
-  /* Home — V16 synchronized with the shipped Flutter composition. */
+  /* Home — V17 synchronized with the shipped Flutter composition. */
   .home-faithful { padding-left: 20px; padding-right: 20px; }
   .home-faithful .app-header { min-height: 46px; margin-bottom: 13px; }
   .home-faithful :where(.page-month-title, .faithful-goal-copy > strong, .faithful-satisfaction-head > strong, .faithful-small-win-value, .faithful-calendar, .faithful-ticket-copy > span, .faithful-member > strong, .faithful-member-spend-amount, .faithful-member-ledgers strong, .faithful-tx-amount) { font-family: var(--hp-font-number); font-variant-numeric: tabular-nums slashed-zero; font-feature-settings: "tnum" 1, "zero" 1; }
@@ -718,10 +767,15 @@ body {
   .list-family-transaction-badge { position: absolute; right: -4px; bottom: -3px; width: 19px; height: 19px; border: 2px solid var(--hp-surface); border-radius: 50%; background: var(--hp-daily); color: #fff; display: grid; place-items: center; }
   .list-family-transaction-badge.joy { background: var(--hp-joy); }
   .list-family-transaction-badge .material-symbols-rounded { font-size: 12px; }
-  .family-payer-chip { flex: 0 0 auto; padding: 2px 7px; border-radius: 5px; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 850; white-space: nowrap; }
-  .family-payer-chip.member-self { background: var(--hp-primary-soft); color: var(--hp-primary-text); }
-  .family-payer-chip.member-hanako { background: var(--hp-joy-soft); color: var(--hp-joy-text); }
-  .family-payer-chip.member-taro { background: var(--hp-shared-soft); color: var(--hp-shared-text); }
+  .family-payer-chip { max-width: 72px; flex: 0 0 auto; overflow: hidden; padding: 2px 7px; border-radius: 5px; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 850; text-overflow: ellipsis; white-space: nowrap; }
+  .family-payer-chip.member-self { background: var(--hp-payer-self-bg); color: var(--hp-payer-self-fg); }
+  .family-payer-chip.member-hanako, .family-payer-chip.member-a { background: var(--hp-payer-a-bg); color: var(--hp-payer-a-fg); }
+  .family-payer-chip.member-taro, .family-payer-chip.member-b { background: var(--hp-payer-b-bg); color: var(--hp-payer-b-fg); }
+  .family-payer-chip.member-c { background: var(--hp-payer-c-bg); color: var(--hp-payer-c-fg); }
+  .family-payer-chip.member-d { background: var(--hp-payer-d-bg); color: var(--hp-payer-d-fg); }
+  .family-payer-chip.member-e { background: var(--hp-payer-e-bg); color: var(--hp-payer-e-fg); }
+  .family-payer-chip.member-f { background: var(--hp-payer-f-bg); color: var(--hp-payer-f-fg); }
+  .family-payer-chip.member-g { background: var(--hp-payer-g-bg); color: var(--hp-payer-g-fg); }
   .list-family-merchant { min-width: 0; overflow: hidden; color: var(--hp-text-muted); text-overflow: ellipsis; white-space: nowrap; }
   .list-empty-filtered { padding: 42px 20px; color: var(--hp-text-muted); text-align: center; font-size: var(--type-body); line-height: var(--line-body); }
   /* Analytics — current Flutter registry restored in the selected warm system. */
@@ -937,6 +991,9 @@ body {
   .shopping-category-actions { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: 8px; padding-top: 14px; }
   .shopping-category-actions .ghost-btn { width: auto; min-width: 92px; }
   .shopping-empty { margin-top: 8px; padding: 36px 16px; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); color: var(--hp-text-muted); text-align: center; font-size: var(--type-body); line-height: var(--line-body); }
+  .shopping-section-title { display: flex; align-items: center; justify-content: space-between; margin: 18px 1px 8px; }
+  .shopping-section-title h2 { margin: 0; color: var(--hp-text-muted); display: inline-flex; align-items: center; gap: 8px; font-size: var(--type-section); line-height: var(--line-section); }
+  .shopping-section-title h2::before { content: ""; width: 3px; height: var(--type-section); border-radius: 2px; background: var(--hp-primary); }
   .shopping-item { min-height: 68px; display: flex; align-items: center; gap: 10px; padding: 11px 12px; background: var(--hp-surface); border: 1px solid var(--hp-border); border-radius: 14px; margin-top: 8px; user-select: none; }
   .shopping-list-card { margin-top: 8px; overflow: hidden; border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); }
   .shopping-list-card .shopping-item { margin-top: 0; border: 0; border-radius: 0; }
@@ -1122,13 +1179,30 @@ body {
   .entry-note-card > .material-symbols-rounded:last-child { width: auto; color: var(--hp-text-faint); font-size: 18px; }
   .entry-satisfaction-card { margin-top: 8px; padding: 11px; border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-surface); }
   .entry-satisfaction-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .entry-satisfaction-title { min-width: 0; display: flex; align-items: center; gap: 9px; }
+  .entry-satisfaction-title .satisfaction-face { width: 20px; height: 20px; color: var(--hp-text-muted); }
   .entry-satisfaction-head strong { color: var(--hp-text); font-size: var(--type-label); line-height: var(--line-label); }
   .entry-satisfaction-head span { color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
-  .entry-satisfaction-options { margin-top: 9px; display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 5px; }
-  .entry-satisfaction-option { min-width: 0; min-height: 42px; padding: 5px 2px; border: 1px solid var(--hp-border); border-radius: 12px; background: var(--hp-surface-muted); color: var(--hp-text-muted); display: grid; place-items: center; gap: 1px; cursor: pointer; }
-  .entry-satisfaction-option .material-symbols-rounded { font-size: 21px; }
+  .entry-satisfaction-options { margin-top: 12px; display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 5px; }
+  .entry-satisfaction-option { min-width: 0; min-height: 56px; padding: 6px 2px 5px; border: 1px solid transparent; border-radius: 16px; background: var(--hp-surface-muted); color: var(--hp-text-muted); display: grid; place-items: center; gap: 3px; cursor: pointer; }
+  .entry-satisfaction-option .satisfaction-face { width: 34px; height: 34px; }
   .entry-satisfaction-option small { font-size: var(--type-micro); line-height: var(--line-micro); font-weight: 750; }
-  .entry-satisfaction-option.active { border-color: var(--hp-joy); background: var(--hp-joy-soft); color: var(--hp-joy-text); }
+  .entry-satisfaction-option.active { border: 2px solid var(--hp-joy); background: var(--hp-joy-soft); color: var(--hp-joy-text); }
+  .satisfaction-face { --face-asset: url("assets/satisfaction/sat_04.svg"); display: inline-block; flex: 0 0 auto; background: currentColor; -webkit-mask: var(--face-asset) center/contain no-repeat; mask: var(--face-asset) center/contain no-repeat; }
+  .entry-satisfaction-summary { width: 100%; min-height: 48px; margin-top: 8px; padding: 9px 11px; border: 1px solid var(--hp-border); border-radius: 16px; background: var(--hp-surface); color: var(--hp-text); display: flex; align-items: center; gap: 9px; text-align: left; cursor: pointer; }
+  .entry-satisfaction-summary .summary-title-icon { width: 20px; height: 20px; color: var(--hp-text-muted); }
+  .entry-satisfaction-summary > strong { width: 48px; flex: 0 0 auto; font-size: var(--type-label); line-height: var(--line-label); }
+  .entry-satisfaction-summary .summary-selected-icon { width: 32px; height: 32px; margin-left: auto; color: var(--hp-joy-text); }
+  .entry-satisfaction-summary .summary-label { color: var(--hp-joy-text); font-size: var(--type-label); line-height: var(--line-label); font-weight: 800; }
+  .entry-satisfaction-summary > .material-symbols-rounded { color: var(--hp-joy-text); font-size: 18px; }
+  .satisfaction-sheet { padding: 2px 4px 0; text-align: center; }
+  .satisfaction-sheet-reason { display: inline-flex; min-height: 31px; align-items: center; padding: 6px 12px; border-radius: var(--hp-radius-pill); background: var(--hp-joy-soft); color: var(--hp-joy-text); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 750; }
+  .satisfaction-sheet h3 { margin: 18px 0 5px; font-size: var(--type-page-title); line-height: var(--line-page-title); }
+  .satisfaction-sheet-current { margin: 0; color: var(--hp-text-muted); font-size: var(--type-body); line-height: var(--line-body); }
+  .satisfaction-sheet .entry-satisfaction-options { margin-top: 20px; gap: 3px; }
+  .satisfaction-sheet .entry-satisfaction-option { min-height: 68px; border-radius: 16px; }
+  .satisfaction-sheet .entry-satisfaction-option .satisfaction-face { width: 48px; height: 48px; }
+  .satisfaction-sheet-helper { margin: 30px 0 10px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: var(--line-supporting); }
   .entry-input-dock { flex: 0 0 auto; padding: 11px 14px 18px; border-top: 1px solid var(--hp-border); background: color-mix(in srgb, var(--hp-surface) 97%, transparent); box-shadow: 0 -8px 22px rgba(75,57,40,.05); }
   .entry-voice-launch { width: min(100%, 304px); min-height: 46px; margin: 0 auto 10px; padding: 7px 12px; border: 1px solid var(--hp-border); border-radius: 15px; background: var(--hp-surface); color: var(--hp-text); display: flex; align-items: center; gap: 9px; text-align: left; cursor: pointer; }
   .entry-voice-launch > .material-symbols-rounded:first-child { width: 32px; height: 32px; border-radius: 11px; background: var(--hp-primary-soft); color: var(--hp-primary); display: grid; place-items: center; font-size: 19px; }
@@ -1218,7 +1292,7 @@ body {
   .edit-delete-confirm { background: var(--hp-error); color: var(--hp-surface); box-shadow: none; }
 
   /* Category selection — mirrors CategorySelectionScreen browse and reorder
-     modes while using the V16 warm semantic tokens. */
+     modes while using the V17 warm semantic tokens. */
   .category-screen { height: 100%; min-height: 0; padding: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--hp-bg); }
   .category-appbar { min-height: 56px; flex: 0 0 56px; padding: 0 8px; border-bottom: 1px solid var(--hp-border); background: var(--hp-surface); display: grid; grid-template-columns: 48px minmax(0,1fr) 72px; align-items: center; }
   .category-appbar h1 { margin: 0; overflow: hidden; color: var(--hp-text); font-size: var(--type-page-title); line-height: var(--line-page-title); font-weight: 700; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
@@ -1247,6 +1321,7 @@ body {
   .category-chip:hover { background: color-mix(in srgb, var(--category-color) 18%, transparent); }
   .category-chip:active { transform: scale(.97); }
   .category-chip.selected { background: var(--category-color); color: #fff; box-shadow: 0 3px 9px color-mix(in srgb, var(--category-color) 22%, transparent); }
+  [data-theme="dark"] .category-chip.selected { color: var(--hp-surface); }
   .category-chip.add { border: 1px solid var(--hp-border); background: transparent; color: var(--hp-text-muted); display: inline-flex; align-items: center; gap: 4px; }
   .category-chip.add .material-symbols-rounded { font-size: 14px; }
   .category-add-dock { flex: 0 0 auto; padding: 8px 16px 16px; background: linear-gradient(to bottom, color-mix(in srgb,var(--hp-bg) 65%,transparent), var(--hp-bg) 22%); }
@@ -1303,6 +1378,32 @@ body {
   .settings-danger-row .row-icon { background: color-mix(in srgb,var(--hp-error) 10%,var(--hp-surface)); color: var(--hp-error); }
   .settings-danger-row .row-copy small { color: color-mix(in srgb,var(--hp-error) 66%,var(--hp-text-muted)); }
   .settings-footer { margin: 24px 0 2px; text-align: center; }
+  .drill-summary { margin: 0 -20px 12px; padding: 16px 20px; background: var(--hp-surface); display: grid; grid-template-columns: 1.35fr 1fr 1fr; gap: 10px; }
+  .drill-summary span { min-width: 0; color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
+  .drill-summary strong { display: block; margin-top: 4px; overflow: hidden; color: var(--hp-text); font-family: var(--hp-font-number); font-size: var(--type-amount-small); line-height: var(--line-amount-small); text-overflow: ellipsis; white-space: nowrap; }
+  .drill-summary span:first-child strong { font-size: var(--type-amount-medium); line-height: var(--line-amount-medium); }
+  .avatar-picker-screen { position: relative; padding: 8px 28px 28px; }
+  .avatar-picker-header { min-height: 44px; display: grid; grid-template-columns: 82px 1fr 82px; align-items: center; }
+  .avatar-picker-header h1 { margin: 0; text-align: center; font-size: var(--type-section); line-height: var(--line-section); }
+  .avatar-picker-header button { min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--hp-text-muted); white-space: nowrap; cursor: pointer; }
+  .avatar-picker-header button:last-child { color: var(--hp-primary-text); font-weight: 800; }
+  .avatar-picker-preview { margin: 20px 0 24px; text-align: center; }
+  .avatar-picker-preview strong { width: 110px; height: 110px; margin: 0 auto 10px; border: 3px solid var(--hp-surface); border-radius: 50%; background: var(--hp-primary-soft); display: grid; place-items: center; font-size: 54px; box-shadow: var(--hp-shadow-card); }
+  .avatar-picker-preview small { color: var(--hp-text-muted); font-size: var(--type-compact); line-height: var(--line-compact); }
+  .profile-avatar-preview { width: 88px; height: 88px; padding: 0; border: 3px solid var(--hp-surface); border-radius: 50%; background: var(--hp-primary-soft); color: var(--hp-text); display: grid; place-items: center; font-size: 42px; line-height: 1; box-shadow: var(--hp-shadow-card); cursor: pointer; }
+  .avatar-picker-tabs { height: 44px; border-bottom: 1px solid var(--hp-border); display: grid; grid-template-columns: 1fr 1fr; }
+  .avatar-picker-tabs button { border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--hp-text-muted); cursor: pointer; }
+  .avatar-picker-tabs button.active { border-bottom-color: var(--hp-primary); color: var(--hp-primary-text); font-weight: 800; }
+  .avatar-picker-grid { margin-top: 24px; display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 10px; }
+  .avatar-picker-grid button { height: 56px; padding: 0; border: 0; border-radius: 12px; background: var(--hp-surface-muted); font-size: 28px; cursor: pointer; }
+  .avatar-picker-grid button.selected { border: 2px solid var(--hp-primary); background: var(--hp-surface); }
+  .avatar-photo-card { width: 220px; margin: 58px auto 0; padding: 24px 20px; border: 1px solid var(--hp-border); border-radius: 20px; background: var(--hp-surface); color: var(--hp-text); display: grid; place-items: center; gap: 8px; text-align: center; cursor: pointer; }
+  .avatar-photo-card .material-symbols-rounded { color: var(--hp-primary); font-size: 42px; }
+  .legal-reader { padding-bottom: 42px; }
+  .legal-reader article { color: var(--hp-text-muted); font-size: var(--type-body); line-height: 1.75; }
+  .legal-reader article h2 { margin: 24px 0 8px; color: var(--hp-text); font-size: var(--type-section); line-height: var(--line-section); }
+  .legal-reader article p { margin: 0 0 12px; }
+  .legal-reader article code { color: var(--hp-primary-text); }
   .backup-hero { position: relative; overflow: hidden; padding: 18px; background: linear-gradient(145deg,color-mix(in srgb,var(--hp-primary-soft) 70%,var(--hp-surface)),var(--hp-surface)); box-shadow: none; }
   .backup-hero::after { content: ""; position: absolute; width: 118px; height: 118px; right: -50px; top: -54px; border: 18px solid color-mix(in srgb,var(--hp-primary) 8%,transparent); border-radius: 50%; }
   .backup-hero-mark { width: 48px; height: 48px; margin-bottom: 13px; border-radius: 15px; display: grid; place-items: center; background: var(--hp-surface); color: var(--hp-primary-text); box-shadow: var(--hp-shadow-card); }
@@ -1452,6 +1553,11 @@ body {
   .family-pending .material-symbols-rounded { color: var(--hp-faithful-accent); }
   .family-pending strong { flex: 1; font-size: var(--type-label); line-height: var(--line-label); }
   .family-pending span:not(.material-symbols-rounded) { color: var(--hp-faithful-accent); font-size: var(--type-supporting); line-height: var(--line-supporting); font-weight: 750; }
+  .family-approved-joining { width: 100%; margin-bottom: 8px; padding: 13px 14px; border: 1px solid color-mix(in srgb,var(--hp-primary) 42%,var(--hp-border)); border-radius: 13px; background: color-mix(in srgb,var(--hp-success) 11%,var(--hp-surface)); color: var(--hp-text); display: flex; align-items: flex-start; gap: 10px; }
+  .family-approved-joining > .material-symbols-rounded { margin-top: 1px; color: var(--hp-success); font-size: 20px; }
+  .family-approved-joining-copy { min-width: 0; flex: 1; }
+  .family-approved-joining-copy strong { display: block; font-size: var(--type-label); line-height: var(--line-label); font-weight: 800; }
+  .family-approved-joining-copy small { display: block; margin-top: 3px; color: var(--hp-text-muted); font-size: var(--type-supporting); line-height: 1.35; }
   .family-member-list { border: 1px solid var(--hp-border); border-radius: 14px; background: var(--hp-surface); overflow: hidden; }
   .family-member-row { width: 100%; min-height: 58px; padding: 8px 12px; border: 0; border-bottom: 1px solid var(--hp-border); background: transparent; color: var(--hp-text); display: flex; align-items: center; gap: 10px; text-align: left; cursor: pointer; }
   .family-member-copy { min-width: 0; flex: 1; }
@@ -1520,9 +1626,14 @@ body {
   .onboarding-content h1 { margin: 15px 0 0; color: var(--hp-text); font-family: var(--hp-font-display); font-size: 28px; line-height: 38px; font-weight: 700; letter-spacing: .01em; }
   .onboarding-brand { margin-top: 6px; color: var(--hp-text-faint); font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 750; letter-spacing: .28em; }
   .onboarding-lead { max-width: 304px; margin: 16px 0 0; color: var(--hp-text-muted); font-size: var(--type-body); line-height: 1.8; font-weight: 550; }
-  .onboarding-value-pills { width: 100%; margin-top: 23px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; }
-  .onboarding-value-pills span { min-height: 38px; padding: 8px 5px; border-radius: 12px; background: var(--hp-surface); border: 1px solid var(--hp-border); color: var(--hp-text-muted); display: grid; place-items: center; font-size: var(--type-compact); line-height: var(--line-compact); font-weight: 750; }
-  .onboarding-value-pills span:nth-child(2) { border-color: color-mix(in srgb,var(--hp-joy) 38%,var(--hp-border)); background: color-mix(in srgb,var(--hp-joy-soft) 58%,var(--hp-surface)); color: var(--hp-joy-text); }
+  .onboarding-value-cluster { width: 100%; height: 82px; margin-top: 23px; padding: 0; position: relative; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; }
+  .onboarding-value-cluster::before { content: ""; position: absolute; inset: 13px 0 8px; border-radius: 32px; background: color-mix(in srgb,var(--hp-primary) 10%,transparent); }
+  .onboarding-value-capsule { height: 78px; z-index: 1; padding: 9px 4px 8px; border: 1px solid; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: var(--type-compact); line-height: 1.15; font-weight: 800; }
+  .onboarding-value-capsule .material-symbols-rounded { font-size: 23px; }
+  .onboarding-value-capsule.daily { transform: translateY(2px); border-color: color-mix(in srgb,var(--hp-primary) 70%,var(--hp-border)); border-radius: 38px 31px 37px 29px; background: color-mix(in srgb,var(--hp-primary) 18%,var(--hp-surface-muted)); color: var(--hp-primary); }
+  .onboarding-value-capsule.joy { border-color: color-mix(in srgb,var(--hp-joy) 78%,var(--hp-border)); border-radius: 32px 38px 31px 39px; background: color-mix(in srgb,var(--hp-joy) 28%,var(--hp-surface-muted)); color: var(--hp-joy-text); }
+  .onboarding-value-capsule.satisfaction { transform: translateY(3px); border-color: color-mix(in srgb,var(--hp-warning) 70%,var(--hp-border)); border-radius: 38px 33px 40px 30px; background: color-mix(in srgb,var(--hp-warning) 34%,var(--hp-surface-muted)); color: var(--hp-warning); }
+  .onboarding-value-capsule .satisfaction-face { width: 24px; height: 24px; }
   .onboarding-privacy-title { margin-top: 20px !important; font-family: var(--hp-font-body) !important; font-size: 23px !important; line-height: 31px !important; letter-spacing: -.01em !important; }
   .onboarding-privacy-list { width: 100%; margin-top: 22px; border: 1px solid var(--hp-border); border-radius: 17px; background: var(--hp-surface); overflow: hidden; text-align: left; }
   .onboarding-privacy-row { min-height: 58px; padding: 10px 14px; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 12px; }
@@ -1695,7 +1806,7 @@ body {
 </head>
 <body>
   <header class="hub-bar">
-    <div class="hub-title">Happy Pocket · V16 整 App Mockup</div>
+    <div class="hub-title">Happy Pocket · V17 整 App Mockup</div>
     <button class="preset active" data-preset="solo-light"><span class="material-symbols-rounded">person</span>A1 个人 · 浅色</button>
     <button class="preset" data-preset="family-light"><span class="material-symbols-rounded">group</span>A2 家庭 · 浅色</button>
     <button class="preset" data-preset="solo-dark"><span class="material-symbols-rounded">dark_mode</span>A3 个人 · 深色</button>
@@ -1713,6 +1824,7 @@ body {
         <button class="screen-link active" data-screen="home"><span class="material-symbols-rounded">home</span>主页</button>
         <button class="screen-link" data-screen="list"><span class="material-symbols-rounded">receipt_long</span>明细</button>
         <button class="screen-link" data-screen="analytics"><span class="material-symbols-rounded">monitoring</span>统计</button>
+        <button class="screen-link" data-screen="analytics-drill"><span class="material-symbols-rounded">manage_search</span>统计分类详情</button>
         <button class="screen-link" data-screen="shopping"><span class="material-symbols-rounded">checklist</span>购物</button>
         <button class="screen-link" data-screen="shopping-form"><span class="material-symbols-rounded">add_shopping_cart</span>购物项目</button>
       </div>
@@ -1725,18 +1837,24 @@ body {
       <div class="catalog-group"><span>Family</span>
         <button class="screen-link" data-screen="family"><span class="material-symbols-rounded">diversity_3</span>家庭入口</button>
         <button class="screen-link" data-screen="create"><span class="material-symbols-rounded">add_home</span>创建家庭</button>
+        <button class="screen-link" data-screen="approval"><span class="material-symbols-rounded">how_to_reg</span>审批成员</button>
         <button class="screen-link" data-screen="join"><span class="material-symbols-rounded">login</span>加入家庭</button>
+        <button class="screen-link" data-screen="join-confirm"><span class="material-symbols-rounded">verified_user</span>确认家庭</button>
+        <button class="screen-link" data-screen="join-waiting"><span class="material-symbols-rounded">hourglass_top</span>等待批准</button>
         <button class="screen-link" data-screen="group"><span class="material-symbols-rounded">group</span>家庭管理</button>
       </div>
       <div class="catalog-group"><span>Setup & safety</span>
         <button class="screen-link" data-screen="onboarding"><span class="material-symbols-rounded">looks_one</span>欢迎引导 · 1/2</button>
         <button class="screen-link" data-screen="onboarding-privacy"><span class="material-symbols-rounded">looks_two</span>欢迎引导 · 2/2</button>
         <button class="screen-link" data-screen="preferences"><span class="material-symbols-rounded">tune</span>初始设置＋安全保护</button>
+        <button class="screen-link" data-screen="setup-pin"><span class="material-symbols-rounded">password</span>设置 PIN</button>
         <button class="screen-link" data-screen="lock"><span class="material-symbols-rounded">lock</span>应用锁</button>
         <button class="screen-link" data-screen="settings"><span class="material-symbols-rounded">settings</span>设置</button>
         <button class="screen-link" data-screen="profile"><span class="material-symbols-rounded">account_circle</span>个人资料</button>
+        <button class="screen-link" data-screen="avatar-picker"><span class="material-symbols-rounded">add_reaction</span>头像选择</button>
         <button class="screen-link" data-screen="backup"><span class="material-symbols-rounded">encrypted</span>备份与恢复</button>
         <button class="screen-link" data-screen="legal"><span class="material-symbols-rounded">policy</span>法务与赞助</button>
+        <button class="screen-link" data-screen="legal-doc"><span class="material-symbols-rounded">article</span>法务正文</button>
       </div>
     </aside>
 
@@ -1759,7 +1877,7 @@ body {
       <div id="home-design-note" class="joy-variant-panel">
         <span class="screen-name">Home 方案</span>
         <div class="coverage" style="margin-top:9px">
-          <div><strong>C · 层次纸面 ★ 已选</strong><br>V16 严格映射当前 Flutter 主页结构。</div>
+          <div><strong>C · 层次纸面 ★ 已选</strong><br>V17 严格映射当前 Flutter 主页结构。</div>
           <div><strong>悦己内容状态</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-home-joy-demo="filled">有悦己记录</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-home-joy-demo="empty">无悦己记录</button></span></div>
           <div><strong>C2 · 手账便签 ★ 已选</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-home-joy-variant="c1">C1 生活贴纸</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-home-joy-variant="c2">C2 手账便签 ★ 已选</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-home-joy-variant="c3">C3 图标浮岛</button></span></div>
         </div>
@@ -1819,7 +1937,8 @@ body {
           <div><strong>共同终点</strong><br>审批完成后进入家庭管理；入口和管理页不显示引导步骤。</div>
         </div>
         <div class="coverage" style="margin-top:10px">
-          <div><strong>演示状态</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="family">入口</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="create">分享邀请</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="approval">审批成员</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="join">输入邀请码</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="join-confirm">确认家庭</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="join-waiting">等待批准</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="group">家庭管理</button></span></div>
+          <div><strong>演示状态</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="family">入口</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="create">分享邀请</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="approval">审批成员</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="join">输入邀请码</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="join-confirm">确认家庭</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="join-waiting">等待批准</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-transition="recovering">密钥恢复</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-transition="approved-joining">成员正在加入</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-family-demo="group">家庭管理</button></span></div>
+          <div><strong>状态衔接</strong><br>审批后加入方先完成密钥恢复，创建方则看到“成员正在加入”；只有激活完成的成员才进入正式成员列表。</div>
           <div><strong>隐私边界</strong><br>所有加入动作都明确说明：审批前不发生同步，个人私密账目不会进入家庭账本。</div>
         </div>
       </div>
@@ -1837,12 +1956,12 @@ body {
       <div id="settings-security-design-note" class="joy-variant-panel" hidden>
         <span class="screen-name">设置 · 一级信息架构</span>
         <div class="coverage" style="margin-top:9px">
-          <div><strong>一级直达</strong><br>移除“其他设置”二级入口；识别语言紧接显示语言，周起始日同属“一般”，通知与全数据删除直接放在设置主列表。</div>
+          <div><strong>一级直达</strong><br>移除“其他设置”二级入口；识别语言紧接显示语言，周起始日同属“一般”；首发版不提供通知设置，全数据删除保留在主列表最底部。</div>
           <div><strong>安全排序</strong><br>高频偏好在前，数据任务与法务在后；不可撤销的全数据删除独立放在页面最底部，避免与备份混淆。</div>
         </div>
         <div class="coverage" style="margin-top:10px">
           <div><strong>演示状态</strong><br><span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><button class="joy-variant-option" style="width:auto;min-height:32px" data-settings-security-demo="off">应用锁关闭</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-settings-security-demo="pin">仅 PIN</button><button class="joy-variant-option" style="width:auto;min-height:32px" data-settings-security-demo="face-id">Face ID + PIN</button></span></div>
-          <div><strong>交互覆盖</strong><br>周起始日与识别语言可选择；通知可直接切换。关闭 Face ID 回到“仅 PIN”，不会删除 PIN。</div>
+          <div><strong>交互覆盖</strong><br>周起始日与识别语言可选择；关闭 Face ID 回到“仅 PIN”，不会删除 PIN。</div>
         </div>
       </div>
       <div id="backup-design-note" class="joy-variant-panel" hidden>
@@ -1859,18 +1978,18 @@ body {
     </aside>
   </div>
 
-  <div id="sketch-tools"><span>Mockup V16</span><button data-tool="375">375</button><button data-tool="390">390</button><button data-tool="430">430</button><button data-tool="annotations">标注</button></div>
+  <div id="sketch-tools"><span>Mockup V17</span><button data-tool="375">375</button><button data-tool="390">390</button><button data-tool="430">430</button><button data-tool="annotations">标注</button></div>
 
 <script>
   const state = {
     screen: new URLSearchParams(location.search).get('screen') || 'home', theme: 'light', family: false, inviteDismissed: false,
     homeJoyEmpty: new URLSearchParams(location.search).get('home-joy-empty') === '1',
     homeJoyVariant: new URLSearchParams(location.search).get('home-joy-variant') || 'c2',
-    familyInviteCode: '482169', familyRequestPending: true,
-    amount: '0', entryVariant: 'a', entryInputMode: 'keyboard', entryVoiceState: 'review', entryVoiceMode: 'replace', entryVoiceTranscript: '', entryVoiceApplied: false, entryReviewPending: false, entryNeedsReview: false, entryMerchant: '', entryCategory: '食费 > 外出就餐', entryLedger: 'daily', entryNote: '', entrySatisfaction: 8, entryContinuous: false, entrySnapshot: null,
+    familyInviteCode: '482169', familyRequestPending: true, familyApprovedJoining: false, familyJoinRecovering: new URLSearchParams(location.search).get('family-transition') === 'recovering',
+    amount: '0', entryVariant: 'a', entryInputMode: 'keyboard', entryVoiceState: 'review', entryVoiceMode: 'replace', entryVoiceTranscript: '', entryVoiceApplied: false, entryReviewPending: false, entryNeedsReview: false, entryMerchant: '', entryCategory: '食費 > 外食', entryLedger: 'daily', entryNote: '', entrySatisfaction: 8, entryContinuous: false, entrySnapshot: null,
     pin: '', onboardingName: '', onboardingLanguage: 'system', onboardingCurrency: 'JPY', onboardingVoice: 'ja', onboardingVoiceExplicit: false,
     onboardingSecurityEnabled: false, onboardingUnlockMethod: 'biometric', onboardingPinConfigured: false, onboardingPinStage: 'create', onboardingPinFirst: '', onboardingPinDraft: '', onboardingPinError: '', onboardingPinReturn: 'preferences', onboardingPinIntent: 'onboarding',
-    settingsWeekStart: 'monday', settingsNotificationsEnabled: true,
+    settingsWeekStart: 'monday', avatarEmoji: '🌿', avatarTab: 'emoji', analyticsDrillCategory: '食費', legalTitle: 'プライバシーポリシー',
     uiState: 'empty', listYear: 2026, listMonth: 7, listDay: null, listSort: 'date', listDirection: 'desc', listLedger: 'all', listCategory: false, listSearchExpanded: false, listSearch: '',
     analyticsTab: 'joy', analyticsWindowType: 'month', analyticsWindow: '2026-7', analyticsWindowLabel: '2026年7月', analyticsTrend: 'total', analyticsDimension: 'category', analyticsMember: 'all', analyticsCalendarMember: 'all', analyticsJoyDay: 12, analyticsJoyExpanded: false, analyticsEmpty: new URLSearchParams(location.search).get('analytics-empty') === '1',
     shoppingScope: 'all', shoppingLedger: 'all', shoppingPrivateOnly: false, shoppingCategoryIds: [],
@@ -1929,6 +2048,7 @@ body {
     home: ['Main shell','主页','有记录时呈现悦己累计；无悦己账单时隐藏所有零值指标，以柔和邀请引导用户记录花钱换来的享受。','HeroHeader + conditional HomeHero / Joy invitation + Invite + Recent','有悦己 / 无悦己 / 个人 / 家庭 / 明暗','首页视觉提案；空态由 joy transaction presence 驱动，CTA 预选悦己账本'],
     list: ['Main shell','交易明细','个人保持原有月历结构；家庭模式以成员色签区分付款人，保留头像类目徽标，首版不增加成员筛选。','账本切换 + 月历汇总 + 紧凑筛选 + 付款人明细','个人 / 家庭 / 搜索 / 空态','复用 ListScreen；家庭模式合并 Shadow Book 数据并以成员身份控制编辑权限'],
     analytics: ['Main shell','统计','将支出与悦己拆成两个独立页签：个人模式为「支出 / ときめき」，A2 家庭模式为「家族の支出 / 私のときめき」。选中项以柔和纸片抬升，未选中项贴合共享底板。','标题栏 + 双页签 + 每页 2 个注册卡片','个人 / 家庭 / 支出 / 我的悦己 / 日期展开 / 时间窗','保留现有 Analytics registry 与 drill-down；家庭模式的悦己页签只呈现当前用户数据'],
+    'analytics-drill': ['Main shell','统计分类详情','从分类图例进入只读明细；小计、笔数与日均均为中性描述，不出现目标、排名或跨期比较。','返回 + 三项汇总 + 只读交易列表','有记录 / 空 / 加载失败','映射 CategoryDrillDownScreen 与 ListTransactionTile.readOnly'],
     shopping: ['Main shell','购物清单','标题栏提供设置入口；清单保留账簿筛选，并恢复私有与类目筛选。正文长按管理，右侧长按拖动。','标题 + 设置 + 范围 + 账簿 + 私有 / 类目筛选 + 手柄排序清单','全部 / 个人 / 私有 / 类目组合 / 完成态 / 长按菜单','复用购物 providers、筛选状态、单项操作与 reorder 交互'],
     'shopping-form': ['Main shell','购物项目','采用方案 3：数量数值与单位分离，常用单位可快速切换，自定义单位可输入、应用并回显。','名称 + 数值 / 单位 + 用途 + 类型 + 分类 + 价格 + 备注','200 克 / 克·千克·袋 / 自定义单位 / 语音回填 / 编辑','扩展 ShoppingItemFormScreen 的数量模型；保留用户原始单位，不做隐式换算'],
     entry: ['Entry','统一记账','金额、类目、日期、商家、用途与备注始终属于同一表单；聆听、解析与识别结果只更新底部输入区，右上键盘入口全程固定。','共享表单 + 单一语音底板 + 数字键盘','手动 / 聆听 / 解析 / 识别结果 / 权限不可用','映射 ManualOneStepScreen、PTT session、快照恢复与 SmartKeyboard'],
@@ -1947,10 +2067,12 @@ body {
     preferences: ['Setup','初始设置＋安全保护','按确认稿统一整页：头像与必填姓名并排，语言、币种与语音使用同一三行选择卡，再衔接可渐进展开的安全保护。','基础设置 + 统一选择卡 + 安全开关 + 单选方式','保护关闭 / 生物识别 / PIN 待设置 / PIN 已设置','复用 OnboardingSettingsScreen、SetPinScreen 与安全设置状态'],
     'setup-pin': ['Setup','设置应用锁 PIN','进入专注的双次 4 位 PIN 输入；两次一致才返回初始设置或设置页，并同步更新应用锁状态。','首次输入 + 再次确认 + 错误重试','首次开启 / 修改 PIN / 不一致','复用 SetPinScreen 的双次输入与 AppLockService.setPin'],
     lock: ['Safety','应用锁','锁屏专注一个任务；生物识别优先，PIN 永远可回退。','生物识别 + PIN','冷启动 / 回前台 / 错误','复用 AppLockService 与 local_auth'],
-    settings: ['Setup','设置','移除“其他设置”二级入口，把识别语言放在显示语言之后，并将周起始日收进“一般”；危险操作固定在最底部。','页头资料卡 + 6 个常规分组 + 1 个独立危险区','锁关闭 / 仅 PIN / Face ID + PIN / 周起始日 / 识别语言 / 通知 / 明暗','映射现有 SettingsScreen、AdditionalSettingsScreen 与各设置组件'],
+    settings: ['Setup','设置','移除“其他设置”二级入口，把识别语言放在显示语言之后，并将周起始日收进“一般”；首发版不提供通知设置，危险操作固定在最底部。','页头资料卡 + 5 个常规分组 + 1 个独立危险区','锁关闭 / 仅 PIN / Face ID + PIN / 周起始日 / 识别语言 / 明暗','映射现有 SettingsScreen 与各设置组件'],
     profile: ['Setup','个人资料','身份编辑采用普通表单与真实头像槽位，不让装饰背景抢占任务。','头像 + 昵称 + 保存','空值 / 图片 / 文本','复用 profile providers'],
+    'avatar-picker': ['Setup','头像选择','头像预览、表情与照片两个页签保持任务聚焦；当前选择使用双重边框状态。','预览 + 页签 + 5列选择网格','表情 / 照片 / 已选择','映射 AvatarPickerScreen 与 warmEmojis'],
     backup: ['Safety','备份与恢复','把本地加密备份拆成清楚的“写出”和“替换恢复”两条任务；密码由用户保管，恢复前明确告知现有数据会被替换。','安全说明 + 写出 + 文件选择 + 替换确认','密码校验 / 处理中 / 成功 / 错误安全拒绝','映射 DataManagementSection、ExportBackupUseCase、ImportBackupUseCase 与 BackupCryptoService'],
-    legal: ['Safety','法务与赞助','合规信息保持阅读优先；赞助作为外部支持入口，不与核心功能竞争。','文档列表 + 长文阅读','日本合规 / 外链','复用 LegalSponsorSection 与 LegalDocScreen']
+    legal: ['Safety','法务与赞助','合规信息保持阅读优先；赞助作为外部支持入口，不与核心功能竞争。','文档列表 + 长文阅读','日本合规 / 外链','复用 LegalSponsorSection 与 LegalDocScreen'],
+    'legal-doc': ['Safety','法务正文','按当前语言读取随 App 打包的离线 HTML，以原生排版呈现，不依赖 WebView 或网络。','返回 + 标题层级 + 长文滚动','日 / 中 / 英 / 加载 / 错误','映射 LegalDocScreen、LegalHtmlView 与 assets/legal']
   };
 
   const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
@@ -2306,7 +2428,7 @@ body {
 
   function analytics() {
     const header=tabHeader(monthTitle('analytics'),`<span class="list-header-actions"><button class="icon-btn" data-action="month" aria-label="月を選ぶ">${icon('calendar_month')}</button><button class="icon-btn" data-screen="settings" aria-label="設定">${icon('settings')}</button></span>`);
-    const family=state.family?`<div class="analytics-family-card" data-token="FamilyInsightDataCard"><h3>家族 · ハイライトサマリー</h3><p>家族のときめき 24回</p><p>みんなで「趣味・コレクション」を楽しんでいます（12件、平均 8.6 / 10）</p></div>`:'';
+    const family=state.family?`<div class="analytics-family-card" data-token="FamilyInsightDataCard"><h3>家族 · ハイライトサマリー</h3>${state.analyticsEmpty?'<p>まだ家族のときめきデータがありません</p>':'<p>家族のときめき 24回</p><p>みんなで「趣味・コレクション」を楽しんでいます（12件、平均 8.6 / 10）</p>'}</div>`:'';
     const spending=`${analyticsSection('支出の推移','',true)}${analyticsTrendCard()}${analyticsSection('カテゴリ支出','category')}${analyticsDonutCard()}${family}`;
     const joy=`${analyticsSection('ときめきカレンダー','joy',true)}${analyticsCalendarCard(true)}${analyticsSection('ときめきの満足度','joy')}${analyticsHistogramCard()}`;
     const panel=state.analyticsTab==='joy'?joy:spending;
@@ -2348,9 +2470,9 @@ body {
     const pending = visible.filter(([, , done])=>!done);
     const completed = visible.filter(([, , done])=>done);
     const pendingContent = pending.length ? `<div id="shopping-list" class="shopping-list-card" data-shopping-reorder-list>${pending.map(item=>shopItem(...item)).join('')}</div>` : `<div class="shopping-empty">条件に合う買い物はありません</div>`;
-    const completedContent = completed.length ? `<div class="section-title"><h2>完了</h2><button class="text-btn" data-action="toast" data-message="完了済みを削除">すべて削除</button></div>${completed.map(item=>shopItem(...item)).join('')}` : '';
+    const completedContent = completed.length ? `<div class="shopping-section-title"><h2>完了</h2><button class="text-btn" data-action="toast" data-message="完了済みを削除">すべて削除</button></div>${completed.map(item=>shopItem(...item)).join('')}` : '';
     const settings = `<span class="list-header-actions"><button class="icon-btn" data-screen="settings" aria-label="設定">${icon('settings')}</button></span>`;
-    return `<section class="screen">${tabHeader('買い物リスト',settings)}${shoppingFilterCard()}<div class="section-title"><h2>買うもの</h2></div>${pendingContent}${completedContent}</section>`;
+    return `<section class="screen">${tabHeader('買い物リスト',settings)}${shoppingFilterCard()}<div class="shopping-section-title"><h2>買うもの</h2></div>${pendingContent}${completedContent}</section>`;
   }
   function shopItem(name,meta,done,ledger='daily',scope='shared',category='food'){ const ledgerLabel=ledger==='joy'?'ときめき':'日常'; return `<div class="shopping-item ${ledger} ${done?'done':''}" data-shopping-scope="${scope}" data-shopping-category="${category}" data-shopping-actions data-shopping-name="${name}" data-shopping-completed="${done}"><button class="check" data-action="check" aria-label="${name}を${done?'未完了':'完了'}にする">${done?icon('check'):''}</button><span class="row-copy"><strong>${name}</strong><small>${meta}</small></span><span class="badge shopping-ledger-badge ${ledger}">${ledgerLabel}</span><button class="shopping-drag-handle" data-shopping-drag-handle aria-label="${name}を長押しして並べ替え">${icon('drag_indicator')}</button></div>`; }
   function shoppingLedgerSelector() {
@@ -2431,7 +2553,7 @@ body {
   }
 
   function entryHeader() {
-    return `<header class="entry-header"><button class="back-btn" data-action="back" aria-label="关闭记账">${icon('close')}</button><h1>添加账目</h1><button class="icon-btn entry-header-action" data-action="entry-history" aria-label="查看记账历史">${icon('history')}</button></header>`;
+    return `<header class="entry-header"><button class="back-btn" data-action="back" aria-label="記録を閉じる">${icon('close')}</button><h1>取引を追加</h1><button class="icon-btn entry-header-action" data-action="entry-history" aria-label="記録履歴を見る">${icon('history')}</button></header>`;
   }
 
   function entryMethodSwitch(mode) {
@@ -2447,10 +2569,19 @@ body {
     return `<div class="entry-amount ${hasVoiceResult?'voice-updated':''}"><strong class="amount" id="amount-value">¥ ${amount}</strong><button class="entry-currency-chip" data-action="entry-currency" aria-label="选择币种">JPY ${icon('arrow_drop_down')}</button></div>`;
   }
 
-  function transactionSatisfactionCard({value,attribute}) {
-    const levels = [[2,'sentiment_very_dissatisfied','很低'],[4,'sentiment_dissatisfied','较低'],[6,'sentiment_neutral','一般'],[8,'sentiment_satisfied','满意'],[10,'sentiment_very_satisfied','很满意']];
+  function satisfactionFaceAsset(score) { return `assets/satisfaction/sat_0${Math.max(1,Math.min(5,Math.ceil(Number(score)/2)))}.svg`; }
+
+  function transactionSatisfactionCard({value,attribute,summary=false}) {
+    const levels = [[2,'低い'],[4,'やや低い'],[6,'ふつう'],[8,'満足'],[10,'大満足']];
     const selected = levels.find(level=>level[0]===Number(value)) || levels[3];
-    return `<div class="entry-satisfaction-card"><div class="entry-satisfaction-head"><strong>满足度</strong><span>${selected[2]} · ${selected[0]}/10</span></div><div class="entry-satisfaction-options" role="radiogroup" aria-label="满足度">${levels.map(([score,face,label])=>`<button class="entry-satisfaction-option ${Number(value)===score?'active':''}" ${attribute}="${score}" role="radio" aria-checked="${Number(value)===score}" aria-label="${label}">${icon(face)}<small>${label}</small></button>`).join('')}</div></div>`;
+    if(summary) return `<button class="entry-satisfaction-summary" data-action="entry-satisfaction-open" aria-label="満足度：${selected[1]}"><i class="satisfaction-face summary-title-icon" style="--face-asset:url('assets/satisfaction/sat_03.svg')"></i><strong>満足度</strong><i class="satisfaction-face summary-selected-icon" style="--face-asset:url('${satisfactionFaceAsset(selected[0])}')"></i><span class="summary-label">${selected[1]}</span>${icon('chevron_right')}</button>`;
+    return `<div class="entry-satisfaction-card"><div class="entry-satisfaction-head"><span class="entry-satisfaction-title"><i class="satisfaction-face" style="--face-asset:url('assets/satisfaction/sat_03.svg')"></i><strong>満足度</strong></span><span>${selected[1]} · ${selected[0]}/10</span></div><div class="entry-satisfaction-options" role="radiogroup" aria-label="満足度">${levels.map(([score,label])=>`<button class="entry-satisfaction-option ${Number(value)===score?'active':''}" ${attribute}="${score}" role="radio" aria-checked="${Number(value)===score}" aria-label="${label}"><i class="satisfaction-face" style="--face-asset:url('${satisfactionFaceAsset(score)}')"></i><small>${label}</small></button>`).join('')}</div></div>`;
+  }
+
+  function satisfactionBottomSheet() {
+    const levels = [[2,'低い'],[4,'やや低い'],[6,'ふつう'],[8,'満足'],[10,'大満足']];
+    const selected = levels.find(level=>level[0]===Number(state.entrySatisfaction)) || levels[3];
+    return `<div class="satisfaction-sheet"><span class="satisfaction-sheet-reason">今回の気持ちを振り返る</span><h3>このときめき支出に、どのくらい満足？</h3><p class="satisfaction-sheet-current">現在：${selected[1]}</p><div class="entry-satisfaction-options" role="radiogroup" aria-label="満足度">${levels.map(([score,label])=>`<button class="entry-satisfaction-option ${Number(state.entrySatisfaction)===score?'active':''}" data-entry-satisfaction-sheet="${score}" role="radio" aria-checked="${Number(state.entrySatisfaction)===score}" aria-label="${label}"><i class="satisfaction-face" style="--face-asset:url('${satisfactionFaceAsset(score)}')"></i><small>${label}</small></button>`).join('')}</div><p class="satisfaction-sheet-helper">選ぶと自動で記録画面に戻ります</p><button class="ghost-btn" data-action="close-modal">「${selected[1]}」のままにする</button></div>`;
   }
 
   function entryDetails(hasVoiceResult) {
@@ -2462,27 +2593,27 @@ body {
     const categoryMeta = source || categoryStatus ? `<span class="entry-form-subline">${source}${categoryStatus}</span>` : '';
     const merchantMeta = hasVoiceResult ? `<span class="entry-form-subline">${source}</span>` : '';
     return `<div class="entry-form">
-      <button class="entry-form-row ${categoryNeedsReview?'needs-confirmation':''}" data-screen="category">${icon('restaurant')}<span class="entry-form-label">分类</span><span class="entry-form-result"><span class="entry-form-mainline"><strong class="entry-form-value">${escapeHtml(state.entryCategory)}</strong>${icon('chevron_right')}</span>${categoryMeta}</span></button>
-      <button class="entry-form-row" data-action="entry-date">${icon('calendar_month')}<span class="entry-form-label">日期</span><span class="entry-form-result"><span class="entry-form-mainline"><strong class="entry-form-value">2026年7月16日</strong>${icon('chevron_right')}</span></span></button>
-      <div class="entry-form-row">${icon('storefront')}<label class="entry-form-label" for="entry-merchant">商家</label><span class="entry-form-result"><span class="entry-form-mainline"><input id="entry-merchant" class="entry-inline-input" data-entry-input="merchant" value="${escapeHtml(state.entryMerchant)}" placeholder="输入店铺" aria-label="商家"></span>${merchantMeta}</span></div>
+      <button class="entry-form-row ${categoryNeedsReview?'needs-confirmation':''}" data-screen="category">${icon('restaurant')}<span class="entry-form-label">カテゴリ</span><span class="entry-form-result"><span class="entry-form-mainline"><strong class="entry-form-value">${escapeHtml(state.entryCategory)}</strong>${icon('chevron_right')}</span>${categoryMeta}</span></button>
+      <button class="entry-form-row" data-action="entry-date">${icon('calendar_month')}<span class="entry-form-label">日付</span><span class="entry-form-result"><span class="entry-form-mainline"><strong class="entry-form-value">2026年7月16日</strong>${icon('chevron_right')}</span></span></button>
+      <div class="entry-form-row">${icon('storefront')}<label class="entry-form-label" for="entry-merchant">お店</label><span class="entry-form-result"><span class="entry-form-mainline"><input id="entry-merchant" class="entry-inline-input" data-entry-input="merchant" value="${escapeHtml(state.entryMerchant)}" placeholder="お店を入力" aria-label="お店"></span>${merchantMeta}</span></div>
     </div>
-    <div class="entry-purpose-card"><span>用途</span><button class="entry-ledger-option daily ${state.entryLedger==='daily'?'active':''}" data-entry-ledger="daily" aria-pressed="${state.entryLedger==='daily'}">${icon('shield')}日常支出</button><button class="entry-ledger-option joy ${state.entryLedger==='joy'?'active':''}" data-entry-ledger="joy" aria-pressed="${state.entryLedger==='joy'}">${icon('auto_awesome')}悦己支出</button></div>
-    ${state.entryLedger==='joy'?transactionSatisfactionCard({value:state.entrySatisfaction,attribute:'data-entry-satisfaction'}):''}
-    <div class="entry-note-card">${icon('description')}<label for="entry-note">备注</label><input id="entry-note" data-entry-input="note" value="${escapeHtml(state.entryNote)}" placeholder="添加备注" aria-label="备注">${hasVoiceResult?source:''}${icon('chevron_right')}</div>`;
+    <div class="entry-purpose-card"><span>用途</span><button class="entry-ledger-option daily ${state.entryLedger==='daily'?'active':''}" data-entry-ledger="daily" aria-pressed="${state.entryLedger==='daily'}">${icon('shield')}日常支出</button><button class="entry-ledger-option joy ${state.entryLedger==='joy'?'active':''}" data-entry-ledger="joy" aria-pressed="${state.entryLedger==='joy'}">${icon('auto_awesome')}ときめき支出</button></div>
+    ${state.entryLedger==='joy'?transactionSatisfactionCard({value:state.entrySatisfaction,attribute:'data-entry-satisfaction',summary:true}):''}
+    <div class="entry-note-card">${icon('description')}<label for="entry-note">メモ</label><input id="entry-note" data-entry-input="note" value="${escapeHtml(state.entryNote)}" placeholder="メモを追加" aria-label="メモ">${hasVoiceResult?source:''}${icon('chevron_right')}</div>`;
   }
 
   function entryContinuousControl() {
-    return `<div class="entry-continuous-row"><span>${state.entryContinuous?'记录后继续下一笔':'记录后返回主页'}</span><button data-action="entry-continuous" aria-pressed="${state.entryContinuous}">${state.entryContinuous?'关闭连续记账':'连续记账'}</button></div>`;
+    return `<div class="entry-continuous-row"><span>${state.entryContinuous?'記録後に次の入力へ':'記録後にホームへ'}</span><button data-action="entry-continuous" aria-pressed="${state.entryContinuous}">${state.entryContinuous?'連続記録を終了':'続けて記録'}</button></div>`;
   }
 
   function entryManualDock() {
-    const voiceLaunch = `<button class="entry-voice-launch" data-action="entry-voice-open"><span class="material-symbols-rounded">mic_none</span><span class="entry-voice-launch-copy"><strong>语音记录</strong><small>一次说出金额、商家、分类和日期</small></span>${icon('chevron_right')}</button>`;
+    const voiceLaunch = `<button class="entry-voice-launch" data-action="entry-voice-open"><span class="material-symbols-rounded">mic_none</span><span class="entry-voice-launch-copy"><strong>音声で記録</strong><small>金額・お店・カテゴリ・日付をまとめて話す</small></span>${icon('chevron_right')}</button>`;
     const decimalDisabled = true;
     const keys = ['1','2','3','4','5','6','7','8','9','00','0','.'];
     const keypad = `${keys.map(key=>`<button class="entry-key" data-entry-key="${key}" ${key==='.'&&decimalDisabled?'disabled aria-label="JPY 不支持小数输入"':''}>${key}</button>`).join('')}
       <button class="entry-key" data-entry-key="backspace" aria-label="删除一位">${icon('backspace')}</button>
       <button class="entry-key currency" data-action="entry-currency">¥&nbsp; JPY</button>
-      <button class="entry-key save" data-action="save-entry" ${state.entryNeedsReview?'disabled aria-label="选择分类后才能记录"':''}>记录</button>`;
+      <button class="entry-key save" data-action="save-entry" ${state.entryNeedsReview?'disabled aria-label="カテゴリを選ぶと記録できます"':''}>記録</button>`;
     return `<div class="entry-input-dock">${voiceLaunch}<div class="entry-keypad">${keypad}</div>${entryContinuousControl()}</div>`;
   }
 
@@ -2569,12 +2700,20 @@ body {
     }).filter(group=>group.name.toLowerCase().includes(query)||group.visibleChildren.length);
   }
 
+  function categoryDisplayColor(color) {
+    if(state.theme!=='dark') return color;
+    const darkColors={
+      '#FF5722':'#FF8A65','#00BCD4':'#4DD0E1','#7CB342':'#AED581','#2196F3':'#64B5F6','#9C27B0':'#CE93D8','#E91E63':'#F48FB1','#FF9800':'#FFB74D','#F44336':'#EF9A9A','#3F51B5':'#9FA8DA','#FFC107':'#FFD54F','#00ACC1':'#80DEEA','#795548':'#BCAAA4','#455A64':'#B0BEC5','#5D4037':'#C7A59A','#827717':'#D4C957','#AD1457':'#F47FA5','#8D6E63':'#D7CCC8','#1B5E20':'#81C784','#607D8B':'#B0BEC5'
+    };
+    return darkColors[String(color).toUpperCase()]||color;
+  }
+
   function categoryBrowseGroup(group) {
     const expanded=state.categoryExpanded===group.id;
     const children=group.visibleChildren || group.children;
     const searchText=[group.name,...group.children.map(child=>child.name)].join(' ');
     const chips=children.map(child=>`<button class="category-chip ${state.categorySelectedId===child.id?'selected':''}" data-action="category-select" data-category-group="${group.id}" data-category-id="${child.id}" aria-pressed="${state.categorySelectedId===child.id}">${escapeHtml(child.name)}</button>`).join('');
-    return `<article class="category-group ${expanded?'expanded':''}" style="--category-color:${group.color}" data-category-search="${escapeHtml(searchText)}"><button class="category-group-header" data-action="category-toggle" data-category-group="${group.id}" aria-expanded="${expanded}"><span class="category-group-icon">${icon(group.icon)}</span><span class="category-group-name">${escapeHtml(group.name)}</span>${icon(expanded?'expand_less':'chevron_right')}</button>${expanded?`<div class="category-children">${chips}<button class="category-chip add" data-action="category-add-sub" data-category-group="${group.id}">${icon('add')}追加</button></div>`:''}</article>`;
+    return `<article class="category-group ${expanded?'expanded':''}" style="--category-color:${categoryDisplayColor(group.color)}" data-category-search="${escapeHtml(searchText)}"><button class="category-group-header" data-action="category-toggle" data-category-group="${group.id}" aria-expanded="${expanded}"><span class="category-group-icon">${icon(group.icon)}</span><span class="category-group-name">${escapeHtml(group.name)}</span>${icon(expanded?'expand_less':'chevron_right')}</button>${expanded?`<div class="category-children">${chips}<button class="category-chip add" data-action="category-add-sub" data-category-group="${group.id}">${icon('add')}追加</button></div>`:''}</article>`;
   }
 
   function categoryBrowse() {
@@ -2586,7 +2725,7 @@ body {
   function categoryReorderGroup(group) {
     const expanded=state.categoryEditExpanded===group.id;
     const children=expanded?`<div class="category-reorder-children" data-category-child-list="${group.id}">${group.children.map(child=>`<div class="category-reorder-child" draggable="true" data-category-drag="child" data-category-group="${group.id}" data-category-id="${child.id}">${icon('drag_indicator')}<span>${escapeHtml(child.name)}</span></div>`).join('')}</div>`:'';
-    return `<article class="category-reorder-group ${expanded?'expanded':''}" style="--category-color:${group.color}" draggable="true" data-category-drag="group" data-category-group="${group.id}"><button class="category-reorder-row" data-action="category-edit-toggle" data-category-group="${group.id}" aria-expanded="${expanded}"><span class="material-symbols-rounded drag-handle">drag_indicator</span><span class="category-group-icon">${icon(group.icon)}</span><span class="category-group-name">${escapeHtml(group.name)}</span></button>${children}</article>`;
+    return `<article class="category-reorder-group ${expanded?'expanded':''}" style="--category-color:${categoryDisplayColor(group.color)}" draggable="true" data-category-drag="group" data-category-group="${group.id}"><button class="category-reorder-row" data-action="category-edit-toggle" data-category-group="${group.id}" aria-expanded="${expanded}"><span class="material-symbols-rounded drag-handle">drag_indicator</span><span class="category-group-icon">${icon(group.icon)}</span><span class="category-group-name">${escapeHtml(group.name)}</span></button>${children}</article>`;
   }
 
   function categoryReorder() {
@@ -2698,7 +2837,8 @@ body {
   }
 
   function joinWaiting() {
-    return `<section class="screen family-screen" lang="ja">${familyHeader('承認を待っています')}${joinProgress(2)}<div class="family-waiting"><span class="family-waiting-ring" aria-label="承認待ち"></span><h2>オーナーの承認待ち</h2><p>あおいさんが参加申請を確認しています。</p><small>アプリを閉じても大丈夫です。<br>承認されたら自動で同期を始めます。</small></div></section>`;
+    const recovering=state.familyJoinRecovering;
+    return `<section class="screen family-screen" lang="ja">${familyHeader('承認を待っています')}${joinProgress(2)}<div class="family-waiting"><span class="family-waiting-ring" aria-label="${recovering?'暗号鍵を復元中':'承認待ち'}"></span><h2>${recovering?'家族の鍵を準備しています':'オーナーの承認待ち'}</h2><p>${recovering?'承認が完了しました。暗号化された家族データを安全に開く準備をしています。':'あおいさんが参加申請を確認しています。'}</p>${recovering?'':`<small>アプリを閉じても大丈夫です。<br>承認されたら自動で同期を始めます。</small>`}</div></section>`;
   }
 
   function approval() {
@@ -2709,14 +2849,16 @@ body {
   function group() {
     const code=`${state.familyInviteCode.slice(0,3)} ${state.familyInviteCode.slice(3)}`;
     const pending=state.familyRequestPending?`<button class="family-pending" data-action="family-pending">${icon('person_add')}<strong>新しい参加申請 · 1件</strong><span>申請を見る</span>${icon('chevron_right')}</button>`:'';
-    return `<section class="screen family-screen" lang="ja">${familyHeader('家族管理',`<span class="family-appbar-status">${icon('check_circle')}同期済み</span>`)}<div class="family-group-identity compact"><span class="family-house-mark">${icon('home')}</span><span class="family-group-copy"><h2>青木家の家計</h2><p>オーナー：あおい · 3人 · たった今同期</p></span><button class="family-inline-action" data-action="family-edit-name">${icon('edit')}編集</button></div>${pending}<div class="family-member-list"><button class="family-member-row" data-action="family-member" data-member="あおい">${familyAvatar('family-avatar-owner.png','あおい')}<span class="family-member-copy"><strong>あおい（あなた）</strong></span><span class="family-role-badge">オーナー</span>${icon('chevron_right')}</button><button class="family-member-row" data-action="family-member" data-member="花子">${familyAvatar('family-avatar-hanako.png','花子')}<span class="family-member-copy"><strong>花子</strong></span><span class="family-member-role">メンバー</span>${icon('chevron_right')}</button><button class="family-member-row" data-action="family-member" data-member="太郎">${familyAvatar('family-avatar-taro.png','太郎')}<span class="family-member-copy"><strong>太郎</strong></span><span class="family-member-role">メンバー</span>${icon('chevron_right')}</button><button class="family-invite-row" data-action="family-invite">${icon('add')}メンバーを招待</button></div><div class="family-management-code"><strong>${code}</strong><small>14分間有効</small><button class="family-code-action" data-action="family-copy-code" aria-label="招待コードをコピー">${icon('content_copy')}</button><button class="family-code-action" data-action="family-share" aria-label="招待コードを共有">${icon('ios_share')}</button><button class="family-inline-action" data-action="family-regenerate-code">再発行</button></div><button class="family-settings-row" data-action="family-sync-settings">${icon('sync')}同期設定${icon('chevron_right')}</button><button class="family-danger" data-action="family-disband">家族を解散</button></section>`;
+    const joining=state.familyApprovedJoining?`<div class="family-approved-joining" role="status" aria-live="polite">${icon('check_circle')}<span class="family-approved-joining-copy"><strong>花子さんが家族に参加しています</strong><small>承認は完了しました。暗号鍵の受け取りが終わるとメンバー一覧に表示されます。</small></span></div>`:'';
+    const hanako=state.familyApprovedJoining?'':`<button class="family-member-row" data-action="family-member" data-member="花子">${familyAvatar('family-avatar-hanako.png','花子')}<span class="family-member-copy"><strong>花子</strong></span><span class="family-member-role">メンバー</span>${icon('chevron_right')}</button>`;
+    return `<section class="screen family-screen" lang="ja">${familyHeader('家族管理',`<span class="family-appbar-status">${icon('check_circle')}同期済み</span>`)}<div class="family-group-identity compact"><span class="family-house-mark">${icon('home')}</span><span class="family-group-copy"><h2>青木家の家計</h2><p>オーナー：あおい · ${state.familyApprovedJoining?'2':'3'}人 · たった今同期</p></span><button class="family-inline-action" data-action="family-edit-name">${icon('edit')}編集</button></div>${joining}${pending}<div class="family-member-list"><button class="family-member-row" data-action="family-member" data-member="あおい">${familyAvatar('family-avatar-owner.png','あおい')}<span class="family-member-copy"><strong>あおい（あなた）</strong></span><span class="family-role-badge">オーナー</span>${icon('chevron_right')}</button>${hanako}<button class="family-member-row" data-action="family-member" data-member="太郎">${familyAvatar('family-avatar-taro.png','太郎')}<span class="family-member-copy"><strong>太郎</strong></span><span class="family-member-role">メンバー</span>${icon('chevron_right')}</button><button class="family-invite-row" data-action="family-invite">${icon('add')}メンバーを招待</button></div><div class="family-management-code"><strong>${code}</strong><small>14分間有効</small><button class="family-code-action" data-action="family-copy-code" aria-label="招待コードをコピー">${icon('content_copy')}</button><button class="family-code-action" data-action="family-share" aria-label="招待コードを共有">${icon('ios_share')}</button><button class="family-inline-action" data-action="family-regenerate-code">再発行</button></div><button class="family-settings-row" data-action="family-sync-settings">${icon('sync')}同期設定${icon('chevron_right')}</button><button class="family-danger" data-action="family-disband">家族を解散</button></section>`;
   }
 
   const onboardingDots = active => `<div class="onboarding-page-dots" aria-label="紹介 ${active + 1} / 2"><i class="${active===0?'active':''}"></i><i class="${active===1?'active':''}"></i></div>`;
   const onboardingAmbience = variant => `<div class="onboarding-ambience ${variant}" aria-hidden="true"><span class="material-symbols-rounded pressed-motif">eco</span><span class="material-symbols-rounded pressed-motif">spa</span><span class="material-symbols-rounded pressed-motif">eco</span><span class="material-symbols-rounded pressed-motif">spa</span></div>`;
 
   function onboarding() {
-    return `<section class="onboarding-screen" lang="ja">${onboardingAmbience('welcome')}<div class="onboarding-topbar"><span class="onboarding-topbar-spacer"></span><button class="onboarding-text-action" data-screen="preferences">スキップ</button></div><div class="onboarding-content"><div class="onboarding-hero-cluster" role="img" aria-label="家と芽を囲む、日常と悦己の表情"><span class="material-symbols-rounded onboarding-petal one" aria-hidden="true">eco</span><span class="material-symbols-rounded onboarding-petal two" aria-hidden="true">eco</span><span class="onboarding-hero-main"><img class="onboarding-source-icon welcome" src="assets/onboarding-existing-house.svg" alt=""></span><span class="onboarding-satellite joy" aria-hidden="true"><i class="onboarding-face-icon" style="--face-asset:url('../../../assets/satisfaction/sat_04.svg')"></i></span><span class="onboarding-satellite daily" aria-hidden="true"><i class="onboarding-face-icon" style="--face-asset:url('../../../assets/satisfaction/sat_02.svg')"></i></span></div><span class="onboarding-badge">たのしく、つづく家計簿</span><h1>ハピポケ家族家計簿</h1><span class="onboarding-brand">HAPPY POCKET</span><p class="onboarding-lead">記録するたびに、ちょっと、しあわせ。<br>お金とのつきあいを、もっと前向きに。</p><div class="onboarding-value-pills"><span>日々の帳</span><span>ときめき帳</span><span>満足度</span></div></div><div class="onboarding-dock">${onboardingDots(0)}<button class="onboarding-primary" data-screen="onboarding-privacy">次へ</button></div></section>`;
+    return `<section class="onboarding-screen" lang="ja">${onboardingAmbience('welcome')}<div class="onboarding-topbar"><span class="onboarding-topbar-spacer"></span><button class="onboarding-text-action" data-screen="preferences">スキップ</button></div><div class="onboarding-content"><div class="onboarding-hero-cluster" role="img" aria-label="家と芽を囲む、日常と悦己の表情"><span class="material-symbols-rounded onboarding-petal one" aria-hidden="true">eco</span><span class="material-symbols-rounded onboarding-petal two" aria-hidden="true">eco</span><span class="onboarding-hero-main"><img class="onboarding-source-icon welcome" src="assets/onboarding-existing-house.svg" alt=""></span><span class="onboarding-satellite joy" aria-hidden="true"><i class="onboarding-face-icon" style="--face-asset:url('assets/satisfaction/sat_04.svg')"></i></span><span class="onboarding-satellite daily" aria-hidden="true"><i class="onboarding-face-icon" style="--face-asset:url('assets/satisfaction/sat_02.svg')"></i></span></div><span class="onboarding-badge">たのしく、つづく家計簿</span><h1>ハピポケ家族家計簿</h1><span class="onboarding-brand">HAPPY POCKET</span><p class="onboarding-lead">記録するたびに、ちょっと、しあわせ。<br>お金とのつきあいを、もっと前向きに。</p><div class="onboarding-value-cluster" aria-label="日々の帳、ときめき帳、満足度"><span class="onboarding-value-capsule daily">${icon('spa')}日々の帳</span><span class="onboarding-value-capsule joy">${icon('favorite')}ときめき帳</span><span class="onboarding-value-capsule satisfaction"><i class="satisfaction-face" style="--face-asset:url('assets/satisfaction/sat_03.svg')"></i>満足度</span></div></div><div class="onboarding-dock">${onboardingDots(0)}<button class="onboarding-primary" data-screen="onboarding-privacy">次へ</button></div></section>`;
   }
 
   function onboardingPrivacy() {
@@ -2792,13 +2934,11 @@ body {
     const security=section('セキュリティ',
       row('lock','アプリロック',appLockOn?'オン · PINで保護':'オフ',{action:'settings-app-lock-toggle',toggle:true,toggleOn:appLockOn})+
       securityChildren);
-    const notifications=section('通知',
-      row('notifications','通知','予算アラートと同期通知',{action:'settings-notifications-toggle',toggle:true,toggleOn:state.settingsNotificationsEnabled}));
     const data=section('データ',
       row('database','バックアップと復元','暗号化ファイル',{screen:'backup'}));
     const about=section('このアプリ',row('policy','法的情報・応援','プライバシー、規約、OSS',{screen:'legal'}));
     const danger=section('データ管理',row('delete_forever','全データを削除','すべての記録を完全に削除',{action:'settings-delete-all',danger:true}),{danger:true});
-    return `<section class="screen settings-screen">${backHeader('設定')}${profileCard}${general}${familySync}${security}${notifications}${data}${about}${danger}<p class="hint settings-footer">Happy Pocket 2.0.0 · データは端末内で保護</p></section>`;
+    return `<section class="screen settings-screen">${backHeader('設定')}${profileCard}${general}${familySync}${security}${data}${about}${danger}<p class="hint settings-footer">Happy Pocket 1.0.0 · データは端末内で保護</p></section>`;
   }
 
   function backupStatusCard(){
@@ -2843,11 +2983,24 @@ body {
     return `<h3>このバックアップから復元？</h3><p class="backup-dialog-copy">パスワードを入力して内容を復号します。</p><div class="backup-file-summary">${icon('encrypted')}<span><strong>${escapeHtml(state.backupSelectedFile)}</strong><small>暗号化バックアップ · .hpb</small></span></div><div class="backup-warning">${icon('warning')}<span><strong>現在のデータは置き換えられます。</strong><br>失敗した場合は変更を取り消し、今のデータを保持します。</span></div><label class="backup-field">バックアップパスワード<input type="password" data-backup-password="restore" value="${escapeHtml(state.backupRestorePassword)}" autocomplete="current-password" placeholder="8文字以上" aria-invalid="${!!error}"></label><div class="backup-dialog-error" role="alert">${error}</div><div class="backup-dialog-actions"><button class="secondary-btn" data-action="close-modal">キャンセル</button><button class="primary-btn" data-action="backup-restore-submit">置き換えて復元</button></div>`;
   }
 
-  function profile() { const profileName=escapeHtml(state.onboardingName.trim()||'あおい'); return `<section class="screen">${backHeader('プロフィール')}<div class="avatar-stack" style="margin-top:8px"><span class="settings-profile-avatar" style="width:82px;height:82px;flex-basis:82px"><img src="assets/onboarding-avatar-warm-v1.png" alt="" style="width:78px;height:78px"></span></div><button class="text-btn" style="display:block;margin:0 auto" data-action="toast" data-message="写真を選択">写真を変更</button><div class="section-title"><h2>表示名</h2></div><input class="search" data-profile-name value="${profileName}" aria-label="表示名"><div style="height:18px"></div><button class="primary-btn" data-action="toast" data-message="プロフィールを保存しました">保存</button></section>`; }
+  function analyticsDrill() {
+    const category=escapeHtml(state.analyticsDrillCategory);
+    return `<section class="screen analytics-drill-screen">${backHeader(category)}<div class="drill-summary"><span>小計<strong>¥29,480</strong></span><span>件数<strong>8</strong></span><span>日均<strong>¥951</strong></span></div><div class="list-day-header"><span>読み取り専用の取引</span></div><div class="list-transactions">${listTransactionRow({day:10,month:7,icon:'local_grocery_store',category,merchant:'ライフ',amount:3280,ledger:'daily'},true)}${listTransactionRow({day:6,month:7,icon:'restaurant',category,merchant:'月舟食堂',amount:4280,ledger:'joy',satisfaction:8},true)}${listTransactionRow({day:2,month:7,icon:'local_cafe',category,merchant:'カフェ・ノワ',amount:980,ledger:'joy',satisfaction:10},true)}</div><p class="hint" style="margin-top:14px">この画面は参照専用です。編集と削除は「明細」から行います。</p></section>`;
+  }
 
-  function legal() { return `<section class="screen">${backHeader('法的情報・応援')}<div class="flat-card"><button class="tap-row row-divider" data-action="legal-doc"><span class="row-icon">${icon('privacy_tip')}</span><span class="row-copy"><strong>プライバシーポリシー</strong><small>データの扱いについて</small></span>${icon('chevron_right')}</button><button class="tap-row row-divider" data-action="legal-doc"><span class="row-icon">${icon('description')}</span><span class="row-copy"><strong>利用規約</strong><small>サービス利用条件</small></span>${icon('chevron_right')}</button><button class="tap-row row-divider" data-action="legal-doc"><span class="row-icon">${icon('storefront')}</span><span class="row-copy"><strong>特定商取引法に基づく表記</strong><small>日本向け法定表示</small></span>${icon('chevron_right')}</button><button class="tap-row" data-action="legal-doc"><span class="row-icon">${icon('code')}</span><span class="row-copy"><strong>オープンソースライセンス</strong><small>使用ライブラリ</small></span>${icon('chevron_right')}</button></div><div class="section-title"><h2>開発を応援</h2></div><div class="card"><span class="row-icon joy">${icon('favorite')}</span><h2 class="display" style="font-size:18px">静かな家計簿を育てる</h2><p class="legal-copy">スポンサーリンクは外部ブラウザで開きます。アプリの機能やデータへのアクセス権とは無関係です。</p><button class="secondary-btn" data-action="toast" data-message="外部スポンサーサイトを確認">スポンサーについて</button></div></section>`; }
+  function avatarPicker() {
+    const emojis=['🏠','🌸','🌿','🐱','🐶','🌈','☀️','🦊','🐼','🍀','⭐','🌻','🐰','🦋','🌙','🎀','🧸','🎵','🏡','🌷','🐣','🍃','💫','🫧','🐻','🐨','🐹','🐧','🦔','🐳','🌱','🌼','🍄','🍓','☁️'];
+    const content=state.avatarTab==='emoji'?`<div class="avatar-picker-grid">${emojis.map(emoji=>`<button class="${state.avatarEmoji===emoji?'selected':''}" data-avatar-emoji="${emoji}" aria-label="${emoji}">${emoji}</button>`).join('')}</div>`:`<button class="avatar-photo-card" data-action="avatar-photo">${icon('add_photo_alternate')}<strong>写真をアップロード</strong><small>JPG / PNG · 最大 512 px</small></button>`;
+    return `<section class="screen avatar-picker-screen"><div class="avatar-picker-header"><button data-action="back">キャンセル</button><h1>アバターを選択</h1><button data-action="avatar-save">完了 ✓</button></div><div class="avatar-picker-preview" aria-label="選択中のアバター"><strong>${state.avatarEmoji}</strong><small>✏️ アバターを変更</small></div><div class="avatar-picker-tabs" role="tablist"><button class="${state.avatarTab==='emoji'?'active':''}" data-avatar-tab="emoji" role="tab">絵文字</button><button class="${state.avatarTab==='photo'?'active':''}" data-avatar-tab="photo" role="tab">写真</button></div>${content}</section>`;
+  }
 
-  const renderers = { foundation, states:statesScreen, home, list:listScreen, analytics, shopping, 'shopping-form':shoppingForm, entry, ocr, category, edit, family, create, approval, join, 'join-confirm':joinConfirm, 'join-waiting':joinWaiting, group, onboarding, 'onboarding-privacy':onboardingPrivacy, preferences, 'setup-pin':setupPinScreen, lock, settings, profile, backup, legal };
+  function profile() { const profileName=escapeHtml(state.onboardingName.trim()||'あおい'); return `<section class="screen">${backHeader('プロフィール')}<div class="avatar-stack" style="margin-top:8px"><button class="profile-avatar-preview" data-screen="avatar-picker" aria-label="アバターを変更">${state.avatarEmoji}</button></div><button class="text-btn" style="display:block;margin:0 auto" data-screen="avatar-picker">アバターを変更</button><div class="section-title"><h2>表示名</h2></div><input class="search" data-profile-name value="${profileName}" aria-label="表示名"><div style="height:18px"></div><button class="primary-btn" data-action="toast" data-message="プロフィールを保存しました">保存</button></section>`; }
+
+  function legal() { return `<section class="screen">${backHeader('法的情報・応援')}<div class="flat-card"><button class="tap-row row-divider" data-action="legal-doc" data-legal-title="プライバシーポリシー"><span class="row-icon">${icon('privacy_tip')}</span><span class="row-copy"><strong>プライバシーポリシー</strong><small>データの扱いについて</small></span>${icon('chevron_right')}</button><button class="tap-row row-divider" data-action="legal-doc" data-legal-title="利用規約"><span class="row-icon">${icon('description')}</span><span class="row-copy"><strong>利用規約</strong><small>サービス利用条件</small></span>${icon('chevron_right')}</button><button class="tap-row row-divider" data-action="legal-doc" data-legal-title="特定商取引法に基づく表記"><span class="row-icon">${icon('storefront')}</span><span class="row-copy"><strong>特定商取引法に基づく表記</strong><small>日本向け法定表示</small></span>${icon('chevron_right')}</button><button class="tap-row" data-action="toast" data-message="オープンソースライセンスを開きます"><span class="row-icon">${icon('code')}</span><span class="row-copy"><strong>オープンソースライセンス</strong><small>使用ライブラリ</small></span>${icon('chevron_right')}</button></div><div class="section-title"><h2>開発を応援</h2></div><div class="card"><span class="row-icon joy">${icon('favorite')}</span><h2 class="display" style="font-size:18px">静かな家計簿を育てる</h2><p class="legal-copy">スポンサーリンクは外部ブラウザで開きます。アプリの機能やデータへのアクセス権とは無関係です。</p><button class="secondary-btn" data-action="toast" data-message="外部スポンサーサイトを確認">スポンサーについて</button></div></section>`; }
+
+  function legalDoc() { const title=escapeHtml(state.legalTitle); return `<section class="screen legal-reader">${backHeader(title)}<article><p><strong>最終更新日：2026年8月5日</strong></p><p>Happy Pocket（以下「本アプリ」）は、ナープ株式会社が提供する、ローカルファーストの家族向け家計簿です。</p><h2>1. 基本方針</h2><p>本アプリは、ご利用者のプライバシーを尊重し、収支、メモ、店舗名などの家計情報を安全に取り扱います。</p><h2>2. 端末内のデータ</h2><p>家計データは原則として端末内に保存され、暗号化データベースで保護されます。当社が内容を平文で収集することはありません。</p><h2>3. 外部通信と通知</h2><p>必要な外部通信は、ご利用者が開始した機能に限定します。初回公開版では通知機能を提供しません。</p><h2>4. お問い合わせ</h2><p>お問い合わせ先は、ストア掲載情報および本アプリ内の法的情報をご確認ください。</p></article></section>`; }
+
+  const renderers = { foundation, states:statesScreen, home, list:listScreen, analytics, 'analytics-drill':analyticsDrill, shopping, 'shopping-form':shoppingForm, entry, ocr, category, edit, family, create, approval, join, 'join-confirm':joinConfirm, 'join-waiting':joinWaiting, group, onboarding, 'onboarding-privacy':onboardingPrivacy, preferences, 'setup-pin':setupPinScreen, lock, settings, profile, 'avatar-picker':avatarPicker, backup, legal, 'legal-doc':legalDoc };
 
   function render() {
     document.documentElement.dataset.theme = state.theme;
@@ -3304,12 +3457,14 @@ body {
     const editDemo=e.target.closest('[data-edit-demo]'); if(editDemo){ showEditDemo(editDemo.dataset.editDemo); return; }
     const categoryDemo=e.target.closest('[data-category-demo]'); if(categoryDemo){ showCategoryDemo(categoryDemo.dataset.categoryDemo); return; }
     const familyDemo=e.target.closest('[data-family-demo]'); if(familyDemo){ if(familyDemo.dataset.familyDemo==='approval') state.familyRequestPending=true; setScreen(familyDemo.dataset.familyDemo); return; }
+    const familyTransition=e.target.closest('[data-family-transition]'); if(familyTransition){ const transition=familyTransition.dataset.familyTransition; state.familyJoinRecovering=transition==='recovering'; state.familyApprovedJoining=transition==='approved-joining'; state.family=true; state.familyRequestPending=false; setScreen(transition==='recovering'?'join-waiting':'group'); return; }
     const setupSecurityDemo=e.target.closest('[data-setup-security-demo]'); if(setupSecurityDemo){ showSetupSecurityDemo(setupSecurityDemo.dataset.setupSecurityDemo); return; }
     const settingsSecurityDemo=e.target.closest('[data-settings-security-demo]'); if(settingsSecurityDemo){ showSettingsSecurityDemo(settingsSecurityDemo.dataset.settingsSecurityDemo); return; }
     const backupDemo=e.target.closest('[data-backup-demo]'); if(backupDemo){ showBackupDemo(backupDemo.dataset.backupDemo); return; }
     const backupFile=e.target.closest('[data-backup-file]'); if(backupFile){ state.backupSelectedFile=backupFile.dataset.backupFile; state.backupSelectedFileKind=backupFile.dataset.backupFileKind||'valid'; state.backupRestorePassword=''; state.backupPasswordError=''; openModal(backupRestoreDialog(),'dialog'); requestAnimationFrame(()=>document.querySelector('[data-backup-password="restore"]')?.focus()); return; }
     const entryMethod=e.target.closest('[data-entry-method]'); if(entryMethod){ if(entryMethod.dataset.entryMethod==='voice') beginEntryVoice(); else switchEntryVoiceToKeyboard(); return; }
     const entryLedger=e.target.closest('[data-entry-ledger]'); if(entryLedger){ state.entryLedger=entryLedger.dataset.entryLedger; render(); return; }
+    const entrySatisfactionSheet=e.target.closest('[data-entry-satisfaction-sheet]'); if(entrySatisfactionSheet){ state.entrySatisfaction=Number(entrySatisfactionSheet.dataset.entrySatisfactionSheet); closeModal(); render(); toast('满足度已更新'); return; }
     const entrySatisfaction=e.target.closest('[data-entry-satisfaction]'); if(entrySatisfaction){ state.entrySatisfaction=Number(entrySatisfaction.dataset.entrySatisfaction); render(); return; }
     const editLedger=e.target.closest('[data-edit-ledger]'); if(editLedger){ state.editLedger=editLedger.dataset.editLedger; render(); return; }
     const editSatisfaction=e.target.closest('[data-edit-satisfaction]'); if(editSatisfaction){ state.editSatisfaction=Number(editSatisfaction.dataset.editSatisfaction); render(); return; }
@@ -3360,9 +3515,12 @@ body {
     const analyticsWindowType=e.target.closest('[data-analytics-window-type]'); if(analyticsWindowType){ state.analyticsWindowType=analyticsWindowType.dataset.analyticsWindowType; document.getElementById('modal-content').innerHTML=analyticsWindowPicker(); return; }
     const analyticsWindow=e.target.closest('[data-analytics-window]'); if(analyticsWindow){ state.analyticsWindow=analyticsWindow.dataset.analyticsWindow; state.analyticsWindowLabel=analyticsWindow.dataset.label; closeModal(); render(); toast(`${state.analyticsWindowLabel}に更新しました`); return; }
     const analyticsMember=e.target.closest('[data-analytics-member]'); if(analyticsMember){ state.analyticsMember=analyticsMember.dataset.analyticsMember; closeModal(); render(); return; }
+    const avatarTab=e.target.closest('[data-avatar-tab]'); if(avatarTab){ state.avatarTab=avatarTab.dataset.avatarTab; render(); return; }
+    const avatarEmoji=e.target.closest('[data-avatar-emoji]'); if(avatarEmoji){ state.avatarEmoji=avatarEmoji.dataset.avatarEmoji; state.avatarTab='emoji'; render(); return; }
     const tool=e.target.closest('[data-tool]'); if(tool){ if(tool.dataset.tool==='annotations') document.body.classList.toggle('annotations'); else document.getElementById('phone').style.width=tool.dataset.tool+'px'; return; }
     const action=e.target.closest('[data-action]'); if(!action) return; const a=action.dataset.action;
     if(a==='toggle-theme'){ state.theme=state.theme==='light'?'dark':'light'; render(); }
+    else if(a==='entry-satisfaction-open') openModal(satisfactionBottomSheet());
     else if(a==='toggle-family'){ state.family=!state.family; state.analyticsMember='all'; state.analyticsCalendarMember='all'; state.shoppingScope='all'; resetShoppingFilters(); render(); toast(state.family?'家庭モード':'個人モード'); }
     else if(a==='family-create') setScreen('create');
     else if(a==='family-join') setScreen('join');
@@ -3374,7 +3532,7 @@ body {
     else if(a==='family-join-review'){ if(!/^\d{6}$/.test(state.familyInviteCode)){ toast('6桁の招待コードを入力してください'); return; } setScreen('join-confirm'); }
     else if(a==='family-send-request'){ state.familyRequestPending=true; setScreen('join-waiting'); }
     else if(a==='family-pending') setScreen('approval');
-    else if(a==='family-approve'){ state.family=true; state.familyRequestPending=false; toast('花子さんを承認しました'); setTimeout(()=>setScreen('group'),450); }
+    else if(a==='family-approve'){ state.family=true; state.familyRequestPending=false; state.familyApprovedJoining=true; toast('花子さんを承認しました'); setTimeout(()=>setScreen('group'),450); }
     else if(a==='family-reject'){ state.familyRequestPending=false; toast('参加申請を拒否しました'); setTimeout(()=>setScreen('create'),450); }
     else if(a==='family-invite') setScreen('create');
     else if(a==='family-member') openModal(`<h3>${escapeHtml(action.dataset.member)}</h3><p class="hint">役割、端末と同期状態を確認します。</p><div class="flat-card"><div class="tap-row row-divider"><span class="row-copy"><strong>役割</strong><small>${action.dataset.member==='あおい'?'オーナー':'メンバー'}</small></span></div><div class="tap-row"><span class="row-copy"><strong>同期状態</strong><small>同期済み</small></span></div></div><button class="ghost-btn" data-action="close-modal">閉じる</button>`);
@@ -3402,7 +3560,6 @@ body {
     else if(a==='settings-pin-reauth-confirm'){ closeModal(); beginOnboardingPinSetup('settings','change-pin'); }
     else if(a==='settings-week-start') openModal(`<h3>週の開始日</h3><div class="flat-card"><button class="tap-row row-divider" data-settings-week-start-choice="monday"><span class="row-copy"><strong>月曜日</strong></span>${state.settingsWeekStart==='monday'?icon('check'):''}</button><button class="tap-row" data-settings-week-start-choice="sunday"><span class="row-copy"><strong>日曜日</strong></span>${state.settingsWeekStart==='sunday'?icon('check'):''}</button></div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
     else if(a==='settings-voice-language') openModal(`<h3>認識言語</h3><div class="flat-card">${[['ja','日本語'],['zh','中文'],['en','English']].map(([code,label],index)=>`<button class="tap-row ${index<2?'row-divider':''}" data-settings-voice-language-choice="${code}"><span class="row-copy"><strong>${label}</strong></span>${state.onboardingVoice===code?icon('check'):''}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
-    else if(a==='settings-notifications-toggle'){ state.settingsNotificationsEnabled=!state.settingsNotificationsEnabled; renderPreservingAppScroll(); toast(state.settingsNotificationsEnabled?'通知をオンにしました':'通知をオフにしました'); }
     else if(a==='settings-delete-all') openModal(`<div class="category-confirm-icon">${icon('delete_forever')}</div><h3>全データを削除しますか？</h3><p class="category-dialog-copy">この操作は取り消せません。バックアップしていない記録も完全に削除されます。</p><div class="category-dialog-actions"><button class="secondary-btn" data-action="close-modal">キャンセル</button><button class="secondary-btn danger" data-action="settings-delete-all-confirm">削除</button></div>`,'dialog');
     else if(a==='settings-delete-all-confirm'){ closeModal(); toast('全データを削除しました'); }
     else if(a==='backup-export-open'){ state.backupExportPassword=''; state.backupExportConfirm=''; state.backupPasswordError=''; openModal(backupExportDialog(),'dialog'); requestAnimationFrame(()=>document.querySelector('[data-backup-password="export"]')?.focus()); }
@@ -3477,7 +3634,7 @@ body {
     else if(a==='analytics-custom-window'){ state.analyticsWindow='custom'; state.analyticsWindowLabel='6月15日 〜 7月12日'; closeModal(); render(); toast('カスタム期間に更新しました'); }
     else if(a==='analytics-joy-toggle'){ state.analyticsJoyExpanded=!state.analyticsJoyExpanded; render(); }
     else if(a==='analytics-member-filter'){ const members=[['all','すべてのメンバー'],['self','🌿 あおい'],...(state.family?[['hanako','🌸 花子'],['taro','☕ 太郎']]:[])]; openModal(`<h3>メンバーで絞り込む</h3><div class="flat-card">${members.map(([value,label],index)=>`<button class="tap-row ${index<members.length-1?'row-divider':''}" data-analytics-member="${value}"><span class="row-copy"><strong>${label}</strong></span>${state.analyticsMember===value?icon('check'):''}</button>`).join('')}</div><button class="ghost-btn" data-action="close-modal">キャンセル</button>`); }
-    else if(a==='analytics-category-drill'){ const category=action.dataset.category; openModal(`<h3>${category}</h3><p class="hint">選択期間の取引を、現在のカテゴリ階層で読み取り専用表示します。</p><div class="flat-card"><div class="tap-row row-divider"><span class="row-icon">${icon('receipt_long')}</span><span class="row-copy"><strong>7月10日 · ${category}</strong><small>日常 · 取引の詳細</small></span><strong class="row-value">¥3,280</strong></div><div class="tap-row"><span class="row-icon joy">${icon('receipt_long')}</span><span class="row-copy"><strong>7月6日 · ${category}</strong><small>ときめき · 取引の詳細</small></span><strong class="row-value">¥980</strong></div></div><button class="ghost-btn" data-action="close-modal">閉じる</button>`); }
+    else if(a==='analytics-category-drill'){ state.analyticsDrillCategory=action.dataset.category||'食費'; setScreen('analytics-drill'); }
     else if(a==='month') openModal(`<h3>月を選ぶ</h3>${[[2026,7],[2026,6],[2026,5]].map(([year,month])=>`<button class="tap-row row-divider" data-list-year="${year}" data-list-month="${month}"><span class="row-copy"><strong>${year}年${month}月</strong></span>${icon('chevron_right')}</button>`).join('')}`);
     else if(a==='shopping-private'){ state.shoppingPrivateOnly=!state.shoppingPrivateOnly; render(); }
     else if(a==='shopping-category'){ shoppingCategoryDraft=new Set(state.shoppingCategoryIds); openModal(shoppingCategoryPicker()); }
@@ -3486,9 +3643,11 @@ body {
     else if(a==='shopping-category-apply'){ state.shoppingCategoryIds=[...shoppingCategoryDraft]; closeModal(); render(); }
     else if(a==='close-modal') closeModal();
     else if(a==='back'){ const previous=state.history.pop()||'home'; setScreen(previous,false); }
-    else if(a==='fab'){ if(state.screen==='shopping'){ resetShoppingForm(); setScreen('shopping-form'); } else { invalidateEntryVoiceSession(); state.amount='0'; state.entryMerchant=''; state.entryCategory='食费 > 外出就餐'; state.entryNote=''; state.entryInputMode='keyboard'; state.entryVoiceMode='replace'; state.entryVoiceTranscript=''; state.entryVoiceApplied=false; state.entryReviewPending=false; state.entryNeedsReview=false; state.entrySnapshot=null; state.entryVoiceState='review'; setScreen('entry'); } }
+    else if(a==='fab'){ if(state.screen==='shopping'){ resetShoppingForm(); setScreen('shopping-form'); } else { invalidateEntryVoiceSession(); state.amount='0'; state.entryMerchant=''; state.entryCategory='食費 > 外食'; state.entryNote=''; state.entryInputMode='keyboard'; state.entryVoiceMode='replace'; state.entryVoiceTranscript=''; state.entryVoiceApplied=false; state.entryReviewPending=false; state.entryNeedsReview=false; state.entrySnapshot=null; state.entryVoiceState='review'; setScreen('entry'); } }
     else if(a==='home-add-joy'){ invalidateEntryVoiceSession(); state.amount='0'; state.entryMerchant=''; state.entryCategory=action.dataset.joyCategory||'兴趣娱乐 > 其他兴趣娱乐'; state.entryLedger='joy'; state.entryNote=''; state.entrySatisfaction=8; state.entryInputMode='keyboard'; state.entryVoiceMode='replace'; state.entryVoiceTranscript=''; state.entryVoiceApplied=false; state.entryReviewPending=false; state.entryNeedsReview=false; state.entrySnapshot=null; state.entryVoiceState='review'; setScreen('entry'); }
     else if(a==='hero-analytics') setScreen('analytics');
+    else if(a==='avatar-save'){ setScreen('profile'); toast('アバターを更新しました'); }
+    else if(a==='avatar-photo') toast('システムの写真選択を開きます');
     else if(a==='toast') toast(action.dataset.message||'操作を確認しました');
     else if(a==='filter'){ action.parentElement.querySelectorAll('.filter-chip').forEach(x=>x.classList.remove('active')); action.classList.add('active'); }
     else if(a==='check'){ const item=action.closest('.shopping-item'); item.classList.toggle('done'); action.innerHTML=item.classList.contains('done')?icon('check'):''; }
@@ -3507,7 +3666,7 @@ body {
     else if(a==='switch') action.classList.toggle('on');
     else if(a==='delete') openModal(`<h3>この操作を確認</h3><p class="hint">削除した内容は元に戻せません。</p><button class="primary-btn" style="background:var(--hp-error)" data-action="close-modal">削除する</button><button class="ghost-btn" data-action="close-modal">キャンセル</button>`);
     else if(a==='forgot-pin') openModal(`<h3>PINを忘れた場合</h3><p class="legal-copy">PINを復元する仕組みはありません。再インストールすると、同期されていない端末内データは失われます。</p><button class="secondary-btn" data-action="close-modal">閉じる</button>`);
-    else if(a==='legal-doc') openModal(`<h3>${action.innerText.trim()}</h3><p class="legal-copy">この文書は読みやすさを優先し、見出し・本文・更新日を一つの紙面として表示します。正式な内容は既存の法務文書を使用します。</p><button class="secondary-btn" data-action="close-modal">閉じる</button>`);
+    else if(a==='legal-doc'){ state.legalTitle=action.dataset.legalTitle||'プライバシーポリシー'; setScreen('legal-doc'); }
   });
   document.addEventListener('keydown', e => {
     const customUnitInput=e.target.closest?.('[data-shopping-custom-unit]');
@@ -3539,6 +3698,15 @@ body {
   });
   document.getElementById('modal').addEventListener('click', e=>{ if(e.target.id==='modal') closeModal(); });
   render();
+  const captureParams = new URLSearchParams(location.search);
+  if (captureParams.get('capture-satisfaction') === '1') {
+    state.entryLedger = 'joy';
+    render();
+    openModal(satisfactionBottomSheet());
+  }
+  if (captureParams.has('capture-offset')) {
+    requestAnimationFrame(() => window.scrollTo(0, Number(captureParams.get('capture-offset')) || 0));
+  }
 </script>
 </body>
 </html>

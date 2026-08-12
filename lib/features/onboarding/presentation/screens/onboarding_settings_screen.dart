@@ -1058,8 +1058,8 @@ class _OnboardingSecurityCard extends StatelessWidget {
     final palette = context.palette;
     final l10n = S.of(context);
     final asset = Theme.of(context).brightness == Brightness.dark
-        ? 'docs/mockup/v16/assets/onboarding-privacy-warm-v1-dark.png'
-        : 'docs/mockup/v16/assets/onboarding-privacy-warm-v1.png';
+        ? 'docs/mockup/v17/assets/onboarding-privacy-warm-v1-dark.png'
+        : 'docs/mockup/v17/assets/onboarding-privacy-warm-v1.png';
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(

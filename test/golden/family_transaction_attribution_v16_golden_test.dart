@@ -21,7 +21,7 @@ import 'package:home_pocket/generated/app_localizations.dart';
 import 'package:home_pocket/shared/widgets/family_transaction_attribution.dart';
 
 String _asset(String fileName) =>
-    '${Directory.current.path}/docs/mockup/v16/assets/$fileName';
+    '${Directory.current.path}/docs/mockup/v17/assets/$fileName';
 
 TaggedTransaction _transaction(String id, LedgerType ledgerType) {
   final now = DateTime(2026, 8, 3, 10, 30);
