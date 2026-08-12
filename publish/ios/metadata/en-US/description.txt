@@ -17,6 +17,6 @@ SHARE ONLY WHAT YOU CHOOSE
 Create a family group with an invite code and sync shared ledgers and shopping items. Sync content is encrypted on device and delivered through a zero-knowledge relay service. Private ledgers and private shopping items stay outside the family-sharing flow.
 
 PRIVACY AT THE CENTER
-Budget data is encrypted on your device and is not used for advertising or behavioral tracking. Network communication needed for family sync, notifications, and exchange rates is explained in the privacy policy.
+Budget data is encrypted on your device and is not used for advertising or behavioral tracking. Network communication needed for family sync and exchange rates is explained in the privacy policy.
 
 Budgeting does not have to be only about restriction. Happy Pocket helps you and your family understand what matters in everyday life.

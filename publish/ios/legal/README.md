@@ -1,22 +1,18 @@
-# 法律物料
+# 法律页面发布物料
 
-`current/` 是 2026-08-05 与 `assets/legal/` 同步的发布快照，共 9 份：Privacy Policy、Terms、特商法，分别为日语、简体中文、英语。
+`current/` 保存与 `assets/legal/` 一致的 9 份页面快照：Privacy Policy、Terms、特商法，分别提供日语、简体中文和英语版本。
 
-文本已由运营方批准作为首发正式版本，包含真实运营主体、地址、电话、邮箱、生效规则、处理方、保留期和三语公开 URL，不再包含草案标记或上线占位符。日本专业法务尚未复核，因此该项仍作为独立发布风险保留。
+App Store 提交时要做的事情只有：
 
-## 定稿清单
+1. 将这些页面发布到公开 HTTPS 网站。
+2. 确认无需登录，在日本可访问，并适合手机阅读。
+3. 将最终 Privacy Policy URL 填入 `metadata/*/privacy_url.txt` 和 App Store Connect。
+4. 确保 App 内链接、App Store Connect 和网站显示的是同一版本。
 
-- [ ] 日本专业法务确认适用主体、准据法、管辖、免责、服务变更、终止和争议处理。
-- [x] 替换事业者名、所在地、电话、运营责任人、支持邮箱。
-- [x] 用真实流程描述 family relay：加密消息的暂存、ACK/过期删除、不可解密内容、设备/组元数据、日志和保留期。
-- [x] 披露汇率请求、WebSocket/relay、语音 on-device 与可选网络降级，并说明首版停用 APNs/FCM。
-- [x] 删除“设备直连”“服务器不保存”“Never sent to cloud”等与事实不符的绝对表述。
-- [x] 明确本地删除、relay 保留、备份、日志与隐私请求流程。
-- [x] 首版隐藏打赏入口；特商法口径明确无付费、捐助或赞助交易。
-- [x] 三语版本含义一致，生效规则和联系方式一致。
-- [x] 删除所有 DRAFT/草案/`support@example.com`/`[上线前填真实值]` 标记。
-- [x] 将定稿同步回 `assets/legal/`，通过 app 内页面测试和占位符扫描。
-- [ ] 将最终文档发布到 HTTPS 公共 URL，并逐语言验证无登录、无地区限制、可移动端阅读。
-- [ ] 用最终 URL 更新 `metadata/*/privacy_url.txt` 和 App Store Connect。
+当前计划 URL：
 
-专业法务复核完成后，应记录 reviewer、日期和文档 hash；如有修改，必须同步更新 `current/`、`assets/legal/` 与官网三语页面。
+- 日语：`https://happypocket.app/privacy`
+- 简体中文：`https://happypocket.app/zh/privacy`
+- 英语：`https://happypocket.app/en/privacy`
+
+本目录不包含公司内部法务审批流程。页面内容及适用法律的准确性仍由发布主体负责。

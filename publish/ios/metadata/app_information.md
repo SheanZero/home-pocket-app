@@ -9,8 +9,8 @@
 | Secondary Category | Lifestyle | Optional |
 | Price | Free | Ready；当前无 IAP/Subscription |
 | Made for Kids | No | Ready |
-| Age Rating | 由 2026 新问卷计算 | 待账号持有人填写；预计低龄但不预设结果 |
-| Content Rights | No third-party content requiring rights | 待负责人确认 |
+| Age Rating | 由当前问卷计算 | 待在 App Store Connect 按实际功能填写；不预设结果 |
+| Content Rights | No third-party content requiring rights | 提交前按实际内容确认 |
 | Copyright | `2026 ナープ株式会社` | Ready |
 | Release | Manual | 推荐首发采用 |
 | Sign-in required | No | Ready；本地 profile 不是远程登录账号 |
@@ -22,9 +22,9 @@
 
 | App Store locale | 目录 | App name | Subtitle |
 |---|---|---|---|
-| Japanese | `ja/` | ハピポケ家族家計簿 | 家族で共有できる安心の家計簿 |
-| Simplified Chinese | `zh-Hans/` | Happy Pocket 家庭账本 | 本地优先的家庭共享记账本 |
-| English (U.S.) | `en-US/` | Happy Pocket: Family Budget | Private budgeting for families |
+| Japanese | `ja/` | Happy Pocket | 家族で共有できる安心の家計簿 |
+| Simplified Chinese | `zh-Hans/` | 快乐账本 | 本地优先的家庭共享记账本 |
+| English (U.S.) | `en-US/` | Happy Pocket: Home Ledger | Secure, shared family budget |
 
 ## 产品口径
 
@@ -37,4 +37,4 @@
 
 - `https://happypocket.app/`：Happy Pocket 正式产品域名；日语使用根路径，简体中文使用 `/zh/`，英语使用 `/en/`。
 - 三语 Support URL 与 Privacy URL 均使用 App 专用页面，不再引用开发者个人主页。
-- 上架前仍需由发布负责人确认公开 DNS、TLS 和各页面在目标地区可访问。
+- 上架前确认公开 DNS、TLS 和各页面在日本可访问。

@@ -1,3 +1,5 @@
+"NSCameraUsageDescription" = "Happy Pocket includes camera support through its profile image picker.";
+"NSLocationWhenInUseUsageDescription" = "The image picker may use location while handling capture information. Happy Pocket does not store or share your location.";
 "NSMicrophoneUsageDescription" = "Happy Pocket uses the microphone for voice entry.";
 "NSPhotoLibraryUsageDescription" = "Happy Pocket uses your photo library to let you choose a profile photo.";
 "NSSpeechRecognitionUsageDescription" = "Happy Pocket uses speech recognition to enter amounts and transaction details by voice.";

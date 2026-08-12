@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 const _localizedInfoPlistKeys = <String>{
+  'NSCameraUsageDescription',
+  'NSLocationWhenInUseUsageDescription',
   'NSMicrophoneUsageDescription',
   'NSPhotoLibraryUsageDescription',
   'NSSpeechRecognitionUsageDescription',
@@ -55,6 +57,11 @@ void main() {
         expect(
           infoPlist,
           contains('<key>NSPhotoLibraryUsageDescription</key>'),
+        );
+        expect(infoPlist, contains('<key>NSCameraUsageDescription</key>'));
+        expect(
+          infoPlist,
+          contains('<key>NSLocationWhenInUseUsageDescription</key>'),
         );
         expect(
           infoPlist,

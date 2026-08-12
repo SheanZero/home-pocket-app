@@ -1,3 +1,5 @@
+"NSCameraUsageDescription" = "プロフィール画像の選択機能に含まれるカメラ連携のために使用します。";
+"NSLocationWhenInUseUsageDescription" = "写真選択機能が撮影情報を処理する際に位置情報を使用します。Happy Pocket は位置情報を保存または共有しません。";
 "NSMicrophoneUsageDescription" = "音声入力のためにマイクを使用します。";
 "NSPhotoLibraryUsageDescription" = "プロフィール写真を選択するために写真ライブラリを使用します。";
 "NSSpeechRecognitionUsageDescription" = "音声で金額や取引内容を入力するために音声認識を使用します。";

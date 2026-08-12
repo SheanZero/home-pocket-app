@@ -1,48 +1,30 @@
-# Happy Pocket — iOS App Store 发布包
+# Happy Pocket — App Store 发布资料
 
-生成日期：2026-08-04（Asia/Tokyo）
+这里保存 Happy Pocket 首次发布到 Apple App Store 时要使用的操作指南和现成物料。
 
-这个目录是 Happy Pocket（ハピポケ家族家計簿）首次 App Store 发布的统一交付入口。它包含发布步骤、App Store Connect 三语文案、审核说明、隐私与加密答题稿、App Icon、法律文本快照、截图采集规范和自动校验脚本。
+当前 App 最低支持 iOS 15，最终上传使用 Xcode 26 或更高版本构建。
 
-## 当前结论
+发布时从 [`APP_STORE_RELEASE.md`](APP_STORE_RELEASE.md) 开始。它是唯一的发布流程文档，按一人公司可以直接执行的方式编写。
 
-**物料框架和可确定内容已准备好，但当前版本仍是 NO-GO，不能直接提交审核。** 账号、法务和真实运行行为相关的信息不能靠占位值代替；请先关闭 [RELEASE_GATES.md](RELEASE_GATES.md) 中的阻断项。
+## 目录
 
-已确认的工程信息：
+- `APP_STORE_RELEASE.md`：从 Apple 账号准备、App Store Connect、Archive、TestFlight 自测、送审到正式上线的完整流程。
+- `REQUIRED_VALUES.env.example`：App Store Connect 字段速查，不含密码或证书。
+- `metadata/`：日语、简体中文、英语商店文案。
+- `screenshots/`：截图规格、分镜、采集命令和校验脚本。
+- `review/`：App Review Notes、审核复现路径和 TestFlight 自测说明。
+- `privacy/`：App Privacy 填写基线、加密问卷技术基线和 Privacy Manifest 模板。
+- `legal/current/`：与 App 内置版本一致的隐私政策、条款和特商法页面快照。
+- `assets/`：1024×1024 App Store Icon 和品牌资源。
+- `scripts/validate_materials.sh`：检查版本、图标、元数据、隐私清单和截图。
+- `SOURCES.md`：Apple 官方资料链接。
 
-| 项目 | 当前值 |
-|---|---|
-| Bundle ID | `com.sheanzero.happypocket.app` |
-| Apple Team ID | `6Y64KR8RLP` |
-| pubspec 版本 | `1.0.0+1` |
-| iOS Deployment Target | iOS 15.0 |
-| 支持设备 | iPhone + iPad（`TARGETED_DEVICE_FAMILY = 1,2`） |
-| Xcode | `26.2`，满足 2026-04-28 起的 Xcode 26 / iOS 26 SDK 上传要求 |
-| App Icon | `assets/app-icon/AppIcon-1024.png`，1024×1024、无 Alpha，可用于商店 |
-| 推送 | 首版停用；通知入口、自动注册与 iOS push capability 已关闭 |
+## 当前还要在 App Store Connect 完成的事项
 
-## 目录说明
+- 上传 `docs/mockup/v17/marketing/ja/exports/` 的 10 张日语 iPhone 营销截图；其他语言使用主语言回退。
+- 用 Apple Distribution 正式签名生成 Archive，Validate App 后上传。
+- 根据最终 App、SDK 和生产服务填写 App Privacy。
+- 完成加密/出口合规问卷并清除 build 的 Missing Compliance。
+- 选择 build，填写审核信息并提交审核。
 
-- `RELEASE_GATES.md`：提交前必须关闭的阻断项。
-- `RELEASE_STEPS.md`：从账号准备、构建、TestFlight 到送审和发布的逐步操作。
-- `REQUIRED_VALUES.env.example`：需要发布负责人填写的真实信息，不含密码或证书。
-- `metadata/`：日语、简体中文、英语 App Store Connect 文案。
-- `review/`：App Review Notes、审核测试路径与 TestFlight 测试说明。
-- `privacy/`：App Privacy 保守答题稿、加密出口合规判断清单、隐私清单模板。
-- `assets/`：1024 App Icon 与品牌源文件。
-- `legal/current/`：与 `assets/legal/` 同步的三语正式文本快照；运营方已批准，尚待专业法务复核。
-- `screenshots/`：截图分镜、规格、采集路径与规范化脚本。
-- `scripts/validate_materials.sh`：本地发布物料门禁。
-- `SOURCES.md`：本包采用的 Apple 官方依据。
-
-## 推荐使用顺序
-
-1. 复制 `REQUIRED_VALUES.env.example` 为本地私有工作表，补齐真实联系人、App 专用支持/隐私 URL、版权主体、版本和发布地区；不要提交凭据。
-2. 关闭 `RELEASE_GATES.md` 中的 P0 项，并同步修正 app 内文案、隐私政策与实际网络行为。
-3. 按 `screenshots/README.md` 用最终 Release build 和非敏感演示数据采集 iPhone、iPad 三语截图。
-4. 运行 `bash publish/ios/scripts/validate_materials.sh`。
-5. 按 `RELEASE_STEPS.md` 上传 TestFlight、验收、填 App Store Connect 并提交审核。
-
-## 边界
-
-本包不包含 Apple ID、App Store Connect API key、分发证书、私钥、provisioning profile、真实手机号或任何其他秘密。出口管制和日本法务结论也不能由模板代替，必须由账号持有人/法务负责人确认。
+账号密码、证书私钥、provisioning profile 和 API key 不存放在本目录。

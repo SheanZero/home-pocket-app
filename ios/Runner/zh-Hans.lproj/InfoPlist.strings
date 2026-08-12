@@ -1,3 +1,5 @@
+"NSCameraUsageDescription" = "Happy Pocket 的个人资料图片选择组件包含相机支持。";
+"NSLocationWhenInUseUsageDescription" = "图片选择组件在处理拍摄信息时可能使用位置。Happy Pocket 不会保存或共享您的位置。";
 "NSMicrophoneUsageDescription" = "Happy Pocket 使用麦克风进行语音记账。";
 "NSPhotoLibraryUsageDescription" = "Happy Pocket 使用您的照片图库以选择个人资料照片。";
 "NSSpeechRecognitionUsageDescription" = "Happy Pocket 使用语音识别输入金额和交易内容。";

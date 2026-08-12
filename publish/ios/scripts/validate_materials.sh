@@ -68,8 +68,7 @@ fi
 
 IOS_RELEASE_MATERIALS=(
   "$PUBLISH_DIR/README.md"
-  "$PUBLISH_DIR/RELEASE_GATES.md"
-  "$PUBLISH_DIR/RELEASE_STEPS.md"
+  "$PUBLISH_DIR/APP_STORE_RELEASE.md"
   "$PUBLISH_DIR/intro/en/app-introduction.md"
   "$PUBLISH_DIR/intro/ja/app-introduction.md"
 )
@@ -87,8 +86,11 @@ if [ "$IOS_VERSION_MISMATCH" -eq 0 ]; then
   pass "iOS release materials consistently declare iOS 15"
 fi
 
-if rg -q 'TARGETED_DEVICE_FAMILY = "1,2";' ios/Runner.xcodeproj/project.pbxproj; then
-  warn "Target supports iPhone and iPad; 13-inch iPad screenshots and QA are mandatory"
+if rg -q 'TARGETED_DEVICE_FAMILY = 1;' ios/Runner.xcodeproj/project.pbxproj \
+  && ! rg -q 'TARGETED_DEVICE_FAMILY = "1,2";' ios/Runner.xcodeproj/project.pbxproj; then
+  pass "Runner target supports iPhone only"
+else
+  block "Runner target must support iPhone only"
 fi
 
 APP_ICON="$PUBLISH_DIR/assets/app-icon/AppIcon-1024.png"
@@ -201,29 +203,31 @@ else
   block "privacy manifest template is invalid"
 fi
 
-if rg -q '<key>NSPhotoLibraryUsageDescription</key>' ios/Runner/Info.plist; then
-  pass "Photo Library usage description is present"
-else
-  block "Photo Library usage description is absent while avatar picker reads the photo library"
-fi
+for permission_key in NSCameraUsageDescription NSLocationWhenInUseUsageDescription NSPhotoLibraryUsageDescription; do
+  if rg -q "<key>${permission_key}</key>" ios/Runner/Info.plist; then
+    pass "$permission_key is present"
+  else
+    block "$permission_key is absent from the shipping Info.plist"
+  fi
+done
 
 READY_IMAGE_COUNT="$(find "$PUBLISH_DIR/screenshots/ready" -type f -name '*.png' | wc -l | tr -d ' ')"
-if [ "$READY_IMAGE_COUNT" -eq 30 ]; then
-  pass "30 final screenshots are present (3 locales x 2 devices x 5)"
+if [ "$READY_IMAGE_COUNT" -eq 10 ]; then
+  pass "10 Japanese iPhone marketing screenshots are present"
 else
-  block "expected 30 final screenshots; found $READY_IMAGE_COUNT"
+  block "expected 10 Japanese iPhone screenshots; found $READY_IMAGE_COUNT"
 fi
 
 REVIEW_NOTES="$PUBLISH_DIR/review/app_review_notes_en.txt"
 REVIEW_VALUES="$PUBLISH_DIR/REQUIRED_VALUES.env.example"
 if rg -n '__REQUIRED_REVIEW_CONTACT_' "$REVIEW_NOTES" "$REVIEW_VALUES" >/dev/null; then
   block "App Review contact still contains required placeholders"
-elif rg -q 'Representative 張欣, ナープ株式会社, support@napu\.co\.jp, 03-6859-7235\.' "$REVIEW_NOTES" \
+elif rg -q 'Representative 張欣, ナープ株式会社, support@napu\.co\.jp, \+81368597235\.' "$REVIEW_NOTES" \
   && rg -q '^REVIEW_FIRST_NAME="欣"$' "$REVIEW_VALUES" \
   && rg -q '^REVIEW_LAST_NAME="張"$' "$REVIEW_VALUES" \
   && rg -q '^REVIEW_COMPANY="ナープ株式会社"$' "$REVIEW_VALUES" \
   && rg -q '^REVIEW_EMAIL="support@napu\.co\.jp"$' "$REVIEW_VALUES" \
-  && rg -q '^REVIEW_PHONE="03-6859-7235"$' "$REVIEW_VALUES"; then
+  && rg -q '^REVIEW_PHONE="\+81368597235"$' "$REVIEW_VALUES"; then
   pass "App Review contact uses approved operator details"
 else
   block "App Review contact does not match approved operator details"

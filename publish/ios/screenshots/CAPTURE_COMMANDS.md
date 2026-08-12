@@ -1,74 +1,27 @@
-# iOS Simulator 截图采集命令
+# iOS App Store 营销截图准备命令
 
-这些命令只负责构建、安装、切换启动语言和截屏；页面导航、演示数据录入与隐私复核仍需人工完成。
+本次不采集 iPad 或三语真机截图。使用已批准的 V17 日语营销导出图，并仅上传到日语产品页。
 
-## 推荐模拟器
+## 来源与输出
 
-- iPhone 16 Pro Max：原生 1320×2868，属于 6.9 英寸接受规格。
-- iPad Pro 13-inch (M4)：原生 2064×2752，属于 13 英寸接受规格。
+- 来源：`docs/mockup/v17/marketing/ja/exports/`，10 张 `2580×5592` RGB PNG。
+- 输出：`publish/ios/screenshots/ready/ja/iphone-6.9/`，10 张 `1290×2796` RGB PNG。
 
-先查看本机实际名称：
-
-```bash
-xcrun simctl list devices available
-```
-
-## 构建 Simulator Release
+## 规范化
 
 ```bash
-flutter clean
-flutter pub get
-flutter build ios --simulator --release
+/Users/xinz/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 \
+  publish/ios/scripts/normalize_screenshots.py \
+  --input docs/mockup/v17/marketing/ja/exports \
+  --output publish/ios/screenshots/ready
 ```
 
-## 安装与启动
+脚本只接受当前精确 2x 来源，按一半尺寸等比缩放，输出 RGB PNG，并移除 Alpha 和图片元数据。
 
-以下以已在 Simulator app 中启动目标设备为前提：
+## 校验与上传
 
 ```bash
-xcrun simctl install booted build/ios/iphonesimulator/Runner.app
+bash publish/ios/scripts/validate_materials.sh
 ```
 
-日语：
-
-```bash
-xcrun simctl launch --terminate-running-process booted \
-  com.sheanzero.happypocket.app \
-  -AppleLanguages '(ja)' \
-  -AppleLocale 'ja_JP'
-```
-
-简体中文：
-
-```bash
-xcrun simctl launch --terminate-running-process booted \
-  com.sheanzero.happypocket.app \
-  -AppleLanguages '(zh-Hans)' \
-  -AppleLocale 'zh_CN'
-```
-
-英语：
-
-```bash
-xcrun simctl launch --terminate-running-process booted \
-  com.sheanzero.happypocket.app \
-  -AppleLanguages '(en)' \
-  -AppleLocale 'en_US'
-```
-
-每次切换语言后，完整退出并重新启动 app，确认权限弹窗与系统文案也使用预期语言。
-
-## 截屏
-
-导航到分镜要求的页面后：
-
-```bash
-xcrun simctl io booted screenshot \
-  publish/ios/screenshots/raw/ja/iphone-6.9/01-home.png
-```
-
-按 `storyboard.csv` 重复 5 个页面，再切换 locale/device。若模拟器输出不是目标原生像素，停止采集并选用正确 device；不要事后拉伸。
-
-## 真机补充
-
-Simulator 图可用于 App Store，但以下项目仍需真机/TestFlight 证据：Face ID、麦克风/语音识别、照片权限、后台状态和双设备同步。首版还应验证不会请求通知权限。审核附件中的双设备演示应优先使用真实设备。
+校验通过后，把 10 张输出图按编号顺序上传到 App Store Connect 的日语 iPhone 截图栏。简体中文和英语不单独上传截图，使用主语言截图回退。

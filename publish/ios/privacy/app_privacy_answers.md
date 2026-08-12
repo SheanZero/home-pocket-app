@@ -26,8 +26,8 @@ Apple 将“Collect”定义为：数据被传出设备，并允许开发者或�
 | Identifiers > User ID | Yes | Yes | No | App Functionality | group/account-level identifiers、group membership |
 | Identifiers > Device ID | Yes | Yes | No | App Functionality | app-generated device ID、公钥标识；首版不收集 APNs/FCM token |
 | User Content > Other User Content | Yes | Yes | No | App Functionality | group name/avatar metadata 明文；notes/merchant/shopping 等共享内容以 E2EE payload 传输 |
-| Financial Info > Purchase History | Conservative Yes | Yes | No | App Functionality | 家庭交易记录会以 E2EE payload 暂存于 relay；需 Apple/法务确认加密不可读内容是否仍按此类申报 |
-| Financial Info > Other Financial Info | Conservative Yes | Yes | No | App Functionality | 收支/预算等同步内容同上；若最终确认仅 ciphertext 不构成可访问数据，可在有书面依据后缩减 |
+| Financial Info > Purchase History | No | — | — | — | 家庭交易记录仅以 E2EE 密文暂存；中继没有密钥，无法以可读形式访问内容，不符合 Apple 对“Collect”的定义 |
+| Financial Info > Other Financial Info | No | — | — | — | 收支、预算等仅以 E2EE 密文暂存；中继无法以可读形式访问内容 |
 | Photos or Videos | No | — | — | — | 头像图片在客户端以 hash/本地内容处理；receipt photo 不同步。确认服务端从不接收图像本体 |
 | Audio Data | No by developer | — | — | — | 开发者不存储音频；system network speech fallback 需按 Apple framework 指引和最终设置复核 |
 | Product Interaction / Usage | No | — | — | — | iOS 未发现 analytics 使用；以 archive/SDK report 为准 |
@@ -45,7 +45,7 @@ Apple 将“Collect”定义为：数据被传出设备，并允许开发者或�
 ## App Store Connect 操作
 
 1. App Privacy > Get Started > **Yes, we collect data from this app**。
-2. 添加最终确认的数据类型。
+2. 添加 4 类最终确认的数据：Name、User ID、Device ID、Other User Content。
 3. 每一类填写：App Functionality、Linked to User、Not used for Tracking。
 4. 录入各语言公开 Privacy Policy URL。
 5. 在 Product Page Preview 检查最终标签。
@@ -60,8 +60,9 @@ Apple 将“Collect”定义为：数据被传出设备，并允许开发者或�
 - [ ] iOS archive 的 Xcode Privacy Report 与所有第三方 SDK manifests。
 - [ ] `Podfile.lock` / Flutter plugins 中是否出现 analytics、ads、crash reporting。
 - [ ] voice on-device fallback 的默认值、用户控制与 Apple Speech 数据处理。
+- [x] App Store Connect 草稿已与 Build 3 的 `PrivacyInfo.xcprivacy` 对齐：4 类数据，均用于 App Functionality、Linked to User、Not used for Tracking。
 - [ ] 最终三语隐私政策与上述表格逐行一致。
 
 ## 关键原则
 
-零知识/E2EE 说明的是**内容不可被中继解密**，不等于“没有数据传出设备”或“服务器不处理任何数据”。App Privacy、隐私政策、审核 Notes 和服务端真实行为必须同时成立。
+零知识/E2EE 说明的是**内容不可被中继解密**。按 Apple 当前口径，App Privacy 的“收集”要求数据以可读形式被保留，因此不把中继无法解密的账本密文申报为 Purchase History 或 Other Financial Info；中继可读的姓名、标识符和其他用户内容仍须申报。App Privacy、隐私政策、审核 Notes 和服务端真实行为必须同时成立。
