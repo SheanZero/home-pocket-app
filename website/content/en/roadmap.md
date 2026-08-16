@@ -23,9 +23,10 @@ stages:
   - version: "v1.2"
     status: "PLANNED"
     title: "Notifications only when they help"
-    summary: "Quiet reminders for recurring expenses, backup freshness, family invitations, and other moments worth remembering."
+    summary: "Quiet reminders for recurring expenses, backup freshness, family invitations, and point-multiplier days at Japanese stores."
     items:
       - "Independent controls and quiet hours"
+      - "User-configured schedules for favorite Japanese stores"
       - "No amounts, notes, or financial details in notification copy"
       - "Important state remains visible inside the app"
   - version: "v1.2"

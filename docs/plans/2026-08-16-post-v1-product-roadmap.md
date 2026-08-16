@@ -96,6 +96,19 @@ Notifications:
 
 - Add local reminders for recurring/fixed expenses, backup freshness, and
   expiring invitations.
+- Add Japan store point-multiplier reminders as a v1.2 local-first capability.
+  The first release is user-configured rather than populated by scraping or an
+  unofficial campaign feed:
+  - save a store name, optional multiplier label, and recurrence rule;
+  - support day-of-week, monthly date, nth weekday, and bounded campaign dates;
+  - allow same-day, one-day-before, and custom-time reminders in Japan time;
+  - default to generic lock-screen copy, with store-name preview available only
+    after explicit opt-in; and
+  - deep-link to the saved reminder or shopping context without inferring a
+    purchase or uploading purchase history.
+- Treat retailer-maintained or licensed campaign calendars as a later
+  enhancement. Any external source must expose provenance and expiry, respect
+  retailer terms, and never silently overwrite a user's local schedule.
 - Request notification permission in context, after the user enables a reminder
   or family event—not during first launch.
 - Provide per-type toggles, quiet hours, and an in-app notification center so
@@ -123,6 +136,10 @@ Developer support:
 Exit gate:
 
 - notification privacy tests assert generic payloads;
+- point-multiplier recurrence tests cover monthly dates, weekdays, nth weekdays,
+  time-zone changes, expired campaigns, and duplicate suppression;
+- store reminder data remains encrypted on-device and works without a network
+  connection;
 - every notification type can be disabled independently;
 - purchase delivery is idempotent and refund-safe; and
 - the app remains fully useful without paying.
@@ -249,4 +266,3 @@ The ordering reflects the current codebase plus platform and market patterns:
 
 These links are inputs, not blanket endorsements. Store rules, APIs, and market
 offerings must be rechecked during each release because they can change.
-
