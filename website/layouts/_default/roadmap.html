@@ -1,0 +1,72 @@
+{{ define "main" }}
+<section class="roadmap-hero" aria-labelledby="roadmap-title">
+  <div class="shell roadmap-hero-grid">
+    <div class="roadmap-hero-copy">
+      <p class="eyebrow">{{ .Params.eyebrow }}</p>
+      <h1 id="roadmap-title">{{ .Title }}</h1>
+      <p class="roadmap-lede">{{ .Params.description }}</p>
+      <div class="roadmap-meta" aria-label="{{ i18n "roadmap_meta_label" }}">
+        <span><small>{{ .Params.currentLabel }}</small>{{ .Params.currentValue }}</span>
+        <span><small>{{ .Params.updatedLabel }}</small>{{ .Params.updated }}</span>
+      </div>
+    </div>
+    <aside class="roadmap-hero-note">
+      <span aria-hidden="true">→</span>
+      <p>{{ i18n "roadmap_hero_note" }}</p>
+    </aside>
+  </div>
+</section>
+
+<section class="section roadmap-plan" aria-labelledby="roadmap-plan-title">
+  <div class="shell section-intro roadmap-intro">
+    <p class="eyebrow">{{ i18n "roadmap_sequence_label" }}</p>
+    <h2 id="roadmap-plan-title">{{ .Params.introTitle }}</h2>
+    <p>{{ .Params.introBody }}</p>
+  </div>
+
+  <div class="shell roadmap-track">
+    {{ range $index, $stage := .Params.stages }}
+    <article class="roadmap-stage{{ if eq $stage.status "NEXT" }} roadmap-stage-next{{ end }}">
+      <div class="roadmap-stage-marker" aria-hidden="true"><span>{{ printf "%02d" (add $index 1) }}</span></div>
+      <div class="roadmap-stage-card">
+        <header>
+          <span class="roadmap-version">{{ $stage.version }}</span>
+          <span class="roadmap-status">{{ $stage.status }}</span>
+        </header>
+        <h3>{{ $stage.title }}</h3>
+        <p>{{ $stage.summary }}</p>
+        <ul>
+          {{ range $stage.items }}<li>{{ . }}</li>{{ end }}
+        </ul>
+      </div>
+    </article>
+    {{ end }}
+  </div>
+</section>
+
+<section class="section roadmap-principles" aria-labelledby="roadmap-principles-title">
+  <div class="shell">
+    <p class="eyebrow eyebrow-light">{{ i18n "roadmap_principles_label" }}</p>
+    <h2 id="roadmap-principles-title">{{ .Params.principlesTitle }}</h2>
+    <div class="roadmap-principle-grid">
+      {{ range $index, $principle := .Params.principles }}
+      <article>
+        <span>{{ printf "%02d" (add $index 1) }}</span>
+        <h3>{{ $principle.title }}</h3>
+        <p>{{ $principle.body }}</p>
+      </article>
+      {{ end }}
+    </div>
+  </div>
+</section>
+
+<section class="roadmap-footnote">
+  <div class="shell roadmap-footnote-inner">
+    <p class="eyebrow">{{ .Params.noteTitle }}</p>
+    <p>{{ .Params.noteBody }}</p>
+    <a class="quiet-link" href="{{ .Site.Params.githubURL }}" target="_blank" rel="noreferrer">{{ i18n "roadmap_source_link" }} <span aria-hidden="true">↗</span></a>
+  </div>
+</section>
+
+{{ partial "download-section.html" . }}
+{{ end }}

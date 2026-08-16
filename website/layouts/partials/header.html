@@ -13,6 +13,7 @@
       {{ with .Site.GetPage "/features" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "features" }} aria-current="page"{{ end }}>{{ i18n "nav_features" }}</a>{{ end }}
       {{ with .Site.GetPage "/family" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "family" }} aria-current="page"{{ end }}>{{ i18n "nav_family" }}</a>{{ end }}
       {{ with .Site.GetPage "/privacy" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "privacy" }} aria-current="page"{{ end }}>{{ i18n "nav_privacy" }}</a>{{ end }}
+      {{ with .Site.GetPage "/roadmap" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "roadmap" }} aria-current="page"{{ end }}>{{ i18n "nav_roadmap" }}</a>{{ end }}
       {{ with .Site.GetPage "/faq" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "faq" }} aria-current="page"{{ end }}>{{ i18n "nav_faq" }}</a>{{ end }}
     </nav>
 
@@ -33,6 +34,7 @@
           {{ with .Site.GetPage "/features" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "features" }} aria-current="page"{{ end }}>{{ i18n "nav_features" }}</a>{{ end }}
           {{ with .Site.GetPage "/family" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "family" }} aria-current="page"{{ end }}>{{ i18n "nav_family" }}</a>{{ end }}
           {{ with .Site.GetPage "/privacy" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "privacy" }} aria-current="page"{{ end }}>{{ i18n "nav_privacy" }}</a>{{ end }}
+          {{ with .Site.GetPage "/roadmap" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "roadmap" }} aria-current="page"{{ end }}>{{ i18n "nav_roadmap" }}</a>{{ end }}
           {{ with .Site.GetPage "/faq" }}<a href="{{ .RelPermalink }}"{{ if eq $.Params.translationKey "faq" }} aria-current="page"{{ end }}>{{ i18n "nav_faq" }}</a>{{ end }}
           <a href="{{ .Site.Home.RelPermalink }}#download">{{ i18n "nav_download" }}</a>
         </nav>

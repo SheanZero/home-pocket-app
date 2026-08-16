@@ -338,3 +338,23 @@ family_boundary_3_body:
   other: "中继服务器不持有解密财务数据所需的密钥。"
 family_next:
   other: "阅读隐私架构"
+nav_roadmap:
+  other: "路线图"
+roadmap_banner_label:
+  other: "NEXT FOR HAPPY POCKET"
+roadmap_banner_title:
+  other: "iPad、通知与附件：后续计划现已公开。"
+roadmap_banner_body:
+  other: "包括支持开发者的方式，我们公开说明 v1.0 之后最重要的功能顺序。"
+roadmap_banner_cta:
+  other: "查看路线图"
+roadmap_meta_label:
+  other: "路线图更新信息"
+roadmap_hero_note:
+  other: "我们计划先推出 iPad 适配，再加入通知与开发支持，之后完成加密附件。"
+roadmap_sequence_label:
+  other: "THE ORDER MATTERS"
+roadmap_principles_label:
+  other: "WHAT WILL NOT CHANGE"
+roadmap_source_link:
+  other: "查看开源开发进度"

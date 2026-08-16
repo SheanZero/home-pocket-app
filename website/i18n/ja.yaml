@@ -338,3 +338,23 @@ family_boundary_3_body:
   other: "中継サーバーは家計データの復号鍵を持ちません。"
 family_next:
   other: "安心設計を詳しく読む"
+nav_roadmap:
+  other: "これから"
+roadmap_banner_label:
+  other: "NEXT FOR HAPPY POCKET"
+roadmap_banner_title:
+  other: "iPad、通知、添付ファイル。これからの計画を公開しました。"
+roadmap_banner_body:
+  other: "開発応援の仕組みを含め、v1.0の先で大切にしたい順番をお知らせします。"
+roadmap_banner_cta:
+  other: "ロードマップを見る"
+roadmap_meta_label:
+  other: "ロードマップの更新情報"
+roadmap_hero_note:
+  other: "最初にiPad対応、次に通知と開発応援、その後に暗号化された添付ファイルを予定しています。"
+roadmap_sequence_label:
+  other: "THE ORDER MATTERS"
+roadmap_principles_label:
+  other: "WHAT WILL NOT CHANGE"
+roadmap_source_link:
+  other: "オープンソースの開発を見る"

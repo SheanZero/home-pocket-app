@@ -338,3 +338,23 @@ family_boundary_3_body:
   other: "The relay never holds the keys needed to read financial data."
 family_next:
   other: "Read the privacy architecture"
+nav_roadmap:
+  other: "Roadmap"
+roadmap_banner_label:
+  other: "NEXT FOR HAPPY POCKET"
+roadmap_banner_title:
+  other: "iPad, notifications, and attachments—our next steps are public."
+roadmap_banner_body:
+  other: "Including an optional way to support development, here is how we are ordering the work after v1.0."
+roadmap_banner_cta:
+  other: "Read the roadmap"
+roadmap_meta_label:
+  other: "Roadmap update information"
+roadmap_hero_note:
+  other: "We plan to begin with iPad, then notifications and developer support, followed by encrypted attachments."
+roadmap_sequence_label:
+  other: "THE ORDER MATTERS"
+roadmap_principles_label:
+  other: "WHAT WILL NOT CHANGE"
+roadmap_source_link:
+  other: "Follow the open-source work"

@@ -14,6 +14,7 @@
         <a href="{{ with .Site.GetPage "/features" }}{{ .RelPermalink }}{{ end }}">{{ i18n "nav_features" }}</a>
         <a href="{{ with .Site.GetPage "/family" }}{{ .RelPermalink }}{{ end }}">{{ i18n "nav_family" }}</a>
         <a href="{{ with .Site.GetPage "/privacy" }}{{ .RelPermalink }}{{ end }}">{{ i18n "nav_privacy" }}</a>
+        {{ with .Site.GetPage "/roadmap" }}<a href="{{ .RelPermalink }}">{{ i18n "nav_roadmap" }}</a>{{ end }}
         <a href="{{ with .Site.GetPage "/faq" }}{{ .RelPermalink }}{{ end }}">{{ i18n "nav_faq" }}</a>
         <a href="{{ .Site.Home.RelPermalink }}#download">{{ i18n "nav_download" }}</a>
       </div>

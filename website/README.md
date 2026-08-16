@@ -24,7 +24,7 @@ For the private Sites preview, Hugo output is staged under `website/dist/client/
 
 ## Structure
 
-- `content/ja/`, `content/zh/`, and `content/en/` contain the localized home, philosophy, features, family, privacy, terms, Tokusho, FAQ, and support pages.
+- `content/ja/`, `content/zh/`, and `content/en/` contain the localized home, philosophy, features, family, privacy, roadmap, terms, Tokusho, FAQ, and support pages.
 - `i18n/` contains the shared interface and component copy.
 - `layouts/` contains the Hugo templates and partials.
 - `assets/css/main.css` contains the responsive visual system.

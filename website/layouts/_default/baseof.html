@@ -17,12 +17,15 @@
   <meta property="og:site_name" content="Happy Pocket">
   <meta property="og:locale" content="{{ .Site.Language.LanguageCode | replaceRE "-" "_" }}">
   {{ range .Translations }}<meta property="og:locale:alternate" content="{{ .Language.LanguageCode | replaceRE "-" "_" }}">{{ end }}
-  <meta property="og:image" content="{{ "images/og-happy-pocket.png" | absURL }}">
+  {{ $socialImage := .Params.ogImage | default "images/og-happy-pocket.png" }}
+  <meta property="og:image" content="{{ $socialImage | absURL }}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Happy Pocket — Family Budget">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="{{ "images/og-happy-pocket.png" | absURL }}">
+  <meta name="twitter:title" content="{{ if .IsHome }}{{ .Title }} — {{ i18n "meta_tagline" }}{{ else }}{{ .Title }} — {{ .Site.Title }}{{ end }}">
+  <meta name="twitter:description" content="{{ .Params.description | default (i18n "meta_description") }}">
+  <meta name="twitter:image" content="{{ $socialImage | absURL }}">
   {{ $style := resources.Get "css/main.css" | minify | fingerprint }}
   <link rel="stylesheet" href="{{ $style.RelPermalink }}" integrity="{{ $style.Data.Integrity }}">
   {{ $script := resources.Get "js/main.js" | minify | fingerprint }}

@@ -23,6 +23,10 @@ accepted ADRs rather than historical roadmap language.
   be recreated or referenced by active scripts or documentation.
 - Audit state lives in `tool/audit/`. Durable release and compatibility evidence
   lives in `docs/testing/`; implementation plans live in `docs/plans/`.
+- The accepted post-1.0 product direction is recorded in
+  `docs/plans/2026-08-16-post-v1-product-roadmap.md`. Its next product release is
+  the adaptive iPad experience; the roadmap remains directional until a scoped
+  implementation plan is approved.
 
 Known verification state as of 2026-08-16:
 

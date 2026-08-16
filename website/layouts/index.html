@@ -21,6 +21,22 @@
   </div>
 </section>
 
+{{ with .Site.GetPage "/roadmap" }}
+<section class="roadmap-banner-section" aria-labelledby="roadmap-banner-title">
+  <div class="shell">
+    <a class="roadmap-banner" href="{{ .RelPermalink }}">
+      <span class="roadmap-banner-index" aria-hidden="true">→</span>
+      <div>
+        <p class="eyebrow">{{ i18n "roadmap_banner_label" }}</p>
+        <h2 id="roadmap-banner-title">{{ i18n "roadmap_banner_title" }}</h2>
+        <p>{{ i18n "roadmap_banner_body" }}</p>
+      </div>
+      <strong>{{ i18n "roadmap_banner_cta" }} <span aria-hidden="true">→</span></strong>
+    </a>
+  </div>
+</section>
+{{ end }}
+
 <section class="section home-routes" aria-labelledby="home-routes-title">
   <div class="shell section-intro home-routes-intro">
     <p class="eyebrow">{{ i18n "home_routes_eyebrow" }}</p>
