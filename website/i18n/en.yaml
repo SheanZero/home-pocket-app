@@ -46,7 +46,7 @@ store_links_label:
 store_open_on:
   other: "Open in"
 store_release_note:
-  other: "Preparing for release — official listings will replace these links after review"
+  other: "Now on the App Store — Android release in preparation"
 hero_privacy_link:
   other: "See how privacy works"
 hero_photo_alt:
@@ -186,7 +186,7 @@ faq_body:
 faq_1_question:
   other: "When can I download it?"
 faq_1_answer:
-  other: "Happy Pocket is preparing for release on the App Store and Google Play. After store review, the buttons on this site will point to the official product listings."
+  other: "The iPhone app is available on the App Store. The Android release is still in preparation."
 faq_2_question:
   other: "Does my financial data go to the cloud?"
 faq_2_answer:
@@ -209,7 +209,7 @@ download_eyebrow:
 download_title:
   other: "Keep today’s spending as part of today’s happiness."
 download_body:
-  other: "Planned for iPhone, iPad, and Android. We will keep the store links and release status current here."
+  other: "Available for iPhone on the App Store. The Android release is in preparation."
 
 footer_statement:
   other: "A local-first family ledger for shared peace of mind and the spending that makes life yours."
@@ -220,7 +220,7 @@ footer_project:
 footer_support:
   other: "Support"
 footer_release_note:
-  other: "Preparing for release · Open source"
+  other: "Available on the App Store · Open source"
 inner_eyebrow:
   other: "HAPPY POCKET PRIVACY"
 inner_summary_label:

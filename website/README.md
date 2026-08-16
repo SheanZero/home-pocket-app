@@ -18,7 +18,7 @@ hugo --source website --minify
 
 The generated static site is written to `website/public/` by default. Product screens under `website/static/images/` are first-party captures from the iOS Simulator, with separate Japanese and English variants; refresh those captures when the app UI changes materially. The family and still-life photographs are generated project assets with no embedded copy, logos, or financial documents.
 
-The App Store and Google Play destinations are configured in `[params]` inside `website/hugo.toml`. Until the official listings are live, the page shows a localized release-status note next to both platform links; replace the temporary iOS search destination with the direct product URL after App Store Connect assigns it. Marketing, privacy, legal, and support metadata use root routes for Japanese and matching `/zh/` and `/en/` routes for the other languages.
+The App Store and Google Play destinations are configured in `[params]` inside `website/hugo.toml`. The iOS button points to the official Happy Pocket product page; the localized release-status note remains visible while the Android listing is being prepared. Marketing, privacy, legal, and support metadata use root routes for Japanese and matching `/zh/` and `/en/` routes for the other languages.
 
 For the private Sites preview, Hugo output is staged under `website/dist/client/` and the minimal worker in `website/worker/index.js` serves those static files. This hosting adapter does not replace Hugo or add an application runtime to the site.
 

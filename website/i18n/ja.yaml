@@ -46,7 +46,7 @@ store_links_label:
 store_open_on:
   other: "ストアを開く"
 store_release_note:
-  other: "公開準備中 — 正式な商品ページは審査後に更新します"
+  other: "App Storeで公開中 — Android版は準備中です"
 hero_privacy_link:
   other: "安心設計を見る"
 hero_photo_alt:
@@ -186,7 +186,7 @@ faq_body:
 faq_1_question:
   other: "いつダウンロードできますか？"
 faq_1_answer:
-  other: "現在は App Store と Google Play での公開準備中です。審査が完了したら、このサイトのボタンを正式な商品ページへ更新します。"
+  other: "iPhone版はApp Storeで公開中です。Android版は現在公開準備中です。"
 faq_2_question:
   other: "家計データはクラウドに送られますか？"
 faq_2_answer:
@@ -209,7 +209,7 @@ download_eyebrow:
 download_title:
   other: "今日の支出を、今日のしあわせとして残そう。"
 download_body:
-  other: "iPhone / iPad と Android に対応予定。正式公開まで、ストア準備の状況もこのサイトでお知らせします。"
+  other: "iPhone版はApp Storeで公開中。Android版は現在準備中です。"
 
 footer_statement:
   other: "家族の安心と、自分の『うれしい』を一緒に守る、ローカルファーストの家計簿。"
@@ -220,7 +220,7 @@ footer_project:
 footer_support:
   other: "お問い合わせ"
 footer_release_note:
-  other: "公開準備中 · オープンソース"
+  other: "App Storeで公開中 · オープンソース"
 inner_eyebrow:
   other: "ハピポケ家族家計簿の安心設計"
 inner_summary_label:

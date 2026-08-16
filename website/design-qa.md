@@ -121,6 +121,6 @@ Scope: Japanese and English multi-page Hugo website, concise homepage, philosoph
 - Browser console after the store-button refinement: no errors or warnings.
 - Final combined reference comparison inspected after the last layout pass.
 
-The App Store listing is not yet live, so the iOS button currently opens a localized App Store search and is accompanied by a release-preparation note. The direct URL remains configurable in `hugo.toml` and should be replaced after App Store Connect assigns the public product page.
+The iOS button opens the official Happy Pocket App Store product page. The destination remains configurable in `hugo.toml`, and the release-preparation note remains visible while the Android listing is being prepared.
 
 final result: passed

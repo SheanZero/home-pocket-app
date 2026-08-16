@@ -7,7 +7,7 @@ disableKinds = ["taxonomy", "term", "RSS"]
 
 [params]
   githubURL = "https://github.com/SheanZero/home-pocket-app"
-  iosURL = "https://apps.apple.com/jp/search?term=%E3%83%8F%E3%83%94%E3%83%9D%E3%82%B1%E5%AE%B6%E6%97%8F%E5%AE%B6%E8%A8%88%E7%B0%BF"
+  iosURL = "https://apps.apple.com/jp/app/happy-pocket/id6800526303"
   androidURL = "https://play.google.com/store/apps/details?id=com.sheanzero.happypocket.app"
   storeListingsReady = false
   productVersion = "1.0.0"

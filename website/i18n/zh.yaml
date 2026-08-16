@@ -46,7 +46,7 @@ store_links_label:
 store_open_on:
   other: "前往商店"
 store_release_note:
-  other: "正在准备发布，审核完成后将更新为正式商店页面"
+  other: "iPhone 版已在 App Store 上架，Android 版正在准备"
 hero_privacy_link:
   other: "了解隐私设计"
 hero_photo_alt:
@@ -186,7 +186,7 @@ faq_body:
 faq_1_question:
   other: "什么时候可以下载？"
 faq_1_answer:
-  other: "Happy Pocket 正在准备 App Store 和 Google Play 发布。商店审核完成后，本站按钮会更新为正式产品页面。"
+  other: "iPhone 版现已可从 App Store 下载；Android 版仍在准备中。"
 faq_2_question:
   other: "我的财务数据会进入云端吗？"
 faq_2_answer:
@@ -209,7 +209,7 @@ download_eyebrow:
 download_title:
   other: "把今天的支出，也留作今天的幸福。"
 download_body:
-  other: "计划支持 iPhone、iPad 和 Android；商店链接与发布状态会在这里持续更新。"
+  other: "iPhone 版已在 App Store 上架，Android 版正在准备中。"
 
 footer_statement:
   other: "本地优先的家庭账本，兼顾共同安心与属于自己的悦己消费。"
@@ -220,7 +220,7 @@ footer_project:
 footer_support:
   other: "支持"
 footer_release_note:
-  other: "正在准备发布 · 开源"
+  other: "App Store 已上架 · 开源"
 inner_eyebrow:
   other: "HAPPY POCKET 隐私设计"
 inner_summary_label:
