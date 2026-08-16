@@ -2,7 +2,7 @@
 
 **Status:** Proposed product direction  
 **Published:** 2026-08-16  
-**Planning horizon:** 12–15 months after v1.0  
+**Planning horizon:** 14–18 months after v1.0
 **Public summary:** `website/content/{ja,zh,en}/roadmap.md`
 
 ## Product intent
@@ -14,8 +14,9 @@ comfortable everyday companion without weakening its two defining boundaries:
 2. convenience must not expose plaintext financial data or introduce
    behavioral tracking.
 
-The next roadmap therefore prioritizes device fit and dependable reminders
-before storage-heavy collaboration features. Monetization remains voluntary and
+The next roadmap therefore prioritizes device fit and dependable reminders,
+then gives curated Japanese store point information its own release before
+storage-heavy collaboration features. Monetization remains voluntary and
 separate from product capability.
 
 ## Assumptions
@@ -30,6 +31,9 @@ separate from product capability.
   same Flutter product rather than a separate codebase.
 - Attachments are private and local-first by default. Family attachment sync is
   a later protocol capability, not an implicit consequence of attaching a file.
+- Japanese store point information is a maintained product dataset, not a
+  one-off notification preset. Every published rule needs a source, applicable
+  conditions, verification date, and expiry/review state.
 
 ## Priority order
 
@@ -37,6 +41,7 @@ separate from product capability.
 | --- | --- | --- |
 | P0 | iPad | Expands the existing product without introducing a new data or trust boundary. |
 | P0 | Notifications | Improves routine value, but needs careful permission and privacy design. |
+| P1 | Japan store point calendar | Requires a dedicated curation and update lifecycle, so it ships independently from generic notifications. |
 | P1 | Attachments | High user value with substantial storage, backup, encryption, and sync cost. |
 | P1 | Developer support | Low implementation coupling and can run in parallel, but must not block core value. |
 
@@ -61,7 +66,7 @@ Exit gate:
 
 - release compatibility contract is green;
 - public legal/support destinations are valid; and
-- each v1.1–v1.3 feature has a scoped architecture decision and test strategy.
+- each v1.1–v1.4 feature has a scoped architecture decision and test strategy.
 
 ### v1.1 — adaptive iPad experience (1–3 months)
 
@@ -96,19 +101,6 @@ Notifications:
 
 - Add local reminders for recurring/fixed expenses, backup freshness, and
   expiring invitations.
-- Add Japan store point-multiplier reminders as a v1.2 local-first capability.
-  The first release is user-configured rather than populated by scraping or an
-  unofficial campaign feed:
-  - save a store name, optional multiplier label, and recurrence rule;
-  - support day-of-week, monthly date, nth weekday, and bounded campaign dates;
-  - allow same-day, one-day-before, and custom-time reminders in Japan time;
-  - default to generic lock-screen copy, with store-name preview available only
-    after explicit opt-in; and
-  - deep-link to the saved reminder or shopping context without inferring a
-    purchase or uploading purchase history.
-- Treat retailer-maintained or licensed campaign calendars as a later
-  enhancement. Any external source must expose provenance and expiry, respect
-  retailer terms, and never silently overwrite a user's local schedule.
 - Request notification permission in context, after the user enables a reminder
   or family event—not during first launch.
 - Provide per-type toggles, quiet hours, and an in-app notification center so
@@ -136,15 +128,63 @@ Developer support:
 Exit gate:
 
 - notification privacy tests assert generic payloads;
-- point-multiplier recurrence tests cover monthly dates, weekdays, nth weekdays,
-  time-zone changes, expired campaigns, and duplicate suppression;
-- store reminder data remains encrypted on-device and works without a network
-  connection;
 - every notification type can be disabled independently;
 - purchase delivery is idempotent and refund-safe; and
 - the app remains fully useful without paying.
 
-### v1.3 — encrypted attachments and backup evolution (5–8 months)
+### v1.3 — Japan store point calendar (5–8 months)
+
+Goal: organize reliable Japanese store point-multiplier information as a
+maintained dataset, then let users follow the stores that matter to them.
+
+Catalog and curation:
+
+- Define a versioned store-point schema with canonical store/program name,
+  Japanese aliases, eligible membership or payment method, multiplier/benefit,
+  recurrence rule, geographic scope, exclusions, source URL, effective dates,
+  last-verified date, and editorial status.
+- Seed the catalog from official retailer, shopping-center, card, or payment
+  program sources. Do not publish rules sourced only from search snippets,
+  affiliate pages, social posts, or unverified community submissions.
+- Build a review queue for new, changed, expiring, conflicting, and withdrawn
+  rules. Preserve source evidence and change history so corrections can be
+  audited and rolled back.
+- Avoid store logos in the first version unless usage rights are confirmed;
+  prefer canonical text names and neutral category labels.
+- Publish a clear last-checked date and conditions. The app must not imply that
+  a benefit is guaranteed at every branch or for every payment method.
+
+App experience:
+
+- Provide searchable store/program profiles and a calendar/list of upcoming
+  point-up days in Japan time.
+- Let users follow selected stores, choose same-day/one-day-before/custom-time
+  reminders, and mute individual rules.
+- Keep followed stores and reminder preferences encrypted on-device. Catalog
+  update requests must not upload purchase history, transaction data, or the
+  user's followed-store list.
+- Support user-created local rules when a store is missing or a branch runs a
+  local campaign. User rules remain distinct from the curated catalog and are
+  never silently overwritten.
+- Default lock-screen copy to a generic reminder. Showing a store name requires
+  explicit notification-preview opt-in.
+- Cache a signed, versioned catalog snapshot so browsing and scheduled reminders
+  continue offline; reject invalid signatures and allow rollback to the last
+  valid snapshot.
+
+Exit gate:
+
+- every published catalog rule has an allowed source, conditions, effective
+  dates, and a recorded verification date;
+- expired or withdrawn rules cannot continue scheduling notifications;
+- recurrence tests cover monthly dates, weekdays, nth weekdays, campaign
+  windows, Japan-time boundaries, device time-zone changes, and duplicate
+  suppression;
+- catalog signature, rollback, stale-data, and correction flows are tested; and
+- store follows and reminders work without revealing user behavior to the
+  catalog service.
+
+### v1.4 — encrypted attachments and backup evolution (8–11 months)
 
 Goal: let a transaction retain its evidence without turning file handling into
 an accidental data leak.
@@ -188,7 +228,7 @@ Exit gate:
 - attachment deletion is consistent across database, file store, thumbnails,
   and backup manifests.
 
-### v1.4 — planning, portability, and family coordination (8–11 months)
+### v1.5 — planning, portability, and family coordination (11–14 months)
 
 Goal: deepen everyday retention after the four requested capabilities are
 stable.
@@ -202,7 +242,7 @@ stable.
 - Keep the Joy experience reflective: no streaks, rankings, financial ROI, or
   achievement events.
 
-### v2.0 — intelligence, secure media sync, and sustainable operations (11–15 months)
+### v2.0 — intelligence, secure media sync, and sustainable operations (14–18 months)
 
 Goal: add higher-cost capabilities only after the data model and platform
 surface are ready.
@@ -226,6 +266,8 @@ surface are ready.
   boundary.
 - Attachment, notification, and purchase logs use opaque identifiers and
   redacted state only.
+- Store catalog updates are content delivery, not behavioral analytics: requests
+  must not contain followed stores, transaction history, or stable user IDs.
 - New network services must be disclosed in Privacy and store metadata before
   release.
 
@@ -238,6 +280,8 @@ surface are ready.
   tasks.
 - Notifications provide equivalent in-app state and never become the only way
   to learn about a family event.
+- Store-point pages show provenance, applicable conditions, and freshness so a
+  reminder is never presented as a guaranteed benefit.
 
 ### Delivery metrics
 
@@ -247,6 +291,8 @@ tracking:
 - crash-free sessions and startup failure rate;
 - backup/restore success rate without file or content identifiers;
 - notification scheduling/delivery state on-device;
+- store catalog freshness, validation failures, and expired-rule cleanup without
+  store-follow or user identifiers;
 - attachment import/decrypt integrity failures; and
 - purchase state-machine errors and unresolved pending transactions.
 

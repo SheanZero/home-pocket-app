@@ -343,15 +343,15 @@ nav_roadmap:
 roadmap_banner_label:
   other: "NEXT FOR HAPPY POCKET"
 roadmap_banner_title:
-  other: "iPad、通知与附件：后续计划现已公开。"
+  other: "iPad、通知、积分日历与附件：后续计划现已公开。"
 roadmap_banner_body:
-  other: "包括日本店铺积分加倍日提醒和支持开发者的方式，我们公开说明 v1.0 之后最重要的功能顺序。"
+  other: "日本店铺积分信息将作为独立的 v1.3 整理与维护，并为你关注的店铺提供本地提醒。"
 roadmap_banner_cta:
   other: "查看路线图"
 roadmap_meta_label:
   other: "路线图更新信息"
 roadmap_hero_note:
-  other: "我们计划先推出 iPad 适配，再加入通知与开发支持，之后完成加密附件。"
+  other: "我们计划依次推出 iPad 适配、通知与开发支持、日本店铺积分日历，以及加密附件。"
 roadmap_sequence_label:
   other: "THE ORDER MATTERS"
 roadmap_principles_label:

@@ -343,15 +343,15 @@ nav_roadmap:
 roadmap_banner_label:
   other: "NEXT FOR HAPPY POCKET"
 roadmap_banner_title:
-  other: "iPad, notifications, and attachments—our next steps are public."
+  other: "iPad, notifications, point days, and attachments—our next steps are public."
 roadmap_banner_body:
-  other: "Including Japanese store point-multiplier reminders and optional developer support, here is how we are ordering the work after v1.0."
+  other: "Japanese store point information now has a dedicated v1.3 for curation, updates, and private reminders for followed stores."
 roadmap_banner_cta:
   other: "Read the roadmap"
 roadmap_meta_label:
   other: "Roadmap update information"
 roadmap_hero_note:
-  other: "We plan to begin with iPad, then notifications and developer support, followed by encrypted attachments."
+  other: "We plan to move from iPad to notifications and developer support, then a Japan store point calendar, followed by encrypted attachments."
 roadmap_sequence_label:
   other: "THE ORDER MATTERS"
 roadmap_principles_label:
