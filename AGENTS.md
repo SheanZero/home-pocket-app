@@ -9,16 +9,19 @@
 
 - **v1.0 shipped:** Codebase Cleanup Initiative (2026-04-29)
 - **v1.1 shipped:** Happiness Metric & Display (2026-05-05)
-- **v1.2-v1.9 shipped:** See `.planning/MILESTONES.md` and archived roadmaps.
+- **v1.2-v1.9 shipped:** Historical planning artifacts were retired after the
+  first public release; use Git history and the architecture/product docs for
+  historical context.
 - **v2.0 shipped:** First-public-release feature foundation (Phases 53-56), archived 2026-08-05.
-- **Current milestone:** None; the project is awaiting next-milestone definition.
-- **Current focus:** Codebase map refreshed 2026-08-05; use `$gsd-new-milestone` when ready to define the next milestone.
-- **Current source of truth:** `.planning/PROJECT.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/MILESTONES.md`, plus the v2.0 archive under `.planning/milestones/`.
+- **Current milestone:** None; the project is awaiting post-1.0 roadmap definition.
+- **Current focus:** Production maintenance and definition of the next product milestone.
+- **Current sources of truth:** `AGENTS.md`, `README.md`, `docs/requirement/`,
+  `docs/arch/`, `docs/testing/`, and `docs/reports/`.
 
 Known close debt:
 - v2.0 closed with `tech_debt`: 38 historical artifact records were explicitly acknowledged; no broken runtime seam or critical requirement gap was found.
 - Hosted Privacy/Terms URLs, app-specific support/sponsor destinations, Tokusho operator identity/contact values, and final legal review are mandatory pre-store release gates.
-- `.planning/codebase/` was refreshed against the 2026-08-05 post-P1/P2 working tree; refresh again if later uncommitted changes materially alter architecture before planning.
+- Repository audit inputs and generated evidence live under `tool/audit/`.
 
 ---
 
@@ -229,19 +232,18 @@ Dependency pins to leave alone unless upgraded together with iOS build verificat
 
 ---
 
-## GSD Workflow
+## Planning & Audit Records
 
-- Planning state lives in `.planning/`.
-- Completed milestones are archived under `.planning/milestones/`.
-- Completed v2.0 requirements live in `.planning/milestones/v2.0-REQUIREMENTS.md`; there is no active `REQUIREMENTS.md` until the next milestone is created.
-- Use `$gsd-progress` to inspect current status.
-- Current recommended command: `$gsd-new-milestone` (rerun `$gsd-map-codebase` first only if the codebase materially changes).
-- Use `$gsd-cleanup` later if phase directories should be archived out of `.planning/phases/`.
-
-When editing planning files:
-- Keep `PROJECT.md`, `ROADMAP.md`, `STATE.md`, `REQUIREMENTS.md`, and `MILESTONES.md` consistent.
-- Archive before deleting active milestone files.
-- Record accepted gaps/deferred work explicitly in `STATE.md`.
+- The former `.planning/` tree was intentionally retired after the first
+  public release. Do not recreate it or add new references to it.
+- Product requirements live in `docs/requirement/`; implementation plans live
+  in `docs/plans/`; architecture decisions live in `docs/arch/03-adr/`.
+- Release compatibility, device matrices, and durable validation evidence live
+  in `docs/testing/`.
+- Repository audit manifests, baselines, allowlists, and generated scanner
+  artifacts live in `tool/audit/`.
+- Keep new planning documents small, current, and linked from the relevant
+  index instead of restoring the retired milestone archive structure.
 
 ---
 

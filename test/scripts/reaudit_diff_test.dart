@@ -84,20 +84,20 @@ Directory _setupTempProject() {
   Link(
     '${tmp.path}/.dart_tool',
   ).createSync('$root/.dart_tool', recursive: true);
-  Directory('${tmp.path}/.planning/audit').createSync(recursive: true);
-  Directory('${tmp.path}/.planning/audit/re-audit').createSync(recursive: true);
+  Directory('${tmp.path}/tool/audit').createSync(recursive: true);
+  Directory('${tmp.path}/tool/audit/re-audit').createSync(recursive: true);
   return tmp;
 }
 
 void _writeBaseline(Directory tmp, List<Finding> findings) {
   File(
-    '${tmp.path}/.planning/audit/issues.json',
+    '${tmp.path}/tool/audit/issues.json',
   ).writeAsStringSync(jsonEncode(_catalogue(findings)));
 }
 
 void _writeReaudit(Directory tmp, List<Finding> findings) {
   File(
-    '${tmp.path}/.planning/audit/re-audit/issues.json',
+    '${tmp.path}/tool/audit/re-audit/issues.json',
   ).writeAsStringSync(jsonEncode(_catalogue(findings)));
 }
 
@@ -149,14 +149,12 @@ void main() {
         // Output artifacts exist.
         expect(
           File(
-            '${tmp.path}/.planning/audit/re-audit/REAUDIT-DIFF.json',
+            '${tmp.path}/tool/audit/re-audit/REAUDIT-DIFF.json',
           ).existsSync(),
           isTrue,
         );
         expect(
-          File(
-            '${tmp.path}/.planning/audit/re-audit/REAUDIT-DIFF.md',
-          ).existsSync(),
+          File('${tmp.path}/tool/audit/re-audit/REAUDIT-DIFF.md').existsSync(),
           isTrue,
         );
       },
@@ -187,7 +185,7 @@ void main() {
         final diffJson =
             jsonDecode(
                   File(
-                    '${tmp.path}/.planning/audit/re-audit/REAUDIT-DIFF.json',
+                    '${tmp.path}/tool/audit/re-audit/REAUDIT-DIFF.json',
                   ).readAsStringSync(),
                 )
                 as Map<String, dynamic>;
@@ -209,7 +207,7 @@ void main() {
       final diffJson =
           jsonDecode(
                 File(
-                  '${tmp.path}/.planning/audit/re-audit/REAUDIT-DIFF.json',
+                  '${tmp.path}/tool/audit/re-audit/REAUDIT-DIFF.json',
                 ).readAsStringSync(),
               )
               as Map<String, dynamic>;
@@ -232,7 +230,7 @@ void main() {
       final diffJson =
           jsonDecode(
                 File(
-                  '${tmp.path}/.planning/audit/re-audit/REAUDIT-DIFF.json',
+                  '${tmp.path}/tool/audit/re-audit/REAUDIT-DIFF.json',
                 ).readAsStringSync(),
               )
               as Map<String, dynamic>;
@@ -262,7 +260,7 @@ void main() {
         final json =
             jsonDecode(
                   File(
-                    '${tmp.path}/.planning/audit/re-audit/REAUDIT-DIFF.json',
+                    '${tmp.path}/tool/audit/re-audit/REAUDIT-DIFF.json',
                   ).readAsStringSync(),
                 )
                 as Map<String, dynamic>;
@@ -292,7 +290,7 @@ void main() {
       final r = await _runDiff(tmp);
       expect(r.exitCode, equals(0), reason: r.stderr.toString());
       final md = File(
-        '${tmp.path}/.planning/audit/re-audit/REAUDIT-DIFF.md',
+        '${tmp.path}/tool/audit/re-audit/REAUDIT-DIFF.md',
       ).readAsStringSync();
       expect(md, contains('# Re-Audit Diff Report'));
       expect(md, contains('**Resolved:**'));

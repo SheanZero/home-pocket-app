@@ -1,0 +1,6 @@
+{
+  "tool_source": "agent:transitive",
+  "generated_at": "2026-04-25T13:50:00.000Z",
+  "findings": [],
+  "note": "Phase 1 dry-run: no typedef-based smuggling found in lib/features/*/domain/, lib/features/*/presentation/, or lib/application/. Re-scan in Phase 8."
+}

@@ -51,7 +51,7 @@ Directory _setupTempProject() {
 
   // Ensure target directories exist.
   Directory('${tmp.path}/coverage').createSync(recursive: true);
-  Directory('${tmp.path}/.planning/audit').createSync(recursive: true);
+  Directory('${tmp.path}/tool/audit').createSync(recursive: true);
   return tmp;
 }
 
@@ -115,14 +115,10 @@ void main() {
       final r = await _runBaseline(tmp);
       expect(r.exitCode, equals(0), reason: r.stderr.toString());
 
-      final txt = File('${tmp.path}/.planning/audit/coverage-baseline.txt');
-      final json = File('${tmp.path}/.planning/audit/coverage-baseline.json');
-      final needTxt = File(
-        '${tmp.path}/.planning/audit/files-needing-tests.txt',
-      );
-      final needJson = File(
-        '${tmp.path}/.planning/audit/files-needing-tests.json',
-      );
+      final txt = File('${tmp.path}/tool/audit/coverage-baseline.txt');
+      final json = File('${tmp.path}/tool/audit/coverage-baseline.json');
+      final needTxt = File('${tmp.path}/tool/audit/files-needing-tests.txt');
+      final needJson = File('${tmp.path}/tool/audit/files-needing-tests.json');
 
       expect(txt.existsSync(), isTrue);
       expect(json.existsSync(), isTrue);
@@ -183,7 +179,7 @@ void main() {
       final j =
           jsonDecode(
                 File(
-                  '${tmp.path}/.planning/audit/coverage-baseline.json',
+                  '${tmp.path}/tool/audit/coverage-baseline.json',
                 ).readAsStringSync(),
               )
               as Map<String, dynamic>;
@@ -192,7 +188,7 @@ void main() {
           .toList();
       expect(paths, equals(['lib/a.dart', 'lib/b.dart', 'lib/c.dart']));
 
-      final txt = File('${tmp.path}/.planning/audit/coverage-baseline.txt')
+      final txt = File('${tmp.path}/tool/audit/coverage-baseline.txt')
           .readAsStringSync()
           .split('\n')
           .where((l) => l.isNotEmpty)
@@ -210,22 +206,22 @@ void main() {
         final json1 =
             jsonDecode(
                   File(
-                    '${tmp.path}/.planning/audit/coverage-baseline.json',
+                    '${tmp.path}/tool/audit/coverage-baseline.json',
                   ).readAsStringSync(),
                 )
                 as Map<String, dynamic>;
         final txt1 = File(
-          '${tmp.path}/.planning/audit/coverage-baseline.txt',
+          '${tmp.path}/tool/audit/coverage-baseline.txt',
         ).readAsStringSync();
         final needJson1 =
             jsonDecode(
                   File(
-                    '${tmp.path}/.planning/audit/files-needing-tests.json',
+                    '${tmp.path}/tool/audit/files-needing-tests.json',
                   ).readAsStringSync(),
                 )
                 as Map<String, dynamic>;
         final needTxt1 = File(
-          '${tmp.path}/.planning/audit/files-needing-tests.txt',
+          '${tmp.path}/tool/audit/files-needing-tests.txt',
         ).readAsStringSync();
 
         final r2 = await _runBaseline(tmp);
@@ -233,22 +229,22 @@ void main() {
         final json2 =
             jsonDecode(
                   File(
-                    '${tmp.path}/.planning/audit/coverage-baseline.json',
+                    '${tmp.path}/tool/audit/coverage-baseline.json',
                   ).readAsStringSync(),
                 )
                 as Map<String, dynamic>;
         final txt2 = File(
-          '${tmp.path}/.planning/audit/coverage-baseline.txt',
+          '${tmp.path}/tool/audit/coverage-baseline.txt',
         ).readAsStringSync();
         final needJson2 =
             jsonDecode(
                   File(
-                    '${tmp.path}/.planning/audit/files-needing-tests.json',
+                    '${tmp.path}/tool/audit/files-needing-tests.json',
                   ).readAsStringSync(),
                 )
                 as Map<String, dynamic>;
         final needTxt2 = File(
-          '${tmp.path}/.planning/audit/files-needing-tests.txt',
+          '${tmp.path}/tool/audit/files-needing-tests.txt',
         ).readAsStringSync();
 
         // .txt files are byte-identical (no timestamp embedded).
@@ -280,7 +276,7 @@ void main() {
       expect(r.exitCode, equals(0), reason: r.stderr.toString());
 
       final txt = File(
-        '${tmp.path}/.planning/audit/coverage-baseline.txt',
+        '${tmp.path}/tool/audit/coverage-baseline.txt',
       ).readAsStringSync();
       expect(txt, isNot(contains('lib/foo.g.dart')));
       expect(txt, contains('lib/real.dart'));
@@ -288,7 +284,7 @@ void main() {
       final j =
           jsonDecode(
                 File(
-                  '${tmp.path}/.planning/audit/coverage-baseline.json',
+                  '${tmp.path}/tool/audit/coverage-baseline.json',
                 ).readAsStringSync(),
               )
               as Map<String, dynamic>;
@@ -307,7 +303,7 @@ void main() {
       final j =
           jsonDecode(
                 File(
-                  '${tmp.path}/.planning/audit/coverage-baseline.json',
+                  '${tmp.path}/tool/audit/coverage-baseline.json',
                 ).readAsStringSync(),
               )
               as Map<String, dynamic>;

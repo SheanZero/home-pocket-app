@@ -204,7 +204,7 @@ List<Finding> _findCrossFileClones(
 }
 
 Map<String, String> _readAllowlist(String projectRoot) {
-  final file = File('$projectRoot/.planning/audit/duplication_allowlist.json');
+  final file = File('$projectRoot/tool/audit/duplication_allowlist.json');
   if (!file.existsSync()) return const {};
   try {
     final decoded = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
@@ -301,7 +301,7 @@ class _Arguments {
 
 _Arguments _parseArguments(List<String> args) {
   var sourcePath = 'lib';
-  var outputPath = '.planning/audit/shards/duplication.json';
+  var outputPath = 'tool/audit/shards/duplication.json';
   for (var index = 0; index < args.length; index++) {
     final argument = args[index];
     if (argument != '--source' && argument != '--output') {
@@ -317,7 +317,7 @@ _Arguments _parseArguments(List<String> args) {
 }
 
 Future<void> main(List<String> args) async {
-  const defaultOutput = '.planning/audit/shards/duplication.json';
+  const defaultOutput = 'tool/audit/shards/duplication.json';
   var outputPath = defaultOutput;
   Map<String, dynamic> envelope;
 

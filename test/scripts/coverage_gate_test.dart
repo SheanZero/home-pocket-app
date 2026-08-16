@@ -50,7 +50,7 @@ Directory _setupTempProject() {
   ).createSync('$root/.dart_tool', recursive: true);
 
   Directory('${tmp.path}/coverage').createSync(recursive: true);
-  Directory('${tmp.path}/.planning/audit').createSync(recursive: true);
+  Directory('${tmp.path}/tool/audit').createSync(recursive: true);
   return tmp;
 }
 
@@ -127,11 +127,11 @@ void main() {
     });
 
     test(
-      'falls back to .planning/audit/files-needing-tests.txt when no positional/--list',
+      'falls back to tool/audit/files-needing-tests.txt when no positional/--list',
       () async {
         _writeLcov(tmp, {'lib/a.dart': (10, 10)});
         File(
-          '${tmp.path}/.planning/audit/files-needing-tests.txt',
+          '${tmp.path}/tool/audit/files-needing-tests.txt',
         ).writeAsStringSync('lib/a.dart\n');
         final r = await _runGate(tmp);
         expect(r.exitCode, equals(0), reason: r.stderr.toString());
@@ -380,7 +380,7 @@ void main() {
       () {
         final root = _absoluteProjectRoot();
         final required = _pathEntries(
-          File('$root/.planning/audit/coverage-gate-required-files.txt'),
+          File('$root/tool/audit/coverage-gate-required-files.txt'),
         );
         const highRisk = {
           'lib/application/settings/export_backup_use_case.dart',
@@ -403,7 +403,7 @@ void main() {
         }
 
         final deferred = _pathEntries(
-          File('$root/.planning/audit/coverage-gate-deferred.txt'),
+          File('$root/tool/audit/coverage-gate-deferred.txt'),
           hasRationale: true,
         );
         expect(deferred, isEmpty);
@@ -421,11 +421,11 @@ void main() {
         );
         expect(
           releaseGate,
-          contains('.planning/audit/coverage-gate-required-files.txt'),
+          contains('tool/audit/coverage-gate-required-files.txt'),
         );
         expect(
           auditWorkflow,
-          isNot(contains('--list .planning/audit/cleanup-touched-files.txt')),
+          isNot(contains('--list tool/audit/cleanup-touched-files.txt')),
         );
       },
     );

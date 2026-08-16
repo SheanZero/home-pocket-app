@@ -43,10 +43,10 @@ String _suggestedFix(String code) => switch (code) {
 };
 
 Future<void> main(List<String> args) async {
-  final shardDir = Directory('.planning/audit/shards');
+  final shardDir = Directory('tool/audit/shards');
   if (!shardDir.existsSync()) shardDir.createSync(recursive: true);
 
-  final shardPath = '.planning/audit/shards/providers.json';
+  final shardPath = 'tool/audit/shards/providers.json';
   Map<String, dynamic> envelope;
   try {
     envelope = buildProviderAuditEnvelope(checkProviderContract('.'));

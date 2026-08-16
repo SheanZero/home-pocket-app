@@ -1,11 +1,11 @@
 // scripts/merge_findings.dart
 // Reads <root>/{shards,agent-shards}/*.json, dedupes,
 // stamps stable IDs, writes <root>/issues.json + <root>/ISSUES.md.
-// Default root: .planning/audit (backwards-compatible with Phase 1 invocation).
+// Default root: tool/audit.
 //
 // Usage:
-//   dart run scripts/merge_findings.dart                            # baseline (root = .planning/audit)
-//   dart run scripts/merge_findings.dart --root <path>              # re-audit (e.g. .planning/audit/re-audit)
+//   dart run scripts/merge_findings.dart                            # baseline (root = tool/audit)
+//   dart run scripts/merge_findings.dart --root <path>              # re-audit (e.g. tool/audit/re-audit)
 //
 // Exit codes:
 //   0 — merge succeeded
@@ -78,7 +78,7 @@ class _Invocation {
 }
 
 _Invocation _resolveInvocation(List<String> args) {
-  var root = '.planning/audit';
+  var root = 'tool/audit';
   var repairPairTransaction = false;
   for (var i = 0; i < args.length; i++) {
     final a = args[i];
@@ -618,7 +618,7 @@ bool _isSafeRepoRelativePath(String path) {
 bool _isMeaningful(String value) => value.trim().isNotEmpty;
 
 Set<String> _readDuplicationAllowlist() {
-  final file = File('.planning/audit/duplication_allowlist.json');
+  final file = File('tool/audit/duplication_allowlist.json');
   if (!file.existsSync()) return const {};
   try {
     final decoded = jsonDecode(file.readAsStringSync());

@@ -1,0 +1,6 @@
+{
+  "tool_source": "agent:layer",
+  "generated_at": "2026-04-28T00:00:00.000Z",
+  "findings": [],
+  "note": "Phase 8 re-audit: scoped scan of lib/features/*/use_cases/ (none exist — directory removed during Phase 3 cleanup), lib/features/*/domain/** (no forbidden imports / no typedef smuggling), lib/features/*/presentation/** (no direct infrastructure/** imports). All CRIT-02 / HIGH-02 layer violations from the Phase 1 baseline are resolved."
+}

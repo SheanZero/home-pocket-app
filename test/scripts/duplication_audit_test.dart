@@ -166,7 +166,7 @@ void main() {
       final fingerprint = RegExp(
         r'Fingerprint: ([0-9a-f]+)',
       ).firstMatch(rationale)![1]!;
-      final audit = Directory('${temp.path}/.planning/audit')
+      final audit = Directory('${temp.path}/tool/audit')
         ..createSync(recursive: true);
       File('${audit.path}/duplication_allowlist.json').writeAsStringSync('''
 {

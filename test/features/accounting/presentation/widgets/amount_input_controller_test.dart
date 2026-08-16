@@ -24,7 +24,7 @@
 //
 // See: lib/features/accounting/presentation/screens/manual_one_step_screen.dart
 //      (inline _onDigit/_onDot 4-decimal cap — the behavior being generalized),
-//      .planning/phases/42-entry-ui-display-voice/42-CONTEXT.md (D-07/D-08).
+//      historical entry-voice decisions D-07/D-08.
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:home_pocket/features/accounting/presentation/widgets/amount_input_controller.dart';

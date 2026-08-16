@@ -55,8 +55,8 @@ const _candidateScope = <String>{
   'docs/testing/STABLE_BASELINE.json',
   'docs/testing/DEVICE_E2E_MATRIX.md',
   'docs/testing/DEPENDENCY_COMPATIBILITY.md',
-  '.planning/audit/coverage-gate-required-files.txt',
-  '.planning/audit/coverage-gate-deferred.txt',
+  'tool/audit/coverage-gate-required-files.txt',
+  'tool/audit/coverage-gate-deferred.txt',
 };
 const _additionalCandidateInputs = <String>{
   'docs/testing/STABLE_BASELINE.json',

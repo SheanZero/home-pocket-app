@@ -132,8 +132,7 @@ void main() {
     'AND-04 distinguishes primary arm64 evidence from supplemental x86 and physical-device absence',
     () {
       final evidence = File(
-        '.planning/phases/61-android-toolchain-emulator-lane/'
-        '61-ANDROID-SAFETY-EVIDENCE.md',
+        'docs/testing/ANDROID_SAFETY_EVIDENCE.md',
       ).readAsStringSync();
 
       expect(evidence, contains('"emulator": "PASS"'));

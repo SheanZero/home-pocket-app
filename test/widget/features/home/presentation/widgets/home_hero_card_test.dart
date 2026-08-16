@@ -146,7 +146,7 @@ Widget _buildSubject({
 }
 
 /// Group structure mirrors requirement / decision IDs from
-/// `.planning/phases/10-homepage-joyfullnesscard-redesign/10-CONTEXT.md`:
+/// the historical HomeHero design contract:
 ///   - HOMEUI-01..07 = HomeHeroCard rendering requirements
 ///   - FAMILY-03    = group-mode member rows
 ///   - D-09         = empty / all-neutral state behavior

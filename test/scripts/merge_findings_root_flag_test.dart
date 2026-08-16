@@ -3,14 +3,14 @@
 // in Phase 8 Plan 08-05 Task 1.
 //
 // Locks the behavioral contract:
-//   1. Default invocation (no flag) reads from .planning/audit/{shards,
-//      agent-shards}/ and writes .planning/audit/{issues.json,ISSUES.md}.
+//   1. Default invocation (no flag) reads from tool/audit/{shards,
+//      agent-shards}/ and writes tool/audit/{issues.json,ISSUES.md}.
 //      Already covered by merge_findings_test.dart — out of scope here.
 //   2. --root <path> redirects ALL audit-directory access to <path>:
 //        scans:  <path>/shards/*.json + <path>/agent-shards/*.json
 //        current catalogue: authoritative <path>/shards/*.json only
 //        writes: <path>/issues.json + <path>/ISSUES.md
-//      and does NOT touch the default .planning/audit/* tree.
+//      and does NOT touch the default tool/audit/* tree.
 //   3. --root with no value exits 2 (invocation error).
 //   4. Unknown flag exits 2.
 //
@@ -121,7 +121,7 @@ void main() {
       'authoritative findings to <path>/issues.json + <path>/ISSUES.md',
       () async {
         // Lay out the re-audit tree the way Phase 8 Plan 08-05 produces it.
-        final reauditRoot = '${tmp.path}/.planning/audit/re-audit';
+        final reauditRoot = '${tmp.path}/tool/audit/re-audit';
         Directory('$reauditRoot/shards').createSync(recursive: true);
         Directory('$reauditRoot/agent-shards').createSync(recursive: true);
         _writeSuccessfulCanonicalShards(reauditRoot);
@@ -144,7 +144,7 @@ void main() {
           ),
         );
 
-        final r = await _runMerger(tmp, ['--root', '.planning/audit/re-audit']);
+        final r = await _runMerger(tmp, ['--root', 'tool/audit/re-audit']);
         expect(r.exitCode, equals(0), reason: r.stderr.toString());
 
         // Outputs at the re-audit root.
@@ -172,19 +172,16 @@ void main() {
         expect(paths, equals({'lib/foo.dart'}));
 
         // Default-root tree must NOT have been touched: no
-        // .planning/audit/issues.json (or ISSUES.md) created at the
+        // tool/audit/issues.json (or ISSUES.md) created at the
         // default location during a --root invocation.
         expect(
-          File('${tmp.path}/.planning/audit/issues.json').existsSync(),
+          File('${tmp.path}/tool/audit/issues.json').existsSync(),
           isFalse,
           reason:
-              '--root must redirect writes; default .planning/audit/issues.json '
+              '--root must redirect writes; default tool/audit/issues.json '
               'must NOT be created when --root is provided',
         );
-        expect(
-          File('${tmp.path}/.planning/audit/ISSUES.md').existsSync(),
-          isFalse,
-        );
+        expect(File('${tmp.path}/tool/audit/ISSUES.md').existsSync(), isFalse);
       },
     );
 

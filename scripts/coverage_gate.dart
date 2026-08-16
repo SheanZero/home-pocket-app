@@ -40,7 +40,7 @@ import 'dart:io';
 import 'coverage/lcov_parser.dart';
 
 const _defaultLcov = 'coverage/lcov_clean.info';
-const _fallbackList = '.planning/audit/files-needing-tests.txt';
+const _fallbackList = 'tool/audit/files-needing-tests.txt';
 
 Future<void> main(List<String> args) async {
   // Defaults from D-02 (threshold) / D-03 (lcov path).

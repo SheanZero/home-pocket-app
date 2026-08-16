@@ -8,7 +8,7 @@
 // It is EXPECTED to be RED until the implementation lands. The integration smoke
 // is the acceptance contract — do NOT weaken these assertions to make them pass.
 //
-// See: .planning/phases/42-entry-ui-display-voice/42-VALIDATION.md (SC-5 row),
+// Historical entry-voice validation scenario SC-5 established this behavior;
 //      docs/arch/03-adr/ADR-020_Exchange_Rate_Precision.md,
 //      docs/arch/03-adr/ADR-021_Hash_Chain_Scope.md.
 

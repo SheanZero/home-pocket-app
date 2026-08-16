@@ -1,5 +1,5 @@
 // scripts/reaudit_diff.dart
-// Diffs .planning/audit/re-audit/issues.json against .planning/audit/issues.json (baseline)
+// Diffs tool/audit/re-audit/issues.json against tool/audit/issues.json (baseline)
 // by (category, normalized_file_path, description). Produces classified counters
 // {resolved, regression, new, open_in_baseline} + REAUDIT-DIFF.{json,md}.
 //
@@ -19,11 +19,11 @@ import 'dart:io';
 
 import 'audit/finding.dart';
 
-const _baselinePath = '.planning/audit/issues.json';
-const _reauditPath = '.planning/audit/re-audit/issues.json';
-const _outDir = '.planning/audit/re-audit';
-const _outJsonPath = '.planning/audit/re-audit/REAUDIT-DIFF.json';
-const _outMdPath = '.planning/audit/re-audit/REAUDIT-DIFF.md';
+const _baselinePath = 'tool/audit/issues.json';
+const _reauditPath = 'tool/audit/re-audit/issues.json';
+const _outDir = 'tool/audit/re-audit';
+const _outJsonPath = 'tool/audit/re-audit/REAUDIT-DIFF.json';
+const _outMdPath = 'tool/audit/re-audit/REAUDIT-DIFF.md';
 
 const _severityOrder = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
 const _categoryOrder = [

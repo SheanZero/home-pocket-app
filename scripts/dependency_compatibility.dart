@@ -2111,12 +2111,8 @@ Future<void> main(List<String> arguments) async {
   final evidenceReport = validatePhase59EvidenceArtifacts(
     baselineJson: read('docs/testing/STABLE_BASELINE.json'),
     compatibilityDocument: read('docs/testing/DEPENDENCY_COMPATIBILITY.md'),
-    acceptanceLedger: read(
-      '.planning/phases/59-controlled-platform-plugin-cohorts/59-PLUGIN-ACCEPTANCE.md',
-    ),
-    coverageMatrix: read(
-      '.planning/phases/59-controlled-platform-plugin-cohorts/COVERAGE.md',
-    ),
+    acceptanceLedger: read('docs/testing/PLATFORM_PLUGIN_ACCEPTANCE.md'),
+    coverageMatrix: read('docs/testing/PLATFORM_PLUGIN_COVERAGE.md'),
   );
   final completeReport = _reportFromMessages([
     ...running.errors,

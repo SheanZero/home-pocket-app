@@ -50,7 +50,7 @@ jobs:
         with:
           name: audit-issues
           path: |
-            .planning/audit/issues.json
-            .planning/audit/ISSUES.md
-            .planning/audit/shards/*.json
-            .planning/audit/agent-shards/*.json
+            tool/audit/issues.json
+            tool/audit/ISSUES.md
+            tool/audit/shards/*.json
+            tool/audit/agent-shards/*.json

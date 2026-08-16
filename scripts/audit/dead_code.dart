@@ -1,5 +1,5 @@
 // scripts/audit/dead_code.dart
-// Runs dart_code_linter:metrics check-unused-{code,files}, emits .planning/audit/shards/dead_code.json.
+// Runs dart_code_linter:metrics check-unused-{code,files}, emits tool/audit/shards/dead_code.json.
 import 'dart:convert';
 import 'dart:io';
 
@@ -297,10 +297,10 @@ DeadCodeAuditRun _failedRun(Map<String, dynamic> envelope, String diagnostic) {
 }
 
 Future<void> main(List<String> args) async {
-  final shardDir = Directory('.planning/audit/shards');
+  final shardDir = Directory('tool/audit/shards');
   if (!shardDir.existsSync()) shardDir.createSync(recursive: true);
 
-  final shardPath = '.planning/audit/shards/dead_code.json';
+  final shardPath = 'tool/audit/shards/dead_code.json';
   final run = await runDeadCodeAudit();
 
   await File(

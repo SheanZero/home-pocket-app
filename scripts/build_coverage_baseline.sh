@@ -2,12 +2,12 @@
 # scripts/build_coverage_baseline.sh
 # Local end-to-end run of the Phase 2 coverage baseline pipeline
 # (mirrors the audit.yml `coverage` job). Produces the four
-# .planning/audit/coverage-* artifacts.
+# tool/audit/coverage-* artifacts.
 #
 # Steps:
 #   1. flutter test --coverage              → coverage/lcov.info
 #   2. coverde filter (strip generated)     → coverage/lcov_clean.info
-#   3. dart run scripts/coverage_baseline   → 4 .planning/audit/ artifacts
+#   3. dart run scripts/coverage_baseline   → 4 tool/audit/ artifacts
 #   4. Verify all four artifact files exist
 
 set -euo pipefail
@@ -28,9 +28,9 @@ echo "[coverage:baseline] computing per-file coverage..."
 dart run scripts/coverage_baseline.dart
 
 echo "[coverage:baseline] verifying outputs..."
-test -f .planning/audit/coverage-baseline.txt
-test -f .planning/audit/coverage-baseline.json
-test -f .planning/audit/files-needing-tests.txt
-test -f .planning/audit/files-needing-tests.json
+test -f tool/audit/coverage-baseline.txt
+test -f tool/audit/coverage-baseline.json
+test -f tool/audit/files-needing-tests.txt
+test -f tool/audit/files-needing-tests.json
 
 echo "[coverage:baseline] OK"

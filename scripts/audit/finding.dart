@@ -1,5 +1,5 @@
 // scripts/audit/finding.dart
-// Schema lock for every audit shard. Mirrors .planning/audit/SCHEMA.md.
+// Schema lock for every audit shard. Mirrors tool/audit/SCHEMA.md.
 
 class Finding {
   final String? id; // null until merge_findings stamps it

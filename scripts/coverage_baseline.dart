@@ -1,8 +1,8 @@
 // scripts/coverage_baseline.dart
-// Reads coverage/lcov_clean.info, writes 4 .planning/audit/coverage-* artifacts.
+// Reads coverage/lcov_clean.info, writes 4 tool/audit/coverage-* artifacts.
 // Mirror of scripts/merge_findings.dart shape. CONTEXT.md D-10..D-12.
 //
-// Outputs (all under .planning/audit/):
+// Outputs (all under tool/audit/):
 //   coverage-baseline.txt      — TSV: path \t covered/total \t percentage
 //   coverage-baseline.json     — full per-file record + top-level metadata
 //   files-needing-tests.txt    — bare paths where percentage < threshold
@@ -20,7 +20,7 @@ import 'coverage/lcov_parser.dart';
 const _defaultLcov = 'coverage/lcov_clean.info';
 const _threshold = 70;
 const _flutterTestCommand = 'flutter test --coverage';
-const _outDir = '.planning/audit';
+const _outDir = 'tool/audit';
 
 Future<void> main(List<String> args) async {
   var lcovPath = _defaultLcov;

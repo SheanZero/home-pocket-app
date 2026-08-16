@@ -1,0 +1,32 @@
+{
+  "tool_source": "agent:duplication",
+  "generated_at": "2026-04-25T13:50:00.000Z",
+  "findings": [
+    {
+      "category": "redundant_code",
+      "severity": "MEDIUM",
+      "file_path": "lib/infrastructure/category/category_service.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "Duplicate CategoryService class — parallel implementation also exists at lib/application/accounting/category_service.dart with overlapping responsibilities",
+      "rationale": "MED-02 territory: two CategoryService implementations under different layers create naming ambiguity and risk of drift. Plus ResolveLedgerTypeService is deprecated alongside CategoryService (CONCERNS.md 'Deprecated services still wired').",
+      "suggested_fix": "Rename one of the two to reflect its actual concern (e.g., CategoryLocaleFormatter vs CategoryClassifier), or consolidate. Phase 6 fix.",
+      "tool_source": "agent:duplication",
+      "confidence": "high",
+      "status": "open"
+    },
+    {
+      "category": "redundant_code",
+      "severity": "MEDIUM",
+      "file_path": "lib/application/accounting/category_service.dart",
+      "line_start": 1,
+      "line_end": 1,
+      "description": "Duplicate CategoryService class — parallel implementation at lib/infrastructure/category/category_service.dart",
+      "rationale": "MED-02 paired finding with lib/infrastructure/category/category_service.dart. Both classes share the CategoryService name but live in different layers, blurring layer responsibility.",
+      "suggested_fix": "See companion finding on lib/infrastructure/category/category_service.dart. Phase 6 fix.",
+      "tool_source": "agent:duplication",
+      "confidence": "high",
+      "status": "open"
+    }
+  ]
+}

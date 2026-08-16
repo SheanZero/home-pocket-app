@@ -195,7 +195,7 @@ void main() {
 
   test('active Android documents keep arm64 primary and x86 supplemental', () {
     final validation = File(
-      '.planning/phases/61-android-toolchain-emulator-lane/61-VALIDATION.md',
+      'docs/testing/ANDROID_SAFETY_EVIDENCE.md',
     ).readAsStringSync();
     final compatibility = File(
       'docs/testing/DEPENDENCY_COMPATIBILITY.md',

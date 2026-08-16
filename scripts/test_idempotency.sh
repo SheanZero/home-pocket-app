@@ -4,13 +4,13 @@
 set -euo pipefail
 
 bash scripts/test_audit_pipeline.sh
-cp .planning/audit/issues.json /tmp/audit_run1.json
+cp tool/audit/issues.json /tmp/audit_run1.json
 
 bash scripts/test_audit_pipeline.sh
 
-if ! diff -q /tmp/audit_run1.json .planning/audit/issues.json; then
+if ! diff -q /tmp/audit_run1.json tool/audit/issues.json; then
   echo "[audit:idempotency] FAIL: issues.json differs across runs (stable-ID guarantee broken)" >&2
-  diff /tmp/audit_run1.json .planning/audit/issues.json | head -40 >&2
+  diff /tmp/audit_run1.json tool/audit/issues.json | head -40 >&2
   exit 1
 fi
 

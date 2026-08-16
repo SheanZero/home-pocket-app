@@ -11,7 +11,7 @@ void main() {
   group('MEDIUM audit closure gate', () {
     test('issues.json has no open MEDIUM findings', () {
       final catalogue =
-          jsonDecode(File('.planning/audit/issues.json').readAsStringSync())
+          jsonDecode(File('tool/audit/issues.json').readAsStringSync())
               as Map<String, Object?>;
       final findings = catalogue['findings']! as List<Object?>;
 

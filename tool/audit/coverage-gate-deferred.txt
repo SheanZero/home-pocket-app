@@ -1,0 +1,15 @@
+# coverage-gate-deferred.txt
+#
+# Files explicitly deferred from the per-file coverage gate
+# (`scripts/coverage_gate.dart --threshold 70`).
+#
+# Format: <relative_path>  # <rationale>
+# Rationale is REQUIRED — entries without it cause the gate to exit 2.
+#
+# Retired 2026-08-05: the 11 historical entries were paired with the old
+# cleanup-touched-files.txt input. Nine point to removed paths; the remaining
+# two are unrelated provider-wiring debt. Keeping any of them in a current
+# trust-boundary gate would be a silent scope waiver. The active risk manifest
+# has zero deferred files. New entries require a tracked, hand-written Dart
+# path and a file-specific rationale; do not add generated/non-executable
+# paths here — keep them out of coverage-gate-required-files.txt instead.

@@ -99,7 +99,7 @@ void main() {
         expect(scanners, contains('flutter pub get --enforce-lockfile'));
         expect(scanners, contains('continue-on-error: true'));
         expect(scanners, contains('actions/upload-artifact@v4'));
-        expect(scanners, contains('.planning/audit/issues.json'));
+        expect(scanners, contains('tool/audit/issues.json'));
       },
     );
   });

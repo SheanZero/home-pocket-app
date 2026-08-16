@@ -5,8 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 const _authorityCommand = 'dart run scripts/release_gate.dart';
 const _auditWorkflowPath = '.github/workflows/audit.yml';
 const _deviceWorkflowPath = '.github/workflows/device-e2e.yml';
-const _decisionLedgerPath =
-    '.planning/phases/62-automated-release-gate-lock/62-02-SUMMARY.md';
+const _decisionLedgerPath = 'docs/testing/RELEASE_GATE_DECISIONS.md';
 const _reportPath = 'docs/testing/RELEASE_COMPATIBILITY.md';
 const _ciATopology = 'CI-A';
 const _ciALabels = '[self-hosted, macOS, ARM64, happy-pocket-release]';
@@ -30,7 +29,7 @@ String _decisionCode(String prefix) {
   final codes = matches.map((match) => match.group(0)!).toSet();
   if (codes.length != 1) {
     throw StateError(
-      'Expected exactly one $prefix decision code in 62-02-SUMMARY',
+      'Expected exactly one $prefix decision code in RELEASE_GATE_DECISIONS',
     );
   }
   return codes.single;

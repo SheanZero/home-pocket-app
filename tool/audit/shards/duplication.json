@@ -1,0 +1,90 @@
+{
+  "tool_source": "owned_duplication_detector",
+  "scan_state": "ran",
+  "generated_at": "2026-08-06T02:47:59.530333Z",
+  "findings": [
+    {
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/features/list/presentation/widgets/list_transaction_tile.dart",
+      "line_start": 229,
+      "line_end": 251,
+      "description": "Exact 16-line structural clone also appears at lib/features/home/presentation/widgets/home_transaction_tile.dart:131.",
+      "rationale": "Accepted duplicate clone: RD-009 reviewed false positive: the overlap is shared transaction-tile rendering structure, while each feature owns its screen-specific behavior. Fingerprint: 4ab15c617e695916.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "accepted"
+    },
+    {
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/features/onboarding/presentation/screens/onboarding_intro_screen.dart",
+      "line_start": 912,
+      "line_end": 932,
+      "description": "Exact 16-line structural clone also appears at lib/features/applock/presentation/widgets/face_id_panel.dart:113.",
+      "rationale": "Accepted duplicate clone: RD-010 reviewed false positive: the overlap is a framework/UI window, not a shared domain responsibility. Fingerprint: 0abac625ca682687.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "accepted"
+    },
+    {
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/features/shopping_list/presentation/widgets/shopping_category_filter_sheet.dart",
+      "line_start": 51,
+      "line_end": 90,
+      "description": "Exact 16-line structural clone also appears at lib/features/list/presentation/widgets/list_category_filter_sheet.dart:49.",
+      "rationale": "Accepted duplicate clone: RD-012 intentional duplication: shopping is L1-only and callback-owned; list supports L1 plus L2 and provider-owned selection. Fingerprint: 99481b7d8b5a4094.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "accepted"
+    },
+    {
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/features/shopping_list/presentation/widgets/shopping_category_filter_sheet.dart",
+      "line_start": 107,
+      "line_end": 151,
+      "description": "Exact 16-line structural clone also appears at lib/features/list/presentation/widgets/list_category_filter_sheet.dart:121.",
+      "rationale": "Accepted duplicate clone: RD-021 accepted: header copy and clear action remain feature-owned beside distinct list selection contracts; only the shared sheet frame is reusable. Fingerprint: 29a2ba6994375ba9.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "accepted"
+    },
+    {
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/features/shopping_list/presentation/widgets/shopping_category_filter_sheet.dart",
+      "line_start": 153,
+      "line_end": 169,
+      "description": "Exact 16-line structural clone also appears at lib/features/list/presentation/widgets/list_category_filter_sheet.dart:168.",
+      "rationale": "Accepted duplicate clone: RD-022 accepted: the similarly shaped list boundary encloses different selection semantics (list L1+L2 tristate versus shopping L1-to-leaf union). Fingerprint: daf4c4ae74961eb3.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "accepted"
+    },
+    {
+      "category": "redundant_code",
+      "severity": "LOW",
+      "file_path": "lib/features/shopping_list/presentation/widgets/shopping_category_filter_sheet.dart",
+      "line_start": 192,
+      "line_end": 211,
+      "description": "Exact 16-line structural clone also appears at lib/features/list/presentation/widgets/list_category_filter_sheet.dart:237.",
+      "rationale": "Accepted duplicate clone: RD-023 accepted: AppSheetActionBar owns the identical stateless rendering; the matching caller setup must retain each feature's independent apply ownership. Fingerprint: 54dae5bdb0525daf.",
+      "suggested_fix": "Extract a shared helper only if the duplicated behavior has the same domain responsibility.",
+      "tool_source": "owned_duplication_detector",
+      "confidence": "medium",
+      "status": "accepted"
+    }
+  ],
+  "detector": {
+    "kind": "exact_normalized_line_clone",
+    "minimum_lines": 16,
+    "scope": "lib"
+  }
+}

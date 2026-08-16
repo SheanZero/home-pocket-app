@@ -11,7 +11,7 @@ void main() {
   group('LOW audit closure gate', () {
     test('issues.json has no open LOW findings', () {
       final catalogue =
-          jsonDecode(File('.planning/audit/issues.json').readAsStringSync())
+          jsonDecode(File('tool/audit/issues.json').readAsStringSync())
               as Map<String, Object?>;
       final findings = catalogue['findings']! as List<Object?>;
 

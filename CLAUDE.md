@@ -8,10 +8,10 @@ This file provides guidance to Claude Code when working with this repository.
 
 **Happy Pocket (ハピポケ家族家計簿)** is a local-first, privacy-focused family accounting app with a dual-ledger system. Zero-knowledge architecture with 4-layer encryption, P2P family sync, and offline-first design.
 
-**Current Phase:** None — v2.0 (Phases 53-56) shipped and archived on 2026-08-05; awaiting next-milestone definition
+**Current Phase:** None — the first public release has shipped; awaiting post-1.0 roadmap definition
 **Target:** iOS 15+ / Android 7+ (API 24+)
 
-**Planning sources:** `.planning/PROJECT.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/MILESTONES.md`, and `.planning/milestones/v2.0-*`. `.planning/codebase/` was refreshed 2026-08-05; run `$gsd-new-milestone` next unless later code changes require another map refresh.
+**Project sources:** `AGENTS.md`, `README.md`, `docs/requirement/`, `docs/arch/`, `docs/testing/`, and `docs/reports/`. The former `.planning/` tree was intentionally retired; audit manifests and generated scanner evidence now live under `tool/audit/`.
 
 ---
 

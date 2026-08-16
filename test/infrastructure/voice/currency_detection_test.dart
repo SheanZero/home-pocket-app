@@ -22,7 +22,7 @@
 //
 // Do NOT weaken assertions to make them pass. RED is the intended state.
 //
-// See: .planning/phases/42-entry-ui-display-voice/42-CONTEXT.md (D-08),
+// Historical entry-voice decision D-08 established this behavior;
 //      lib/shared/constants/voice_currency_suffixes.dart,
 //      lib/features/voice/domain/models/voice_parse_result.dart.
 

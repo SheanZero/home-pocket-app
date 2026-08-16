@@ -46,9 +46,7 @@ const aabJarVerificationArguments = <String>[
   '-verify',
 ];
 
-const evidencePath =
-    '.planning/phases/61-android-toolchain-emulator-lane/'
-    '61-ANDROID-SAFETY-EVIDENCE.md';
+const evidencePath = 'docs/testing/ANDROID_SAFETY_EVIDENCE.md';
 const _evidenceStart = '<!-- phase61-evidence-json:start -->';
 const _evidenceEnd = '<!-- phase61-evidence-json:end -->';
 

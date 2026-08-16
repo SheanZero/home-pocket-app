@@ -14,14 +14,14 @@ echo "[audit:pipeline] merging shards..."
 dart run scripts/merge_findings.dart
 
 echo "[audit:pipeline] verifying outputs..."
-test -f .planning/audit/issues.json
-test -f .planning/audit/ISSUES.md
+test -f tool/audit/issues.json
+test -f tool/audit/ISSUES.md
 
 # Schema sanity check on issues.json
 python3 - <<'EOF'
 import json
 import sys
-data = json.load(open('.planning/audit/issues.json'))
+data = json.load(open('tool/audit/issues.json'))
 findings = data.get('findings', [])
 required = {'category', 'severity', 'file_path', 'line_start', 'line_end',
             'description', 'rationale', 'suggested_fix', 'tool_source',

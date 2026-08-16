@@ -91,7 +91,7 @@ File _transactionArtifact(Directory root, String suffix) {
 }
 
 Directory _initShardLayout(Directory tmp) {
-  final root = Directory('${tmp.path}/.planning/audit');
+  final root = Directory('${tmp.path}/tool/audit');
   final shards = Directory('${root.path}/shards')..createSync(recursive: true);
   Directory('${root.path}/agent-shards').createSync(recursive: true);
   const canonicalTools = {
@@ -1754,8 +1754,8 @@ void main() {
         final rootLink = Link('${tmp.path}/audit-link')
           ..createSync(shardRoot.path);
         final rootSpellings = <String>[
-          '.planning/audit/',
-          '.planning/audit/.',
+          'tool/audit/',
+          'tool/audit/.',
           'audit-link/',
         ];
 

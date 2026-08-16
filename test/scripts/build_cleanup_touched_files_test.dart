@@ -2,9 +2,9 @@
 // Subprocess tests for scripts/build_cleanup_touched_files.sh.
 //
 // Phase 8 Plan 08-02 Task 1 (EXIT-04). Locks the behavioral contract of the
-// generator that produces .planning/audit/cleanup-touched-files.txt:
-//   1. Bash script parses Phase 3-6 PLAN.md frontmatter `files_modified:`
-//      blocks, filters to `lib/...` paths, sorts + dedupes.
+// validator for the migrated tool/audit/cleanup-touched-files.txt manifest:
+//   1. The retired Phase 3-6 planning inputs are no longer required at runtime.
+//   2. The durable manifest is checked for lib paths, ordering and uniqueness.
 //   2. Output: every line `lib/`-prefixed, no `#` comments, sorted unique,
 //      trailing newline.
 //   3. Determinism: re-running the script produces byte-identical output.
@@ -12,10 +12,7 @@
 //      - lib/main.dart exactly once
 //      - lib/application/i18n/formatter_service.dart exactly once
 //
-// The tests run the real script against the real .planning/phases tree
-// (no fixture directory needed — the post-Phase-6 plan tree is stable). Two
-// invocations into separate temp output paths are diffed byte-for-byte to
-// prove determinism.
+// The tests run the real script against the repository-owned durable manifest.
 
 import 'dart:io';
 
@@ -24,10 +21,6 @@ import 'package:flutter_test/flutter_test.dart';
 String _absoluteProjectRoot() => Directory.current.path;
 
 /// Runs `bash scripts/build_cleanup_touched_files.sh` from the project root
-/// with $OUT pointing at [outPath] (the script reads OUT as the output target
-/// — note: the current implementation hardcodes OUT to the canonical artifact
-/// location, so we instead capture the artifact post-run and copy it).
-///
 /// Returns the ProcessResult so the caller can assert exit code + stderr.
 Future<ProcessResult> _runGenerator() async {
   return Process.run(
@@ -39,9 +32,9 @@ Future<ProcessResult> _runGenerator() async {
 }
 
 void main() {
-  const generatedPath = '.planning/audit/cleanup-touched-files.txt';
+  const generatedPath = 'tool/audit/cleanup-touched-files.txt';
 
-  group('build_cleanup_touched_files.sh (subprocess against real plan tree)', () {
+  group('build_cleanup_touched_files.sh (durable manifest validator)', () {
     test(
       'script exists, is executable, and uses /usr/bin/env bash shebang',
       () {
@@ -61,7 +54,7 @@ void main() {
       },
     );
 
-    test('exits 0 against real .planning/phases/03-06 tree', () async {
+    test('exits 0 against the migrated manifest', () async {
       final r = await _runGenerator();
       expect(
         r.exitCode,

@@ -1,5 +1,5 @@
 // scripts/audit/layer.dart
-// Runs import_lint and emits .planning/audit/shards/layer.json.
+// Runs import_lint and emits tool/audit/shards/layer.json.
 import 'dart:convert';
 import 'dart:io';
 
@@ -140,10 +140,10 @@ LayerAuditRun _failedRun(Map<String, dynamic> envelope, String diagnostic) {
 }
 
 Future<void> main(List<String> args) async {
-  final shardDir = Directory('.planning/audit/shards');
+  final shardDir = Directory('tool/audit/shards');
   if (!shardDir.existsSync()) shardDir.createSync(recursive: true);
 
-  final shardPath = '.planning/audit/shards/layer.json';
+  final shardPath = 'tool/audit/shards/layer.json';
   final run = await runLayerAudit();
 
   await File(

@@ -2037,12 +2037,10 @@ end
         File('docs/testing/STABLE_BASELINE.json').readAsStringSync();
     String compatibilityDocument() =>
         File('docs/testing/DEPENDENCY_COMPATIBILITY.md').readAsStringSync();
-    String acceptanceLedger() => File(
-      '.planning/phases/59-controlled-platform-plugin-cohorts/59-PLUGIN-ACCEPTANCE.md',
-    ).readAsStringSync();
-    String coverageMatrix() => File(
-      '.planning/phases/59-controlled-platform-plugin-cohorts/COVERAGE.md',
-    ).readAsStringSync();
+    String acceptanceLedger() =>
+        File('docs/testing/PLATFORM_PLUGIN_ACCEPTANCE.md').readAsStringSync();
+    String coverageMatrix() =>
+        File('docs/testing/PLATFORM_PLUGIN_COVERAGE.md').readAsStringSync();
 
     List<String> validateArtifacts({
       String? baselineJson,
