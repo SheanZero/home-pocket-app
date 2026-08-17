@@ -69,16 +69,23 @@ class AppInitializer {
       // a pending privacy wipe has resumed and deleted its durable journal.
       initContainer = _containerFactory();
       final masterKeyRepo = initContainer.read(masterKeyRepositoryProvider);
+      late final bool databaseExistedAtLaunch;
 
       try {
-        if (!await masterKeyRepo.hasMasterKey()) {
+        final hasMasterKey = await masterKeyRepo.hasMasterKey();
+        // Capture this before the database factory can create a fresh file.
+        // A missing database defines a new installation identity even when
+        // iOS Keychain (or restored Android secure storage) retained the old
+        // device key pair across uninstall/reinstall.
+        databaseExistedAtLaunch = await _databaseExists();
+        if (!hasMasterKey) {
           // CRITICAL data-loss guard: a missing master key normally means
           // "first launch", but if an encrypted database already exists the key
           // read failed for another reason (locked device, changed keychain
           // access group, transient keychain error). Generating a new random
           // key here would permanently orphan the existing data, so fail loud
           // instead of overwriting the key.
-          if (await _databaseExists()) {
+          if (databaseExistedAtLaunch) {
             return InitResult.failure(
               type: InitFailureType.masterKeyMissingWithData,
               error: const MasterKeyMissingWithExistingDataError(),
@@ -92,6 +99,27 @@ class AppInitializer {
           error: e,
           stackTrace: st,
         );
+      }
+
+      // Stage 2b: Reinstall identity boundary. Rotate only a retained identity;
+      // genuine first launch still creates its first identity after pending
+      // wipe recovery below. Doing the reinstall rotation before opening the
+      // new database makes a failed/partial secure-storage write retryable on
+      // the next launch instead of leaving a fresh database that looks old.
+      if (!databaseExistedAtLaunch) {
+        try {
+          final keyManager = initContainer.read(keyManagerProvider);
+          if (await keyManager.hasKeyPair()) {
+            await keyManager.clearKeys();
+            await keyManager.generateDeviceKeyPair();
+          }
+        } catch (e, st) {
+          return InitResult.failure(
+            type: InitFailureType.masterKey,
+            error: e,
+            stackTrace: st,
+          );
+        }
       }
 
       // Stage 3: Database

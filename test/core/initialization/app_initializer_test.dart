@@ -58,6 +58,7 @@ void main() {
       () => fakeMasterKeyRepo.initializeMasterKey(),
     ).thenAnswer((_) async {});
     when(() => fakeKeyRepo.hasKeyPair()).thenAnswer((_) async => true);
+    when(() => fakeKeyRepo.clearKeys()).thenAnswer((_) async {});
     when(() => fakeKeyRepo.getDeviceId()).thenAnswer((_) async => 'device-1');
     when(() => fakeKeyRepo.generateKeyPair()).thenAnswer(
       (_) async => DeviceKeyPair(
@@ -81,7 +82,7 @@ void main() {
         keyRepo: fakeKeyRepo,
       ),
       databaseFactory: databaseFactory ?? _successDatabaseFactory(),
-      databaseExists: databaseExists ?? (() async => false),
+      databaseExists: databaseExists ?? (() async => true),
       seedRunner: seedRunner ?? _noopSeedRunner(),
       pendingPrivacyWipeResumer: pendingPrivacyWipeResumer,
       ensureNativeLibrary: ensureNativeLibrary ?? (() async {}),
@@ -118,7 +119,9 @@ void main() {
       when(
         () => fakeMasterKeyRepo.hasMasterKey(),
       ).thenAnswer((_) async => false);
-      final result = await makeInitializer().initialize();
+      final result = await makeInitializer(
+        databaseExists: () async => false,
+      ).initialize();
       (result as InitSuccess).container.dispose();
 
       verify(() => fakeMasterKeyRepo.initializeMasterKey()).called(1);
@@ -176,6 +179,10 @@ void main() {
           ensureNativeLibrary: () async {
             calls.add('nativeLibrary');
           },
+          databaseExists: () async {
+            calls.add('databaseExists');
+            return true;
+          },
           databaseFactory: (_) async {
             calls.add('databaseFactory');
             return AppDatabase.forTesting();
@@ -184,7 +191,114 @@ void main() {
 
         expect(result, isA<InitSuccess>());
         (result as InitSuccess).container.dispose();
-        expect(calls, ['nativeLibrary', 'hasMasterKey', 'databaseFactory']);
+        expect(calls, [
+          'nativeLibrary',
+          'hasMasterKey',
+          'databaseExists',
+          'databaseFactory',
+        ]);
+      },
+    );
+
+    test(
+      'replaces a retained device identity before creating a fresh database',
+      () async {
+        final calls = <String>[];
+        when(() => fakeKeyRepo.hasKeyPair()).thenAnswer((_) async {
+          calls.add('hasKeyPair');
+          return true;
+        });
+        when(() => fakeKeyRepo.clearKeys()).thenAnswer((_) async {
+          calls.add('clearKeys');
+        });
+        when(() => fakeKeyRepo.generateKeyPair()).thenAnswer((_) async {
+          calls.add('generateKeyPair');
+          return DeviceKeyPair(
+            deviceId: 'device-2',
+            publicKey: 'pubkey-2',
+            createdAt: DateTime(2026, 8, 17),
+          );
+        });
+        when(
+          () => fakeKeyRepo.getDeviceId(),
+        ).thenAnswer((_) async => 'device-2');
+
+        final result = await makeInitializer(
+          databaseExists: () async {
+            calls.add('databaseExists');
+            return false;
+          },
+          databaseFactory: (_) async {
+            calls.add('databaseFactory');
+            return AppDatabase.forTesting();
+          },
+        ).initialize();
+
+        expect(result, isA<InitSuccess>());
+        (result as InitSuccess).container.dispose();
+        expect(
+          calls,
+          containsAllInOrder([
+            'databaseExists',
+            'hasKeyPair',
+            'clearKeys',
+            'generateKeyPair',
+            'databaseFactory',
+          ]),
+        );
+        verify(() => fakeKeyRepo.clearKeys()).called(1);
+        verify(() => fakeKeyRepo.generateKeyPair()).called(1);
+      },
+    );
+
+    test('does not clear identity when the database already exists', () async {
+      final result = await makeInitializer(
+        databaseExists: () async => true,
+      ).initialize();
+
+      expect(result, isA<InitSuccess>());
+      (result as InitSuccess).container.dispose();
+      verifyNever(() => fakeKeyRepo.clearKeys());
+      verifyNever(() => fakeKeyRepo.generateKeyPair());
+    });
+
+    test(
+      'fresh first launch generates identity without clearing keys',
+      () async {
+        when(() => fakeKeyRepo.hasKeyPair()).thenAnswer((_) async => false);
+
+        final result = await makeInitializer(
+          databaseExists: () async => false,
+        ).initialize();
+
+        expect(result, isA<InitSuccess>());
+        (result as InitSuccess).container.dispose();
+        verifyNever(() => fakeKeyRepo.clearKeys());
+        verify(() => fakeKeyRepo.generateKeyPair()).called(1);
+      },
+    );
+
+    test(
+      'does not create a fresh database when replacement identity fails',
+      () async {
+        when(() => fakeKeyRepo.hasKeyPair()).thenAnswer((_) async => true);
+        when(
+          () => fakeKeyRepo.generateKeyPair(),
+        ).thenThrow(StateError('secure storage write failed'));
+        var databaseFactoryCalled = false;
+
+        final result = await makeInitializer(
+          databaseExists: () async => false,
+          databaseFactory: (_) async {
+            databaseFactoryCalled = true;
+            return AppDatabase.forTesting();
+          },
+        ).initialize();
+
+        expect(result, isA<InitFailure>());
+        expect((result as InitFailure).type, InitFailureType.masterKey);
+        expect(databaseFactoryCalled, isFalse);
+        verify(() => fakeKeyRepo.clearKeys()).called(1);
       },
     );
 
@@ -215,7 +329,7 @@ void main() {
           keyRepo: fakeKeyRepo,
         ),
         databaseFactory: _successDatabaseFactory(),
-        databaseExists: () async => false,
+        databaseExists: () async => true,
         seedRunner: (container) async {
           captured = container;
         },
@@ -432,7 +546,9 @@ void main() {
           () => fakeMasterKeyRepo.initializeMasterKey(),
         ).thenThrow(Exception('key generation failed'));
 
-        final result = await makeInitializer().initialize();
+        final result = await makeInitializer(
+          databaseExists: () async => false,
+        ).initialize();
 
         expect(result, isA<InitFailure>());
         expect((result as InitFailure).type, equals(InitFailureType.masterKey));

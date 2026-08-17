@@ -527,6 +527,7 @@ void main() {
         () => fakeMasterKeyRepo.initializeMasterKey(),
       ).thenAnswer((_) async {});
       when(() => fakeKeyRepo.hasKeyPair()).thenAnswer((_) async => true);
+      when(() => fakeKeyRepo.clearKeys()).thenAnswer((_) async {});
       when(() => fakeKeyRepo.getDeviceId()).thenAnswer((_) async => 'device-1');
       when(() => fakeKeyRepo.generateKeyPair()).thenAnswer(
         (_) async => DeviceKeyPair(
